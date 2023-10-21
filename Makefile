@@ -1,7 +1,7 @@
 NAME	=	websServ
 
-SRCS	=	src/parser/main.cpp
-HEADERS	=	includes/header.hpp
+SRCS	=	src/parser/main.cpp src/parser/Parser.cpp
+HEADERS	=	src/parser/Parser.hpp	
 
 CPP	=	c++
 CPPFLAGS	=	-Wall -Wextra -Werror -std=c++98 -Wconversion
@@ -14,7 +14,7 @@ ${NAME}	:	${OBJS}
 	${CPP} ${CPPFLAGS} $< -o $@
 
 %.o	:	%.cpp ${HEADERS}
-	${CPP} ${CPPFLAGS} -c $<
+	${CPP} ${CPPFLAGS} -c $< -o $@
 
 clean	:
 	rm -rf ${OBJS}
