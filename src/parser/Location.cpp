@@ -2,6 +2,7 @@
 
 Location::Location( void )
 {
+	innerLocation = NULL;
 }
 
 Location::Location(const Location& copy)
@@ -11,6 +12,7 @@ Location::Location(const Location& copy)
 
 Location::~Location( void )
 {
+	delete innerLocation;
 }
 
 Location& Location::operator=(const Location& target)

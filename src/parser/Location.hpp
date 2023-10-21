@@ -10,7 +10,7 @@
 class	Location
 {
 	std::map<std::string, std::string> values;
-	Location* innerLocation = NULL;
+	Location* innerLocation;
 
 	public :
 		Location( void );

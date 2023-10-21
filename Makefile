@@ -19,7 +19,7 @@ OBJS	=	${SRCS:.cpp=.o}
 all	:	${NAME}
 
 ${NAME}	:	${OBJS}
-	${CPP} ${CPPFLAGS} $< -o $@
+	${CPP} ${CPPFLAGS} $^ -o $@
 
 %.o	:	%.cpp ${HEADERS}
 	${CPP} ${CPPFLAGS} -c $< -o $@
