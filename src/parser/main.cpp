@@ -1,5 +1,5 @@
 #include <iostream>
-
+#include "Location.hpp"
 
 int	main(int ac, char **av)
 {
@@ -8,6 +8,8 @@ int	main(int ac, char **av)
 		std::cerr << "Error :\fInvalid argument" << std::endl;
 		return (1);
 	}
+	Location local;
+	(void)local;
 	(void)av;
 	return (0);
 }
