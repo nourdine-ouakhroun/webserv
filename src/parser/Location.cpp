@@ -1,11 +1,11 @@
 #include "Location.hpp"
 
-Location::Location( void )
+Location::Location( void ) : GlobalModel()
 {
 	innerLocation = NULL;
 }
 
-Location::Location(const Location& copy)
+Location::Location(const Location& copy) : GlobalModel(copy)
 {
 	*this = copy;
 }

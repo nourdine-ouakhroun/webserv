@@ -3,13 +3,11 @@
 
 #include <iostream>
 #include <map>
-//#include "InnerLocation.hpp"
-
+#include "../Models/GlobalModel.hpp"
 //class InnerLocation;
 
-class	Location
+class	Location : public GlobalModel
 {
-	std::map<std::string, std::string> values;
 	Location* innerLocation;
 
 	public :
