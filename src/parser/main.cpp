@@ -1,4 +1,6 @@
 #include <iostream>
+#include <fstream>
+#include <vector>
 #include "Location.hpp"
 #include "Server.hpp"
 #include "../Models/GlobalModel.hpp"
@@ -29,6 +31,32 @@ void	printLocations(Location* locs)
 	printLocations(innerLoc);
 }
 
+
+std::vector<std::string>	getFileContent(std::string fileName)
+{
+	std::ifstream outfile(fileName);
+	std::vector<std::string>	vec;
+	std::string tmp;
+	while (!outfile.eof())
+	{
+		std::getline(outfile, tmp, '\n');
+		vec.push_back(tmp);
+	}
+	return (vec);
+}
+
+int	checkSyntax(const std::vector<std::string> content)
+{
+	std::vector<std::string>::iterator iterBegin = content.begin();
+	std::vector<std::string>::iterator iterEnd = content.end();
+	while (iterBegin != iterEnd)
+	{
+		std::cout << *iterBegin << std::endl;
+		iterBegin++;
+	}
+	return (1);
+}
+
 int	main(int ac, char **av)
 {
 	if (ac < 2)
@@ -36,13 +64,20 @@ int	main(int ac, char **av)
 		std::cerr << "Error :\fInvalid argument" << std::endl;
 		return (1);
 	}
-	GlobalModel model("80", "./YoupiBanane", "index.html", "GET", "hello");
-/*	Location*	loc = new Location(
+
+	std::vector<std::string> content = getFileContent(av[1]);
+	checkSyntax(content);
+
+
+
+
+/*	GlobalModel model("80", "./YoupiBanane", "index.html", "GET", "hello");
+	Location*	loc = new Location(
 			GlobalModel("8080", "/mehdi", "home.html", "POST", "Salim"),
 			new Location(
 				GlobalModel("8080", "/mehdi", "home.html", "POST", "Salim"),
 				NULL)
-			);*/
+			);
 	Location *loc = getLocations(new Location(model, NULL), model);
 	printLocations(loc);
 	std::cout << model.getListen() << std::endl;
@@ -60,7 +95,7 @@ int	main(int ac, char **av)
 	std::cout << sermodel.getAllowMethods() << std::endl;
 	std::cout << sermodel.getErrorPage() << std::endl;
 //	Server ser();
-/*	Server serv;
+	Server serv;
 	serv.pushToMap("listen", "80");
 	serv.pushToMap("listen", "[::]:80");
 	serv.pushToMap("listen", "441");
