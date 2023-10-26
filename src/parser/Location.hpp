@@ -12,9 +12,12 @@ class	Location : public GlobalModel
 
 	public :
 		Location( void );
+		Location(GlobalModel&, Location*);
 		Location(const Location& copy);
 		~Location( void );
 		Location& operator=(const Location& target);
+		void	setInnerLocation(Location* Inner);
+		Location	*getInnerLocation( void ) const;
 };
 
 #endif
