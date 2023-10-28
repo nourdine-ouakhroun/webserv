@@ -6,13 +6,15 @@ SRCS	=	src/parser/main.cpp \
 		src/parser/Location.cpp \
 		src/Models/GlobalModel.cpp \
 		src/Models/ServerModel.cpp \
-		src/Models/Data.cpp
+		src/Models/Data.cpp \
+		src/Utils/String.cpp
 #		src/parser/InnerLocation.cpp \
 
 HEADERS	=	src/parser/Parser.hpp \
 		src/parser/Server.hpp \
 		src/parser/Location.hpp \
-		src/models/Data.hpp
+		src/Models/Data.hpp \
+		src/Utils/String.hpp
 #		src/Models/GlobalModel.hpp
 #		src/parser/InnerLocation.hpp	\
 

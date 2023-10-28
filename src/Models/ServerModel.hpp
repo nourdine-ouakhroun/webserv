@@ -1,7 +1,6 @@
 #ifndef SERVER_MODEL
 #define SERVER_MODEL
 
-#include <iostream>
 #include "../parser/Location.hpp"
 #include "GlobalModel.hpp"
 

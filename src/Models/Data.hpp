@@ -2,18 +2,19 @@
 #define DATA_HPP
 
 #include <iostream>
+#include "../Utils/String.hpp"
 
 class Data
 {
-	std::string	key;
-	std::string value;
+	String	key;
+	String value;
 
 	public :
-		Data(const std::string& _key, const std::string& _value);
-		void	setKey(const std::string& Key);
-		void	setValue(const std::string& Value);
-		const std::string&	getKey( void ) const;
-		const std::string&	getValue( void ) const;
+		Data(const String& _key, const String& _value);
+		void	setKey(const String& Key);
+		void	setValue(const String& Value);
+		const String&	getKey( void ) const;
+		const String&	getValue( void ) const;
 
 };
 
