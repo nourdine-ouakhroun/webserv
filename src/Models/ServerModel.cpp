@@ -12,14 +12,6 @@ ServerModel::~ServerModel( void ) throw()
 {
 	try
 	{
-/*		std::vector<Location*>::iterator b = location.begin();
-		std::vector<Location*>::iterator e = location.end();
-		while (b < e)
-		{
-			delete *b;
-			*b = NULL;
-			b++;
-		}*/
 		location.clear();
 	}
 	catch (...)
