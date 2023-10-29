@@ -6,19 +6,19 @@
 
 class	ServerModel : public GlobalModel
 {
-	Location	*location;
+	std::vector<Location*>	location;
 
 	public :
 		ServerModel( void );
-		ServerModel(GlobalModel&, Location*);
+		ServerModel(GlobalModel&, std::vector<Location*>);
 		ServerModel& operator=(const ServerModel& target);
 		ServerModel(const ServerModel& copy);
-		~ServerModel( void );
-		void	setLocation(Location& _location);
+		~ServerModel( void )	throw();
+		void	setLocation(std::vector<Location*> _location);
+		void	addLocation(Location *_location);
 
-		Location*	getLocation( void ) const;
-
-
+		const std::vector<Location*>&	getLocation( void ) const;
+//		void	clear( void );
 		
 };
 

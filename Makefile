@@ -1,6 +1,6 @@
-NAME	=	websServ
+NAME	=	webServ
 
-SRCS	=	src/parser/main.cpp \
+SRCS	=	src/main.cpp \
 		src/parser/Parser.cpp \
 		src/parser/Server.cpp \
 		src/parser/Location.cpp \
@@ -19,7 +19,7 @@ HEADERS	=	src/parser/Parser.hpp \
 #		src/parser/InnerLocation.hpp	\
 
 CPP	=	c++
-CPPFLAGS	=	-Wall -Wextra -Werror -std=c++98 -Wconversion
+CPPFLAGS	=	-Wall -Wextra -Werror -std=c++98 -Wconversion# -fsanitize=address
 
 OBJS	=	${SRCS:.cpp=.o}
 

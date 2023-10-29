@@ -2,9 +2,12 @@
 #define PARSER_HPP
 
 #include <iostream>
+#include "../Models/ServerModel.hpp"
 
 class Parser
 {
+	std::vector<std::vector<String> >	serversContents;
+	std::vector<ServerModel> servers;
 	//std::string configFile;
 
 	public :
