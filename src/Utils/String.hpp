@@ -16,6 +16,7 @@ class String : public std::string
 		String&	trim(const String& characters);
 		String&	leftTrim(const String& characters);
 		String&	rightTrim(const String& characters);
+		std::vector<String>	split( void );
 		std::vector<String>	split(const char& separators);
 		int		countRepeating(const char& c);
 };

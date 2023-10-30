@@ -28,9 +28,18 @@ void	printAllData(Parser& parser)
 
 void	testLeaks(char *fileName)
 {
-	Parser* parser = new Parser(fileName);
-	printAllData(*parser);
-	delete parser;
+	try
+	{
+		Parser* parser = new Parser(fileName);
+		std::cout << "webserv: the configuration file " << fileName << " syntax is ok" << std::endl;
+		std::cout << "webserv: configuration file " << fileName << " test is successful" << std::endl;
+		printAllData(*parser);
+		delete parser;
+	}
+	catch (ParsingException& e)
+	{
+		std::cout << e.what() << std::endl;
+	}
 }
 
 int	main(int ac, char **av)

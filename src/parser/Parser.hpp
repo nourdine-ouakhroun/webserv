@@ -5,6 +5,7 @@
 #include <fstream>
 #include "Location.hpp"
 #include <cctype>
+#include "../Exception/ParsingException.hpp"
 #include "../Models/ServerModel.hpp"
 
 class Parser
@@ -28,11 +29,11 @@ class Parser
 		void	 getFileContent( void );
 		std::vector<String>	 getServerConfig(std::vector<String>::iterator& iterBegin, const std::vector<String>::iterator& iterEnd);
 		void	parsingFile(std::vector<String> content);
-		int		checkSyntax(std::vector<Data> content);
 		void	splitContentIntoServers( void );
 		void	freeLocations(Location* locs);
 		void	printServerModel(ServerModel& server);
 		void	getFinalResualt( void );
+		void	checkSyntax( void );
 };
 
 #endif

@@ -5,9 +5,55 @@ Parser::Parser( void )
 
 }
 
+
+void	Parser::checkSyntax( void )
+{
+	int	openBrackets = 0;
+	std::vector<String> server;
+	bool	insideServer = false;
+	std::vector<String>::iterator iterBegin = fileContent.begin();
+	std::vector<String>::iterator iterEnd = fileContent.end();
+
+	while (iterBegin < iterEnd)
+	{
+		openBrackets += iterBegin->countRepeating('{');
+		openBrackets -= iterBegin->countRepeating('}');
+		if (!iterBegin->compare(0, 7, "server "))
+		{
+			insideServer = !insideServer;
+			iterBegin++;
+			continue ;
+		}
+		if (insideServer == true)
+		{
+			if (iterBegin->countRepeating('{') || iterBegin->countRepeating('}'))
+			{
+				iterBegin++;
+				continue ;
+			}
+			if (*(iterBegin->end() - 1) != ';')
+			{
+				String message;
+				message.append("webserv: [emerg] invalid parameter \"").append(*iterBegin).append("\" in ").append(fileName);
+				message.append("\nwebserv: configuration file ").append(fileName).append(" test failed");
+				throw (ParsingException(message));
+			}
+		}
+		iterBegin++;
+	}
+	if (openBrackets)
+	{
+		String message;
+		message.append("webserv: [emerg] unexpected end of file, expecting \"").append((openBrackets < 0) ? "{" : "}").append("\" in ").append(fileName);
+		message.append("\nwebserv: configuration file ").append(fileName).append(" test failed");
+		throw (ParsingException(message));
+	}
+}
+
 Parser::Parser(String _fileName) : fileName(_fileName)
 {
 	getFileContent();
+	checkSyntax();
 	splitContentIntoServers();
 	getFinalResualt();
 }
@@ -65,7 +111,7 @@ const	std::vector<ServerModel>&	Parser::getServers( void ) const
 
 Data	Parser::extractDataFromString(String& line)
 {
-	std::vector<String> vec = line.split(' ');
+	std::vector<String> vec = line.split();
 	std::vector<String>::iterator ib = vec.begin();
 	std::vector<String>::iterator ie = vec.end();
 	String	key = *ib;
@@ -194,18 +240,6 @@ void	Parser::parsingFile(std::vector<String> content)
 		}
 	}
 	servers.push_back(server);
-}
-
-int	Parser::checkSyntax(std::vector<Data> content)
-{
-	std::vector<Data>::iterator iterBegin = content.begin();
-	std::vector<Data>::iterator iterEnd = content.end();
-	while (iterBegin != iterEnd)
-	{
-		std::cout << iterBegin->getKey() << "\t\t\t\t" << iterBegin->getValue() << std::endl;
-		iterBegin++;
-	}
-	return (1);
 }
 
 void	Parser::splitContentIntoServers( void )
