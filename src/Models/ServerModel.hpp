@@ -1,7 +1,7 @@
 #ifndef SERVER_MODEL
 #define SERVER_MODEL
 
-#include "../parser/Location.hpp"
+#include "../Parser/Location.hpp"
 #include "GlobalModel.hpp"
 
 class	ServerModel : public GlobalModel

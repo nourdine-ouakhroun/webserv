@@ -62,6 +62,31 @@ String&	String::trim(const String& characters)
 	return (*this);
 }
 
+
+std::vector<String> String::split( void )
+{
+	String tmp(*this);
+	iterator	b = tmp.begin();
+	iterator	e = tmp.end();
+	while (b < e)
+	{
+		if (*b == ' ' || *b == '\t')
+			*b = ' ';
+		b++;
+	}
+	std::vector<String> vec;
+	std::istringstream str(tmp);
+    String s;
+    while (getline(str, s, ' '))
+	{
+		if (s.size() == 0)
+			continue ;
+        vec.push_back(s);
+    }
+	return (vec);
+}
+
+
 std::vector<String> String::split(const char& separator)
 {
 	std::vector<String> vec;

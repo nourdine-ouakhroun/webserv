@@ -27,6 +27,7 @@ Location::~Location( void )
 		while (b < e)
 		{
 			delete *b;
+			*b = NULL;
 			b++;
 		}
 		delete innerLocation;

@@ -40,10 +40,9 @@ const Data&	GlobalModel::getData(const String& key)
 		iterBegin++;
 	}
 	throw std::exception();
-	(void)key;
 }
 
-const std::vector<Data>	GlobalModel::getAllData( void ) const
+const std::vector<Data>&	GlobalModel::getAllData( void ) const
 {
 	return (data);
 }
