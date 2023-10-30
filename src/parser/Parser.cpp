@@ -5,7 +5,6 @@ Parser::Parser( void )
 
 }
 
-
 void	Parser::checkSyntax( void )
 {
 	int	openBrackets = 0;
@@ -35,7 +34,7 @@ void	Parser::checkSyntax( void )
 			{
 				String message;
 				message.append("webserv: [emerg] invalid parameter \"").append(*iterBegin).append("\" in ").append(fileName);
-				message.append("\nwebserv: configuration file ").append(fileName).append(" test failed");
+				message.append("\nwebserv: configuration file ").append(fileName).append(" test failed.");
 				throw (ParsingException(message));
 			}
 		}
@@ -45,7 +44,7 @@ void	Parser::checkSyntax( void )
 	{
 		String message;
 		message.append("webserv: [emerg] unexpected end of file, expecting \"").append((openBrackets < 0) ? "{" : "}").append("\" in ").append(fileName);
-		message.append("\nwebserv: configuration file ").append(fileName).append(" test failed");
+		message.append("\nwebserv: configuration file ").append(fileName).append(" test failed.");
 		throw (ParsingException(message));
 	}
 }
@@ -174,19 +173,34 @@ Location*	Parser::getLocations(std::vector<String>::iterator& begin, const std::
 
 void	Parser::getFileContent( void )
 {
+	String	tmp;
+	size_t	pos;
 	std::ifstream outfile(fileName);
+	// Check File is opened or not.
 	if (outfile.is_open() == false)
 	{
 		outfile.close();
-		throw (std::exception());
+		// throw exception with the same nginx message.
+		String message;
+		message.append("webserv: [emerg] open \"").append(fileName).append("\" failed (No such file or directory)");
+		message.append("\nwebserv: configuration file \"").append(fileName).append("\" test failed.");
+		throw (ParsingException(message));
 	}
-	String tmp;
+	// read data from file and store it in vector of String.
 	while (!outfile.eof())
 	{
 		std::getline(outfile, tmp, '\n');
 		tmp.trim(" \t");
 		if (tmp.size() == 0 || *tmp.begin() == '#')
 			continue ;
+
+		// this part for remove comment inside strings
+		{
+			pos = tmp.find('#');
+			if (pos != String::npos)
+				tmp.erase(pos);
+		}
+		// pushing data into vector
 		fileContent.push_back(tmp);
 	}
 	outfile.close();

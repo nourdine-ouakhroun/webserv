@@ -1,6 +1,6 @@
 #include <fstream>
-#include "parser/Location.hpp"
-#include "parser/Parser.hpp"
+#include "Parser/Location.hpp"
+#include "Parser/Parser.hpp"
 #include "Models/ServerModel.hpp"
 #include <cctype>
 
@@ -31,14 +31,14 @@ void	testLeaks(char *fileName)
 	try
 	{
 		Parser* parser = new Parser(fileName);
-		std::cout << "webserv: the configuration file " << fileName << " syntax is ok" << std::endl;
-		std::cout << "webserv: configuration file " << fileName << " test is successful" << std::endl;
+		std::cout << "\033[32mwebserv: the configuration file " << fileName << " syntax is ok" << std::endl;
+		std::cout << "webserv: configuration file " << fileName << " test is successful\033[0m" << std::endl;
 		printAllData(*parser);
 		delete parser;
 	}
 	catch (ParsingException& e)
 	{
-		std::cout << e.what() << std::endl;
+		std::cerr << "\033[31m" << e.what() << "\033[0m" << std::endl;
 	}
 }
 
