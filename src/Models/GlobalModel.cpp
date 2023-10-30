@@ -29,7 +29,7 @@ void	GlobalModel::addData(const Data& _data)
 	data.push_back(_data);
 }
 
-const Data&	GlobalModel::getData(const std::string& key)
+const Data&	GlobalModel::getData(const String& key)
 {
 	std::vector<Data>::iterator	iterBegin = data.begin();
 	std::vector<Data>::iterator	iterEnd = data.end();
@@ -40,10 +40,9 @@ const Data&	GlobalModel::getData(const std::string& key)
 		iterBegin++;
 	}
 	throw std::exception();
-	(void)key;
 }
 
-const std::vector<Data>	GlobalModel::getAllData( void ) const
+const std::vector<Data>&	GlobalModel::getAllData( void ) const
 {
 	return (data);
 }

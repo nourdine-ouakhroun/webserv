@@ -1,25 +1,25 @@
 #include "Data.hpp"
 
-Data::Data(const std::string& _key, const std::string& _value) : key(_key), value(_value)
+Data::Data(const String& _key, const String& _value) : key(_key), value(_value)
 {
 }
 
-void	Data::setKey(const std::string& Key)
+void	Data::setKey(const String& Key)
 {
 	key = Key;
 }
 
-void	Data::setValue(const std::string& Value)
+void	Data::setValue(const String& Value)
 {
 	value = Value;
 }
 
-const std::string& Data::getKey( void ) const
+const String& Data::getKey( void ) const
 {
 	return (key);
 }
 
-const std::string& Data::getValue( void ) const
+const String& Data::getValue( void ) const
 {
 	return (value);
 }

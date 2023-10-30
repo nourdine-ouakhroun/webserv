@@ -1,10 +1,9 @@
 #ifndef GLOBAL_MODEL
 #define GLOBAL_MODEL
 
-#include <iostream>
-#include <vector>
 #include <exception>
 #include "Data.hpp"
+
 
 class GlobalModel
 {
@@ -16,8 +15,8 @@ class GlobalModel
 		~GlobalModel( void );
 		GlobalModel&	operator=(const GlobalModel& target);
 		void	addData(const Data& _data);
-		const Data&	getData(const std::string& key);
-		const std::vector<Data>	getAllData( void ) const;
+		const Data&	getData(const String& key);
+		const std::vector<Data>&	getAllData( void ) const;
 
 
 };
