@@ -1,9 +1,9 @@
 NAME	=	webServ
 
 SRCS	=	src/main.cpp \
-		src/parser/Parser.cpp \
-		src/parser/Server.cpp \
-		src/parser/Location.cpp \
+		src/Parser/Parser.cpp \
+		src/Parser/Server.cpp \
+		src/Parser/Location.cpp \
 		src/Models/GlobalModel.cpp \
 		src/Models/ServerModel.cpp \
 		src/Models/Data.cpp \
@@ -11,9 +11,9 @@ SRCS	=	src/main.cpp \
 		src/Exception/ParsingException.cpp
 #		src/parser/InnerLocation.cpp \
 
-HEADERS	=	src/parser/Parser.hpp \
-		src/parser/Server.hpp \
-		src/parser/Location.hpp \
+HEADERS	=	src/Parser/Parser.hpp \
+		src/Parser/Server.hpp \
+		src/Parser/Location.hpp \
 		src/Models/Data.hpp \
 		src/Utils/String.hpp \
 		src/Exception/ParsingException.hpp \
