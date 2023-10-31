@@ -1,10 +1,10 @@
 #include "ParsingException.hpp"
 
-ParsingException::ParsingException( void ) : message()
+ParsingException::ParsingException( void ) : std::exception(), message()
 {
 }
 
-ParsingException::ParsingException(const String& Message) : message(Message)
+ParsingException::ParsingException(const String& Message) : std::exception(), message(Message)
 {
 }
 
