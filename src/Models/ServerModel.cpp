@@ -4,17 +4,24 @@ ServerModel::ServerModel( void ) : GlobalModel()
 {
 }
 
-ServerModel::ServerModel(GlobalModel& model, std::string _serverName, std::string _accessLog, Location* _location) : GlobalModel(model), serverName(_serverName), accessLog(_accessLog), location(_location)
+ServerModel::ServerModel(GlobalModel& model, std::vector<Location*> _location) : GlobalModel(model), location(_location)
 {
 }
 
-ServerModel::~ServerModel( void )
+ServerModel::~ServerModel( void ) throw()
 {
+	try
+	{
+		location.clear();
+	}
+	catch (...)
+	{
+		std::cerr << "catch Exception in ServerModel Destructor (~ServerModel)." << std::endl;
+	}
 }
 
 ServerModel::ServerModel(const ServerModel& copy) : GlobalModel(copy)
 {
-	location = NULL;
 	*this = copy;
 }
 
@@ -22,44 +29,33 @@ ServerModel& ServerModel::operator=(const ServerModel& target)
 {
 	if (this != &target)
 	{
-		serverName = target.serverName;
-		accessLog = target.accessLog;
-		delete location;
-		location = new Location(*target.getLocation());
+		GlobalModel::operator=(target);
+		
+		location = target.location;
+//		delete location;
+//		location = new Location(*target.getLocation());
 	}
 	return (*this);
 }
 
-void	ServerModel::setLocation(Location& _location)
+void	ServerModel::setLocation(std::vector<Location*> _location)
 {
-	delete location;
-	location = new Location(_location);
+	location = _location;
 }
 
-void	ServerModel::setServerName(std::string _serverName)
-{
-	serverName = _serverName;
-}
-
-
-void	ServerModel::setAccessLog(std::string _accessLog)
-{
-	accessLog = _accessLog;
-}
-
-std::string	ServerModel::getServerName( void ) const
-{
-	return (serverName);
-}
-
-
-std::string	ServerModel::getAccessLog( void ) const
-{
-	return (accessLog);
-}
-
-Location*	ServerModel::getLocation( void ) const
+const std::vector<Location*>&	ServerModel::getLocation( void ) const
 {
 	return (location);
 }
 
+void	ServerModel::addLocation(Location* _location)
+{
+	location.push_back(_location);
+}
+
+/*
+void	ServerModel::clear( void )
+{
+	delete location;
+}
+*/

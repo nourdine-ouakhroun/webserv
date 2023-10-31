@@ -2,19 +2,24 @@
 # define LOCATION_HPP
 
 #include <iostream>
-#include <map>
 #include "../Models/GlobalModel.hpp"
-//class InnerLocation;
 
 class	Location : public GlobalModel
 {
-	Location* innerLocation;
+	std::vector<Location*>	*innerLocation;
+	String		path;
 
 	public :
 		Location( void );
+		Location(GlobalModel&, String, std::vector<Location*>*);
 		Location(const Location& copy);
 		~Location( void );
 		Location& operator=(const Location& target);
+//		void	addInnerLocation(Location* Inner);
+		void	setPath(String Path);
+		String	getPath( void ) const;
+		std::vector<Location*>	*getInnerLocation( void ) const;
+		void	deleteLocations( void );
 };
 
 #endif
