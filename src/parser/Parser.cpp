@@ -2,7 +2,6 @@
 
 Parser::Parser( void )
 {
-
 }
 
 void	Parser::checkSyntax( void )
@@ -116,7 +115,7 @@ Data	Parser::extractDataFromString(String& line)
 	String	key = *ib;
 	String	value("");
 	while (++ib < ie)
-		value.append(" ").append(ib->trim(" \t"));
+		value.append(" ").append(ib->trim(" \t;"));
 	return (Data(key, value));
 }
 
