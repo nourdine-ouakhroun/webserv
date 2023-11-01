@@ -10,7 +10,16 @@ OBJ = $(SRC:.cpp=.o)
 
 NAME = SERVER
 
-all : $(OBJ)
+all : $(NAME)
+
+$(NAME) : $(OBJ)
 	$(XXC) $(XXCFLAGS) $(OBJ) -o  $(NAME)
+
 %.o : %.cpp
 	$(XXC) $(XXCFLAGS) -c $<
+
+clean :
+	rm -f $(OBJ)
+fclean : clean
+	rm -f $(NAME)
+re : fclean $(NAME)
