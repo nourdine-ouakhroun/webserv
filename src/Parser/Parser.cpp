@@ -174,7 +174,7 @@ void	Parser::getFileContent( void )
 {
 	String	tmp;
 	size_t	pos;
-	std::ifstream outfile(fileName);
+	std::ifstream outfile(fileName.c_str());
 	// Check File is opened or not.
 	if (outfile.is_open() == false)
 	{
@@ -282,8 +282,8 @@ void	Parser::freeLocations(Location* locs)
 
 void	Parser::printServerModel(ServerModel& server)
 {
-	std::vector<Location*>::const_iterator b = server.getLocation().cbegin();
-	std::vector<Location*>::const_iterator e = server.getLocation().cend();
+	std::vector<Location*>::const_iterator b = server.getLocation().begin();
+	std::vector<Location*>::const_iterator e = server.getLocation().end();
 	while (b < e)
 	{
 		printLocations(*b);
