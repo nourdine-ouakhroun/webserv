@@ -12,7 +12,7 @@ Location::Location(GlobalModel& model, String Path, std::vector<Location*> *_inn
 {
 }
 
-Location::Location(const Location& copy)
+Location::Location(const Location& copy) : GlobalModel(copy)
 {
 	innerLocation = NULL;
 	*this = copy;
