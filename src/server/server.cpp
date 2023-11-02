@@ -28,45 +28,6 @@ void ServerRun::bindConection(int Port)
 
 void ServerRun::acceptRquist()
 {
-	char req[2024];
-	fd_set cur_sock, ready_sock;
-	FD_ZERO(&cur_sock);
-	FD_SET(socketfd, &cur_sock);
-
-	while(1)
-	{
-		FD_SET(socketfd, &cur_sock);
-		ready_sock = cur_sock;
-		if(select(1024, &ready_sock, NULL, NULL, NULL) < 0)
-		{
-			std::cout << "error : select" << std::endl;
-			exit(0);
-		}
-		for(int i = 0; i < FD_SETSIZE; i++)
-		{
-			if(FD_ISSET(i, &ready_sock))
-			{
-				if(i == socketfd)
-				{
-					newfd = accept(socketfd, (struct sockaddr *)NULL, NULL);
-					FD_SET(newfd, &cur_sock);
-					break;
-				}
-				else
-				{
-					int bytes = read(i, req, 2024);	
-					if(bytes < 0)
-					{
-						std::cout << "error : read failed ." << std::endl;
-						exit(0);
-					}
-					std::cout << req << std::endl;
-					FD_CLR(i, &cur_sock);
-					close(i);
-				}
-			}
-		}
-	}
 }
 
 void ServerRun::listenSocket()
