@@ -19,6 +19,8 @@ class	ServerModel : public GlobalModel
 
 		const std::vector<Location*>&	getLocation( void ) const;
 //		void	clear( void );
+
+		static	void	printServerModelInfo(const ServerModel& serverModel);
 		
 };
 
