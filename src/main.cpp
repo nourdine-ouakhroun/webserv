@@ -10,23 +10,6 @@
 
 void	printAllData(Parser& parser)
 {
-/*	std::vector<ServerModel> servers = parser.getServers();
-	std::vector<ServerModel>::iterator b = servers.begin();
-	std::vector<ServerModel>::iterator e = servers.end();
-	int i = 0;
-	while (b < e)
-	{
-		std::cout << "===================================== Server " << i++ << "====================================" << std::endl;
-		std::vector<Data>::const_iterator begin = b->getAllData().begin();
-		std::vector<Data>::const_iterator end = b->getAllData().end();
-		while (begin < end)
-		{
-			std::cout << "Key = " << begin->getKey() << "\tValue = " << begin->getValue() << std::endl;
-			begin++;
-		}
-		parser.printServerModel(*b);
-		b++;
-	}*/
 	ServerData servers(parser.getServers());
 	try
 	{
@@ -86,11 +69,11 @@ int	main(int ac, char **av)
 		return (1);
 	}
 	testLeaks(av[1]);
-	int pid = getpid();
-	String str("lsof -p ");
-	str.append(std::to_string(pid));
-	system("leaks -q webServ");	
-	system(str.c_str());
+	//int pid = getpid();
+	//String str("lsof -p ");
+	//str.append(std::to_string(pid));
+	//system("leaks -q webServ");	
+	//system(str.c_str());
 	//checkSyntax(data);
 
 	return (0);
