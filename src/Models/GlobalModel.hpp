@@ -1,5 +1,5 @@
-#ifndef GLOBAL_MODEL
-#define GLOBAL_MODEL
+#ifndef GLOBALMODEL_HPP
+#define GLOBALMODEL_HPP
 
 #include <exception>
 #include "Data.hpp"
@@ -18,7 +18,7 @@ class GlobalModel
 		const Data&	getData(const String& key);
 		const std::vector<Data>&	getAllData( void ) const;
 
-
+		static	void	printGlobalModel(const GlobalModel&, String&);
 };
 
 #endif

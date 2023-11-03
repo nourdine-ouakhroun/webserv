@@ -83,3 +83,23 @@ void	Location::deleteLocations( void )
 		b++;
 	}
 }
+
+void	Location::printAllLocations(const std::vector<Location*>* locations, String& str)
+{
+	std::vector<Location*>::const_iterator ibegin = locations->begin();
+	std::vector<Location*>::const_iterator iend = locations->end();
+	while (ibegin < iend)
+	{
+		std::cout << str << "PATH ==> " << (*ibegin)->getPath() << std::endl;
+		str.append("\t");
+		printGlobalModel(**ibegin, str);
+		if ((*ibegin)->getInnerLocation() != NULL)
+		{
+			str.append("\t");
+			printAllLocations((*ibegin)->getInnerLocation(), str);
+			str.erase(str.length() - 1);
+		}
+		str.erase(str.length() - 1);
+		ibegin++;
+	}
+}

@@ -59,3 +59,12 @@ void	ServerModel::clear( void )
 	delete location;
 }
 */
+
+void	ServerModel::printServerModelInfo(const ServerModel& serverModel)
+{
+	std::cout << "===================== Server Info =====================\n";
+	String s("\t");
+	GlobalModel::printGlobalModel(serverModel, s);
+	std::cout << s << ">>>> Location Info <<<<\n";
+	Location::printAllLocations(&serverModel.getLocation(), s);
+}

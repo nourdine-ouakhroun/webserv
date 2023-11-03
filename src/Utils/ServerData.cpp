@@ -1,6 +1,10 @@
 #include "ServerData.hpp"
 
-ServerData::ServerData(const std::vector<ServerModel>& _data) : data(_data)
+ServerData::ServerData( void )
+{
+}
+
+ServerData::ServerData(const std::vector<ServerModel>& _data) : servers(_data)
 {
 }
 
@@ -11,8 +15,13 @@ ServerData::ServerData(const ServerData& copy)
 
 ServerData&	ServerData::operator=(const ServerData& target)
 {
-	data = target.data;
+	servers = target.servers;
 	return (*this);
+}
+
+void	ServerData::setServerData(const std::vector<ServerModel>& serversData)
+{
+	servers = serversData;
 }
 
 void	ServerData::displayData( void )
@@ -20,12 +29,16 @@ void	ServerData::displayData( void )
 
 }
 
-const std::vector<ServerModel>&	ServerData::getData( void ) const
+ServerModel	ServerData::getServer(const String& serverName)
 {
-	return (data);
-}
-
-const std::vector<Location*>&	ServerData::getServerLocations( void ) const
-{
-	return (data.begin()->getLocation());
+	std::vector<ServerModel>::iterator iterBegin = servers.begin();
+	std::vector<ServerModel>::iterator iterEnd = servers.end();
+	while (iterBegin < iterEnd)
+	{
+		Data value = iterBegin->getData("server_name");
+		if (value.getValue().contains(serverName) == true)
+			return (*iterBegin);
+		iterBegin++;
+	}
+	throw (std::exception());
 }

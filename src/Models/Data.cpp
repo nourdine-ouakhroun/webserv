@@ -24,4 +24,7 @@ const String& Data::getValue( void ) const
 	return (value);
 }
 
-
+void	Data::printData(const Data& data, String& str)
+{
+	std::cout << str << "Key	==>	" << data.getKey() << "	| Value	==>	" << data.getValue() << std::endl;
+}
