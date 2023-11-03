@@ -20,6 +20,10 @@ class	Location : public GlobalModel
 		String	getPath( void ) const;
 		std::vector<Location*>	*getInnerLocation( void ) const;
 		void	deleteLocations( void );
+
+
+//		static	void	printLocation(const Location&);
+		static	void	printAllLocations(const std::vector<Location*>*, String&);
 };
 
 #endif
