@@ -1,53 +1,99 @@
-#include <stdio.h>
-#include <string.h>
-#include <sys/types.h>
-#include <netdb.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <sys/time.h>
-#include <sys/types.h>
-#include <netinet/in.h>
-#include<unistd.h>
-#include<iostream>
-#define MYPORT 8080 
-#define BACKLOG 10
-int main(int argc, char *argv[])
+#include "Server.hpp"
+
+Server::Server( void )
 {
-	struct sockaddr_storage their_addr;
-    socklen_t addr_size;
-    struct sockaddr_in servaddr;
-    int sockfd, new_fd;
-
-
-
-    sockfd = socket(AF_INET, SOCK_STREAM, 0);
-	bzero(&servaddr, sizeof(servaddr));
-    servaddr.sin_family = AF_INET;
-    servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-    servaddr.sin_port = htons(MYPORT);
-    bind(sockfd, (struct sockaddr*)&servaddr, sizeof(servaddr));
-   	listen(sockfd, BACKLOG);
-	socklen_t address_len = sizeof(servaddr);
-	while(1)
+	socketLen = sizeof(socketData);
+	port = 8778;
+	socketFd = socket(AF_INET, SOCK_STREAM, 0);
+	if (socketFd < 0)
+		throw (std::exception());
+	bzero(&socketData, (size_t)socketLen);
+	socketData.sin_port = htons(port);
+	socketData.sin_family = AF_INET;
+	socketData.sin_addr.s_addr = INADDR_ANY;
+	if (bind(socketFd, (struct sockaddr *)&socketData, socketLen) < 0 || listen(socketFd, 5) < 0)
 	{
-
-		char str[2024];
-   		addr_size = sizeof their_addr;
-    	new_fd = accept(sockfd, (struct sockaddr *)&servaddr, &address_len);
-		read(new_fd, str,2024);
-		std::cout << str << std::endl;
-		//char *str1 = "HTTP/1.0 200 OK\nContent-Type: text/html\n\nHELLO";
-		//write(new_fd, str1, sizeof(str1));
-
-		std::string server_req_h;
-		std::string req_body = "<h1>HELLO WORLD </h1>";
-        server_req_h.append( "HTTP/1.1 200 OK\n");
-        server_req_h.append( "Content-Type: text/html\n");
-        server_req_h.append( "Content-Length: ").append(std::to_string(req_body.length())).append("\n");
-        server_req_h.append( "\n");
-        server_req_h.append(req_body).append("\n");
-
-		write(new_fd, server_req_h.c_str(), server_req_h.length());
-		close(new_fd);
+		close(socketFd);
+		throw (std::exception());
 	}
+}
+
+Server::Server(const unsigned short &_port)
+{
+	socketLen = sizeof(socketData);
+	port = _port;
+	socketFd = socket(AF_INET, SOCK_STREAM, 0);
+	if (socketFd < 0)
+		throw (std::exception());
+	bzero(&socketData, socketLen);
+	socketData.sin_port = htons(port);
+	socketData.sin_family = AF_INET;
+	socketData.sin_addr.s_addr = INADDR_ANY;
+	if (bind(socketFd, (struct sockaddr *)&socketData, socketLen) < 0 || listen(socketFd, 5) < 0)
+	{
+		close(socketFd);
+		throw (std::exception());
+	}
+}
+
+Server::Server(const Server& copy)
+{
+	*this = copy;
+}
+
+Server::~Server( void ) throw()
+{
+	close(socketFd);
+}
+
+Server&	Server::operator=(const Server& target)
+{
+	if (this != &target)
+	{
+		socketFd = target.socketFd;
+		socketData = target.socketData;
+		socketLen = target.socketLen;
+		port = target.port;
+	}
+	return (*this);
+}
+
+int 	Server::accept( void )
+{
+	int newSocket = (int)::accept(
+						socketFd,
+						(struct sockaddr *)&socketData, 
+						(socklen_t *)&socketLen
+					);
+	if (newSocket < 0)
+		return (errorNumber);
+	return (newSocket);
+}
+
+
+String	Server::recieve(int socket)
+{
+	String	buffer;
+	char	tmp[100];
+
+	while (1)
+	{
+		bzero(tmp, 100);
+		int nBytes;
+		if ((nBytes = (int)::recv(socket, tmp, 99, 0)) < 0)
+			break ;
+		if (nBytes != 99)
+			break ;
+		buffer.append(tmp);
+	}
+	return (buffer);
+}
+
+int	Server::send(int socket, String response)
+{
+
+	int	nBit = (int)::send(socket, response.c_str(), response.length(), 0);
+	if (nBit < 0)
+		return (errorNumber);
+	return (nBit);
 }

@@ -1,18 +1,21 @@
-#ifndef	SERVER_DATA
-#define	SERVER_DATA
+#ifndef	SERVERDATA_HPP
+#define	SERVERDATA_HPP
 
-#include "../Models/ServerModel.hpp"
+#include "../Parser/Parser.hpp"
 
 class ServerData
 {
-	std::vector<ServerModel> data;
+	std::vector<ServerModel> servers;
+
 	public :
+		ServerData( void );
 		ServerData(const std::vector<ServerModel>&);
 		ServerData(const ServerData&);
 		ServerData&	operator=(const ServerData&);
+		void	setServerData(const std::vector<ServerModel>&);
 		void	displayData( void );
-		const std::vector<ServerModel>&	getData( void ) const;
-		const std::vector<Location*>&	getServerLocations( void ) const;
+		ServerModel	getServer(const String& serverName);
+//		const std::vector<Location*>&	getServerLocations( void ) const;
 };
 
 #endif

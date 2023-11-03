@@ -19,6 +19,8 @@ class String : public std::string
 		std::vector<String>	split( void );
 		std::vector<String>	split(const char& separators);
 		int		countRepeating(const char& c);
+		bool	contains(const String& str) const;
+		bool	equal(const String& value) const;
 };
 
 
