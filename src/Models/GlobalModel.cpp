@@ -46,3 +46,15 @@ const std::vector<Data>&	GlobalModel::getAllData( void ) const
 {
 	return (data);
 }
+
+
+void	GlobalModel::printGlobalModel(const GlobalModel& model, String &str)
+{
+	std::vector<Data>::const_iterator	ibegin = model.getAllData().begin();
+	std::vector<Data>::const_iterator	iend = model.getAllData().end();
+	while (ibegin < iend)
+	{
+		Data::printData(*ibegin, str);
+		ibegin++;
+	}
+}
