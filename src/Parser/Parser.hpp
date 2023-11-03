@@ -23,6 +23,9 @@ class Parser
 		Parser& operator=(const Parser& target);
 		const std::vector<std::vector<String> >& getServersContents( void ) const;
 		const	std::vector<ServerModel>&	getServers( void ) const;
+		void	printServerModel(ServerModel& server);
+	
+	private :
 		Data	extractDataFromString(String& line);
 		void	 printLocations(Location* locs);
 		Location*	 getLocations(std::vector<String>::iterator& begin, const std::vector<String>::iterator& end, String	path);
@@ -31,7 +34,6 @@ class Parser
 		void	parsingFile(std::vector<String> content);
 		void	splitContentIntoServers( void );
 		void	freeLocations(Location* locs);
-		void	printServerModel(ServerModel& server);
 		void	getFinalResualt( void );
 		void	checkSyntax( void );
 };
