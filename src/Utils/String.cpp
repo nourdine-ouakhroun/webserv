@@ -22,6 +22,19 @@ String& String::operator=(const String& str)
 	return (*this);
 }
 
+bool	String::equal(const String& value) const
+{
+	if (!compare(value))
+		return (true);
+	return (false);
+}
+
+bool	String::contains(const String& str) const
+{
+	if ((int)find(str) != -1)
+		return (true);
+	return (false);
+}
 
 String&	String::leftTrim(const String& characters)
 {

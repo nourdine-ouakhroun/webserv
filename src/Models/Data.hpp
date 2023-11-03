@@ -15,7 +15,8 @@ class Data
 		void	setValue(const String& Value);
 		const String&	getKey( void ) const;
 		const String&	getValue( void ) const;
-
+		
+		static	void	printData(const Data& data, String&);
 };
 
 #endif
