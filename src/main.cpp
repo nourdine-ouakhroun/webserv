@@ -13,8 +13,9 @@ void	printAllData(Parser& parser)
 	ServerData servers(parser.getServers());
 	try
 	{
-		ServerModel smodel = servers.getServer("mehdi.com");	
-		ServerModel::printServerModelInfo(smodel);
+		ServerModel smodel = servers.getServer("mehdi.com");
+		(void)smodel;
+//		ServerModel::printServerModelInfo(smodel);
 	}
 	catch (...)
 	{
