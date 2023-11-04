@@ -81,7 +81,10 @@ String	Server::recieve(int socket)
 		bzero(tmp, 100);
 		int nBytes;
 		if ((nBytes = (int)::recv(socket, tmp, 99, 0)) < 0)
+		{
+			exit(0);
 			break ;
+		}
 		if (nBytes != 99)
 			break ;
 		buffer.append(tmp);
