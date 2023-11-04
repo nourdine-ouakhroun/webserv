@@ -15,7 +15,6 @@ class ServerData
 		void	setServerData(const std::vector<ServerModel>&);
 		void	displayData( void );
 		ServerModel	getServer(const String& serverName);
-//		const std::vector<Location*>&	getServerLocations( void ) const;
 };
 
 #endif
