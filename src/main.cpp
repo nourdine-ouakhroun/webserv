@@ -7,16 +7,28 @@
 #include <cctype>
 #include <unistd.h>
 
-void	runServer(unsigned short port)
+/*void	parseHeader(String& header)
 {
-	Server server(port);
+
+}
+*/
+void	runServer(Server& server)
+{
 	while (1)
 	{
-		int newSocket = server.accept();
-		String header = server.recieve(newSocket);
+		int res = server.waitingRequest();
+		if (!res)
+			continue ;
+		if (res < 0)
+			throw (std::exception());
+		int fd = server.getAvailabeFD();
+		if (fd < 0)
+			throw (std::exception());	
+		int newsocket = server.accept(fd);
+		String header = server.recieve(newsocket);
 		std::cout << header << std::endl << std::endl;
-		server.send(newSocket, "HTTP/1.1 200 OK\r\n\r\n<h1>hello world</h1>");
-		close(newSocket);
+		server.send(newsocket, "http/1.1 200 ok\r\n\r\n<h1>hello world</h1>");
+		close(newsocket);
 	}
 }
 
@@ -26,19 +38,15 @@ void	createServer(const ServerModel& serv)
 	std::vector<Data> data = serv.getData("listen");
 	std::vector<Data>::iterator ibegin = data.begin();
 	std::vector<Data>::iterator iend = data.end();
+	Server server;
 	while (ibegin < iend)
 	{
 		unsigned short port = (unsigned short)strtol(ibegin->getValue().c_str(), NULL, 10);
 		std::cout << "Port : " << port << std::endl;
-		int pid = fork();
-		if (!pid)
-		{
-	 		runServer(port);
-			break ;
-		}
+		server.createNewSocket(port);
 		ibegin++;
 	}
-	wait(0);
+	runServer(server);
 }
 
 void	printAllData(Parser& parser)
