@@ -15,7 +15,7 @@ class GlobalModel
 		~GlobalModel( void );
 		GlobalModel&	operator=(const GlobalModel& target);
 		void	addData(const Data& _data);
-		const Data&	getData(const String& key);
+		std::vector<Data>	getData(const String& key) const;
 		const std::vector<Data>&	getAllData( void ) const;
 
 		static	void	printGlobalModel(const GlobalModel&, String&);
