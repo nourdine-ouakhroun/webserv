@@ -29,17 +29,18 @@ void	GlobalModel::addData(const Data& _data)
 	data.push_back(_data);
 }
 
-const Data&	GlobalModel::getData(const String& key)
+std::vector<Data>	GlobalModel::getData(const String& key) const
 {
-	std::vector<Data>::iterator	iterBegin = data.begin();
-	std::vector<Data>::iterator	iterEnd = data.end();
-	while (iterBegin != iterEnd)
+	std::vector<Data>	returnData;
+	std::vector<Data>::const_iterator	iterBegin = data.begin();
+	std::vector<Data>::const_iterator	iterEnd = data.end();
+	while (iterBegin < iterEnd)
 	{
 		if (!iterBegin->getKey().compare(key))
-			return (*iterBegin);
+			returnData.push_back(*iterBegin);
 		iterBegin++;
 	}
-	throw std::exception();
+	return (returnData);
 }
 
 const std::vector<Data>&	GlobalModel::getAllData( void ) const
