@@ -7,22 +7,53 @@
 #include <cctype>
 #include <unistd.h>
 
+void	runServer(unsigned short port)
+{
+	Server server(port);
+	while (1)
+	{
+		int newSocket = server.accept();
+		String header = server.recieve(newSocket);
+		std::cout << header << std::endl << std::endl;
+		server.send(newSocket, "HTTP/1.1 200 OK\r\n\r\n<h1>hello world</h1>");
+		close(newSocket);
+	}
+}
+
+void	createServer(const ServerModel& serv)
+{
+	(void)serv;
+	std::vector<Data> data = serv.getData("listen");
+	std::vector<Data>::iterator ibegin = data.begin();
+	std::vector<Data>::iterator iend = data.end();
+	while (ibegin < iend)
+	{
+		unsigned short port = (unsigned short)strtol(ibegin->getValue().c_str(), NULL, 10);
+		std::cout << "Port : " << port << std::endl;
+		int pid = fork();
+		if (!pid)
+		{
+	 		runServer(port);
+			break ;
+		}
+		ibegin++;
+	}
+	wait(0);
+}
 
 void	printAllData(Parser& parser)
 {
-	ServerData servers(parser.getServers());
+	__unused ServerData servers(parser.getServers());
 	try
 	{
 		ServerModel smodel = servers.getServer("mehdi.com");
-		(void)smodel;
-//		ServerModel::printServerModelInfo(smodel);
+		//ServerModel::printServerModelInfo(smodel);
+		createServer(smodel);
 	}
-	catch (...)
+	catch ( ... )
 	{
 		std::cout << "I can't found the exact server." << std::endl;
 	}
-
-
 }
 
 void	testLeaks(char *fileName)
@@ -39,27 +70,6 @@ void	testLeaks(char *fileName)
 	{
 		std::cerr << "\033[31m" << e.what() << "\033[0m" << std::endl;
 	}
-	try
-	{
-		int pid = fork();
-		if (!pid)
-		{
-			Server server(8090);
-			while (1)
-			{
-				int newSocket = server.accept();
-				String header = server.recieve(newSocket);
-				std::cout << header << std::endl << std::endl;
-				server.send(newSocket, "HTTP/1.1 200 OK\r\n\r\n<h1>hello world</h1>");
-				close(newSocket);
-			}
-		}
-		wait(0);
-	}
-	catch (...)
-	{
-	}
-	
 }
 
 int	main(int ac, char **av)
@@ -70,12 +80,5 @@ int	main(int ac, char **av)
 		return (1);
 	}
 	testLeaks(av[1]);
-	//int pid = getpid();
-	//String str("lsof -p ");
-	//str.append(std::to_string(pid));
-	//system("leaks -q webServ");	
-	//system(str.c_str());
-	//checkSyntax(data);
-
 	return (0);
 }

@@ -35,8 +35,8 @@ ServerModel	ServerData::getServer(const String& serverName)
 	std::vector<ServerModel>::iterator iterEnd = servers.end();
 	while (iterBegin < iterEnd)
 	{
-		Data value = iterBegin->getData("server_name");
-		if (value.getValue().contains(serverName) == true)
+		std::vector<Data> value = iterBegin->getData("server_name");
+		if (value.empty() == false && value.begin()->getValue().contains(serverName) == true)
 			return (*iterBegin);
 		iterBegin++;
 	}
