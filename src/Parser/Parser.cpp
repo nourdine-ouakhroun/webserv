@@ -304,7 +304,28 @@ void	Parser::getFinalResualt( void )
 	}
 }
 
-
+std::vector<Data>	Parser::parseHeader(const String& header)
+{
+	(void)header;
+	std::vector<Data> vec;
+	std::istringstream	iss(header);
+	String			tmp, key, value;
+	while (iss.eof() == false)
+	{
+		std::getline(iss, tmp, '\n');
+		if (tmp.length() == 0 || tmp[0] == '\r')
+			continue ;
+		Logger::info(std::cout, tmp, "");
+		std::vector<String> split = tmp.split(':');
+		if (split.empty() == true)
+			continue ;
+		key = split[0];
+		if (split.size() > 1)
+			value = String::convertVectorToString(split, 1, static_cast<unsigned int>(split.size() - 1), ':');
+		vec.push_back(Data(key.trim(" \t"), value.trim(" \t")));
+	}
+	return (vec);
+}
 
 
 

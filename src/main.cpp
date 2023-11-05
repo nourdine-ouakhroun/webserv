@@ -9,32 +9,6 @@
 #include <unistd.h>
 
 
-
-std::vector<Data>	parseHeader(String& header)
-{
-	(void)header;
-	std::vector<Data> vec;
-	String httpMethods("GET POST DELETE PUT");
-	std::istringstream	iss(header);
-	String			tmp;
-	String			httpMethod;
-	while (iss.eof() == false)
-	{
-		std::getline(iss, tmp, '\n');
-		if (tmp.length() == 0)
-			continue ;
-		Logger::info(std::cout, tmp, "");
-		std::vector<String> split = tmp.split(':');
-
-		Logger::debug(std::cout, split[0], "");
-		if (split.size() > 1)
-			Logger::debug(std::cout, split[1], "");
-//		Data data;
-//		vec.push_back(tmp);
-	}
-	return (vec);
-}
-
 void	runServer(Server& server)
 {
 	while (1)
@@ -47,8 +21,7 @@ void	runServer(Server& server)
 			throw (std::exception());	
 		int newsocket = server.accept(fd);
 		String header = server.recieve(newsocket);
-		parseHeader(header);
-//		std::cout << header << std::endl << std::endl;
+		Parser::parseHeader(header);
 		server.send(newsocket, "http/1.1 200 ok\r\n\r\n<h1>hello world</h1>");
 		close(newsocket);
 	}
