@@ -127,3 +127,20 @@ int	String::countRepeating(const char& c)
 	}
 	return (counter);
 }
+
+
+String	String::convertVectorToString(const std::vector<String>& strings, unsigned int begin = 0, unsigned int len = 1, char separator = 0)
+{
+	String dest;
+	
+	if (len + begin > strings.size())
+		len = (unsigned int)strings.size();
+	while (begin <= len)
+	{
+		dest.append(strings[begin]);
+		begin++;
+		if (separator != 0 && begin <= len)
+			dest.append(&separator);
+	}
+	return (dest);
+}

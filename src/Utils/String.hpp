@@ -21,6 +21,7 @@ class String : public std::string
 		int		countRepeating(const char& c);
 		bool	contains(const String& str) const;
 		bool	equal(const String& value) const;
+		static String	convertVectorToString(const std::vector<String>& strings, unsigned int begin/* = 0*/, unsigned int len/* = 1*/, char separator/* = 0*/);
 };
 
 
