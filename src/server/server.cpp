@@ -16,7 +16,11 @@ bool	Server::createNewSocket(unsigned short port)
 	socketData.sin_family = AF_INET;
 	socketData.sin_addr.s_addr = INADDR_ANY;
 	if (bind(nSocket, (struct sockaddr *)&socketData, socketLen) < 0 || listen(nSocket, 5) < 0)
-		return (false);	
+	{
+		nSocket = -1;
+		close(nSocket);
+		return (false);
+	}
 	struct pollfd pFd;
 	pFd.fd = nSocket;
 	pFd.events = POLLIN | POLLOUT;
@@ -70,6 +74,8 @@ Server&	Server::operator=(const Server& target)
 
 int		Server::waitingRequest( void )
 {
+	if (pollFds.empty() == true)
+		return (-1);
 	return (static_cast<int>(poll(&pollFds[0], (unsigned int)pollFds.size(), 50000)));
 }
 
@@ -113,9 +119,9 @@ String	Server::recieve(int socket)
 			exit(0);
 			break ;
 		}
-		if (nBytes != 99)
-			break ;
 		buffer.append(tmp);
+		if (nBytes < 99)
+			break ;
 	}
 	return (buffer);
 }
