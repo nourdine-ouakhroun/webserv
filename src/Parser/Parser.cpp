@@ -32,8 +32,8 @@ void	Parser::checkSyntax( void )
 			if (*(iterBegin->end() - 1) != ';')
 			{
 				String message;
-				message.append("webserv: [emerg] invalid parameter \"").append(*iterBegin).append("\" in ").append(fileName);
-				message.append("\nwebserv: configuration file ").append(fileName).append(" test failed.");
+				message.append("[emerg] invalid parameter \"").append(*iterBegin).append("\" in ").append(fileName);
+				message.append(" test failed.");
 				throw (ParsingException(message));
 			}
 		}
