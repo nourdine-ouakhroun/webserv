@@ -4,29 +4,51 @@
 #include "Models/ServerModel.hpp"
 #include "Server/Server.hpp"
 #include "Utils/ServerData.hpp"
+#include "Utils/Logger.hpp"
 #include <cctype>
 #include <unistd.h>
 
-/*void	parseHeader(String& header)
-{
 
+
+std::vector<Data>	parseHeader(String& header)
+{
+	(void)header;
+	std::vector<Data> vec;
+	String httpMethods("GET POST DELETE PUT");
+	std::istringstream	iss(header);
+	String			tmp;
+	String			httpMethod;
+	while (iss.eof() == false)
+	{
+		std::getline(iss, tmp, '\n');
+		if (tmp.length() == 0)
+			continue ;
+		Logger::info(std::cout, tmp, "");
+		std::vector<String> split = tmp.split(':');
+
+		Logger::debug(std::cout, split[0], "");
+		if (split.size() > 1)
+			Logger::debug(std::cout, split[1], "");
+//		Data data;
+//		vec.push_back(tmp);
+	}
+	return (vec);
 }
-*/
+
 void	runServer(Server& server)
 {
 	while (1)
 	{
 		int res = server.waitingRequest();
-		if (!res)
-			continue ;
-		if (res < 0)
+		if (res <= 0)
 			throw (std::exception());
 		int fd = server.getAvailabeFD();
 		if (fd < 0)
 			throw (std::exception());	
 		int newsocket = server.accept(fd);
 		String header = server.recieve(newsocket);
-		std::cout << header << std::endl << std::endl;
+		parseHeader(header);
+//		std::cout << header << std::endl << std::endl;
 		server.send(newsocket, "http/1.1 200 ok\r\n\r\n<h1>hello world</h1>");
 		close(newsocket);
 	}
@@ -42,8 +64,9 @@ void	createServer(const ServerModel& serv)
 	while (ibegin < iend)
 	{
 		unsigned short port = (unsigned short)strtol(ibegin->getValue().c_str(), NULL, 10);
-		std::cout << "Port : " << port << std::endl;
-		server.createNewSocket(port);
+		Logger::debug(std::cout, "Port : ", port);
+		if (server.createNewSocket(port) == false)
+			std::cout << "can not open the port : " << port << std::endl;
 		ibegin++;
 	}
 	runServer(server);
@@ -69,14 +92,16 @@ void	testLeaks(char *fileName)
 	try
 	{
 		Parser* parser = new Parser(fileName);
-		std::cout << "\033[32mwebserv: the configuration file " << fileName << " syntax is ok" << std::endl;
-		std::cout << "webserv: configuration file " << fileName << " test is successful\033[0m" << std::endl;
+		String str("the configuration file");
+		str.append(fileName);
+		Logger::success(std::cout, str, " syntax is ok.");
+		Logger::success(std::cout, str, " test is successfuli.");
 		printAllData(*parser);
 		delete parser;
 	}
 	catch (ParsingException& e)
 	{
-		std::cerr << "\033[31m" << e.what() << "\033[0m" << std::endl;
+		Logger::error(std::cerr, e.what(), "");
 	}
 }
 
