@@ -11,25 +11,35 @@
 
 void	runServer(Server& server)
 {
+	int res, fd, newsocket;
+	String	header;
+
 	while (1)
 	{
-		int res = server.waitingRequest();
-		if (res <= 0)
+		res = server.waitingRequest();
+		if (!res)
+			continue ;
+		if (res < 0)
 			throw (std::exception());
-		int fd = server.getAvailabeFD();
+		fd = server.getAvailabeFD();
 		if (fd < 0)
 			throw (std::exception());	
-		int newsocket = server.accept(fd);
-		String header = server.recieve(newsocket);
+		newsocket = server.accept(fd);
+		if (newsocket < 0)
+			continue ;
+		header = server.recieve(newsocket);
+		if (header.empty() == true)
+			break ;
 		Parser::parseHeader(header);
-		server.send(newsocket, "http/1.1 200 ok\r\n\r\n<h1>hello world</h1>");
+		if (server.send(newsocket, "HTTP/1.1 200 ok\r\n\r\n<h1>hello world</h1>") == -1)
+			Logger::error(std::cerr, "Send Failed.", "");
 		close(newsocket);
+		header.clear();
 	}
 }
 
 void	createServer(const ServerModel& serv)
 {
-	(void)serv;
 	std::vector<Data> data = serv.getData("listen");
 	std::vector<Data>::iterator ibegin = data.begin();
 	std::vector<Data>::iterator iend = data.end();
