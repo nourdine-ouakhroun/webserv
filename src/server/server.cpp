@@ -76,7 +76,7 @@ int		Server::waitingRequest( void )
 {
 	if (pollFds.empty() == true)
 		return (-1);
-	return (static_cast<int>(poll(&pollFds[0], (unsigned int)pollFds.size(), 50000)));
+	return (static_cast<int>(poll(&pollFds[0], (unsigned int)pollFds.size(), 10000)));
 }
 
 int		Server::getAvailabeFD( void )
@@ -115,10 +115,7 @@ String	Server::recieve(int socket)
 		bzero(tmp, 100);
 		int nBytes;
 		if ((nBytes = (int)::recv(socket, tmp, 99, 0)) < 0)
-		{
-			exit(0);
 			break ;
-		}
 		buffer.append(tmp);
 		if (nBytes < 99)
 			break ;
