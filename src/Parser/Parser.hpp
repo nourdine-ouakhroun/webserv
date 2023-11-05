@@ -7,6 +7,7 @@
 #include <cctype>
 #include "../Exception/ParsingException.hpp"
 #include "../Models/ServerModel.hpp"
+#include "../Utils/Logger.hpp"
 
 class Parser
 {
@@ -24,6 +25,7 @@ class Parser
 		const std::vector<std::vector<String> >& getServersContents( void ) const;
 		const	std::vector<ServerModel>&	getServers( void ) const;
 		void	printServerModel(ServerModel& server);
+		static std::vector<Data>	parseHeader(const String& header);
 	
 	private :
 		Data	extractDataFromString(String& line);
