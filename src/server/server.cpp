@@ -104,6 +104,11 @@ int 	Server::accept(int targetSocket)
 	return (newSocket);
 }
 
+/*
+int	checkIsAlreadyExist(int socketId)
+{
+	for ()
+}*/
 
 String	Server::recieve(int socket)
 {
