@@ -7,10 +7,11 @@
 #include <cstring>
 #include <unistd.h>
 #include "../Utils/String.hpp"
+#include <sys/poll.h>
 
 class Server
 {
-	int		socketFd;
+	std::vector<struct pollfd> pollFds;
 	struct	sockaddr_in	socketData;
 	socklen_t	socketLen;
 	unsigned short	port;
@@ -22,7 +23,10 @@ class Server
 		Server(const Server& copy);
 		~Server( void ) throw();
 		Server&	operator=(const Server& target);
-		int		accept( void );
+		bool	createNewSocket(unsigned short port);
+		int		waitingRequest( void );
+		int		getAvailabeFD( void );
+		int		accept(int targetSocket);
 		String	recieve(int socket);
 		int		send(int socket, String response);
 };
