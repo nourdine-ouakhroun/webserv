@@ -9,8 +9,8 @@ SRCS	=	src/main.cpp \
 		src/Utils/String.cpp \
 		src/Exception/ParsingException.cpp \
 		src/Server/Server.cpp \
-		 src/Utils/ServerData.cpp \
-#		src/parser/InnerLocation.cpp \
+		src/Utils/ServerData.cpp \
+		src/Utils/Logger.cpp
 
 HEADERS	=	src/Parser/Parser.hpp \
 		src/Parser/Location.hpp \
@@ -19,7 +19,8 @@ HEADERS	=	src/Parser/Parser.hpp \
 		src/Exception/ParsingException.hpp \
 		src/Models/GlobalModel.hpp \
 		src/Utils/ServerData.hpp \
-		src/Server/Server.hpp
+		src/Server/Server.hpp \
+		src/Utils/Logger.hpp
 
 CPP	=	c++
 CPPFLAGS	=	-Wall -Wextra -Werror -std=c++98 -Wconversion# -fsanitize=address

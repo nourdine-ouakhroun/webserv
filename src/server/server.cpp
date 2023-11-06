@@ -3,26 +3,36 @@
 Server::Server( void )
 {
 	socketLen = sizeof(socketData);
-	port = 8778;
-	socketFd = socket(AF_INET, SOCK_STREAM, 0);
-	if (socketFd < 0)
-		throw (std::exception());
-	bzero(&socketData, (size_t)socketLen);
+}
+
+bool	Server::createNewSocket(unsigned short port)
+{
+	int nSocket = socket(AF_INET, SOCK_STREAM, 0);
+	if (nSocket < 0)
+		return (false);
+	struct sockaddr_in socketData;
+	bzero(&socketData, socketLen);
 	socketData.sin_port = htons(port);
 	socketData.sin_family = AF_INET;
 	socketData.sin_addr.s_addr = INADDR_ANY;
-	if (bind(socketFd, (struct sockaddr *)&socketData, socketLen) < 0 || listen(socketFd, 5) < 0)
+	if (bind(nSocket, (struct sockaddr *)&socketData, socketLen) < 0 || listen(nSocket, 5) < 0)
 	{
-		close(socketFd);
-		throw (std::exception());
+		nSocket = -1;
+		close(nSocket);
+		return (false);
 	}
+	struct pollfd pFd;
+	pFd.fd = nSocket;
+	pFd.events = POLLIN | POLLOUT;
+	pollFds.push_back(pFd);
+	return (true);
 }
 
 Server::Server(const unsigned short &_port)
 {
 	socketLen = sizeof(socketData);
 	port = _port;
-	socketFd = socket(AF_INET, SOCK_STREAM, 0);
+	int socketFd = socket(AF_INET, SOCK_STREAM, 0);
 	if (socketFd < 0)
 		throw (std::exception());
 	bzero(&socketData, socketLen);
@@ -34,6 +44,10 @@ Server::Server(const unsigned short &_port)
 		close(socketFd);
 		throw (std::exception());
 	}
+	struct pollfd pFd;
+	pFd.fd = socketFd;
+	pFd.events = POLLIN | POLLOUT;
+	pollFds.push_back(pFd);
 }
 
 Server::Server(const Server& copy)
@@ -43,14 +57,14 @@ Server::Server(const Server& copy)
 
 Server::~Server( void ) throw()
 {
-	close(socketFd);
+	//close(socketFd);
 }
 
 Server&	Server::operator=(const Server& target)
 {
 	if (this != &target)
 	{
-		socketFd = target.socketFd;
+		pollFds = target.pollFds;
 		socketData = target.socketData;
 		socketLen = target.socketLen;
 		port = target.port;
@@ -58,10 +72,30 @@ Server&	Server::operator=(const Server& target)
 	return (*this);
 }
 
-int 	Server::accept( void )
+int		Server::waitingRequest( void )
+{
+	if (pollFds.empty() == true)
+		return (-1);
+	return (static_cast<int>(poll(&pollFds[0], (unsigned int)pollFds.size(), 10000)));
+}
+
+int		Server::getAvailabeFD( void )
+{
+	std::vector<struct pollfd>::iterator iterBegin = pollFds.begin();
+	std::vector<struct pollfd>::iterator iterEnd = pollFds.end();
+	while (iterBegin < iterEnd)
+	{
+		if ((iterBegin->revents & POLLIN) || (iterBegin->revents & POLLOUT))
+			return (iterBegin->fd);
+		iterBegin++;
+	}
+	return (-1);
+}
+
+int 	Server::accept(int targetSocket)
 {
 	int newSocket = (int)::accept(
-						socketFd,
+						targetSocket,
 						(struct sockaddr *)&socketData, 
 						(socklen_t *)&socketLen
 					);
@@ -70,6 +104,11 @@ int 	Server::accept( void )
 	return (newSocket);
 }
 
+/*
+int	checkIsAlreadyExist(int socketId)
+{
+	for ()
+}*/
 
 String	Server::recieve(int socket)
 {
@@ -81,13 +120,10 @@ String	Server::recieve(int socket)
 		bzero(tmp, 100);
 		int nBytes;
 		if ((nBytes = (int)::recv(socket, tmp, 99, 0)) < 0)
-		{
-			exit(0);
-			break ;
-		}
-		if (nBytes != 99)
 			break ;
 		buffer.append(tmp);
+		if (nBytes < 99)
+			break ;
 	}
 	return (buffer);
 }
