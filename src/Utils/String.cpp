@@ -31,7 +31,7 @@ bool	String::equal(const String& value) const
 
 bool	String::contains(const String& str) const
 {
-	if ((int)find(str) != -1)
+	if (find(str) != npos)
 		return (true);
 	return (false);
 }

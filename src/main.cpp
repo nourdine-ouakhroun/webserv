@@ -1,11 +1,6 @@
-#include <fstream>
-#include "Parser/Location.hpp"
-#include "Parser/Parser.hpp"
-#include "Models/ServerModel.hpp"
-#include "Server/Server.hpp"
-#include "Utils/ServerData.hpp"
-#include "Utils/Logger.hpp"
-#include <cctype>
+#include "Parser.hpp"
+#include "Server.hpp"
+#include "ServerData.hpp"
 #include <unistd.h>
 
 void	runServer(Server& server)
@@ -30,6 +25,7 @@ void	runServer(Server& server)
 		if (header.empty() == true)
 			break ;
 		Parser::parseHeader(header);
+		
 		if (server.send(newsocket, "HTTP/1.1 200 ok\r\n\r\n<h1>hello world</h1>") == -1)
 			Logger::error(std::cerr, "Send Failed.", "");
 		close(newsocket);
@@ -66,14 +62,15 @@ void	test(const Location& loca)
 void	printAllData(Parser& parser)
 {
 	ServerData servers(parser.getServers());
-	// servers.displayServers();
+	servers.displayServers();
 	try
 	{
-		// ServerModel smodel = servers.getServerByServerName("mehdi.com");
-		ServerModel smodel = servers.getServerByPort(8090);
+		// ServerModel smodel = servers.getDefaultServer();
+		ServerModel smodel = servers.getServerByServerName("mehdi.com");
+		// ServerModel smodel = servers.getServerByPort(8090);
 		// ServerModel::printServerModelInfo(smodel);
 		String str("");
-		if (smodel.findLocationByPath(&smodel.getLocation(), str, "/mehdi/salim/test", test) == false)
+		if (smodel.findLocationByPath(smodel.getLocation(), str, "/mehdi/salim/test", test) == false)
 		{
 			Logger::error(std::cerr, "404 Page Not Found.", "");
 			return ;
@@ -91,11 +88,12 @@ void	testLeaks(char *fileName)
 	try
 	{
 		Parser parser(fileName);
+		Parser parser2(parser);
 		String str("the configuration file");
 		str.append(fileName);
 		Logger::success(std::cout, str, " syntax is ok.");
 		Logger::success(std::cout, str, " test is successfuli.");
-		printAllData(parser);
+		printAllData(parser2);
 	}
 	catch (ParsingException& e)
 	{
@@ -111,6 +109,6 @@ int	main(int ac, char **av)
 		return (1);
 	}
 	testLeaks(av[1]);
-	// system("leaks -q webServ");
+	system("leaks -q webServ");
 	return (0);
 }
