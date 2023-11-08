@@ -8,7 +8,6 @@
 #include <cctype>
 #include <unistd.h>
 
-
 void	runServer(Server& server)
 {
 	int res, fd, newsocket;
@@ -55,14 +54,31 @@ void	createServer(const ServerModel& serv)
 	runServer(server);
 }
 
+void	test(const Location& loca)
+{
+	std::vector<Data> locationData = loca.getAllData();
+	String str("");
+	for (int i = 0; i < (int)locationData.size(); i++)
+		Data::printData(locationData.at((std::vector<Data>::size_type)i), str);
+	Logger::debug(std::cerr, "hello form ", "test.");
+}
+
 void	printAllData(Parser& parser)
 {
-	__unused ServerData servers(parser.getServers());
+	ServerData servers(parser.getServers());
+	// servers.displayServers();
 	try
 	{
-		ServerModel smodel = servers.getServer("mehdi.com");
-		//ServerModel::printServerModelInfo(smodel);
-		createServer(smodel);
+		// ServerModel smodel = servers.getServerByServerName("mehdi.com");
+		ServerModel smodel = servers.getServerByPort(8090);
+		// ServerModel::printServerModelInfo(smodel);
+		String str("");
+		if (smodel.findLocationByPath(&smodel.getLocation(), str, "/mehdi/salim/test", test) == false)
+		{
+			Logger::error(std::cerr, "404 Page Not Found.", "");
+			return ;
+		}
+		// createServer(smodel);
 	}
 	catch ( ... )
 	{
@@ -74,13 +90,12 @@ void	testLeaks(char *fileName)
 {
 	try
 	{
-		Parser* parser = new Parser(fileName);
+		Parser parser(fileName);
 		String str("the configuration file");
 		str.append(fileName);
 		Logger::success(std::cout, str, " syntax is ok.");
 		Logger::success(std::cout, str, " test is successfuli.");
-		printAllData(*parser);
-		delete parser;
+		printAllData(parser);
 	}
 	catch (ParsingException& e)
 	{
@@ -92,9 +107,10 @@ int	main(int ac, char **av)
 {
 	if (ac < 2)
 	{
-		std::cerr << "Error :\fInvalid argument" << std::endl;
+		Logger::error(std::cerr, "Invalid argument", ".");
 		return (1);
 	}
 	testLeaks(av[1]);
+	// system("leaks -q webServ");
 	return (0);
 }
