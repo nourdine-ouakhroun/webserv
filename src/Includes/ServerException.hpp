@@ -2,7 +2,7 @@
 #define SERVEREXCEPTION_HPP
 
 #include <exception>
-#include "../Utils/String.hpp"
+#include "String.hpp"
 
 class ServerException : public std::exception
 {
