@@ -13,8 +13,12 @@ class ServerData
 		ServerData(const ServerData&);
 		ServerData&	operator=(const ServerData&);
 		void	setServerData(const std::vector<ServerModel>&);
-		void	displayData( void );
-		ServerModel	getServer(const String& serverName);
+		void	displayServers( void );
+		ServerModel	getServerByServerName(const String& serverName);
+		ServerModel	getServerByPort(const unsigned short& port);
+		const std::vector<ServerModel>&	getAllServers();
+		ServerModel	getDefaultServer( void );
+		bool		checkDuplicateServer( void );
 };
 
 #endif
