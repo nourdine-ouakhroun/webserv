@@ -1,7 +1,7 @@
 #ifndef	SERVERDATA_HPP
 #define	SERVERDATA_HPP
 
-#include "../Parser/Parser.hpp"
+#include "Parser.hpp"
 #include <algorithm>    // std::find
 
 class ServerData
