@@ -116,7 +116,7 @@ Data	Parser::extractDataFromString(String& line)
 	String	value("");
 	while (++ib < ie)
 		value.append(" ").append(ib->trim(" \t;"));
-	return (Data(key, value));
+	return (Data(key, value.trim(" \t")));
 }
 
 void	Parser::printLocations(Location* locs)

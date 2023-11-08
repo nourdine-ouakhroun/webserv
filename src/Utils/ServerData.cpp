@@ -44,8 +44,13 @@ ServerModel	ServerData::getServerByServerName(const String& serverName)
 	while (iterBegin < iterEnd)
 	{
 		std::vector<Data> value = iterBegin->getData("server_name");
-		if (value.empty() == false && value.begin()->getValue().contains(serverName) == true)
-			return (*iterBegin);
+		for (int i = 0; i < (int)value.size(); i++)
+		{
+			String str = value.at((std::vector<Data>::size_type)i).getValue();
+			std::vector<String> values = str.split();
+			if (find(values.begin(), values.end(), serverName) != values.end())
+				return (*iterBegin);
+		}
 		iterBegin++;
 	}
 	throw (std::exception());
@@ -77,8 +82,18 @@ ServerModel	ServerData::getDefaultServer( void )
 	while (iterBegin < iterEnd)
 	{
 		std::vector<Data> value = iterBegin->getData("listen");
-		if (value.empty() == false && (unsigned short)std::strtol(value.begin()->getValue().c_str(), NULL, 10))
-			return (*iterBegin);
+		for (int i = 0; i < (int)value.size(); i++)
+		{
+			String str = value.at((std::vector<Data>::size_type)i).getValue();
+			std::vector<String> values = str.split();
+			if (find(values.begin(), values.end(), "default_server") != values.end())
+				return (*iterBegin);
+			// if (value.at((std::vector<Data>::size_type)i).getValue().contains("default_server") == true)
+		}
+		// std::vector<Data> value = iterBegin->getData("listen");
+		// for (int i = 0; i < (int)value.size(); i++)
+		// 	if (value.at(i).getValue().contains("default_server") == true)
+		// 		return (*iterBegin);
 		iterBegin++;
 	}
 	throw (std::exception());
@@ -86,15 +101,16 @@ ServerModel	ServerData::getDefaultServer( void )
 
 bool		ServerData::checkDuplicateServer( void )
 {
-	std::vector<ServerModel>::iterator iterBegin = servers.begin();
-	std::vector<ServerModel>::iterator iterEnd = servers.end();
-	while (iterBegin < iterEnd)
-	{
-		std::vector<Data> value = iterBegin->getData("listen");
-		for (int i = 0; i < (int)value.size(); i++)
-			if (isExist(value) == true)
-				return (false);
-		}
-		iterBegin++;
-	}
+	// std::vector<ServerModel>::iterator iterBegin = servers.begin();
+	// std::vector<ServerModel>::iterator iterEnd = servers.end();
+	// while (iterBegin < iterEnd)
+	// {
+	// 	std::vector<Data> value = iterBegin->getData("listen");
+	// 	for (int i = 0; i < (int)value.size(); i++)
+	// 		if (isExist(value) == true)
+	// 			return (false);
+	// 	}
+	// 	iterBegin++;
+	// }
+	return (false);
 }
