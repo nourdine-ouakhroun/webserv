@@ -14,21 +14,27 @@ SRCS	=	src/main.cpp \
 
 HEADERS	=	src/Includes/*.hpp
 
+
 CPP	=	c++
 CPPFLAGS	=	-Wall -Wextra -Werror -std=c++98 -Wconversion  -I./src/Includes# -fsanitize=address
 
-OBJS	=	${SRCS:.cpp=.o}
+BIN		=	bin
+
+OBJS	=	${SRCS:src/%.cpp=${BIN}/%.o}
+
 
 all	:	${NAME}
 
-${NAME}	:	${OBJS}
+${NAME}	: ${OBJS}
 	${CPP} ${CPPFLAGS} $^ -o $@
+	@echo "finish !!"
 
-%.o	:	%.cpp ${HEADERS}
+${BIN}/%.o	:	src/%.cpp ${HEADERS}
+	@mkdir -p $(dir $@)
 	${CPP} ${CPPFLAGS} -c $< -o $@
 
 clean	:
-	rm -rf ${OBJS}
+	rm -rf ${BIN}
 
 fclean	:	clean
 	rm -rf ${NAME}
