@@ -60,9 +60,35 @@ void	ServerModel::clear( void )
 }
 */
 
+
+bool	ServerModel::findLocationByPath(
+						const std::vector<Location*>* locations,
+						String& destPath, const String& srcPath,
+						void (*to_do) (const Location&))
+{
+	std::vector<Location*>::const_iterator ibegin = locations->begin();
+	std::vector<Location*>::const_iterator iend = locations->end();
+	bool	isDone = false;
+	while (ibegin < iend)
+	{
+		String tmpPath(destPath);
+		tmpPath.append((*ibegin)->getPath());
+		if (!srcPath.compare(tmpPath) && tmpPath.length() == srcPath.length())
+		{
+			to_do(**ibegin);
+			isDone = true;
+		}
+		if (isDone)
+			return (true);
+		if ((*ibegin)->getInnerLocation() && findLocationByPath((*ibegin)->getInnerLocation(), tmpPath, srcPath, to_do) == true)
+			return (true);
+		ibegin++;
+	}
+	return (false);
+}
+
 void	ServerModel::printServerModelInfo(const ServerModel& serverModel)
 {
-	std::cout << "===================== Server Info =====================\n";
 	String s("\t");
 	GlobalModel::printGlobalModel(serverModel, s);
 	std::cout << s << ">>>> Location Info <<<<\n";
