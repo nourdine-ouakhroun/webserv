@@ -8,6 +8,7 @@ SRCS	=	src/main.cpp \
 		src/Models/Data.cpp \
 		src/Utils/String.cpp \
 		src/Exception/ParsingException.cpp \
+		src/Exception/ServerException.cpp \
 		src/Server/Server.cpp \
 		src/Utils/ServerData.cpp \
 		src/Utils/Logger.cpp
@@ -17,6 +18,7 @@ HEADERS	=	src/Parser/Parser.hpp \
 		src/Models/Data.hpp \
 		src/Utils/String.hpp \
 		src/Exception/ParsingException.hpp \
+		src/Exception/ServerException.hpp \
 		src/Models/GlobalModel.hpp \
 		src/Utils/ServerData.hpp \
 		src/Server/Server.hpp \
