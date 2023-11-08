@@ -22,17 +22,16 @@ BIN		=	bin
 
 OBJS	=	${SRCS:src/%.cpp=${BIN}/%.o}
 
+
 all	:	${NAME}
 
 ${NAME}	: ${OBJS}
 	${CPP} ${CPPFLAGS} $^ -o $@
+	@echo "finish !!"
 
-${BIN}/%.o	:	src/%.cpp ${HEADERS} ${BIN}
+${BIN}/%.o	:	src/%.cpp ${HEADERS}
 	@mkdir -p $(dir $@)
-	@${CPP} ${CPPFLAGS} -c $< -o $@
-
-${BIN} :
-	mkdir -p $@
+	${CPP} ${CPPFLAGS} -c $< -o $@
 
 clean	:
 	rm -rf ${BIN}
