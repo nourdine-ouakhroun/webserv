@@ -30,6 +30,7 @@ void	runServer(Server& server)
 		if (header.empty() == true)
 			break ;
 		Parser::parseHeader(header);
+		
 		if (server.send(newsocket, "HTTP/1.1 200 ok\r\n\r\n<h1>hello world</h1>") == -1)
 			Logger::error(std::cerr, "Send Failed.", "");
 		close(newsocket);
@@ -69,9 +70,10 @@ void	printAllData(Parser& parser)
 	// servers.displayServers();
 	try
 	{
-		// ServerModel smodel = servers.getServerByServerName("mehdi.com");
-		ServerModel smodel = servers.getServerByPort(8090);
-		// ServerModel::printServerModelInfo(smodel);
+		// ServerModel smodel = servers.getDefaultServer();
+		ServerModel smodel = servers.getServerByServerName("mehdi.com");
+		// ServerModel smodel = servers.getServerByPort(8090);
+		ServerModel::printServerModelInfo(smodel);
 		String str("");
 		if (smodel.findLocationByPath(&smodel.getLocation(), str, "/mehdi/salim/test", test) == false)
 		{
