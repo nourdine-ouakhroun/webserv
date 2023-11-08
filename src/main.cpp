@@ -1,11 +1,6 @@
-#include <fstream>
-#include "Parser/Location.hpp"
-#include "Parser/Parser.hpp"
-#include "Models/ServerModel.hpp"
-#include "Server/Server.hpp"
-#include "Utils/ServerData.hpp"
-#include "Utils/Logger.hpp"
-#include <cctype>
+#include "Parser.hpp"
+#include "Server.hpp"
+#include "ServerData.hpp"
 #include <unistd.h>
 
 void	runServer(Server& server)

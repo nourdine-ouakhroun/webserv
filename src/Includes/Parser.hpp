@@ -5,9 +5,8 @@
 #include <fstream>
 #include "Location.hpp"
 #include <cctype>
-#include "../Exception/ParsingException.hpp"
-#include "../Models/ServerModel.hpp"
-#include "../Utils/Logger.hpp"
+#include "ParsingException.hpp"
+#include "ServerModel.hpp"
 
 class Parser
 {

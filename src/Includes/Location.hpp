@@ -2,7 +2,7 @@
 # define LOCATION_HPP
 
 #include <iostream>
-#include "../Models/GlobalModel.hpp"
+#include "GlobalModel.hpp"
 
 class	Location : public GlobalModel
 {
