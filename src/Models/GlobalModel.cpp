@@ -29,20 +29,50 @@ void	GlobalModel::addData(const Data& _data)
 	data.push_back(_data);
 }
 
-const Data&	GlobalModel::getData(const String& key)
+std::vector<Data>	GlobalModel::getData(const String& key) const
 {
-	std::vector<Data>::iterator	iterBegin = data.begin();
-	std::vector<Data>::iterator	iterEnd = data.end();
-	while (iterBegin != iterEnd)
+	std::vector<Data>	returnData;
+	std::vector<Data>::const_iterator	iterBegin = data.begin();
+	std::vector<Data>::const_iterator	iterEnd = data.end();
+	while (iterBegin < iterEnd)
 	{
 		if (!iterBegin->getKey().compare(key))
-			return (*iterBegin);
+			returnData.push_back(*iterBegin);
 		iterBegin++;
 	}
-	throw std::exception();
+	return (returnData);
 }
 
 const std::vector<Data>&	GlobalModel::getAllData( void ) const
 {
 	return (data);
+}
+
+
+
+bool	GlobalModel::isExist(const Data& value)
+{
+	std::vector<Data>::const_iterator	iterBegin = data.begin();
+	std::vector<Data>::const_iterator	iterEnd = data.end();
+	while (iterBegin < iterEnd)
+	{
+		if (!iterBegin->getKey().compare(value.getKey()) \
+			&& !iterBegin->getValue().compare(value.getValue()))
+			return (true);
+		iterBegin++;
+	}
+	return (false);
+}
+
+
+
+void	GlobalModel::printGlobalModel(const GlobalModel& model, String &str)
+{
+	std::vector<Data>::const_iterator	ibegin = model.getAllData().begin();
+	std::vector<Data>::const_iterator	iend = model.getAllData().end();
+	while (ibegin < iend)
+	{
+		Data::printData(*ibegin, str);
+		ibegin++;
+	}
 }

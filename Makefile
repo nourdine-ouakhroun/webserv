@@ -3,40 +3,39 @@ NAME	=	webServ
 
 SRCS	=	src/main.cpp \
 		src/Parser/Parser.cpp \
-		src/Parser/Server.cpp \
 		src/Parser/Location.cpp \
 		src/Models/GlobalModel.cpp \
 		src/Models/ServerModel.cpp \
 		src/Models/Data.cpp \
 		src/Utils/String.cpp \
 		src/Exception/ParsingException.cpp \
+		src/Exception/ServerException.cpp \
+		src/Server/Server.cpp \
 		src/Utils/ServerData.cpp
-#		src/parser/InnerLocation.cpp \
 
-HEADERS	=	src/Parser/Parser.hpp \
-		src/Parser/Server.hpp \
-		src/Parser/Location.hpp \
-		src/Models/Data.hpp \
-		src/Utils/String.hpp \
-		src/Exception/ParsingException.hpp \
-		src/Models/GlobalModel.hpp \
-		src/Utils/ServerData.hpp
+HEADERS	=	src/Includes/*.hpp
+
 
 CPP	=	c++
-CPPFLAGS	=	-Wall -Wextra -Werror -std=c++98 -Wconversion# -fsanitize=address
+CPPFLAGS	=	-Wall -Wextra -Werror -std=c++98 -Wconversion  -I./src/Includes# -fsanitize=address
 
-OBJS	=	${SRCS:.cpp=.o}
+BIN		=	bin
+
+OBJS	=	${SRCS:src/%.cpp=${BIN}/%.o}
+
 
 all	:	${NAME}
 
-${NAME}	:	${OBJS}
+${NAME}	: ${OBJS}
 	${CPP} ${CPPFLAGS} $^ -o $@
+	@echo "finish !!"
 
-%.o	:	%.cpp ${HEADERS}
+${BIN}/%.o	:	src/%.cpp ${HEADERS}
+	@mkdir -p $(dir $@)
 	${CPP} ${CPPFLAGS} -c $< -o $@
 
 clean	:
-	rm -rf ${OBJS}
+	rm -rf ${BIN}
 
 fclean	:	clean
 	rm -rf ${NAME}
