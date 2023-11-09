@@ -63,24 +63,15 @@ void	test(const Location& loca)
 void	printAllData(__unused Parser& parser)
 {
 	ServerData servers(parser.getServers());
-	servers.displayServers();
 	try
 	{
 		ServerModel smodel = servers.getDefaultServer();
-		// ServerModel smodel1 = servers.getServerByServerName("mehdi.com");
-		// ServerModel smodel = servers.getServerByPort(8090);
 		ServerModel::printServerModelInfo(smodel);
-		String str("");
-		if (smodel.findLocationByPath(smodel.getLocation(), str, "/", test) == false)
-		{
-			Logger::error(std::cerr, "404 Page Not Found.", "");
-			return ;
-		}
 		createServer(smodel);
 	}
-	catch ( ... )
+	catch (std::exception& e)
 	{
-		std::cout << "I can't found the exact server." << std::endl;
+		Logger::error(std::cerr, "I can't found the exact server, Reason => ", e.what());
 	}
 }
 
