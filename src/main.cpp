@@ -24,6 +24,7 @@ void	runServer(Server& server)
 		header = server.recieve(newsocket);
 		if (header.empty() == true)
 			break ;
+		// Logger::debug(std::cout, header, "");
 		Parser::parseHeader(header);
 		
 		if (server.send(newsocket, "HTTP/1.1 200 ok\r\n\r\n<h1>hello world</h1>") == -1)
@@ -59,23 +60,23 @@ void	test(const Location& loca)
 	Logger::debug(std::cerr, "hello form ", "test.");
 }
 
-void	printAllData(Parser& parser)
+void	printAllData(__unused Parser& parser)
 {
 	ServerData servers(parser.getServers());
 	servers.displayServers();
 	try
 	{
-		// ServerModel smodel = servers.getDefaultServer();
-		ServerModel smodel = servers.getServerByServerName("mehdi.com");
+		ServerModel smodel = servers.getDefaultServer();
+		// ServerModel smodel1 = servers.getServerByServerName("mehdi.com");
 		// ServerModel smodel = servers.getServerByPort(8090);
-		// ServerModel::printServerModelInfo(smodel);
+		ServerModel::printServerModelInfo(smodel);
 		String str("");
-		if (smodel.findLocationByPath(smodel.getLocation(), str, "/mehdi/salim/test", test) == false)
+		if (smodel.findLocationByPath(smodel.getLocation(), str, "/", test) == false)
 		{
 			Logger::error(std::cerr, "404 Page Not Found.", "");
 			return ;
 		}
-		// createServer(smodel);
+		createServer(smodel);
 	}
 	catch ( ... )
 	{
@@ -88,12 +89,11 @@ void	testLeaks(char *fileName)
 	try
 	{
 		Parser parser(fileName);
-		Parser parser2(parser);
 		String str("the configuration file");
 		str.append(fileName);
 		Logger::success(std::cout, str, " syntax is ok.");
 		Logger::success(std::cout, str, " test is successfuli.");
-		printAllData(parser2);
+		printAllData(parser);
 	}
 	catch (ParsingException& e)
 	{
@@ -109,6 +109,6 @@ int	main(int ac, char **av)
 		return (1);
 	}
 	testLeaks(av[1]);
-	system("leaks -q webServ");
+	// system("leaks -q webServ");
 	return (0);
 }

@@ -12,6 +12,7 @@ Parser::Parser( void )
 */
 Parser::Parser(const String& _fileName) : fileName(_fileName)
 {
+	// Logger::warn(std::cout, readFile(), "");
 	getFileContent();
 	checkSyntax();
 	splitContentIntoServers();
@@ -94,7 +95,7 @@ void	Parser::checkSyntax( void )
 	{
 		openBrackets += iterBegin->countRepeating('{');
 		openBrackets -= iterBegin->countRepeating('}');
-		if (!iterBegin->compare(0, 7, "server "))
+		if (!iterBegin->compare("server"))
 		{
 			insideServer = !insideServer;
 			iterBegin++;
@@ -102,7 +103,7 @@ void	Parser::checkSyntax( void )
 		}
 		if (insideServer == true)
 		{
-			if (iterBegin->countRepeating('{') || iterBegin->countRepeating('}'))
+			if (iterBegin->contains("location ") == true || iterBegin->countRepeating('{') || iterBegin->countRepeating('}'))
 			{
 				iterBegin++;
 				continue ;
@@ -136,7 +137,7 @@ void	Parser::checkSyntax( void )
 Data	Parser::extractDataFromString(String& line)
 {
 	std::vector<String> vec = line.split();
-	String	key = vec.at(0);
+	String	key = vec.at(0).trim(" \t;");
 	String	value("");
 	for (std::vector<String>::size_type i = 1; i < vec.size(); i++)
 		value.append(" ").append(vec.at(i).trim(" \t;"));
@@ -185,7 +186,9 @@ Location	Parser::getLocations(std::vector<String>::iterator& begin, const std::v
 	GlobalModel model;
 	while (begin < end)
 	{
-		if (!begin->compare(0, 1, "}"))
+		// if (!begin->compare("{"))
+		// 	begin++;
+		if (!begin->compare("}"))
 		{
 			begin++;
 			break ;
@@ -194,12 +197,51 @@ Location	Parser::getLocations(std::vector<String>::iterator& begin, const std::v
 		{
 			String _path = extractDataFromString(*begin).getValue();
 			// maybe push_back throw an exception !!
-			newLocation.push_back(getLocations(++begin, end, _path.trim(" \t{")));
+			newLocation.push_back(getLocations(++begin, end, _path.trim(" \t")));
 		}
 		else
 			model.addData(extractDataFromString(*(begin++)));
 	}
 	return (Location(model, path, newLocation));
+}
+
+String	Parser::readFile()
+{
+	String content;
+	char	buffer[2];
+	bool	isComment = false;
+
+	int fd = open(fileName.c_str(), O_RDONLY);
+	if (fd < 0)
+		exit(0);
+	while (1)
+	{
+		bzero(buffer, 2);
+		ssize_t reader = read(fd, buffer, 1);
+		if (reader != 1)
+			break ;
+		if (isComment == true && buffer[0] == '\n')
+		{
+			isComment = false;
+			content.append(buffer);
+		}
+		else if (buffer[0] == '#')
+		{
+			isComment = true;
+			content.append(buffer);
+		}
+		else if (isComment == false && (buffer[0] == '}' || buffer[0] == '{'))
+		{
+			content.append("\n");
+			content.append(buffer);
+			content.append("\n");
+		}
+		else if (isComment == false && (buffer[0] == ';'))
+			content.append(";\n");
+		else
+			content.append(buffer);
+	}
+	return (content);
 }
 
 /**
@@ -212,17 +254,9 @@ void	Parser::getFileContent( void )
 {
 	String	tmp;
 	size_t	pos;
-	std::ifstream outfile(fileName.c_str());
-	// Check File is opened or not.
-	if (outfile.is_open() == false)
-	{
-		outfile.close();
-		// throw exception with the same nginx message.
-		String message;
-		message.append("webserv: [emerg] open \"").append(fileName).append("\" failed (No such file or directory)");
-		message.append("\nwebserv: configuration file \"").append(fileName).append("\" test failed.");
-		throw (ParsingException(message));
-	}
+	String	str = readFile();
+
+	std::istringstream outfile(str);
 	// read data from file and store it in vector of String.
 	while (!outfile.eof())
 	{
@@ -230,7 +264,6 @@ void	Parser::getFileContent( void )
 		tmp.trim(" \t");
 		if (tmp.size() == 0 || *tmp.begin() == '#')
 			continue ;
-
 		// this part for remove comment inside strings
 		{
 			pos = tmp.find('#');
@@ -240,9 +273,7 @@ void	Parser::getFileContent( void )
 		// pushing data into vector
 		fileContent.push_back(tmp);
 	}
-	outfile.close();
 }
-
 
 std::vector<String>	Parser::getServerConfig(std::vector<String>::iterator& iterBegin, const std::vector<String>::iterator& iterEnd)
 {
@@ -252,22 +283,23 @@ std::vector<String>	Parser::getServerConfig(std::vector<String>::iterator& iterB
 
 	while (iterBegin < iterEnd)
 	{
-		openBrackets += iterBegin->countRepeating('{');
-		openBrackets -= iterBegin->countRepeating('}');
-		if (!openBrackets)
-		{
-			iterBegin++;
-			break ;
-		}
-		if (!iterBegin->compare(0, 7, "server "))
+		if (!iterBegin->compare("server"))
 		{
 			insideServer = !insideServer;
 			iterBegin++;
-			continue ;
 		}
+		openBrackets += iterBegin->countRepeating('{');
+		if (iterBegin->countRepeating('{'))
+			iterBegin++;
+		openBrackets -= iterBegin->countRepeating('}');
+		if (!openBrackets)
+			break ;
 		if (insideServer == true)
-			server.push_back(iterBegin->trim(" \t"));
-		iterBegin++;
+		{
+			String s = iterBegin->trim(" \t");
+			server.push_back(s);
+			iterBegin++;
+		}
 	}
 	return server;
 }
@@ -279,15 +311,17 @@ void	Parser::parsingFile(std::vector<String> content)
 	std::vector<String>::iterator iEnd = content.end();
 	while (iBegin < iEnd)
 	{
-		if (iBegin->compare(0, 9, "location "))
+		if (iBegin->compare(0, 9, "location ")) // Not A Location Part
 		{
 			server.addData(extractDataFromString(*iBegin));
 			iBegin++;
 		}
-		else
+		else // Location Part
 		{
 			String _path = extractDataFromString(*iBegin).getValue();
-			server.addLocation(getLocations(++iBegin, iEnd, _path.trim(" {")));
+			server.addLocation(getLocations(++iBegin, iEnd, _path.trim(" \t")));
+			String str("");
+			// Location::printAllLocations(server.getLocation(), str);
 		}
 	}
 	servers.push_back(server);
@@ -298,7 +332,10 @@ void	Parser::splitContentIntoServers( void )
 	std::vector<String>::iterator begin = fileContent.begin();
 	const std::vector<String>::iterator end = fileContent.end();
 	while (begin < end)
+	{
 		serversContents.push_back(getServerConfig(begin, end));
+		begin++;
+	}
 }
 
 void	Parser::printServerModel(const ServerModel& server)
@@ -311,7 +348,6 @@ void	Parser::printServerModel(const ServerModel& server)
 		b++;
 	}
 }
-
 
 void	Parser::getFinalResualt( void )
 {
@@ -326,7 +362,6 @@ void	Parser::getFinalResualt( void )
 
 std::vector<Data>	Parser::parseHeader(const String& header)
 {
-	(void)header;
 	std::vector<Data> vec;
 	std::istringstream	iss(header);
 	String			tmp, key, value;
@@ -335,7 +370,6 @@ std::vector<Data>	Parser::parseHeader(const String& header)
 		std::getline(iss, tmp, '\n');
 		if (tmp.length() == 0 || tmp[0] == '\r')
 			continue ;
-		Logger::info(std::cout, tmp, "");
 		std::vector<String> split = tmp.split(':');
 		if (split.empty() == true)
 			continue ;

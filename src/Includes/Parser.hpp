@@ -5,6 +5,8 @@
 #include <fstream>
 #include "Location.hpp"
 #include <cctype>
+#include <unistd.h>
+#include <fcntl.h>
 #include "ParsingException.hpp"
 #include "ServerModel.hpp"
 
@@ -38,6 +40,7 @@ class Parser
 		void	splitContentIntoServers( void );
 		void	getFinalResualt( void );
 		void	checkSyntax( void );
+		String	readFile();
 };
 
 #endif
