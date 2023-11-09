@@ -22,9 +22,24 @@ String& String::operator=(const String& str)
 	return (*this);
 }
 
+bool	String::equal(const String& value) const
+{
+	if (!compare(value))
+		return (true);
+	return (false);
+}
+
+bool	String::contains(const String& str) const
+{
+	if (find(str) != npos)
+		return (true);
+	return (false);
+}
 
 String&	String::leftTrim(const String& characters)
 {
+	if (length() == 0)
+		return (*this);
 	iterator iterBegin = begin();
 	iterator iterEnd = end();
 
@@ -41,6 +56,8 @@ String&	String::leftTrim(const String& characters)
 
 String&	String::rightTrim(const String& characters)
 {
+	if (length() == 0)
+		return (*this);
 	iterator iterBegin = begin();
 	iterator iterEnd = end();
 
@@ -57,6 +74,8 @@ String&	String::rightTrim(const String& characters)
 
 String&	String::trim(const String& characters)
 {
+	if (length() == 0)
+		return (*this);
 	leftTrim(characters);
 	rightTrim(characters);
 	return (*this);
@@ -113,4 +132,21 @@ int	String::countRepeating(const char& c)
 		iBeg++;
 	}
 	return (counter);
+}
+
+
+String	String::convertVectorToString(const std::vector<String>& strings, unsigned int begin = 0, unsigned int len = 1, char separator = 0)
+{
+	String dest;
+	
+	if (len + begin > strings.size())
+		len = (unsigned int)strings.size();
+	while (begin <= len)
+	{
+		dest.append(strings[begin]);
+		begin++;
+		if (separator != 0 && begin <= len)
+			dest.append(&separator);
+	}
+	return (dest);
 }
