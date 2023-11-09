@@ -57,7 +57,7 @@ Server::Server(const Server& copy)
 
 Server::~Server( void ) throw()
 {
-	//close(socketFd);
+	// close(socketFd);
 }
 
 Server&	Server::operator=(const Server& target)
