@@ -2,7 +2,8 @@
 #define DATA_HPP
 
 #include <iostream>
-#include "../Utils/String.hpp"
+#include "String.hpp"
+#include "Logger.hpp"
 
 class Data
 {
@@ -15,7 +16,8 @@ class Data
 		void	setValue(const String& Value);
 		const String&	getKey( void ) const;
 		const String&	getValue( void ) const;
-
+		
+		static	void	printData(const Data& data, String&);
 };
 
 #endif
