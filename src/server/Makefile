@@ -5,6 +5,7 @@ XXCFLAGS = -Wall -Wextra -Werror
 
 SRC =	main.cpp\
 		server.cpp\
+		parssingRequist.cpp\
 
 OBJ = $(SRC:.cpp=.o)
 

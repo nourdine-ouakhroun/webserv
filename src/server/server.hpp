@@ -6,22 +6,26 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <netdb.h>
+#include <map>
 #include <unistd.h>
+#include<vector>
 #include <arpa/inet.h>
+#include<vector>
+#include <sys/poll.h>
 #include <sys/select.h>
 #include <cstring>
+using namespace std;
 class	ServerRun
 {
 	public :
 		ServerRun();
-		void bindConection(int Port);
-		void listenSocket();
-		void acceptRquist();
+		int Newsocket();
+		void bindConection(int Port, int sreverfd);
+		void listenSocket(int serverfd);
 		~ServerRun();
 	private :
-		int socketfd;
-		int newfd;
-		struct sockaddr_in addressSocketStruct;
 
 };
+
+void acceptRquist( std::vector<int> servers );
 #endif
