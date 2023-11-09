@@ -5,6 +5,7 @@
 #include <fstream>
 #include "Location.hpp"
 #include <cctype>
+#include <cstring>
 #include <unistd.h>
 #include <fcntl.h>
 #include "ParsingException.hpp"

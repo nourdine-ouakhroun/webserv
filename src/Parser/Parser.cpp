@@ -213,10 +213,10 @@ String	Parser::readFile()
 
 	int fd = open(fileName.c_str(), O_RDONLY);
 	if (fd < 0)
-		exit(0);
+		throw (ParsingException("Failed to open File."));
 	while (1)
 	{
-		bzero(buffer, 2);
+		memset(buffer, 0, 2);
 		ssize_t reader = read(fd, buffer, 1);
 		if (reader != 1)
 			break ;

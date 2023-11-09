@@ -60,7 +60,7 @@ void	test(const Location& loca)
 	Logger::debug(std::cerr, "hello form ", "test.");
 }
 
-void	printAllData(__unused Parser& parser)
+void	printAllData(Parser& parser)
 {
 	ServerData servers(parser.getServers());
 	try
