@@ -36,7 +36,7 @@ bool	String::contains(const String& str) const
 	return (false);
 }
 
-String&	String::leftTrim(__unused const String& characters)
+String&	String::leftTrim(const String& characters)
 {
 	if (length() == 0)
 		return (*this);
@@ -54,7 +54,7 @@ String&	String::leftTrim(__unused const String& characters)
 	return (*this);
 }
 
-String&	String::rightTrim(__unused const String& characters)
+String&	String::rightTrim(const String& characters)
 {
 	if (length() == 0)
 		return (*this);

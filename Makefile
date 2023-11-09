@@ -1,5 +1,6 @@
 NAME	=	webServ
 
+
 SRCS	=	src/main.cpp \
 		src/Parser/Parser.cpp \
 		src/Parser/Location.cpp \
