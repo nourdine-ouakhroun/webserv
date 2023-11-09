@@ -37,8 +37,9 @@ void	ServerData::displayServers( void )
 	}
 }
 
-ServerModel	ServerData::getServerByServerName(const String& serverName)
+std::vector<ServerModel>	ServerData::getServersByServerName(const String& serverName)
 {
+	std::vector<ServerModel>	serv;
 	std::vector<ServerModel>::iterator iterBegin = servers.begin();
 	std::vector<ServerModel>::iterator iterEnd = servers.end();
 	while (iterBegin < iterEnd)
@@ -49,25 +50,26 @@ ServerModel	ServerData::getServerByServerName(const String& serverName)
 			String str = value.at((std::vector<Data>::size_type)i).getValue();
 			std::vector<String> values = str.split();
 			if (find(values.begin(), values.end(), serverName) != values.end())
-				return (*iterBegin);
+				serv.push_back(*iterBegin);
 		}
 		iterBegin++;
 	}
-	throw (std::exception());
+	return (serv);
 }
 
-ServerModel	ServerData::getServerByPort(const unsigned short& port)
+std::vector<ServerModel>	ServerData::getServersByPort(const unsigned short& port)
 {
+	std::vector<ServerModel>	serv;
 	std::vector<ServerModel>::iterator iterBegin = servers.begin();
 	std::vector<ServerModel>::iterator iterEnd = servers.end();
 	while (iterBegin < iterEnd)
 	{
 		std::vector<Data> value = iterBegin->getData("listen");
 		if (value.empty() == false && (unsigned short)std::strtol(value.begin()->getValue().c_str(), NULL, 10) == port)
-			return (*iterBegin);
+			serv.push_back(*iterBegin);
 		iterBegin++;
 	}
-	throw (std::exception());
+	return (serv);
 }
 
 const std::vector<ServerModel>&	ServerData::getAllServers()
@@ -77,6 +79,7 @@ const std::vector<ServerModel>&	ServerData::getAllServers()
 
 ServerModel	ServerData::getDefaultServer( void )
 {
+	std::vector<ServerModel>	serv;
 	std::vector<ServerModel>::iterator iterBegin = servers.begin();
 	std::vector<ServerModel>::iterator iterEnd = servers.end();
 	while (iterBegin < iterEnd)
@@ -87,16 +90,13 @@ ServerModel	ServerData::getDefaultServer( void )
 			String str = value.at((std::vector<Data>::size_type)i).getValue();
 			std::vector<String> values = str.split();
 			if (find(values.begin(), values.end(), "default_server") != values.end())
-				return (*iterBegin);
-			// if (value.at((std::vector<Data>::size_type)i).getValue().contains("default_server") == true)
+				serv.push_back(*iterBegin);
 		}
-		// std::vector<Data> value = iterBegin->getData("listen");
-		// for (int i = 0; i < (int)value.size(); i++)
-		// 	if (value.at(i).getValue().contains("default_server") == true)
-		// 		return (*iterBegin);
 		iterBegin++;
 	}
-	throw (std::exception());
+	if (serv.size() > 1)
+		throw (ServerException("Duplicate default server."));
+	return (*serv.begin());
 }
 
 bool		ServerData::checkDuplicateServer( void )
