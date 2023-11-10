@@ -3,6 +3,13 @@
 #include "ServerData.hpp"
 #include <unistd.h>
 
+void	getKeys()
+{
+	String str(KEYS);
+	std::vector<String> keys = str.split(' ');
+	Logger::info(std::cout, str, "\n");
+}
+
 void	runServer(Server& server)
 {
 	int res, fd, newsocket;
