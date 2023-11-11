@@ -1,138 +1,156 @@
-#include "Server.hpp"
+#include"Server.hpp"
 
-Server::Server( void )
+ServerRun::ServerRun(ServerData smodel)
 {
-	socketLen = sizeof(socketData);
+	this->serves = smodel;
 }
-
-bool	Server::createNewSocket(unsigned short port)
+int ServerRun::Newsocket()
 {
-	int nSocket = socket(AF_INET, SOCK_STREAM, 0);
-	if (nSocket < 0)
-		return (false);
-	struct sockaddr_in socketData;
-	bzero(&socketData, socketLen);
-	socketData.sin_port = htons(port);
-	socketData.sin_family = AF_INET;
-	socketData.sin_addr.s_addr = INADDR_ANY;
-	if (bind(nSocket, (struct sockaddr *)&socketData, socketLen) < 0 || listen(nSocket, 5) < 0)
+	int socketfd = socket(PF_INET, SOCK_STREAM, 0);
+	if(socketfd < 0)
 	{
-		nSocket = -1;
-		close(nSocket);
-		return (false);
+		std::cout << "error : socket conection not open ." << std::endl;
+		exit(1);
 	}
-	struct pollfd pFd;
-	pFd.fd = nSocket;
-	pFd.events = POLLIN | POLLOUT;
-	pollFds.push_back(pFd);
-	return (true);
+	int option = 1;
+	setsockopt(socketfd, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(int));
+	std::cout << socketfd << std::endl;
+	return socketfd;
 }
 
-Server::Server(const unsigned short &_port)
+void ServerRun::ParssingRecuistContent(std::string ContentRequist)
 {
-	socketLen = sizeof(socketData);
-	port = _port;
-	int socketFd = socket(AF_INET, SOCK_STREAM, 0);
-	if (socketFd < 0)
-		throw (std::exception());
-	bzero(&socketData, socketLen);
-	socketData.sin_port = htons(port);
-	socketData.sin_family = AF_INET;
-	socketData.sin_addr.s_addr = INADDR_ANY;
-	if (bind(socketFd, (struct sockaddr *)&socketData, socketLen) < 0 || listen(socketFd, 5) < 0)
+	ParssingRequist	Req(ContentRequist);
+	std::vector<std::string>	RequistContentASplite;
+	std::vector<Data> _data;
+	RequistContentASplite	=	Req.SplitBynewLine();
+	
+	for(size_t i = 1; i < RequistContentASplite.size(); i++)
 	{
-		close(socketFd);
-		throw (std::exception());
+		try {_data.push_back(Req.SpliteEvryLine(RequistContentASplite.at(i)));}
+		catch(const std::exception& e){}
 	}
-	struct pollfd pFd;
-	pFd.fd = socketFd;
-	pFd.events = POLLIN | POLLOUT;
-	pollFds.push_back(pFd);
-}
+	String str(RequistContentASplite[0]);
+	std::cout << str.split().at(1) << std::endl;
+	// for (size_t i = 0; i < _data.size(); i++)
+	// {
+	// 	std::cout <<  "key \t[==>" << _data.at(i).getKey() << "<==]";
+	// 	std::cout <<  "valeu\t[==>" << _data.at(i).getValue() << "<==]" << std::endl;
+	// }
 
-Server::Server(const Server& copy)
-{
-	*this = copy;
-}
 
-Server::~Server( void ) throw()
-{
-	// close(socketFd);
-}
 
-Server&	Server::operator=(const Server& target)
+	std::string	valeu;
+	size_t		position;
+
+	position = valeu.find(':');
+	valeu = _data.at(0).getValue();
+
+	std::vector<ServerModel> smodel = serves.getServersByPort((unsigned short)strtol(valeu.substr(position + 1).c_str(), NULL, 10));
+
+	// ServerModel::printServerModelInfo(smodel[0]);
+	// std::vector<Data> ports = smodel.getData("listen");
+}
+void ServerRun::HandelRequist(struct pollfd	*struct_fds ,size_t	i)
 {
-	if (this != &target)
+	std::string str = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<h1>tl9na sali dakchi</h1>";
+	ssize_t				bytes;
+	char				req[2024];
+	int					newfd;
+	std::string			ContentRequist;
+
+	if(struct_fds[i].revents == POLLOUT || struct_fds[i].revents ==  POLLIN)
 	{
-		pollFds = target.pollFds;
-		socketData = target.socketData;
-		socketLen = target.socketLen;
-		port = target.port;
+		ContentRequist.clear();
+		bytes = 0;
+		newfd = accept(struct_fds[i].fd, (struct sockaddr *)NULL, NULL);
+
+		if(newfd < 0)
+		{
+			std::cout << "error : accpet" << std::endl;	
+			exit(0);
+		}
+		
+		bzero(req, 2024);
+		while((bytes = recv(newfd, req, 2023, 0)) != 0)
+		{
+			ContentRequist.append(req);
+			bzero(req, 2024);
+			if (bytes < 2023)
+				break;
+		}
+		if(bytes < 0)
+			throw std::runtime_error("read was filed");
+		ParssingRecuistContent(ContentRequist);
+		write(newfd,str.c_str(),strlen(str.c_str()));
+		close(newfd);
 	}
-	return (*this);
 }
 
-int		Server::waitingRequest( void )
+void ServerRun::acceptRquist( std::vector<int> servers ) 
 {
-	if (pollFds.empty() == true)
-		return (-1);
-	return (static_cast<int>(poll(&pollFds[0], (unsigned int)pollFds.size(), 10000)));
-}
-
-int		Server::getAvailabeFD( void )
-{
-	std::vector<struct pollfd>::iterator iterBegin = pollFds.begin();
-	std::vector<struct pollfd>::iterator iterEnd = pollFds.end();
-	while (iterBegin < iterEnd)
+	struct pollfd	struct_fds[servers.size()];
+	int pollValeu;
+	memset(struct_fds, 0 , sizeof(struct_fds));
+	for (size_t	i = 0; i < servers.size(); i++)
 	{
-		if ((iterBegin->revents & POLLIN) || (iterBegin->revents & POLLOUT))
-			return (iterBegin->fd);
-		iterBegin++;
+		struct_fds[i].fd	 =	servers[i];
+		struct_fds[i].events =	POLLOUT | POLLIN;
 	}
-	return (-1);
-}
-
-int 	Server::accept(int targetSocket)
-{
-	int newSocket = (int)::accept(
-						targetSocket,
-						(struct sockaddr *)&socketData, 
-						(socklen_t *)&socketLen
-					);
-	if (newSocket < 0)
-		return (errorNumber);
-	return (newSocket);
-}
-
-/*
-int	checkIsAlreadyExist(int socketId)
-{
-	for ()
-}*/
-
-String	Server::recieve(int socket)
-{
-	String	buffer;
-	char	tmp[100];
-
 	while (1)
 	{
-		bzero(tmp, 100);
-		int nBytes;
-		if ((nBytes = (int)::recv(socket, tmp, 99, 0)) < 0)
-			break ;
-		buffer.append(tmp);
-		if (nBytes < 99)
-			break ;
+		pollValeu = poll(struct_fds, (unsigned int)servers.size(), 6000); 
+		if (pollValeu < 0)
+		{
+			std::cout << "error : pull" << std::endl;
+			exit(1);
+		}
+		if (pollValeu == 0)
+			continue ;
+		for(size_t i = 0; i < servers.size(); i++)
+			HandelRequist(struct_fds, i);
 	}
-	return (buffer);
 }
-
-int	Server::send(int socket, String response)
+void ServerRun::RunAllServers()
 {
+	std::vector<int> servers;
+	ServerModel smodel = serves.getDefaultServer();
+	std::vector<Data> ports = smodel.getData("listen");
+	for(size_t i = 0;i < ports.size();i++)
+	{
+		int serverfd = this->Newsocket();
+		std::cout << ports[i].getValue() << std::endl;
+		this->bindConection((int)strtol(ports[i].getValue().c_str(), NULL, 10), serverfd); 
+		this->listenSocket(serverfd);
+		servers.push_back(serverfd);
+	}
+	this->acceptRquist( servers );
+}
+void ServerRun::bindConection(int port, int socketfd)
+{
+	struct sockaddr_in addressSocketStruct;
+	bzero(&addressSocketStruct, sizeof(addressSocketStruct));
+	addressSocketStruct.sin_family = PF_INET;
+	addressSocketStruct.sin_port = htons(port);
+	addressSocketStruct.sin_addr.s_addr = INADDR_ANY;
 
-	int	nBit = (int)::send(socket, response.c_str(), response.length(), 0);
-	if (nBit < 0)
-		return (errorNumber);
-	return (nBit);
+	int bindr =  bind(socketfd,	(struct sockaddr *)&addressSocketStruct, sizeof(addressSocketStruct));
+	if(bindr < 0)
+	{
+		std::cout << "error : the conectin not binded ." << std::endl;
+		exit(0);
+	}
+}
+void ServerRun::listenSocket(int socketfd)
+{
+	int lestenr = listen(socketfd, 10);
+	if(lestenr < 0)
+	{
+		std::cout << "error : listen" << std::endl;
+		exit(0);
+	}
+}
+ServerRun::~ServerRun()
+{
+	//close(socketfd);
 }
