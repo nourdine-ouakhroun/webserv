@@ -17,6 +17,7 @@ Parser::Parser(const String& _fileName) : fileName(_fileName)
 	checkSyntax();
 	splitContentIntoServers();
 	getFinalResualt();
+	checkKeys();
 }
 
 /**
@@ -382,5 +383,19 @@ std::vector<Data>	Parser::parseHeader(const String& header)
 	return (vec);
 }
 
-
+void	Parser::checkKeys( void )
+{
+	std::vector<String> keys = String(KEYS).split(' ');
+	for (unsigned int i = 0; i < (unsigned int)servers.size(); i++)
+	{
+		std::vector<Data> _data = servers.at((unsigned int)i).getAllData();
+		for (unsigned int j = 0; j < (unsigned int)_data.size(); j++)
+			if (find(keys.begin(), keys.end(), _data.at(j).getKey()) == keys.end())
+			{
+				String message("Invalid Key '");
+				message.append(_data.at(j).getKey()).append("'.");
+				throw (ParsingException(message));
+			}
+	}
+}
 
