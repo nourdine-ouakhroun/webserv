@@ -242,6 +242,7 @@ String	Parser::readFile()
 		else
 			content.append(buffer);
 	}
+	close(fd);
 	return (content);
 }
 
