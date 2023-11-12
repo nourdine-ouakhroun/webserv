@@ -19,7 +19,7 @@ HEADERS	=	src/Includes/*.hpp
 
 
 CPP	=	c++
-CPPFLAGS	=	-Wall -Wextra -Werror -std=c++98 -Wconversion  -I./src/Includes# -fsanitize=address
+CPPFLAGS	=	-Wall -Wextra -Werror -std=c++98 -Wconversion -O3 -I./src/Includes# -fsanitize=address
 
 BIN		=	bin
 

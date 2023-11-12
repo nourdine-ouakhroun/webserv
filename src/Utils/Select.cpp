@@ -56,7 +56,6 @@ void    Select::fd_zero( void )
 
 void    Select::fd_set(int fd)
 {
-    // std::cout << "nfds = [" << nfds << "]  | fd = {" << fd << "}" << std::endl; 
     FD_SET(fd, &set);
     nfds = fd;
 }
