@@ -3,44 +3,45 @@
 #include "ServerData.hpp"
 #include <unistd.h>
 
-void	runServer(Server& __unused server, std::vector<int> port)
+void	runServerByPoll(Server& __unused server, __unused std::vector<int> port)
 {
-	Select	tmpSet(server.fds);
 	while (true)
 	{
-		tmpSet = server.fds;
-		int selectReturn = tmpSet.waitingRequest();
-		if (!selectReturn)
-			continue ;
-		if (selectReturn == -1)
+		Poll	tmpPoll(server.fds);
+		int pollReturn = tmpPoll.waitingRequest();
+		if (pollReturn < 0)
 			break ;
-		for(int i = 0; i < tmpSet.getNumberOfFds() + 1; i++)
+		if (pollReturn == 0)
+			continue ;
+		for (int i = 0; i < (int)tmpPoll.fdsSize(); i++)
 		{
-			if (tmpSet.fd_isset(i) == true)
+			int readyFd = tmpPoll.getReadyFd(i);
+			if (readyFd > -1)
 			{
-				if (find(port.begin(), port.end(), i) != port.end())
+				if (find(port.begin(), port.end(), readyFd) != port.end())
 				{
-					int newClient = server.accept(i);
+					int newClient = server.accept(readyFd);
 					if (newClient < 0)
 						break ;
-					server.fds.fd_set(newClient);
-					if (newClient > tmpSet.getNumberOfFds())
-						tmpSet.setNumberOfFds(newClient);
-					Logger::info(std::cerr, "new connection : ", newClient);
+					server.fds.push_fd(newClient);
 				}
 				else
 				{
-					String header = server.recieve(i);
+					String header = server.recieve(readyFd);
+					if (header.empty() == true)
+						continue ;
 					Logger::debug(std::cout, header, "");
-					if (server.send(i, "HTTP/1.1 200 ok\r\n\r\n<h1>hello world</h1>") == -1)
+					if (server.send(readyFd, "HTTP/1.1 200 ok\r\n\r\n<h1>hello world</h1>") == -1)
 							Logger::error(std::cerr, "Send Failed.", "");
-					close(i);
-					server.fds.fd_clear(i);
+					close(readyFd);
+					tmpPoll.erase_fd(readyFd);
+					server.fds.erase_fd(readyFd);
 					
-				} // end of else
-			} // end of if
-		} // end of for
-	} // end of while
+				}
+			}
+		}
+		
+	}
 }
 
 void	createServer(const ServerModel& serv)
@@ -61,7 +62,7 @@ void	createServer(const ServerModel& serv)
 		ports.push_back(newSocket);
 		ibegin++;
 	}
-	runServer(server, ports);
+	runServerByPoll(server, ports);
 }
 
 void	test(const Location& loca)
@@ -116,3 +117,49 @@ int	main(int ac, char **av)
 	// system("leaks -q webServ");
 	return (0);
 }
+
+
+
+
+
+
+// void	runServerBySelect(Server& __unused server, std::vector<int> port)
+// {
+// 	Select	tmpSet(server.fds);
+// 	while (true)
+// 	{
+// 		tmpSet = server.fds;
+// 		int selectReturn = tmpSet.waitingRequest();
+// 		if (!selectReturn)
+// 			continue ;
+// 		if (selectReturn == -1)
+// 			break ;
+// 		for(int i = 0; i < tmpSet.getNumberOfFds() + 1; i++)
+// 		{
+// 			if (tmpSet.fd_isset(i) == true)
+// 			{
+// 				if (find(port.begin(), port.end(), i) != port.end())
+// 				{
+// 					int newClient = server.accept(i);
+// 					if (newClient < 0)
+// 						break ;
+// 					server.fds.fd_set(newClient);
+// 					if (newClient > tmpSet.getNumberOfFds())
+// 						tmpSet.setNumberOfFds(newClient);
+// 					Logger::info(std::cerr, "new connection : ", newClient);
+// 				}
+// 				else
+// 				{
+// 					String header = server.recieve(i);
+// 					Logger::debug(std::cout, header, "");
+// 					if (server.send(i, "HTTP/1.1 200 ok\r\n\r\n<h1>hello world</h1>") == -1)
+// 							Logger::error(std::cerr, "Send Failed.", "");
+// 					close(i);
+// 					server.fds.fd_clear(i);
+					
+// 				} // end of else
+// 			} // end of if
+// 		} // end of for
+// 	} // end of while
+// }
+

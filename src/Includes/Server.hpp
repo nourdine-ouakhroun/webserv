@@ -7,10 +7,10 @@
 #include <cstring>
 #include <unistd.h>
 #include "String.hpp"
-#include "Select.hpp"
+#include "Poll.hpp"
 #include "ServerException.hpp"
-#include <sys/poll.h>
-#include <sys/select.h>
+// #include <sys/poll.h>
+// #include <sys/select.h>
 #include <fcntl.h>
 
 class Server
@@ -22,7 +22,7 @@ class Server
 
 
 	public :
-		Select	fds;
+		Poll	fds;
 		Server( void );
 		Server(const unsigned short &_port);
 		Server(const Server& copy);
@@ -33,7 +33,7 @@ class Server
 		int		accept(int targetSocket);
 		String	recieve(int socket);
 		int		send(int socket, String response);
-		Select	getFds( void ) const
+		Poll	getFds( void ) const
 		{
 			return (fds);
 		};
