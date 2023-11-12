@@ -23,7 +23,7 @@ class	ServerModel : public GlobalModel
 						const std::vector<Location>& locations,
 						String& destPath,
 						const String& srcPath,
-						void (*to_do) (const Location&));
+						void (*to_do) (const Location&, String&), String& returnValue);
 
 		static	void	printServerModelInfo(const ServerModel& serverModel);
 		
