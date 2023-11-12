@@ -18,7 +18,36 @@ int ServerRun::Newsocket()
 	return socketfd;
 }
 
-void ServerRun::ParssingRecuistContent(std::string ContentRequist)
+void	print(const Location& loca, String& qq)
+{
+	std::string respond;
+	char req[2024];
+	String fullPath;
+	fullPath.append(loca.getData("root").at(0).getValue()).append(loca.getPath()).append("/");
+	String saa(loca.getData("index").at(0).getValue());
+	std::vector<String> indexs = saa.split();
+	for (size_t i = 0; i < indexs.size(); i++)
+	{
+		String tmp(fullPath);
+		tmp.append(indexs[i]);
+		int fd = open(tmp.c_str() , O_RDONLY);
+		if(fd < 0)
+			continue;
+		bzero(req, 2024);
+		ssize_t bytes = 0;
+		while((bytes = read(fd, req, 2023)) != 0)
+		{
+			respond.append(req);
+			bzero(req, 2024);
+			if (bytes < 2023)
+				break;
+		}
+		break;
+	}
+	qq = respond;
+}
+
+String	ServerRun::ParssingRecuistContent(std::string ContentRequist)
 {
 	ParssingRequist	Req(ContentRequist);
 	std::vector<std::string>	RequistContentASplite;
@@ -30,30 +59,38 @@ void ServerRun::ParssingRecuistContent(std::string ContentRequist)
 		try {_data.push_back(Req.SpliteEvryLine(RequistContentASplite.at(i)));}
 		catch(const std::exception& e){}
 	}
-	String str(RequistContentASplite[0]);
-	std::cout << str.split().at(1) << std::endl;
-	// for (size_t i = 0; i < _data.size(); i++)
-	// {
-	// 	std::cout <<  "key \t[==>" << _data.at(i).getKey() << "<==]";
-	// 	std::cout <<  "valeu\t[==>" << _data.at(i).getValue() << "<==]" << std::endl;
-	// }
-
 
 
 	std::string	valeu;
 	size_t		position;
 
-	position = valeu.find(':');
 	valeu = _data.at(0).getValue();
+	position = valeu.find(':');
 
+	String str(RequistContentASplite[0]);
+	// std::cout << str.split().at(2) << std::endl;
+	// std::cout << valeu.substr(position + 1).c_str() << std::endl;
 	std::vector<ServerModel> smodel = serves.getServersByPort((unsigned short)strtol(valeu.substr(position + 1).c_str(), NULL, 10));
-
+	if (smodel.empty() == true)
+		return "";
+	String sa("");
+	String qq;
+	try
+	{
+		smodel[0].findLocationByPath(smodel[0].getLocation(), sa, str.split().at(1), print, qq);
+		std::cout << qq << std::endl;
+	}
+	catch(...)
+	{
+		
+	}
+	return (qq);
 	// ServerModel::printServerModelInfo(smodel[0]);
 	// std::vector<Data> ports = smodel.getData("listen");
 }
 void ServerRun::HandelRequist(struct pollfd	*struct_fds ,size_t	i)
 {
-	std::string str = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<h1>tl9na sali dakchi</h1>";
+	std::string str = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
 	ssize_t				bytes;
 	char				req[2024];
 	int					newfd;
@@ -81,8 +118,9 @@ void ServerRun::HandelRequist(struct pollfd	*struct_fds ,size_t	i)
 		}
 		if(bytes < 0)
 			throw std::runtime_error("read was filed");
-		ParssingRecuistContent(ContentRequist);
-		write(newfd,str.c_str(),strlen(str.c_str()));
+		String ss = ParssingRecuistContent(ContentRequist);
+		str.append(ss);
+		write(newfd,str.c_str(),str.length());
 		close(newfd);
 	}
 }
