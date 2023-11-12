@@ -46,7 +46,7 @@ void	ServerModel::addLocation(Location _location)
 bool	ServerModel::findLocationByPath(
 						const std::vector<Location>& locations,
 						String& destPath, const String& srcPath,
-						void (*to_do) (const Location&))
+						void (*to_do) (const Location&, String&), String& returnValue)
 {
 	std::vector<Location>::const_iterator ibegin = locations.begin();
 	std::vector<Location>::const_iterator iend = locations.end();
@@ -57,12 +57,12 @@ bool	ServerModel::findLocationByPath(
 		tmpPath.append(ibegin->getPath());
 		if (!srcPath.compare(tmpPath) && tmpPath.length() == srcPath.length())
 		{
-			to_do(*ibegin);
+			to_do(*ibegin, returnValue);
 			isDone = true;
 		}
 		if (isDone)
 			return (true);
-		if (ibegin->getInnerLocation().empty() == false && findLocationByPath(ibegin->getInnerLocation(), tmpPath, srcPath, to_do) == true)
+		if (ibegin->getInnerLocation().empty() == false && findLocationByPath(ibegin->getInnerLocation(), tmpPath, srcPath, to_do, returnValue) == true)
 			return (true);
 		ibegin++;
 	}

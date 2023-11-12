@@ -24,7 +24,7 @@ class	ServerRun
 		int		Newsocket();
 		void	bindConection(int	Port, int	sreverfd);
 		void	HandelRequist(struct pollfd	*struct_fds ,size_t	i);
-		void	ParssingRecuistContent( std::string );
+		String	ParssingRecuistContent( std::string );
 		void	acceptRquist( std::vector<int>	servers );
 		void	listenSocket(int	serverfd);
 		void	RunAllServers();
