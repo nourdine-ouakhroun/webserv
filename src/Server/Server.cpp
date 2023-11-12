@@ -22,7 +22,7 @@ int	Server::createNewSocket(unsigned short port)
 		nSocket = -1;
 		return (-1);
 	}
-	fds.fd_set(nSocket);
+	fds.push_fd(nSocket);
 	return (nSocket);
 }
 
@@ -43,7 +43,7 @@ Server::Server(const unsigned short &_port)
 		close(socketFd);
 		throw (ServerException("bind faild."));
 	}
-	fds.fd_set(socketFd);
+	fds.push_fd(socketFd);
 }
 
 Server::Server(const Server& copy)
