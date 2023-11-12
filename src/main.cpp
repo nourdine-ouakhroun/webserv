@@ -3,7 +3,64 @@
 #include "ServerData.hpp"
 #include <unistd.h>
 
-void	runServerByPoll(Server& __unused server, __unused std::vector<int> port)
+
+String	readFile(const String& path)
+{
+	String content;
+	char	buffer[2];
+
+	int fd = open(path.c_str(), O_RDONLY);
+	if (fd < 0)
+		return (content);
+	while (1)
+	{
+		memset(buffer, 0, 2);
+		ssize_t reader = read(fd, buffer, 1);
+		content.append(buffer);
+		if (reader != 1)
+			break ;
+	}
+	close(fd);
+	return (content);
+}
+
+template <typename T>
+void	to_do(const Location& loca, T& value)
+{
+	String file(loca.getData("root").at(0).getValue());
+	file.append(loca.getPath());
+			 /* |   check if the path ended with /   | */
+	file.append((file.end() - 1)[0] == '/' ? "" : "/");
+	std::vector<String> indexs = String(loca.getData("index").at(0).getValue()).split();
+	for (size_t i = 0; i < indexs.size(); i++)
+	{
+		String tmp(file);
+		// String name(indexs.at(i).getValue());
+		tmp.append(indexs.at(i));
+		Logger::info(std::cout, tmp, "");
+		value = readFile(tmp);
+		if (value.length() != 0)
+			return ;
+	}
+	value.append("<h1>404 Page Not Found.</h1>");
+	
+}
+
+String	handler(const ServerModel& servModel, std::vector<Data> header)
+{
+	GlobalModel model(header);
+	std::vector<Data> hosts = model.getData("Method");
+	String tmp(hosts.begin()->getValue());
+	String path(tmp.split()[1]);
+	path.rightTrim("/").trim(" \t\r\n");
+	String str;
+	String	content;
+	if (ServerModel::findLocationByPath(servModel.getLocation(), str, path, to_do, content) == false)
+		content.append("<h1>404 Page Not Found.</h1>");
+	return (content);
+}
+
+void	runServerByPoll(const ServerModel& serv, Server& __unused server, __unused std::vector<int> port)
 {
 	while (true)
 	{
@@ -30,21 +87,21 @@ void	runServerByPoll(Server& __unused server, __unused std::vector<int> port)
 					String header = server.recieve(readyFd);
 					if (header.empty() == true)
 						continue ;
-					Logger::debug(std::cout, header, "");
-					if (server.send(readyFd, "HTTP/1.1 200 ok\r\n\r\n<h1>hello world</h1>") == -1)
+						std::cout << header << std::endl;
+					String content("HTTP/1.1 200 ok\r\n\r\n");
+					content.append(handler(serv, Parser::parseHeader(header)));
+					if (server.send(readyFd, content) == -1)
 							Logger::error(std::cerr, "Send Failed.", "");
 					close(readyFd);
 					tmpPoll.erase_fd(readyFd);
 					server.fds.erase_fd(readyFd);
-					
 				}
 			}
 		}
-		
 	}
 }
 
-void	createServer(const ServerModel& serv)
+Server	createServer(const ServerModel& serv)
 {
 	std::vector<int> ports;
 	std::vector<Data> data = serv.getData("listen");
@@ -56,32 +113,25 @@ void	createServer(const ServerModel& serv)
 	{
 		unsigned short port = (unsigned short)strtol(ibegin->getValue().c_str(), NULL, 10);
 		Logger::debug(std::cout, "Port : ", port);
+
 		newSocket = server.createNewSocket(port);
 		if (newSocket == -1)
 			std::cout << "can not open the port : " << port << std::endl;
 		ports.push_back(newSocket);
 		ibegin++;
 	}
-	runServerByPoll(server, ports);
+	runServerByPoll(serv, server, ports);
+	for (size_t i = 0; i < ports.size(); i++)
+		close(ports.at(i));
+	return (server);
 }
 
-void	test(const Location& loca)
-{
-	std::vector<Data> locationData = loca.getAllData();
-	String str("");
-	for (int i = 0; i < (int)locationData.size(); i++)
-		Data::printData(locationData.at((std::vector<Data>::size_type)i), str);
-	Logger::debug(std::cerr, "hello form ", "test.");
-}
-
-void	printAllData(Parser& parser)
+void	start(Parser& parser)
 {
 	ServerData servers(parser.getServers());
 	try
 	{
-		ServerModel smodel = servers.getDefaultServer();
-		// ServerModel::printServerModelInfo(smodel);
-		createServer(smodel);
+		createServer(servers.getDefaultServer());
 	}
 	catch (std::exception& e)
 	{
@@ -89,23 +139,10 @@ void	printAllData(Parser& parser)
 	}
 }
 
-void	testLeaks(char *fileName)
-{
-	try
-	{
-		Parser parser(fileName);
-		String str("the configuration file");
-		str.append(fileName);
-		Logger::success(std::cout, str, " syntax is ok.");
-		Logger::success(std::cout, str, " test is successfuli.");
-		printAllData(parser);
-	}
-	catch (ParsingException& e)
-	{
-		Logger::error(std::cerr, e.what(), "");
-	}
-}
 
+/**
+ * @brief	main function.
+ */
 int	main(int ac, char **av)
 {
 	if (ac < 2)
@@ -113,53 +150,21 @@ int	main(int ac, char **av)
 		Logger::error(std::cerr, "Invalid argument", ".");
 		return (1);
 	}
-	testLeaks(av[1]);
-	// system("leaks -q webServ");
+	try
+	{
+		Parser parser(av[1]);
+		start(parser);
+	}
+	catch (ParsingException& e)
+	{
+		Logger::error(std::cerr, e.what(), "");
+	}
 	return (0);
 }
 
-
-
-
-
-
-// void	runServerBySelect(Server& __unused server, std::vector<int> port)
-// {
-// 	Select	tmpSet(server.fds);
-// 	while (true)
-// 	{
-// 		tmpSet = server.fds;
-// 		int selectReturn = tmpSet.waitingRequest();
-// 		if (!selectReturn)
-// 			continue ;
-// 		if (selectReturn == -1)
-// 			break ;
-// 		for(int i = 0; i < tmpSet.getNumberOfFds() + 1; i++)
-// 		{
-// 			if (tmpSet.fd_isset(i) == true)
-// 			{
-// 				if (find(port.begin(), port.end(), i) != port.end())
-// 				{
-// 					int newClient = server.accept(i);
-// 					if (newClient < 0)
-// 						break ;
-// 					server.fds.fd_set(newClient);
-// 					if (newClient > tmpSet.getNumberOfFds())
-// 						tmpSet.setNumberOfFds(newClient);
-// 					Logger::info(std::cerr, "new connection : ", newClient);
-// 				}
-// 				else
-// 				{
-// 					String header = server.recieve(i);
-// 					Logger::debug(std::cout, header, "");
-// 					if (server.send(i, "HTTP/1.1 200 ok\r\n\r\n<h1>hello world</h1>") == -1)
-// 							Logger::error(std::cerr, "Send Failed.", "");
-// 					close(i);
-// 					server.fds.fd_clear(i);
-					
-// 				} // end of else
-// 			} // end of if
-// 		} // end of for
-// 	} // end of while
-// }
-
+/**
+ * String str("the configuration file");
+ * str.append(av[1]);
+ * Logger::success(std::cout, str, " syntax is ok.");
+ * Logger::success(std::cout, str, " test is successfuli.");
+*/
