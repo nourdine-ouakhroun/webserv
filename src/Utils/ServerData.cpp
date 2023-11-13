@@ -65,19 +65,41 @@ std::vector<ServerModel>	ServerData::getServersByPort(const unsigned short& port
 	while (iterBegin < iterEnd)
 	{
 		std::vector<Data> value = iterBegin->getData("listen");
-		if (value.empty() == false && (unsigned short)std::strtol(value.begin()->getValue().c_str(), NULL, 10) == port)
-			serv.push_back(*iterBegin);
+		for (size_t i = 0; i < value.size(); i++)
+			if (value.empty() == false && (unsigned short)std::strtol(value[i].getValue().c_str(), NULL, 10) == port)
+				serv.push_back(*iterBegin);
 		iterBegin++;
 	}
 	return (serv);
 }
+
+// std::vector<ServerModel>	ServerData::getServersByPortAndServerName(const unsigned short& port, const String& serverName)
+// {
+// 	bool	checker = false;
+// 	std::vector<ServerModel>	serv;
+// 	std::vector<ServerModel>::iterator iterBegin = servers.begin();
+// 	std::vector<ServerModel>::iterator iterEnd = servers.end();
+// 	while (iterBegin < iterEnd)
+// 	{
+// 		std::vector<Data> sName = iterBegin->getData("server_name");
+// 		std::vector<Data> value = iterBegin->getData("listen");
+// 		std::vector<String> values = sName.split();
+// 		if (find(values.begin(), values.end(), serverName) != values.end())
+// 				checker = true;
+// 		for (size_t i = 0; i < value.size(); i++)
+// 			if (checker == true && value.empty() == false && (unsigned short)std::strtol(value[i].getValue().c_str(), NULL, 10) == port)
+// 				serv.push_back(*iterBegin);
+// 		iterBegin++;
+// 	}
+// 	return (serv);
+// }
 
 const std::vector<ServerModel>&	ServerData::getAllServers()
 {
 	return (servers);
 }
 
-ServerModel	ServerData::getDefaultServer( void )
+const ServerModel&	ServerData::getDefaultServer( void )
 {
 	std::vector<ServerModel>	serv;
 	std::vector<ServerModel>::iterator iterBegin = servers.begin();
@@ -96,21 +118,7 @@ ServerModel	ServerData::getDefaultServer( void )
 	}
 	if (serv.size() > 1)
 		throw (ServerException("Duplicate default server."));
+	else if (serv.size() == 0)
+		serv.push_back(*servers.begin());
 	return (*serv.begin());
-}
-
-bool		ServerData::checkDuplicateServer( void )
-{
-	// std::vector<ServerModel>::iterator iterBegin = servers.begin();
-	// std::vector<ServerModel>::iterator iterEnd = servers.end();
-	// while (iterBegin < iterEnd)
-	// {
-	// 	std::vector<Data> value = iterBegin->getData("listen");
-	// 	for (int i = 0; i < (int)value.size(); i++)
-	// 		if (isExist(value) == true)
-	// 			return (false);
-	// 	}
-	// 	iterBegin++;
-	// }
-	return (false);
 }
