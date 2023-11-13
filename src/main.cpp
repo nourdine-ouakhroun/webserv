@@ -91,7 +91,7 @@ bool	requestHandler(const std::vector<int>& port, Server& server, ServerData& se
 			String header = server.recieve(readyFd);
 			if (header.empty() == true)
 				return (true);
-				std::cout << header << std::endl;
+			std::cout << header << std::endl;
 			String content("HTTP/1.1 200 ok\r\n\r\n");
 			content.append(handler(serv, Parser::parseHeader(header)));
 			if (server.send(readyFd, content) == -1)
@@ -103,7 +103,7 @@ bool	requestHandler(const std::vector<int>& port, Server& server, ServerData& se
 	return (true);
 }
 
-void	runServerByPoll(ServerData& serv, Server& server, __unused std::vector<int> port)
+void	runServerByPoll(ServerData& serv, Server& server, std::vector<int> port)
 {
 	while (true)
 	{

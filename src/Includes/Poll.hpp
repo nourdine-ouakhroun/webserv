@@ -3,6 +3,7 @@
 
 #include <poll.h>
 #include <vector>
+#include <cstddef>
 
 class   Poll
 {
