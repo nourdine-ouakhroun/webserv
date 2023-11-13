@@ -32,6 +32,17 @@ class	ServerModel : public GlobalModel
 			{
 				String tmpPath(destPath);
 				tmpPath.append(ibegin->getPath());
+				std::vector<Data> aliases = ibegin->getData("alias");
+				for (size_t i = 0; i < aliases.size(); i++)
+				{
+					std::vector<String> values = String(aliases[i].getValue()).split();
+					if (std::find(values.begin(), values.end(), srcPath) != values.end())
+					{
+						to_do(*ibegin, value);
+						return (true);
+					}
+				}
+				
 				if (!srcPath.compare(tmpPath) && tmpPath.length() == srcPath.length())
 				{
 					to_do(*ibegin, value);
