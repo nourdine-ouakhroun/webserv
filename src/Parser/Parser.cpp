@@ -380,7 +380,7 @@ std::vector<Data>	Parser::parseHeader(const String& header)
 		{
 			key = tmp.substr(0, pos);
 			value = tmp.substr(pos + 1);
-			vec.push_back(Data(key.trim(" \t"), value.trim(" \t")));
+			vec.push_back(Data(key.trim(" \t\r\n"), value.trim(" \t\r\n")));
 		}
 	}
 	return (vec);

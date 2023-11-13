@@ -35,32 +35,75 @@ void	to_do(const Location& loca, T& value)
 	for (size_t i = 0; i < indexs.size(); i++)
 	{
 		String tmp(file);
-		// String name(indexs.at(i).getValue());
 		tmp.append(indexs.at(i));
 		Logger::info(std::cout, tmp, "");
 		value = readFile(tmp);
 		if (value.length() != 0)
 			return ;
 	}
-	value.append("<h1>404 Page Not Found.</h1>");
-	
+	value.append(ERROR_404);
 }
 
-String	handler(const ServerModel& servModel, std::vector<Data> header)
+unsigned short	getPort(String	value)
+{
+	unsigned short port = 80;
+	String::size_type pos = value.find_last_of(':');
+	if (pos != String::npos)
+		port = (unsigned short)std::strtol(value.substr(pos + 1).c_str(), NULL, 10);
+	return port;
+}
+
+String	handler(ServerData& servers, std::vector<Data> header)
 {
 	GlobalModel model(header);
+	std::vector<ServerModel>	servModel;
+	long sa = std::strtol(model.getData("Host").at(0).getValue().c_str(), NULL, 10);
+	if (sa != 0)
+		servModel = servers.getServersByPort(getPort(model.getData("Host").at(0).getValue()));
+	else
+		servModel = servers.getServersByServerName(model.getData("Host").at(0).getValue());
+	if (servModel.empty() == true)
+		servModel.push_back(servers.getDefaultServer());
 	std::vector<Data> hosts = model.getData("Method");
 	String tmp(hosts.begin()->getValue());
 	String path(tmp.split()[1]);
 	path.rightTrim("/").trim(" \t\r\n");
 	String str;
 	String	content;
-	if (ServerModel::findLocationByPath(servModel.getLocation(), str, path, to_do, content) == false)
-		content.append("<h1>404 Page Not Found.</h1>");
+	if (ServerModel::findLocationByPath(servModel.at(0).getLocation(), str, path, to_do, content) == false)
+		content.append(ERROR_404);
 	return (content);
 }
 
-void	runServerByPoll(const ServerModel& serv, Server& __unused server, __unused std::vector<int> port)
+bool	requestHandler(const std::vector<int>& port, Server& server, ServerData& serv, int readyFd)
+{
+	if (readyFd > -1)
+	{
+		if (find(port.begin(), port.end(), readyFd) != port.end())
+		{
+			int newClient = server.accept(readyFd);
+			if (newClient < 0)
+				return (false);
+			server.fds.push_fd(newClient);
+		}
+		else
+		{
+			String header = server.recieve(readyFd);
+			if (header.empty() == true)
+				return (true);
+				std::cout << header << std::endl;
+			String content("HTTP/1.1 200 ok\r\n\r\n");
+			content.append(handler(serv, Parser::parseHeader(header)));
+			if (server.send(readyFd, content) == -1)
+				Logger::error(std::cerr, "Send Failed.", "");
+			close(readyFd);
+			server.fds.erase_fd(readyFd);
+		}
+	}
+	return (true);
+}
+
+void	runServerByPoll(ServerData& serv, Server& server, __unused std::vector<int> port)
 {
 	while (true)
 	{
@@ -71,56 +114,38 @@ void	runServerByPoll(const ServerModel& serv, Server& __unused server, __unused 
 		if (pollReturn == 0)
 			continue ;
 		for (int i = 0; i < (int)tmpPoll.fdsSize(); i++)
-		{
-			int readyFd = tmpPoll.getReadyFd(i);
-			if (readyFd > -1)
-			{
-				if (find(port.begin(), port.end(), readyFd) != port.end())
-				{
-					int newClient = server.accept(readyFd);
-					if (newClient < 0)
-						break ;
-					server.fds.push_fd(newClient);
-				}
-				else
-				{
-					String header = server.recieve(readyFd);
-					if (header.empty() == true)
-						continue ;
-						std::cout << header << std::endl;
-					String content("HTTP/1.1 200 ok\r\n\r\n");
-					content.append(handler(serv, Parser::parseHeader(header)));
-					if (server.send(readyFd, content) == -1)
-							Logger::error(std::cerr, "Send Failed.", "");
-					close(readyFd);
-					tmpPoll.erase_fd(readyFd);
-					server.fds.erase_fd(readyFd);
-				}
-			}
-		}
+			if (requestHandler(port, server, serv, tmpPoll.getReadyFd(i)) == false)
+				break ;
 	}
 }
 
-Server	createServer(const ServerModel& serv)
+std::vector<int>	openAllPorts(const std::vector<ServerModel>& serversInfo, Server& server)
 {
 	std::vector<int> ports;
-	std::vector<Data> data = serv.getData("listen");
-	std::vector<Data>::iterator ibegin = data.begin();
-	std::vector<Data>::iterator iend = data.end();
-	Server server;
 	int newSocket;
-	while (ibegin < iend)
+	for (size_t i = 0; i < serversInfo.size(); i++)
 	{
-		unsigned short port = (unsigned short)strtol(ibegin->getValue().c_str(), NULL, 10);
-		Logger::debug(std::cout, "Port : ", port);
-
-		newSocket = server.createNewSocket(port);
-		if (newSocket == -1)
-			std::cout << "can not open the port : " << port << std::endl;
-		ports.push_back(newSocket);
-		ibegin++;
+		std::vector<Data> data = serversInfo[i].getData("listen");
+		if (data.empty() == true)
+			data.push_back(Data("listen", "80"));
+		for (size_t i = 0; i < data.size(); i++)
+		{
+			unsigned short port = (unsigned short)strtol(data[i].getValue().c_str(), NULL, 10);
+			newSocket = server.createNewSocket(port);
+			if (newSocket == -1)
+				continue ;
+			Logger::info(std::cout, "Listen to port : ", port);
+			ports.push_back(newSocket);
+		}
 	}
-	runServerByPoll(serv, server, ports);
+	return (ports);
+}
+
+Server	createServer(ServerData& serv)
+{
+	Server server;
+	std::vector<int> ports = openAllPorts(serv.getAllServers(), server);
+	// runServerByPoll(serv, server, ports);
 	for (size_t i = 0; i < ports.size(); i++)
 		close(ports.at(i));
 	return (server);
@@ -131,7 +156,7 @@ void	start(Parser& parser)
 	ServerData servers(parser.getServers());
 	try
 	{
-		createServer(servers.getDefaultServer());
+		createServer(servers);
 	}
 	catch (std::exception& e)
 	{
