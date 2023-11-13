@@ -15,6 +15,10 @@
 #include"Cgi.hpp"
 #include "ParssingRequist.hpp"
 
+struct _Data { 
+	std::string	file; 
+	std::string	respond;
+};
 class	ServerRun
 {
 	public :
