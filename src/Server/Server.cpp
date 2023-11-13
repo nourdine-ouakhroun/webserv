@@ -18,27 +18,33 @@ int ServerRun::Newsocket()
 	return socketfd;
 }
 
-void	getRespond(const Location& loca, String& qq)
+void	getRespond(const Location& loca, _Data& _data)
 {
 	std::string respond;
+	std::vector<String> index;
 	char req[2024];
 	String fullPath;
 	fullPath.append(loca.getData("root").at(0).getValue()).append(loca.getPath()).append("/");
-	std::cout << fullPath << std::endl;
-	String indexs(loca.getData("index").at(0).getValue());
-	std::vector<String> index = indexs.split();
-	for (size_t i = 0; i < indexs.size(); i++)
+	if(!_data.file.size())
+	{
+		String indexs(loca.getData("index").at(0).getValue());
+		index = indexs.split();
+	}
+	else
+		index.push_back(_data.file);
+	for (size_t i = 0; i < index.size(); i++)
 	{
 		String tmp(fullPath);
 		tmp.append(index[i]);
 		int fd = open(tmp.c_str() , O_RDONLY);
+		std::cout << tmp << std::endl;
 		if(fd < 0)
 			continue;
 		if(tmp.substr(tmp.find('.') + 1) != "html")
 		{
 			Cgi CgiScript(tmp);
 			std::string responCgi = CgiScript.HandelScript();
-			qq = responCgi;
+			_data.respond = responCgi;
 			return ;
 		}
 		bzero(req, 2024);
@@ -52,7 +58,7 @@ void	getRespond(const Location& loca, String& qq)
 		}
 		break;
 	}
-	qq = respond;
+	_data.respond = respond;
 }
 
 String	ServerRun::ParssingRecuistContent(std::string ContentRequist)
@@ -65,8 +71,9 @@ String	ServerRun::ParssingRecuistContent(std::string ContentRequist)
 	std::string					port;
 	size_t						position;
 	String						locationPath("");
-	String						respond;
-
+	_Data respondData;
+	respondData.file = "";
+	respondData.respond = "";
 	RequistContentASplite	=	Requist.SplitBynewLine();
 	
 	for(size_t i = 1; i < RequistContentASplite.size(); i++)
@@ -80,14 +87,31 @@ String	ServerRun::ParssingRecuistContent(std::string ContentRequist)
 	if(position == SIZE_T_MAX)
 		port = "80";
 	String path(RequistContentASplite[0]);
+	path = path.split().at(1);
+	std::vector<String>splitepath =  path.split('/');
+	bool find = false;
+	if(path.find('.') != SIZE_T_MAX)
+	{
+		respondData.file = splitepath.back();
+		find = true;
+	}
+	path.clear();
+	for (size_t i = 0; i < splitepath.size() - find; i++)
+	{
+		path.append("/").append(splitepath[i]);
+	}
 	smodel = serves.getServersByPort((unsigned short)strtol(port.c_str(), NULL, 10));
 	if (smodel.empty() == true)
 		return "";
 	try{
-		smodel[0].findLocationByPath(smodel[0].getLocation(), locationPath, path.split().at(1), getRespond, respond);
+		for(size_t i = 0; i < smodel.size(); i++)
+		{
+			if(smodel[i].findLocationByPath(smodel[i].getLocation(), locationPath, path, getRespond, respondData) != true)
+				return (ERROR_404);
+		}
 	}
 	catch(...){}
-	return (respond);
+	return (respondData.respond);
 }
 void ServerRun::HandelRequist(struct pollfd	*struct_fds ,size_t	i)
 {
