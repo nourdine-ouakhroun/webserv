@@ -18,21 +18,29 @@ int ServerRun::Newsocket()
 	return socketfd;
 }
 
-void	print(const Location& loca, String& qq)
+void	getRespond(const Location& loca, String& qq)
 {
 	std::string respond;
 	char req[2024];
 	String fullPath;
 	fullPath.append(loca.getData("root").at(0).getValue()).append(loca.getPath()).append("/");
-	String saa(loca.getData("index").at(0).getValue());
-	std::vector<String> indexs = saa.split();
+	String indexs(loca.getData("index").at(0).getValue());
+	std::vector<String> index = indexs.split();
 	for (size_t i = 0; i < indexs.size(); i++)
 	{
 		String tmp(fullPath);
-		tmp.append(indexs[i]);
+		tmp.append(index[i]);
+		// std::cout <<  tmp << std::endl; 
 		int fd = open(tmp.c_str() , O_RDONLY);
 		if(fd < 0)
 			continue;
+		if(tmp.substr(tmp.find('.')) != "html")
+		{
+			Cgi CgiScript(tmp);
+			std::string responCgi = CgiScript.HandelScript();
+			qq = responCgi;
+			return ;
+		}
 		bzero(req, 2024);
 		ssize_t bytes = 0;
 		while((bytes = read(fd, req, 2023)) != 0)
@@ -44,53 +52,47 @@ void	print(const Location& loca, String& qq)
 		}
 		break;
 	}
+	// std::cout << " [ " << respond << std::endl;
 	qq = respond;
 }
 
 String	ServerRun::ParssingRecuistContent(std::string ContentRequist)
 {
-	ParssingRequist	Req(ContentRequist);
 	std::vector<std::string>	RequistContentASplite;
-	std::vector<Data> _data;
-	RequistContentASplite	=	Req.SplitBynewLine();
+	std::vector<ServerModel>	smodel;
+	std::vector<Data>			_data;
+	ParssingRequist				Requist(ContentRequist);
+	std::string					valeu;
+	std::string					port;
+	size_t						position;
+	String						locationPath("");
+	String						respond;
+
+	RequistContentASplite	=	Requist.SplitBynewLine();
 	
 	for(size_t i = 1; i < RequistContentASplite.size(); i++)
 	{
-		try {_data.push_back(Req.SpliteEvryLine(RequistContentASplite.at(i)));}
+		try {_data.push_back(Requist.SpliteEvryLine(RequistContentASplite.at(i)));}
 		catch(const std::exception& e){}
 	}
-
-
-	std::string	valeu;
-	size_t		position;
-
 	valeu = _data.at(0).getValue();
 	position = valeu.find(':');
-
+	port = valeu.substr(position + 1);
+	if(position == SIZE_T_MAX)
+		port = "80";
 	String str(RequistContentASplite[0]);
-	// std::cout << str.split().at(2) << std::endl;
-	// std::cout << valeu.substr(position + 1).c_str() << std::endl;
-	std::vector<ServerModel> smodel = serves.getServersByPort((unsigned short)strtol(valeu.substr(position + 1).c_str(), NULL, 10));
+	smodel = serves.getServersByPort((unsigned short)strtol(port.c_str(), NULL, 10));
 	if (smodel.empty() == true)
 		return "";
-	String sa("");
-	String qq;
-	try
-	{
-		smodel[0].findLocationByPath(smodel[0].getLocation(), sa, str.split().at(1), print, qq);
-		std::cout << qq << std::endl;
+	try{
+		smodel[0].findLocationByPath(smodel[0].getLocation(), locationPath, str.split().at(1), getRespond, respond);
 	}
-	catch(...)
-	{
-		
-	}
-	return (qq);
-	// ServerModel::printServerModelInfo(smodel[0]);
-	// std::vector<Data> ports = smodel.getData("listen");
+	catch(...){}
+	return (respond);
 }
 void ServerRun::HandelRequist(struct pollfd	*struct_fds ,size_t	i)
 {
-	std::string str = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
+	std::string header = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
 	ssize_t				bytes;
 	char				req[2024];
 	int					newfd;
@@ -118,9 +120,10 @@ void ServerRun::HandelRequist(struct pollfd	*struct_fds ,size_t	i)
 		}
 		if(bytes < 0)
 			throw std::runtime_error("read was filed");
-		String ss = ParssingRecuistContent(ContentRequist);
-		str.append(ss);
-		write(newfd,str.c_str(),str.length());
+		String responde = ParssingRecuistContent(ContentRequist);
+		header.append(responde);
+		// std::cout << header << std::endl;
+		write(newfd,header.c_str(),header.length());
 		close(newfd);
 	}
 }
@@ -152,13 +155,21 @@ void ServerRun::acceptRquist( std::vector<int> servers )
 void ServerRun::RunAllServers()
 {
 	std::vector<int> servers;
-	ServerModel smodel = serves.getDefaultServer();
-	std::vector<Data> ports = smodel.getData("listen");
-	for(size_t i = 0;i < ports.size();i++)
+	std::vector<int> ports;
+	std::vector<ServerModel> smodel = serves.getAllServers();
+	for(size_t i = 0; i < smodel.size(); i++)
+	{
+		std::vector<Data> portsValeu = smodel[i].getData("listen");
+		for(size_t j = 0; j < portsValeu.size(); j++)
+		{
+			ports.push_back((int)strtol(portsValeu[j].getValue().c_str(), NULL, 10));
+		}
+	}
+	for(size_t i = 0; i < ports.size(); i++)
 	{
 		int serverfd = this->Newsocket();
-		std::cout << ports[i].getValue() << std::endl;
-		this->bindConection((int)strtol(ports[i].getValue().c_str(), NULL, 10), serverfd); 
+		std::cout << ports[i] << std::endl;
+		this->bindConection(ports[i], serverfd); 
 		this->listenSocket(serverfd);
 		servers.push_back(serverfd);
 	}

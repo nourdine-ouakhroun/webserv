@@ -65,8 +65,9 @@ std::vector<ServerModel>	ServerData::getServersByPort(const unsigned short& port
 	while (iterBegin < iterEnd)
 	{
 		std::vector<Data> value = iterBegin->getData("listen");
-		if (value.empty() == false && (unsigned short)std::strtol(value.begin()->getValue().c_str(), NULL, 10) == port)
-			serv.push_back(*iterBegin);
+		for (size_t i = 0; i < value.size(); i++)
+			if (value.empty() == false && (unsigned short)std::strtol(value.at((std::vector<int>::size_type)i).getValue().c_str(), NULL, 10) == port)
+				serv.push_back(*iterBegin);
 		iterBegin++;
 	}
 	return (serv);

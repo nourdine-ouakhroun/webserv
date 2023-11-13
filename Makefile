@@ -13,6 +13,8 @@ SRCS	= src/Parser/Parser.cpp \
 		src/Server/main.cpp\
 		src/Server/Server.cpp\
 		src/Server/ParssingRequist.cpp\
+		src/Server/Cgi.cpp\
+
 
 
 HEADERS	=	src/Includes/*.hpp
