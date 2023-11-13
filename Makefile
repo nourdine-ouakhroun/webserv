@@ -1,4 +1,4 @@
-NAME	=	webServ
+NAME	=	webserv
 
 
 SRCS	=	src/main.cpp \
