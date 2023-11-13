@@ -24,17 +24,17 @@ void	getRespond(const Location& loca, String& qq)
 	char req[2024];
 	String fullPath;
 	fullPath.append(loca.getData("root").at(0).getValue()).append(loca.getPath()).append("/");
+	std::cout << fullPath << std::endl;
 	String indexs(loca.getData("index").at(0).getValue());
 	std::vector<String> index = indexs.split();
 	for (size_t i = 0; i < indexs.size(); i++)
 	{
 		String tmp(fullPath);
 		tmp.append(index[i]);
-		// std::cout <<  tmp << std::endl; 
 		int fd = open(tmp.c_str() , O_RDONLY);
 		if(fd < 0)
 			continue;
-		if(tmp.substr(tmp.find('.')) != "html")
+		if(tmp.substr(tmp.find('.') + 1) != "html")
 		{
 			Cgi CgiScript(tmp);
 			std::string responCgi = CgiScript.HandelScript();
@@ -52,7 +52,6 @@ void	getRespond(const Location& loca, String& qq)
 		}
 		break;
 	}
-	// std::cout << " [ " << respond << std::endl;
 	qq = respond;
 }
 
@@ -80,12 +79,12 @@ String	ServerRun::ParssingRecuistContent(std::string ContentRequist)
 	port = valeu.substr(position + 1);
 	if(position == SIZE_T_MAX)
 		port = "80";
-	String str(RequistContentASplite[0]);
+	String path(RequistContentASplite[0]);
 	smodel = serves.getServersByPort((unsigned short)strtol(port.c_str(), NULL, 10));
 	if (smodel.empty() == true)
 		return "";
 	try{
-		smodel[0].findLocationByPath(smodel[0].getLocation(), locationPath, str.split().at(1), getRespond, respond);
+		smodel[0].findLocationByPath(smodel[0].getLocation(), locationPath, path.split().at(1), getRespond, respond);
 	}
 	catch(...){}
 	return (respond);
@@ -122,7 +121,6 @@ void ServerRun::HandelRequist(struct pollfd	*struct_fds ,size_t	i)
 			throw std::runtime_error("read was filed");
 		String responde = ParssingRecuistContent(ContentRequist);
 		header.append(responde);
-		// std::cout << header << std::endl;
 		write(newfd,header.c_str(),header.length());
 		close(newfd);
 	}

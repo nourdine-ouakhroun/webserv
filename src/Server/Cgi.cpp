@@ -39,6 +39,16 @@ std::string Cgi::HandelScript()
             else
             {
                 wait(0);
+                forkValeu = fork();
+                const char *argv[] = {"/bin/rm", "./a.out", NULL};
+                if(forkValeu == 0)
+                {
+                    if(execve(argv[0], (char *const *) argv, NULL) < 0)
+                    {
+                        std::cout << "hello" << std::endl;
+                        exit(0);
+                    }
+                }
                 read(fd[0], beffur, 2023);
                 close(fd[0]);
                 close(fd[1]);
