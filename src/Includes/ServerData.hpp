@@ -5,6 +5,9 @@
 #include "ServerException.hpp"
 #include <algorithm>    // std::find
 
+
+#define	ERROR_404	"<h1>404 Page not found.</h1>"
+
 class ServerData
 {
 	std::vector<ServerModel> servers;
@@ -19,8 +22,8 @@ class ServerData
 		std::vector<ServerModel>	getServersByServerName(const String& serverName);
 		std::vector<ServerModel>	getServersByPort(const unsigned short& port);
 		const std::vector<ServerModel>&	getAllServers();
-		ServerModel	getDefaultServer( void );
-		bool		checkDuplicateServer( void );
+		const ServerModel&	getDefaultServer( void );
+
 };
 
 #endif

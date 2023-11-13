@@ -10,6 +10,7 @@ class GlobalModel
 
 	public	:
 		GlobalModel( void );
+		GlobalModel(std::vector<Data> _data);
 		GlobalModel(const GlobalModel& copy);
 		virtual ~GlobalModel( void );
 		GlobalModel&	operator=(const GlobalModel& target);
