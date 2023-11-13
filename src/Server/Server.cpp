@@ -15,8 +15,8 @@ int	Server::createNewSocket(unsigned short port)
 	int status = setsockopt(nSocket, SOL_SOCKET ,SO_REUSEADDR , &opt, sizeof(int));
     if(status < 0)
 	{
-       	perror("Couldn't set options");
-		exit(EXIT_FAILURE);
+       		std::cerr << "Couldn't set options" << std::endl;
+		return (-1);
 	}
 	struct sockaddr_in socketData;
 	bzero(&socketData, socketLen);
@@ -40,13 +40,13 @@ Server::Server(const unsigned short &_port)
 	port = _port;
 	int socketFd = socket(AF_INET, SOCK_STREAM, 0);
 	if (socketFd < 0)
-		throw (std::exception());
+		throw (ServerException("socket faild."));
 	fcntl(socketFd, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
 	int status = setsockopt(socketFd, SOL_SOCKET ,SO_REUSEADDR , &opt, sizeof(int));
-    if(status < 0)
+	if(status < 0)
 	{
-       	perror("Couldn't set options");
-		// exit(EXIT_FAILURE);
+       		std::cerr << "Couldn't set options" << std::endl;
+		throw (ServerException("setsockopt faild."));
 	}
 	bzero(&socketData, socketLen);
 	socketData.sin_port = htons(port);
