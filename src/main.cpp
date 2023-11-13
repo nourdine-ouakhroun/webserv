@@ -145,7 +145,7 @@ Server	createServer(ServerData& serv)
 {
 	Server server;
 	std::vector<int> ports = openAllPorts(serv.getAllServers(), server);
-	// runServerByPoll(serv, server, ports);
+	runServerByPoll(serv, server, ports);
 	for (size_t i = 0; i < ports.size(); i++)
 		close(ports.at(i));
 	return (server);
