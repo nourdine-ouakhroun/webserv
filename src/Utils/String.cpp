@@ -8,7 +8,7 @@ String::String(const char* str) : std::string(str)
 {
 }
 
-String::String(const std::string& str) : std::string(str)
+String::String(const std::string str) : std::string(str)
 {
 }
 
@@ -108,7 +108,6 @@ std::vector<String> String::split( void )
     }
 	return (vec);
 }
-
 
 std::vector<String> String::split(const char& separator)
 {
