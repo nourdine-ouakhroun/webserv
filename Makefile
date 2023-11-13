@@ -1,4 +1,4 @@
-NAME	=	webServ
+NAME	=	webserv
 
 
 SRCS	=	src/main.cpp \
@@ -11,13 +11,15 @@ SRCS	=	src/main.cpp \
 		src/Exception/ParsingException.cpp \
 		src/Exception/ServerException.cpp \
 		src/Server/Server.cpp \
-		src/Utils/ServerData.cpp
+		src/Utils/ServerData.cpp \
+		src/Utils/Poll.cpp \
+		src/Utils/Select.cpp
 
 HEADERS	=	src/Includes/*.hpp
 
 
 CPP	=	c++
-CPPFLAGS	=	-Wall -Wextra -Werror -std=c++98 -Wconversion  -I./src/Includes# -fsanitize=address
+CPPFLAGS	=	-Wall -Wextra -Werror -std=c++98 -Wconversion -O3 -I./src/Includes# -fsanitize=address
 
 BIN		=	bin
 
