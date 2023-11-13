@@ -5,6 +5,10 @@ GlobalModel::GlobalModel( void )
 
 }
 
+GlobalModel::GlobalModel(std::vector<Data> _data) : data(_data)
+{
+}
+
 GlobalModel::GlobalModel(const GlobalModel& copy)
 {
 	*this = copy;

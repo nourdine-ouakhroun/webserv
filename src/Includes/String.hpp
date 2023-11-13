@@ -10,7 +10,7 @@ class String : public std::string
 	public :
 		String( void );
 		String(const char *str);
-		String(const std::string& str);
+		String(const std::string str);
 		String(const String& str);
 		~String( void );
 		String&	operator=(const String& str);
