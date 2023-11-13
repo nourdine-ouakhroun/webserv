@@ -19,11 +19,32 @@ class	ServerModel : public GlobalModel
 
 		const std::vector<Location>&	getLocation( void ) const;
 
-		bool	findLocationByPath(
-						const std::vector<Location>& locations,
-						String& destPath,
-						const String& srcPath,
-						void (*to_do) (const Location&));
+		template <typename T>
+		static bool	findLocationByPath(
+								const std::vector<Location>& locations,
+								String& destPath, const String& srcPath,
+								void (*to_do) (const Location&, T&), T& value)
+		{
+			std::vector<Location>::const_iterator ibegin = locations.begin();
+			std::vector<Location>::const_iterator iend = locations.end();
+			bool	isDone = false;
+			while (ibegin < iend)
+			{
+				String tmpPath(destPath);
+				tmpPath.append(ibegin->getPath());
+				if (!srcPath.compare(tmpPath) && tmpPath.length() == srcPath.length())
+				{
+					to_do(*ibegin, value);
+					isDone = true;
+				}
+				if (isDone)
+					return (true);
+				if (ibegin->getInnerLocation().empty() == false && findLocationByPath(ibegin->getInnerLocation(), tmpPath, srcPath, to_do, value) == true)
+					return (true);
+				ibegin++;
+			}
+			return (false);
+		}
 
 		static	void	printServerModelInfo(const ServerModel& serverModel);
 		
