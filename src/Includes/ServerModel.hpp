@@ -3,6 +3,7 @@
 
 #include "Location.hpp"
 #include "GlobalModel.hpp"
+#include <algorithm>
 
 class	ServerModel : public GlobalModel
 {
