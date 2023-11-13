@@ -242,6 +242,7 @@ String	Parser::readFile()
 		else
 			content.append(buffer);
 	}
+	close(fd);
 	return (content);
 }
 
@@ -366,18 +367,21 @@ std::vector<Data>	Parser::parseHeader(const String& header)
 	std::vector<Data> vec;
 	std::istringstream	iss(header);
 	String			tmp, key, value;
+	String			httpMethod;
+	std::getline(iss, httpMethod, '\n');
+	vec.push_back(Data("Method", httpMethod.trim(" \t")));
+	unsigned long	pos = 0;
 	while (iss.eof() == false)
 	{
 		std::getline(iss, tmp, '\n');
 		if (tmp.length() == 0 || tmp[0] == '\r')
 			continue ;
-		std::vector<String> split = tmp.split(':');
-		if (split.empty() == true)
-			continue ;
-		key = split[0];
-		if (split.size() > 1)
-			value = String::convertVectorToString(split, 1, static_cast<unsigned int>(split.size() - 1), ':');
-		vec.push_back(Data(key.trim(" \t"), value.trim(" \t")));
+		if ((pos = tmp.find_first_of(':')) != String::npos)
+		{
+			key = tmp.substr(0, pos);
+			value = tmp.substr(pos + 1);
+			vec.push_back(Data(key.trim(" \t\r\n"), value.trim(" \t\r\n")));
+		}
 	}
 	return (vec);
 }
