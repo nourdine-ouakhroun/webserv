@@ -37,7 +37,7 @@ void	getRespond(const Location& loca, _Data& _data)
 		String tmp(fullPath);
 		tmp.append(index[i]);
 		int fd = open(tmp.c_str() , O_RDONLY);
-		std::cout << tmp << std::endl;
+		// std::cout << tmp << std::endl;
 		if(fd < 0)
 			continue;
 		if(tmp.substr(tmp.find('.') + 1) != "html")
@@ -90,7 +90,7 @@ String	ServerRun::ParssingRecuistContent(std::string ContentRequist)
 	path = path.split().at(1);
 	std::vector<String>splitepath =  path.split('/');
 	bool find = false;
-	if(path.find('.') != SIZE_T_MAX)
+	if(splitepath.back().find('.') != SIZE_T_MAX && path.back() != '/')
 	{
 		respondData.file = splitepath.back();
 		find = true;
