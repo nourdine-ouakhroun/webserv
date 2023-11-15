@@ -9,8 +9,7 @@
 #include "String.hpp"
 #include "Poll.hpp"
 #include "ServerException.hpp"
-// #include <sys/poll.h>
-// #include <sys/select.h>
+#include "ServerData.hpp"
 #include <fcntl.h>
 
 class Server
@@ -38,5 +37,11 @@ class Server
 			return (fds);
 		};
 };
+
+String	readFile(const String& path);
+unsigned short	getPort(String	value);
+std::vector<ServerModel>	getServer(ServerData& servers, std::vector<Data> header);
+std::vector<int>	openAllPorts(const std::vector<ServerModel>& serversInfo, Server& server);
+
 
 #endif
