@@ -1,6 +1,6 @@
-#include "server.hpp"
+#include "Server.hpp"
 
 int main()
 {
-	ServerRun Server;
+	Server	s;
 }

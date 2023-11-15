@@ -1,16 +1,28 @@
 
 
-XXC = c++
-XXCFLAGS = -Wall -Wextra -Werror
+CXX = c++
+CXXFLAGS = -Wall -Wextra -Werror
 
-SRC =	main.cpp\
-		server.cpp\
+SRCS =	main.cpp\
+		Server.cpp\
+		Request.cpp
 
-OBJ = $(SRC:.cpp=.o)
+RM = rm -f
 
-NAME = SERVER
+OBJS = $(SRCS:.cpp=.o)
 
-all : $(OBJ)
-	$(XXC) $(XXCFLAGS) $(OBJ) -o  $(NAME)
+NAME = webserv
+
+all : $(OBJS)
+	$(CXX) $(CXXFLAGS) $(OBJS) -o  $(NAME)
 %.o : %.cpp
-	$(XXC) $(XXCFLAGS) -c $<
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+clean :
+	$(RM) $(OBJS)
+
+fclean : clean
+	$(RM) $(NAME)
+
+re : fclean all
+
