@@ -257,7 +257,8 @@ void	Parser::getFileContent( void )
 	String	tmp;
 	size_t	pos;
 	String	str = readFile();
-
+	if (str.empty() == true)
+		throw (ParsingException("Empty File."));
 	std::istringstream outfile(str);
 	// read data from file and store it in vector of String.
 	while (!outfile.eof())
