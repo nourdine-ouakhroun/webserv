@@ -1,28 +1,6 @@
 #include "Parser.hpp"
 #include "Server.hpp"
-#include "ServerData.hpp"
-#include <unistd.h>
 
-
-String	readFile(const String& path)
-{
-	String content;
-	char	buffer[2];
-
-	int fd = open(path.c_str(), O_RDONLY);
-	if (fd < 0)
-		return (content);
-	while (1)
-	{
-		memset(buffer, 0, 2);
-		ssize_t reader = read(fd, buffer, 1);
-		content.append(buffer);
-		if (reader != 1)
-			break ;
-	}
-	close(fd);
-	return (content);
-}
 
 template <typename T>
 void	to_do(const Location& loca, T& value)
@@ -44,34 +22,29 @@ void	to_do(const Location& loca, T& value)
 	value.append(ERROR_404);
 }
 
-unsigned short	getPort(String	value)
-{
-	unsigned short port = 80;
-	String::size_type pos = value.find_last_of(':');
-	if (pos != String::npos)
-		port = (unsigned short)std::strtol(value.substr(pos + 1).c_str(), NULL, 10);
-	return port;
-}
 
 String	handler(ServerData& servers, std::vector<Data> header)
 {
 	GlobalModel model(header);
 	std::vector<ServerModel>	servModel;
-	long sa = std::strtol(model.getData("Host").at(0).getValue().c_str(), NULL, 10);
-	if (sa != 0)
-		servModel = servers.getServersByPort(getPort(model.getData("Host").at(0).getValue()));
-	else
-		servModel = servers.getServersByServerName(model.getData("Host").at(0).getValue());
-	if (servModel.empty() == true)
-		servModel.push_back(servers.getDefaultServer());
-	std::vector<Data> hosts = model.getData("Method");
-	String tmp(hosts.begin()->getValue());
-	String path(tmp.split()[1]);
-	path.rightTrim("/").trim(" \t\r\n");
 	String str;
 	String	content;
+
+	servModel = getServer(servers, header);
+	if (servModel.empty() == true)
+		servModel = servers.getAllServers();
+	// exit(0);
+	// String access_log = servModel.at(0).getData("access_log").at(0).getValue();
+	// if (access_log.contains("main") == true)
+	// {
+	// 	std::ofstream accessLogFile(access_log.split()[0].trim(" \t\n\r"));
+	// 	Logger::info(accessLogFile, "Hello World", " Test 1");
+	// }
+	// std::vector<Data> hosts = model.getData("Method");
+	String path(String(model.getData("Method").begin()->getValue()).split()[1]);
+	path.rightTrim("/").trim(" \t\r\n");
 	if (ServerModel::findLocationByPath(servModel.at(0).getLocation(), str, path, to_do, content) == false)
-		content.append(ERROR_404);
+		return (ERROR_404);
 	return (content);
 }
 
@@ -117,28 +90,6 @@ void	runServerByPoll(ServerData& serv, Server& server, std::vector<int> port)
 			if (requestHandler(port, server, serv, tmpPoll.getReadyFd(i)) == false)
 				break ;
 	}
-}
-
-std::vector<int>	openAllPorts(const std::vector<ServerModel>& serversInfo, Server& server)
-{
-	std::vector<int> ports;
-	int newSocket;
-	for (size_t i = 0; i < serversInfo.size(); i++)
-	{
-		std::vector<Data> data = serversInfo[i].getData("listen");
-		if (data.empty() == true)
-			data.push_back(Data("listen", "80"));
-		for (size_t i = 0; i < data.size(); i++)
-		{
-			unsigned short port = (unsigned short)strtol(data[i].getValue().c_str(), NULL, 10);
-			newSocket = server.createNewSocket(port);
-			if (newSocket == -1)
-				continue ;
-			Logger::info(std::cout, "Listen to port : ", port);
-			ports.push_back(newSocket);
-		}
-	}
-	return (ports);
 }
 
 Server	createServer(ServerData& serv)

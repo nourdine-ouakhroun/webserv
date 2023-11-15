@@ -28,7 +28,6 @@ class	ServerModel : public GlobalModel
 		{
 			std::vector<Location>::const_iterator ibegin = locations.begin();
 			std::vector<Location>::const_iterator iend = locations.end();
-			bool	isDone = false;
 			while (ibegin < iend)
 			{
 				String tmpPath(destPath);
@@ -38,20 +37,20 @@ class	ServerModel : public GlobalModel
 				{
 					std::vector<String> values = String(aliases[i].getValue()).split();
 					if (std::find(values.begin(), values.end(), srcPath) != values.end())
-					{
-						to_do(*ibegin, value);
-						return (true);
-					}
+						return (to_do(*ibegin, value), true);
 				}
-				
-				if (!srcPath.compare(tmpPath) && tmpPath.length() == srcPath.length())
+				String	src(srcPath);
+				size_t	pos = srcPath.find_last_of('.');
+				if (pos != String::npos)
 				{
-					to_do(*ibegin, value);
-					isDone = true;
+					size_t pos2 = srcPath.find_last_of('/');
+					if (pos2 != String::npos && pos2 < pos)
+						src = srcPath.substr(0, pos2);
 				}
-				if (isDone)
-					return (true);
-				if (ibegin->getInnerLocation().empty() == false && findLocationByPath(ibegin->getInnerLocation(), tmpPath, srcPath, to_do, value) == true)
+				if (!src.compare(tmpPath) && tmpPath.length() == src.length())
+					return (to_do(*ibegin, value), true);
+				if (ibegin->getInnerLocation().empty() == false \
+					&& findLocationByPath(ibegin->getInnerLocation(), tmpPath, src, to_do, value) == true)
 					return (true);
 				ibegin++;
 			}

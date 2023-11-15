@@ -2,6 +2,7 @@ NAME	=	webserv
 
 
 SRCS	=	src/main.cpp \
+		src/tools.cpp \
 		src/Parser/Parser.cpp \
 		src/Parser/Location.cpp \
 		src/Models/GlobalModel.cpp \
