@@ -1,7 +1,5 @@
 #include "Server.hpp"
 
-
-
 String	readFile(const String& path)
 {
 	String content;
