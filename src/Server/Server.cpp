@@ -44,7 +44,7 @@ void	ServerRun::HandelRequist(struct pollfd	*struct_fds ,size_t	i)
 			exit(0);
 		}
 		bzero(req, 2024);
-		while((bytes = recv(newfd, req, 2023, 0)) != 0)
+		while((bytes = recv(newfd, req, 2023, 0)) > 0)
 		{
 			ContentRequist.append(req);
 			bzero(req, 2024);
@@ -52,7 +52,7 @@ void	ServerRun::HandelRequist(struct pollfd	*struct_fds ,size_t	i)
 				break;
 		}
 		if(bytes < 0)
-			throw std::runtime_error("read was filed");
+			return;
 		String responde = ParssingRecuistContent(ContentRequist);
 		write(newfd,responde.c_str(),responde.length());
 		close(newfd);
@@ -61,7 +61,7 @@ void	ServerRun::HandelRequist(struct pollfd	*struct_fds ,size_t	i)
 
 void	ServerRun::acceptRquist( std::vector<int>	servers ) 
 {
-	struct pollfd	struct_fds[servers.size()];
+	std::vector<struct pollfd>	struct_fds;
 	int pollValeu;
 	memset(struct_fds, 0 , sizeof(struct_fds));
 	for (size_t	i = 0; i < servers.size(); i++)
@@ -71,7 +71,9 @@ void	ServerRun::acceptRquist( std::vector<int>	servers )
 	}
 	while (1)
 	{
-		pollValeu = poll(struct_fds, (unsigned int)servers.size(), 6000); 
+		struct pollfd	struct_fds2[servers.size()];
+		memcpy(struct_fds2, struct_fds, sizeof(struct pollfd) * servers.size());
+		pollValeu = poll(&struct_fds[0], (unsigned int)servers.size(), 6000); 
 		if (pollValeu < 0)
 		{
 			std::cout << "error : poll" << std::endl;
