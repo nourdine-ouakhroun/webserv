@@ -1,19 +1,18 @@
 
 #include"ParssingRequist.hpp"
 #include"ServerData.hpp"
-ParssingRequist::ParssingRequist( void )
-{
-	
+ParssingRequist::ParssingRequist( void ){
+
 }
-ParssingRequist::ParssingRequist( std::string RequistContent )
-{
-	this->RequistContent = RequistContent;
+ParssingRequist::ParssingRequist( String requistLine ){
+	this->requistLine = requistLine;
 }
-Data ParssingRequist::SpliteEvryLine( std::string LineRequist )
+
+Data ParssingRequist::SpliteEvryLine( String LineRequist)
 {
 	size_t Position;
 	Data _data;
-	Position = LineRequist.find(':');
+	Position = LineRequist.find(": ");
 	if(Position != SIZE_T_MAX)
 	{
 		_data.setKey(LineRequist.substr(0, Position));
@@ -24,16 +23,26 @@ Data ParssingRequist::SpliteEvryLine( std::string LineRequist )
 
 	return(_data);
 }
-std::vector<std::string>	ParssingRequist::SplitBynewLine(  )
+void ParssingRequist::setreq( std::vector<String> requses )
 {
-	std::vector<std::string>	Content;
-	std::string					tockens;
+	for (size_t i = 1; i < requses.size(); i++)
+	{
+		Data _data(SpliteEvryLine(requses[i]));
+		String valeu = _data.getValue();
+		requsteContent[_data.getKey()] = valeu.split(',');
+	}
+	std::cout << requsteContent["host"][0] << std::endl;
+}
+std::vector<String>	ParssingRequist::SplitBynewLine( String RequistContent )
+{
+	std::vector<String>	Content;
+	String					tockens;
 	std::istringstream			sstr(RequistContent);
 
 	while(getline(sstr, tockens, '\n'))
 	{
 		tockens[tockens.size() -1] = 0;
-			Content.push_back(tockens);
+		Content.push_back(tockens);
 	}
 	return Content;
 }

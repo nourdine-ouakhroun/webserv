@@ -1,15 +1,18 @@
 #ifndef CGI_HPP
 #define CGI_HPP
 #include<iostream>
+#include "ServerData.hpp"
 #include <unistd.h>
-class Cgi{
+class   Cgi{
     private :
         std::string PathScript;
-        Cgi(); 
+        Cgi();
+
     public :
-        Cgi(std::string);
-        std::string HandelScript();
+        Cgi( std::string );
         ~Cgi();
+
+        std::string HandelScript();
 };
 
 
