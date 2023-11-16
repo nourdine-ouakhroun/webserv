@@ -6,12 +6,10 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <netdb.h>
-#include <map>
 #include<vector>
 #include <sys/poll.h>
 #include <sys/select.h>
 #include "Parser.hpp"
-#include "ServerData.hpp"
 #include"Cgi.hpp"
 #include "ParssingRequist.hpp"
 
@@ -28,7 +26,7 @@ class	ServerRun
 		int		Newsocket();
 		void	bindConection(int	Port, int	sreverfd);
 		void	HandelRequist(struct pollfd	*struct_fds ,size_t	i);
-		String	ParssingRecuistContent( std::string );
+		String	ParssingRecuistContent( String );
 		void	acceptRquist( std::vector<int>	servers );
 		void	listenSocket(int	serverfd);
 		void	RunAllServers();
