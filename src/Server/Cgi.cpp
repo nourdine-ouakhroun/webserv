@@ -11,7 +11,7 @@ std::string Cgi::HandelScript()
 	if(this->PathScript.substr(PathScript.find('.') + 1) == "cpp")
     {
         std::string cmd("/usr/bin/c++ ");
-        cmd.append(PathScript).append(" && ./a.out");
+        cmd.append(PathScript).append(" && ./a.out && /bin/rm -f a.out");
         const char *argv[] = {"/bin/bash", "-c", (char*)cmd.c_str(),NULL};
         int fd[2];
         pipe(fd);
@@ -24,22 +24,19 @@ std::string Cgi::HandelScript()
             if(execve(argv[0], (char *const *)argv, NULL) < 0)
             {
                 std::cout << "execve filed" << std::endl;
-                exit(0);
+                exit(0);    
             }
         }
         else
         {
             wait(0);
-            // if(unlink("./a.out") < 0)
-            // {
-            //     std::cout << "error" << std::endl;
-            //     exit(1);
-            // }
             read(fd[0], beffur, 2023);
             close(fd[0]);
             close(fd[1]);
         }
     }
+    else
+        return ERROR_404;
     return beffur;
 }
 Cgi::~Cgi()
