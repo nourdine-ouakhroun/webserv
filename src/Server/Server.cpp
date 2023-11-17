@@ -25,26 +25,48 @@ String	ServerRun::ParssingRecuistContent(String	ContentRequist)
 	try{requist.setreq(spletLines);}catch(...){}
 	return 0;
 }
-void	ServerRun::HandelRequist(struct pollfd	*struct_fds ,size_t	i)
-{
-	ssize_t		bytes;
-	char		req[2024];
-	int			newfd;
-	std::string	ContentRequist;
 
+void erase(std::vector<struct pollfd> & struct_fdsS, size_t j)
+{
+	std::vector<struct pollfd> returnFds;
+	for (size_t i = 0; i < struct_fdsS.size(); i++)
+	{
+		if(i != j)
+			returnFds.push_back(struct_fdsS[i]);
+	}
+	struct_fdsS = returnFds;
+}
+void	ServerRun::HandelRequist(struct pollfd	*struct_fds ,size_t	i, std::vector<struct pollfd>	&struct_fdsS, std::vector<int> servers)
+{
 	if (struct_fds[i].revents == POLLOUT || struct_fds[i].revents ==  POLLIN)
 	{
-		ContentRequist.clear();
-		bytes = 0;
-		newfd = accept(struct_fds[i].fd, (struct sockaddr *)NULL, NULL);
-
-		if( newfd < 0 )
+		for (size_t j = 0; j < servers.size(); j++)
 		{
-			std::cout << "	error	:	accpet	" << std::endl;	
-			exit(0);
+			if(struct_fds[i].fd == servers[j])
+			{
+				int			newfd;
+				newfd = accept(struct_fds[i].fd, (struct sockaddr *)NULL, NULL);
+
+				if( newfd < 0 )
+				{
+					std::cout << "	error	:	accpet	" << std::endl;	
+					exit(0);
+				}
+				struct pollfd fd;
+				fd.fd = newfd;
+				fd.events = POLLOUT | POLLIN;
+				struct_fdsS.push_back(fd);
+				return;
+			}
 		}
+		ssize_t		bytes;
+		std::string	ContentRequist;
+		char		req[2024];
+		bytes = 0;
+		ContentRequist.clear();
+		std::string header = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
 		bzero(req, 2024);
-		while((bytes = recv(newfd, req, 2023, 0)) > 0)
+		while((bytes = recv(struct_fds[i].fd, req, 2023, 0)) > 0)
 		{
 			ContentRequist.append(req);
 			bzero(req, 2024);
@@ -53,27 +75,28 @@ void	ServerRun::HandelRequist(struct pollfd	*struct_fds ,size_t	i)
 		}
 		if(bytes < 0)
 			return;
-		String responde = ParssingRecuistContent(ContentRequist);
-		write(newfd,responde.c_str(),responde.length());
-		close(newfd);
+		std::cout << ContentRequist << std::endl;
+		write(struct_fds[i].fd, header.append("<h1> hello world</h1>").c_str(), header.length());
+		close(struct_fds[i].fd);
+		erase(struct_fdsS,i);
 	}
 }
 
 void	ServerRun::acceptRquist( std::vector<int>	servers ) 
 {
-	std::vector<struct pollfd>	struct_fds;
+	std::vector<struct pollfd>	struct_fdsS;
+	struct pollfd fd;
 	int pollValeu;
-	memset(struct_fds, 0 , sizeof(struct_fds));
 	for (size_t	i = 0; i < servers.size(); i++)
 	{
-		struct_fds[i].fd = servers[i];
-		struct_fds[i].events = POLLOUT | POLLIN;
+		fd.fd = servers[i];
+		fd.events = POLLOUT | POLLIN;
+		struct_fdsS.push_back(fd);
 	}
 	while (1)
 	{
-		struct pollfd	struct_fds2[servers.size()];
-		memcpy(struct_fds2, struct_fds, sizeof(struct pollfd) * servers.size());
-		pollValeu = poll(&struct_fds[0], (unsigned int)servers.size(), 6000); 
+		std::vector<struct pollfd>	struct_fdsC(struct_fdsS);
+		pollValeu = poll(&struct_fdsC[0], (unsigned int)struct_fdsC.size(), 6000);
 		if (pollValeu < 0)
 		{
 			std::cout << "error : poll" << std::endl;
@@ -81,8 +104,8 @@ void	ServerRun::acceptRquist( std::vector<int>	servers )
 		}
 		if (pollValeu == 0)
 			continue ;
-		for(size_t i = 0; i < servers.size(); i++)
-			HandelRequist(struct_fds, i);
+		for(size_t i = 0; i < struct_fdsC.size(); i++)
+			HandelRequist(&struct_fdsC[0], i, struct_fdsS, servers);
 	}
 }
 void	ServerRun::RunAllServers()
