@@ -104,10 +104,10 @@ String	Server::recieve(int socket)
 	{
 		bzero(tmp, 100);
 		int nBytes;
-		if ((nBytes = (int)recv(socket, tmp, 1, 0)) < 0)
+		if ((nBytes = (int)recv(socket, tmp, 99, 0)) < 0)
 			break ;
 		buffer.append(tmp);
-		if (nBytes < 1)
+		if (nBytes < 99)
 			break ;
 	}
 	return (buffer);
