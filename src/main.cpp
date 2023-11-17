@@ -3,9 +3,15 @@
 
 
 template <typename T>
-void	to_do(const Location& loca, T& value)
+void	to_do(const Location& __unused loca, T& value)
 {
-	String file(loca.getData("root").at(0).getValue());
+	std::vector<Data>	data = loca.getData("root");
+	if (data.empty() == true)
+	{
+		value.append(ERROR_404);
+		return ;
+	}
+	String file(data.at(0).getValue());
 	file.append(loca.getPath());
 			 /* |   check if the path ended with /   | */
 	file.append((file.end() - 1)[0] == '/' ? "" : "/");
@@ -14,12 +20,11 @@ void	to_do(const Location& loca, T& value)
 	{
 		String tmp(file);
 		tmp.append(indexs.at(i));
-		Logger::info(std::cout, tmp, "");
 		value = readFile(tmp);
 		if (value.length() != 0)
 			return ;
 	}
-	value.append(ERROR_404);
+	value.append("404 hello world");
 }
 
 
@@ -27,23 +32,24 @@ String	handler(ServerData& servers, std::vector<Data> header)
 {
 	GlobalModel model(header);
 	std::vector<ServerModel>	servModel;
-	String str;
 	String	content;
 
 	servModel = getServer(servers, header);
 	if (servModel.empty() == true)
 		servModel = servers.getAllServers();
-	// exit(0);
-	// String access_log = servModel.at(0).getData("access_log").at(0).getValue();
-	// if (access_log.contains("main") == true)
-	// {
-	// 	std::ofstream accessLogFile(access_log.split()[0].trim(" \t\n\r"));
-	// 	Logger::info(accessLogFile, "Hello World", " Test 1");
-	// }
-	// std::vector<Data> hosts = model.getData("Method");
+	// content.append("Content-Type: ").append(String(model.getData("Accept").at(0).getValue()).split(',').at(0));
+	// content.append("\r\n");
 	String path(String(model.getData("Method").begin()->getValue()).split()[1]);
 	path.rightTrim("/").trim(" \t\r\n");
-	if (ServerModel::findLocationByPath(servModel.at(0).getLocation(), str, path, to_do, content) == false)
+	ServerModel server = servModel.at(0);
+	String root(server.getData("root").at(0).getValue());
+	if (server.checkIsDirectory(root.append(path)) == false)
+	{
+		content.append(readFile(root));
+		return (content);
+	}
+	// exit(0);
+	if (ServerModel::findLocationByPath(servModel.at(0).getLocation(), root, path, to_do, content) == false)
 		return (ERROR_404);
 	return (content);
 }
@@ -64,9 +70,11 @@ bool	requestHandler(const std::vector<int>& port, Server& server, ServerData& se
 			String header = server.recieve(readyFd);
 			if (header.empty() == true)
 				return (true);
+			std::cout << "---------------------------------------------------------------------" << std::endl;
 			std::cout << header << std::endl;
 			String content("HTTP/1.1 200 ok\r\n\r\n");
 			content.append(handler(serv, Parser::parseHeader(header)));
+			// ssize_t sender = server.send(readyFd, content);
 			if (server.send(readyFd, content) == -1)
 				Logger::error(std::cerr, "Send Failed.", "");
 			close(readyFd);
@@ -144,3 +152,15 @@ int	main(int ac, char **av)
  * Logger::success(std::cout, str, " syntax is ok.");
  * Logger::success(std::cout, str, " test is successfuli.");
 */
+
+// ACCESS_LOG
+// {
+		// exit(0);
+	// String access_log = servModel.at(0).getData("access_log").at(0).getValue();
+	// if (access_log.contains("main") == true)
+	// {
+	// 	std::ofstream accessLogFile(access_log.split()[0].trim(" \t\n\r"));
+	// 	Logger::info(accessLogFile, "Hello World", " Test 1");
+	// }
+	// std::vector<Data> hosts = model.getData("Method");
+// }
