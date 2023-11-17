@@ -38,7 +38,7 @@ void erase(std::vector<struct pollfd> & struct_fdsS, size_t j)
 }
 void	ServerRun::HandelRequist(struct pollfd	*struct_fds ,size_t	i, std::vector<struct pollfd>	&struct_fdsS, std::vector<int> servers)
 {
-	if (struct_fds[i].revents == POLLOUT || struct_fds[i].revents ==  POLLIN)
+	if (struct_fds[i].revents & POLLOUT || struct_fds[i].revents &  POLLIN)
 	{
 		for (size_t j = 0; j < servers.size(); j++)
 		{
@@ -46,12 +46,12 @@ void	ServerRun::HandelRequist(struct pollfd	*struct_fds ,size_t	i, std::vector<s
 			{
 				int			newfd;
 				newfd = accept(struct_fds[i].fd, (struct sockaddr *)NULL, NULL);
-
 				if( newfd < 0 )
 				{
 					std::cout << "	error	:	accpet	" << std::endl;	
 					exit(0);
 				}
+				fcntl(newfd, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
 				struct pollfd fd;
 				fd.fd = newfd;
 				fd.events = POLLOUT | POLLIN;
@@ -61,20 +61,21 @@ void	ServerRun::HandelRequist(struct pollfd	*struct_fds ,size_t	i, std::vector<s
 		}
 		ssize_t		bytes;
 		std::string	ContentRequist;
-		char		req[2024];
+		char		req[2];
 		bytes = 0;
 		ContentRequist.clear();
 		std::string header = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
-		bzero(req, 2024);
-		while((bytes = recv(struct_fds[i].fd, req, 2023, 0)) > 0)
+		bzero(req, 2);
+		while((bytes = recv(struct_fds[i].fd, req, 1, 0)) > 0)
 		{
 			ContentRequist.append(req);
-			bzero(req, 2024);
-			if (bytes < 2023)
-				break;
+			bzero(req, 2);
 		}
-		if(bytes < 0)
+		if(bytes < 0 && !ContentRequist.size())
+		{
+			std::cout << "filed " << std::endl;
 			return;
+		}
 		std::cout << ContentRequist << std::endl;
 		write(struct_fds[i].fd, header.append("<h1> hello world</h1>").c_str(), header.length());
 		close(struct_fds[i].fd);
