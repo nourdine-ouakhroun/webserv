@@ -1,0 +1,84 @@
+1
+POLLOUT : 4
+POLLIN : 1
+struct_fdsC[i].revents : 1
+2
+POLLOUT : 4
+POLLIN : 1
+struct_fdsC[i].revents : 0
+POLLOUT : 4
+POLLIN : 1
+struct_fdsC[i].revents : 4
+[ 470 ]     
+1
+POLLOUT : 4
+POLLIN : 1
+struct_fdsC[i].revents : 1
+2
+POLLOUT : 4
+POLLIN : 1
+struct_fdsC[i].revents : 0
+POLLOUT : 4
+POLLIN : 1
+struct_fdsC[i].revents : 4
+[ 470 ]     
+1
+POLLOUT : 4
+POLLIN : 1
+struct_fdsC[i].revents : 1
+2
+POLLOUT : 4
+POLLIN : 1
+struct_fdsC[i].revents : 0
+POLLOUT : 4
+POLLIN : 1
+struct_fdsC[i].revents : 4
+[ 470 ]     
+1
+POLLOUT : 4
+POLLIN : 1
+struct_fdsC[i].revents : 1
+2
+POLLOUT : 4
+POLLIN : 1
+struct_fdsC[i].revents : 0
+POLLOUT : 4
+POLLIN : 1
+struct_fdsC[i].revents : 4
+[ 470 ]     
+1
+POLLOUT : 4
+POLLIN : 1
+struct_fdsC[i].revents : 1
+2
+POLLOUT : 4
+POLLIN : 1
+struct_fdsC[i].revents : 0
+POLLOUT : 4
+POLLIN : 1
+struct_fdsC[i].revents : 4
+[ 470 ]     
+1
+POLLOUT : 4
+POLLIN : 1
+struct_fdsC[i].revents : 1
+2
+POLLOUT : 4
+POLLIN : 1
+struct_fdsC[i].revents : 0
+POLLOUT : 4
+POLLIN : 1
+struct_fdsC[i].revents : 4
+[ 470 ]     
+1
+POLLOUT : 4
+POLLIN : 1
+struct_fdsC[i].revents : 1
+2
+POLLOUT : 4
+POLLIN : 1
+struct_fdsC[i].revents : 0
+POLLOUT : 4
+POLLIN : 1
+struct_fdsC[i].revents : 4
+[ 470 ]     
