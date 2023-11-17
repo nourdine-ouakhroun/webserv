@@ -3,6 +3,8 @@
 
 #include "Location.hpp"
 #include "GlobalModel.hpp"
+#include <unistd.h>
+#include <dirent.h>
 #include <algorithm>
 
 class	ServerModel : public GlobalModel
@@ -20,17 +22,32 @@ class	ServerModel : public GlobalModel
 
 		const std::vector<Location>&	getLocation( void ) const;
 
-		template <typename T>
-		static bool	findLocationByPath(
-								const std::vector<Location>& locations,
-								String& destPath, const String& srcPath,
-								void (*to_do) (const Location&, T&), T& value)
+		bool	checkIsDirectory(String filename)
 		{
-			std::vector<Location>::const_iterator ibegin = locations.begin();
-			std::vector<Location>::const_iterator iend = locations.end();
+			if (!access(filename.c_str(), F_OK))
+			{
+				DIR *dir = opendir(filename.c_str());
+				if (dir != NULL)
+				{
+					closedir(dir);
+					return (true);
+				}
+			}
+			return (false);
+		}
+
+		template <typename T>
+		static bool	findLocationByPath(std::vector<Location> locations, const String& rootPath,
+								const String& srcPath, void (*to_do) (const Location&, T&), T& value)
+		{
+			std::vector<Location>::iterator ibegin = locations.begin();
+			std::vector<Location>::iterator iend = locations.end();
 			while (ibegin < iend)
 			{
-				String tmpPath(destPath);
+				std::vector<Data> data = ibegin->getData("root");
+				if (data.empty() == true)
+					ibegin->addData(Data("root", rootPath));
+				String tmpPath;
 				tmpPath.append(ibegin->getPath());
 				std::vector<Data> aliases = ibegin->getData("alias");
 				for (size_t i = 0; i < aliases.size(); i++)
@@ -39,18 +56,12 @@ class	ServerModel : public GlobalModel
 					if (std::find(values.begin(), values.end(), srcPath) != values.end())
 						return (to_do(*ibegin, value), true);
 				}
-				String	src(srcPath);
-				size_t	pos = srcPath.find_last_of('.');
-				if (pos != String::npos)
-				{
-					size_t pos2 = srcPath.find_last_of('/');
-					if (pos2 != String::npos && pos2 < pos)
-						src = srcPath.substr(0, pos2);
-				}
-				if (!src.compare(tmpPath) && tmpPath.length() == src.length())
+				// checkIsDirectory(String(rootPath).append(srcPath));
+				//
+				if (!srcPath.compare(tmpPath.trim(" \t\n\r")) && tmpPath.length() == srcPath.length())
 					return (to_do(*ibegin, value), true);
 				if (ibegin->getInnerLocation().empty() == false \
-					&& findLocationByPath(ibegin->getInnerLocation(), tmpPath, src, to_do, value) == true)
+					&& findLocationByPath(ibegin->getInnerLocation(), ibegin->getData("root").at(0).getValue(), srcPath, to_do, value) == true)
 					return (true);
 				ibegin++;
 			}

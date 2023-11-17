@@ -304,25 +304,86 @@ Parser& Parser::operator=(const Parser& target)
 }
 
 /**
- * @brief	Getter of vector of vector of String.
- * @param	(none)
- * @return	constant refrance vector of vector of String.
- * @exception	no-throw exception.
+ * @brief	Reading File content char by char.
+ * @return	String Content
 */
-const std::vector<std::vector<String> >&	Parser::getServersContents( void ) const
+String	Parser::readFile()
 {
-	return (serversContents);
+	String content;
+	char	buffer[2];
+	bool	isComment = false;
+
+	int fd = open(fileName.c_str(), O_RDONLY);
+	// if open faild.
+	if (fd < 0)
+		throw (ParsingException("Failed to open File."));
+	while (1)
+	{
+		// set buffer to zeroes.
+		memset(buffer, 0, 2);
+		ssize_t reader = read(fd, buffer, 1);
+		if (reader != 1)
+			break ;
+		if (isComment == true && buffer[0] == '\n')
+		{
+			// end of comment.
+			isComment = false;
+			content.append(buffer);
+		}
+		else if (buffer[0] == '#')
+		{
+			// begin of comment
+			isComment = true;
+			content.append(buffer);
+		}
+		else if (isComment == false && (buffer[0] == '}' || buffer[0] == '{'))
+		{
+			// "location / {" == become ==> "location / \n{\n".
+			content.append("\n");
+			content.append(buffer);
+			content.append("\n");
+		}
+		else if (isComment == false && (buffer[0] == ';'))
+			content.append(";\n"); // go back to new line after a semicolon.
+		else
+			content.append(buffer); // append buffer.
+	}
+	close(fd); // close file descriptor.
+	return (content);
 }
 
 /**
- * @brief	Getter of vector of Server Models.
+ * @brief	Read file content unsing std::ifstream and store it in vector container (fileContent).
  * @param	(none)
- * @return	constant refrance vector of Server Model.
- * @exception	no-throw exception.
+ * @return	(none)
+ * @exception	throw ParsingException when failed to open file.
 */
-const	std::vector<ServerModel>&	Parser::getServers( void ) const
+void	Parser::getFileContent( void )
 {
-	return (servers);
+	String	tmp;
+	size_t	pos;
+	String	str = readFile();
+	if (str.empty() == true)
+		throw (ParsingException("Empty File."));
+	std::istringstream outfile(str);
+	// read data from file and store it in vector of String.
+	while (!outfile.eof())
+	{
+		std::getline(outfile, tmp, '\n'); // read line by line.
+		tmp.trim(" \t");
+		if (tmp.size() == 0 || *tmp.begin() == '#')
+			continue ;
+		// this part for remove comment inside strings
+		{
+			pos = tmp.find('#');
+			if (pos != String::npos)
+				tmp.erase(pos);
+		}
+		// pushing data into vector
+		fileContent.push_back(tmp);
+	}
+	if (fileContent.empty() == true)
+		throw (ParsingException("Invalid Content."));
 }
 
 /**
@@ -336,9 +397,10 @@ void	Parser::checkSyntax( void )
 	int	openBrackets = 0;
 	std::vector<String> server;
 	bool	insideServer = false;
+	if (fileContent.empty() == true)
+		return ;
 	std::vector<String>::iterator iterBegin = fileContent.begin();
-	std::vector<String>::iterator iterEnd = fileContent.end();
-
+	const std::vector<String>::iterator iterEnd = fileContent.end();
 	while (iterBegin < iterEnd)
 	{
 		// Counting Brackets.
@@ -382,6 +444,62 @@ void	Parser::checkSyntax( void )
 }
 
 /**
+ * @brief	Extract Server Configuration one by one from vector of File Content vector.
+ * @param	iterBegin	The begin of File Content vector.
+ * @param	iterEnd		The End of File Content vector.
+ * @return	new vector that's contains one Server Configuration.
+*/
+std::vector<String>	Parser::getServerConfig(std::vector<String>::iterator& iterBegin, const std::vector<String>::iterator& iterEnd)
+{
+	int	openBrackets = 0; // Numebr of Brackets.
+	std::vector<String> server; // Return Value;
+	bool	insideServer = false;
+
+	while (iterBegin < iterEnd)
+	{
+		if (!iterBegin->compare("server"))
+		{
+			insideServer = true;
+			iterBegin++;
+		}
+		openBrackets += iterBegin->countRepeating('{');
+		if (iterBegin->countRepeating('{'))
+			iterBegin++;
+		openBrackets -= iterBegin->countRepeating('}');
+		if (!openBrackets)
+			break ;
+		if (insideServer == true)
+		{
+			String s = iterBegin->trim(" \t");
+			server.push_back(s);
+			iterBegin++;
+		}
+	}
+	return server;
+}
+
+/**
+ * @brief	Split	File Content into vector of Servers.
+ * 			for more detials, go top.
+*/
+void	Parser::splitContentIntoServers( void )
+{
+	std::vector<String>::iterator begin = fileContent.begin();
+	const std::vector<String>::iterator end = fileContent.end();
+	while (begin < end)
+	{
+		std::vector<String> srv = getServerConfig(begin, end);
+		if (srv.empty() == false)
+			serversContents.push_back(srv);
+		begin++;
+	}
+	if (serversContents.empty() == true)
+		throw (ParsingException("No Server to run."));
+	// clear file content vector.
+	fileContent.clear();
+}
+
+/**
  * @brief	Split String into part Key and Value.
  * @param	line	String to split.
  * @return 	Data class that contains key and value.
@@ -395,35 +513,6 @@ Data	Parser::extractDataFromString(String& line)
 	for (std::vector<String>::size_type i = 1; i < vec.size(); i++)
 		value.append(" ").append(vec.at(i).trim(" \t;"));
 	return (Data(key, value.trim(" \t")));
-}
-
-/**
- * @brief	printing all Locations stored in Parser class.
- * @param	locs	const Location class.
- * @return	(none).
- * @exception	no-throw exception.
-*/
-void	Parser::printLocations(const Location& locs)
-{
-	static String s;
-	if (locs.getAllData().empty() == true)
-		return ;
-	// printing Path of Location.
-	std::cout << s << "Path : " << locs.getPath() << std::endl;
-
-	// printing All data from GlobalModel (Key, Value).
-	std::vector<Data> vec = locs.getAllData();
-	for (std::vector<Location>::size_type i = 0; i < vec.size(); i++)
-		Data::printData(vec.at(i), s);
-
-	// printing All Location from GlobalModel (Key, Value).
-	std::vector<Location> innerLoc = locs.getInnerLocation();
-	for (std::vector<Location>::size_type i = 0; i < innerLoc.size(); i++)
-	{
-		s.append("\t");
-		printLocations(innerLoc.at(i));
-		s.erase(s.length() - 1);
-	}
 }
 
 /**
@@ -458,113 +547,10 @@ Location	Parser::getLocations(std::vector<String>::iterator& begin, const std::v
 	return (Location(model, path, newLocation));
 }
 
-String	Parser::readFile()
-{
-	String content;
-	char	buffer[2];
-	bool	isComment = false;
-
-	int fd = open(fileName.c_str(), O_RDONLY);
-	if (fd < 0)
-		throw (ParsingException("Failed to open File."));
-	while (1)
-	{
-		memset(buffer, 0, 2);
-		ssize_t reader = read(fd, buffer, 1);
-		if (reader != 1)
-			break ;
-		if (isComment == true && buffer[0] == '\n')
-		{
-			isComment = false;
-			content.append(buffer);
-		}
-		else if (buffer[0] == '#')
-		{
-			isComment = true;
-			content.append(buffer);
-		}
-		else if (isComment == false && (buffer[0] == '}' || buffer[0] == '{'))
-		{
-			content.append("\n");
-			content.append(buffer);
-			content.append("\n");
-		}
-		else if (isComment == false && (buffer[0] == ';'))
-			content.append(";\n");
-		else
-			content.append(buffer);
-	}
-	close(fd);
-	return (content);
-}
-
 /**
- * @brief	Read file content unsing std::ifstream and store it in vector container (fileContent).
- * @param	(none)
- * @return	(none)
- * @exception	throw ParsingException when failed to open file.
+ * @brief	Separate between Location and Data, and store it in ServerModel.
+ * @param	content The Server Part.
 */
-void	Parser::getFileContent( void )
-{
-	String	tmp;
-	size_t	pos;
-	String	str = readFile();
-	if (str.empty() == true)
-		throw (ParsingException("Empty File."));
-	std::istringstream outfile(str);
-	// read data from file and store it in vector of String.
-	while (!outfile.eof())
-	{
-		std::getline(outfile, tmp, '\n');
-		tmp.trim(" \t");
-		if (tmp.size() == 0 || *tmp.begin() == '#')
-			continue ;
-		// this part for remove comment inside strings
-		{
-			pos = tmp.find('#');
-			if (pos != String::npos)
-				tmp.erase(pos);
-		}
-		// pushing data into vector
-		fileContent.push_back(tmp);
-	}
-}
-
-/**
- * @brief	Extract Server Configuration one by one from vector of File Content vector.
- * @param	iterBegin	The begin of File Content vector.
- * @param	iterEnd		The End of File Content vector.
- * @return	new vector that's contains one Server Configuration.
-*/
-std::vector<String>	Parser::getServerConfig(std::vector<String>::iterator& iterBegin, const std::vector<String>::iterator& iterEnd)
-{
-	int	openBrackets = 0; // Numebr of Brackets.
-	std::vector<String> server; // Return Value;
-	bool	insideServer = false;
-
-	while (iterBegin < iterEnd)
-	{
-		if (!iterBegin->compare("server"))
-		{
-			insideServer = !insideServer;
-			iterBegin++;
-		}
-		openBrackets += iterBegin->countRepeating('{');
-		if (iterBegin->countRepeating('{'))
-			iterBegin++;
-		openBrackets -= iterBegin->countRepeating('}');
-		if (!openBrackets)
-			break ;
-		if (insideServer == true)
-		{
-			String s = iterBegin->trim(" \t");
-			server.push_back(s);
-			iterBegin++;
-		}
-	}
-	return server;
-}
-
 void	Parser::parsingFile(std::vector<String> content)
 {
 	ServerModel server;
@@ -572,7 +558,7 @@ void	Parser::parsingFile(std::vector<String> content)
 	std::vector<String>::iterator iEnd = content.end();
 	while (iBegin < iEnd)
 	{
-		if (iBegin->compare(0, 9, "location ")) // Not A Location Part
+		if (iBegin->compare(0, 9, "location ")) // Data Part.
 		{
 			server.addData(extractDataFromString(*iBegin));
 			iBegin++;
@@ -587,18 +573,26 @@ void	Parser::parsingFile(std::vector<String> content)
 	servers.push_back(server);
 }
 
-void	Parser::splitContentIntoServers( void )
+/**
+ * 
+*/
+void	Parser::getFinalResualt( void )
 {
-	std::vector<String>::iterator begin = fileContent.begin();
-	const std::vector<String>::iterator end = fileContent.end();
+	std::vector<std::vector<String> >::iterator begin = serversContents.begin();
+	std::vector<std::vector<String> >::iterator end = serversContents.end();
 	while (begin < end)
 	{
-		serversContents.push_back(getServerConfig(begin, end));
+		parsingFile(*begin);
 		begin++;
 	}
-	fileContent.clear();
+	serversContents.clear();
 }
 
+
+/**
+ * @brief	Prant Server Model Infos.
+ * @param	server	Server to print
+*/
 void	Parser::printServerModel(const ServerModel& server)
 {
 	std::vector<Location>::const_iterator b = server.getLocation().begin();
@@ -610,16 +604,33 @@ void	Parser::printServerModel(const ServerModel& server)
 	}
 }
 
-void	Parser::getFinalResualt( void )
+/**
+ * @brief	printing all Locations stored in Parser class.
+ * @param	locs	const Location class.
+ * @return	(none).
+ * @exception	no-throw exception.
+*/
+void	Parser::printLocations(const Location& locs)
 {
-	std::vector<std::vector<String> >::iterator begin = serversContents.begin();
-	std::vector<std::vector<String> >::iterator end = serversContents.end();
-	while (begin < end)
+	static String s;
+	if (locs.getAllData().empty() == true)
+		return ;
+	// printing Path of Location.
+	std::cout << s << "Path : " << locs.getPath() << std::endl;
+
+	// printing All data from GlobalModel (Key, Value).
+	std::vector<Data> vec = locs.getAllData();
+	for (std::vector<Location>::size_type i = 0; i < vec.size(); i++)
+		Data::printData(vec.at(i), s);
+
+	// printing All Location from GlobalModel (Key, Value).
+	std::vector<Location> innerLoc = locs.getInnerLocation();
+	for (std::vector<Location>::size_type i = 0; i < innerLoc.size(); i++)
 	{
-		parsingFile(*begin);
-		begin++;
+		s.append("\t");
+		printLocations(innerLoc.at(i));
+		s.erase(s.length() - 1);
 	}
-	serversContents.clear();
 }
 
 std::vector<Data>	Parser::parseHeader(const String& header)
@@ -646,6 +657,9 @@ std::vector<Data>	Parser::parseHeader(const String& header)
 	return (vec);
 }
 
+/**
+ * @brief	Check All Keys inside File config is exists.
+*/
 void	Parser::checkKeys( void )
 {
 	std::vector<String> keys = String(KEYS).split(' ');
@@ -662,3 +676,24 @@ void	Parser::checkKeys( void )
 	}
 }
 
+/**
+ * @brief	Getter of vector of vector of String.
+ * @param	(none)
+ * @return	constant refrance vector of vector of String.
+ * @exception	no-throw exception.
+*/
+const std::vector<std::vector<String> >&	Parser::getServersContents( void ) const
+{
+	return (serversContents);
+}
+
+/**
+ * @brief	Getter of vector of Server Models.
+ * @param	(none)
+ * @return	constant refrance vector of Server Model.
+ * @exception	no-throw exception.
+*/
+const	std::vector<ServerModel>&	Parser::getServers( void ) const
+{
+	return (servers);
+}

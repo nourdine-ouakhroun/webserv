@@ -50,6 +50,7 @@ std::vector<int>	openAllPorts(const std::vector<ServerModel>& serversInfo, Serve
 	int newSocket;
 	for (size_t i = 0; i < serversInfo.size(); i++)
 	{
+		// ServerModel::printServerModelInfo(serversInfo[i]);
 		std::vector<Data> data = serversInfo[i].getData("listen");
 		if (data.empty() == true)
 			data.push_back(Data("listen", "80"));
