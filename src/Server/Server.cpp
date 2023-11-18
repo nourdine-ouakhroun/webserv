@@ -52,7 +52,13 @@ void getrespond(const Location & _location, String &respond)
 	{
 		locations[_data[i].getKey()] = _data[i].getValue();
 	}
+
+	// std::vector<Data> roots = _location.getData("root");
+	// if (roots.empty() == true)
+		// return ;
+	// String path(roots.at(0).getValue());
 	Allpath = locations["root"].append(_location.getPath()).append("/");
+	std::cout << "Allpath : " << Allpath << std::endl;
 	std::vector<String> index = locations["index"].split();
 	
 	for (size_t i = 0; i < index.size(); i++)
