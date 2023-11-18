@@ -1,31 +1,3 @@
-/*
-Select()
-A better way to handle multiple clients is by using select() linux command. 
-Select command allows to monitor multiple file descriptors, waiting until one of the file descriptors become active. 
-For example, if there is some data to be read on one of the sockets select will provide that information. 
-Select works like an interrupt handler, which gets activated as soon as any file descriptor sends any data.
-Data structure used for select: fd_set
-It contains the list of file descriptors to monitor for some activity.
-There are four functions associated with fd_set:
-fd_set readfds;
-
-// Clear an fd_set
-FD_ZERO(&readfds);  
-
-// Add a descriptor to an fd_set
-FD_SET(master_sock, &readfds);   
-
-// Remove a descriptor from an fd_set
-FD_CLR(master_sock, &readfds); 
-
-//If something happened on the master socket , then its an incoming connection  
-FD_ISSET(master_sock, &readfds); 
-
-manual page of select : https://linux.die.net/man/2/select
-
-activity = select( max_fd + 1 , &readfds , NULL , NULL , NULL);
-*/
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
