@@ -21,9 +21,8 @@ int	ServerRun::Newsocket()
 String	ServerRun::ParssingRecuistContent(String	ContentRequist)
 {
 	std::vector <String> spletLines = ParssingRequist::SplitBynewLine(ContentRequist);
-	ParssingRequist requist(spletLines.at(0));
-	try{requist.setreq(spletLines);}catch(...){}
-	return 0;
+	_requset _requisteconten = ParssingRequist::setreq(spletLines);
+	return "<h1> hello </h1>";
 }
 
 void erase(std::vector<struct pollfd> & struct_fdsS, size_t j)
@@ -36,6 +35,18 @@ void erase(std::vector<struct pollfd> & struct_fdsS, size_t j)
 	}
 	struct_fdsS = returnFds;
 }
+
+std::string status(std::string statuscode, std::string stringcode)
+{
+	(void) statuscode;
+	(void) stringcode;
+	std::string header = "HTTP/1.1 ";
+	header.append(statuscode);
+	header.append("\r\nContent-Type: text/html\r\n\r\n");
+	header.append(stringcode);
+	return header;
+}
+
 void	ServerRun::HandelRequist(struct pollfd	*struct_fds ,size_t	i, std::vector<struct pollfd>	&struct_fdsS, std::vector<int> servers)
 {
 	if (struct_fds[i].revents & POLLOUT || struct_fds[i].revents &  POLLIN)
@@ -64,7 +75,6 @@ void	ServerRun::HandelRequist(struct pollfd	*struct_fds ,size_t	i, std::vector<s
 		char		req[2];
 		bytes = 0;
 		ContentRequist.clear();
-		std::string header = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
 		bzero(req, 2);
 		while((bytes = recv(struct_fds[i].fd, req, 1, 0)) > 0)
 		{
@@ -72,12 +82,10 @@ void	ServerRun::HandelRequist(struct pollfd	*struct_fds ,size_t	i, std::vector<s
 			bzero(req, 2);
 		}
 		if(bytes < 0 && !ContentRequist.size())
-		{
-			std::cout << "filed " << std::endl;
 			return;
-		}
 		std::cout << ContentRequist << std::endl;
-		write(struct_fds[i].fd, header.append("<h1> hello world</h1>").c_str(), header.length());
+		std::string respond = status("200 OK", ParssingRecuistContent(ContentRequist));
+		write(struct_fds[i].fd, respond.c_str(), respond.length());
 		close(struct_fds[i].fd);
 		erase(struct_fdsS,i);
 	}
