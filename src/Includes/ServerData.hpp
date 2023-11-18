@@ -6,7 +6,8 @@
 #include <algorithm>    // std::find
 
 
-#define	ERROR_404	"<h1>404 Page not found.</h1>"
+#define	ERROR_404	"<h1 style=\"text-align: center;\">404 Page not found.</h1>"
+#define	ERROR_403	"<h1 style=\"text-align: center;\">403 Forbidden.</h1>"
 
 class ServerData
 {
