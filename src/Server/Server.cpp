@@ -15,7 +15,7 @@ int	Server::createNewSocket(unsigned short port)
 	int status = setsockopt(nSocket, SOL_SOCKET ,SO_REUSEADDR , &opt, sizeof(int));
     if(status < 0)
 	{
-       		std::cerr << "Couldn't set options" << std::endl;
+       	std::cerr << "Couldn't set options" << std::endl;
 		return (-1);
 	}
 	struct sockaddr_in socketData;
@@ -104,10 +104,10 @@ String	Server::recieve(int socket)
 	{
 		bzero(tmp, 100);
 		int nBytes;
-		if ((nBytes = (int)recv(socket, tmp, 1, 0)) < 0)
+		if ((nBytes = (int)recv(socket, tmp, 99, 0)) < 0)
 			break ;
 		buffer.append(tmp);
-		if (nBytes < 1)
+		if (nBytes < 99)
 			break ;
 	}
 	return (buffer);
