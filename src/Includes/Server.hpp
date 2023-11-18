@@ -32,7 +32,7 @@ class	ServerRun
 		void	RunAllServers();
 
 	private :
-		ServerData serves;
+		ServerData servers;
 
 };
 
