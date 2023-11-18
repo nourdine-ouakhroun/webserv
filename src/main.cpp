@@ -42,7 +42,10 @@ String	handler(ServerData& servers, std::vector<Data> header)
 	String path(String(model.getData("Method").begin()->getValue()).split()[1]);
 	path.rightTrim("/").trim(" \t\r\n");
 	ServerModel server = servModel.at(0);
-	String root(server.getData("root").at(0).getValue());
+	std::vector<Data> roots = server.getData("root");
+	String root;
+	if (roots.empty() == false)
+		root = roots.at(0).getValue();
 	if (server.checkIsDirectory(root.append(path)) == false)
 	{
 		content.append(readFile(root));
@@ -70,8 +73,8 @@ bool	requestHandler(const std::vector<int>& port, Server& server, ServerData& se
 			String header = server.recieve(readyFd);
 			if (header.empty() == true)
 				return (true);
+			// std::cout << header << std::endl;
 			std::cout << "---------------------------------------------------------------------" << std::endl;
-			std::cout << header << std::endl;
 			String content("HTTP/1.1 200 ok\r\n\r\n");
 			content.append(handler(serv, Parser::parseHeader(header)));
 			// ssize_t sender = server.send(readyFd, content);
@@ -127,7 +130,7 @@ void	start(Parser& parser)
 /**
  * @brief	main function.
  */
-int	main(int ac, char **av)
+ int	main(int ac, char **av)
 {
 	if (ac < 2)
 	{
