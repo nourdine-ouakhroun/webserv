@@ -15,7 +15,7 @@ int	Server::createNewSocket(unsigned short port)
 	int status = setsockopt(nSocket, SOL_SOCKET ,SO_REUSEADDR , &opt, sizeof(int));
     if(status < 0)
 	{
-       		std::cerr << "Couldn't set options" << std::endl;
+       	std::cerr << "Couldn't set options" << std::endl;
 		return (-1);
 	}
 	struct sockaddr_in socketData;

@@ -2,13 +2,17 @@
 #define REQUEST_HPP
 
 #include "String.hpp"
+#include <map>
 
 class   Request
 {
+    std::map<String, String> header;
     public :
         Request( void );
-        Request(String _request);
-        // Request(const Request& copy);
+        Request(const String& _request);
+        Request(const Request& copy);
+        ~Request( void );
+        Request&    operator=(const Request& target);
 
 };
 
