@@ -24,7 +24,7 @@ _requset ParssingRequist::setreq( std::vector<String> requses )
 {
 	_requset _req;
 
-	_req.requistLine = requses[0];
+	_req.requistLine = requses[0].split();
 	size_t i;
 	for (i = 1; i < requses.size(); i++)
 	{
@@ -44,21 +44,6 @@ _requset ParssingRequist::setreq( std::vector<String> requses )
 		{
 			_req.body.push_back(requses[i]);
 		}
-	}
-	for (std::map<String, std::vector<String> >::iterator it = _req.header.begin(); it != _req.header.end(); it++)
-	{
-		std::cout << "Key : [ " <<  it->first << " ] ";
-		std::cout << "Valeus : [";
-		for (size_t i = 0; i < it->second.size(); i++)
-		{
-			std::cout << it->second[i] << " ";
-		}
-		std::cout << " ]" << std::endl;
-	}
-	std::cout << "body :" << std::endl;
-	for (i = 0;i < _req.body.size();i++)
-	{
-		std::cout <<"[ " << _req.body[i] << " ]" << std::endl;
 	}
 	return _req;
 }
