@@ -2,7 +2,7 @@
 
 ServerRun::ServerRun(ServerData	smodel)
 {
-	this->serves = smodel;
+	this->servers = smodel;
 }
 int	ServerRun::Newsocket()
 {
@@ -17,11 +17,8 @@ int	ServerRun::Newsocket()
 	std::cout << socketfd << std::endl;
 	return socketfd;
 }
-
-String	ServerRun::ParssingRecuistContent(String	ContentRequist)
+void printreq(_requset _requisteconten)
 {
-	std::vector <String> spletLines = ParssingRequist::SplitBynewLine(ContentRequist);
-	_requset _requisteconten = ParssingRequist::setreq(spletLines);
 	std::cout << "requist line :" << std::endl;
 	for (size_t i = 0;i < _requisteconten.requistLine.size();i++)
 	{
@@ -43,7 +40,81 @@ String	ServerRun::ParssingRecuistContent(String	ContentRequist)
 	{
 		std::cout <<"[ " << _requisteconten.body[i] << " ]" << std::endl;
 	}
-	return "<h1> hello </h1>";
+}
+
+void getrespond(const Location & _location, String &respond)
+{
+	( void )respond;
+	std::map<String, String> locations;
+	std::vector<Data> _data = _location.getAllData();
+	String Allpath;
+	for (size_t i = 0; i < _data.size(); i++)
+	{
+		locations[_data[i].getKey()] = _data[i].getValue();
+	}
+	Allpath = locations["root"].append(_location.getPath()).append("/");
+	std::vector<String> index = locations["index"].split();
+	
+	for (size_t i = 0; i < index.size(); i++)
+	{
+		String tmp(Allpath);
+		tmp.append(index[i]);
+		int fd = open(tmp.c_str() , O_RDONLY);
+		if(fd < 0)
+			continue;
+		if(tmp.substr(tmp.find('.')) != "html")
+		{
+			Cgi CgiScript(tmp);
+			std::string responCgi = CgiScript.HandelScript();
+			respond = responCgi;
+			return ;
+		}
+		char res[200];
+		bzero(res, 200);
+		ssize_t bytes = 0;
+		while((bytes = read(fd, res, 199)) != 0)
+		{
+			respond.append(res);
+			bzero(res, 200);
+			if (bytes < 199)
+				break;
+		}
+		break;
+
+	}
+	
+}
+String	ServerRun::ParssingRecuistContent(String	ContentRequist)
+{
+	_requset					requist;
+	std::string					port;
+	String						respond;
+	String						path("");
+	std::string					serverName;
+	std::vector<String>			spletLines;
+	std::vector<ServerModel>	Serv;
+	ServerModel 				finalserver;
+
+	spletLines 	= ParssingRequist::SplitBynewLine(ContentRequist);
+	requist 	= ParssingRequist::setreq(spletLines);
+	serverName = requist.header["Host"].size() != 1 ? "" : requist.header["Host"][0].split(':')[0];
+	if(serverName.empty())
+	{
+		std::cout << "error : Host not fonde" << std::endl;
+		exit(1);
+	}
+	port = requist.header["Host"][0].split(':').size() == 2 ? requist.header["Host"][0].split(':')[1] : "80";
+	Serv = servers.getServersByPort((unsigned short)strtol(port.c_str(), NULL, 10));
+	if(Serv.size() > 1)
+		Serv = servers.getServersByServerName(serverName);
+	if(Serv.size() > 1)
+	{
+		std::cout << "error : ambeguis server" << std::endl;
+		exit(1);
+	}
+	ServerModel::findLocationByPath(Serv[0].getLocation(), path,requist.requistLine[1], getrespond, respond);
+	// std::cout << path << std::endl;
+	return respond;
 }
 
 void erase(std::vector<struct pollfd> & struct_fdsS, size_t j)
@@ -140,9 +211,9 @@ void	ServerRun::acceptRquist( std::vector<int>	servers )
 }
 void	ServerRun::RunAllServers()
 {
-	std::vector<int> servers;
 	std::vector<int> ports;
-	std::vector<ServerModel> smodel = serves.getAllServers();
+	std::vector<ServerModel> smodel = servers.getAllServers();
+	std::vector<int> serversSocket;
 	for(size_t i = 0; i < smodel.size(); i++)
 	{
 		std::vector<Data> portsValeu = smodel[i].getData("listen");
@@ -157,9 +228,9 @@ void	ServerRun::RunAllServers()
 		std::cout << ports[i] << std::endl;
 		this->bindConection(ports[i], serverfd); 
 		this->listenSocket(serverfd);
-		servers.push_back(serverfd);
+		serversSocket.push_back(serverfd);
 	}
-	this->acceptRquist( servers );
+	this->acceptRquist( serversSocket );
 }
 
 void	ServerRun::bindConection(int port, int socketfd)
