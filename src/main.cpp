@@ -48,13 +48,15 @@ String	handler(ServerData& servers, std::vector<Data> header)
 	String path(String(model.getData("Method").begin()->getValue()).split()[1]);
 	path.trim(" \t\r\n");
 	ServerModel server = servModel.at(0);
+	// setLogs(server);
+	Logger::info(std::cout, "hello world : ", "Test Again.");
 	std::vector<Data> roots = server.getData("root");
 	String root;
 	if (roots.empty() == false)
 		root = roots.at(0).getValue();
 	if (root.empty() == false && server.checkIsDirectory(root.append(path)) == 0)
 	{
-		Logger::warn(std::cout, "root value : ", root);
+		// Logger::warn<std::fstream, String>(std::fstream(server.access_log), "root value : ", root);
 		content.append(readFile(root));
 		return (content);
 	}
