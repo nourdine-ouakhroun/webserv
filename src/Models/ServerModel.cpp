@@ -50,3 +50,26 @@ void	ServerModel::printServerModelInfo(const ServerModel& serverModel)
 	std::cout << s << ">>>> Location Info <<<<\n";
 	Location::printAllLocations(serverModel.getLocation(), s);
 }
+
+Location	ServerModel::getLocationByPath(std::vector<Location> locations, const String& srcPath)
+{
+	static std::vector<Location> tmplocations;
+	if (tmplocations.empty() == true)
+		tmplocations = locations;
+	std::vector<Location>::iterator ibegin = locations.begin();
+	std::vector<Location>::iterator iend = locations.end();
+	while (ibegin < iend)
+	{
+		String tmpPath(ibegin->getPath());
+		if (!srcPath.compare(tmpPath) && tmpPath.length() == srcPath.length())
+			return (*ibegin);
+		if (ibegin->getInnerLocation().empty() == false)
+		{
+			Location loca = getLocationByPath(ibegin->getInnerLocation(), srcPath);
+			if (loca.getPath().empty() == false)
+				return (loca);
+		}
+		ibegin++;
+	}
+	return (Location());
+}
