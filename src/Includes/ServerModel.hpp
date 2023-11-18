@@ -1,9 +1,13 @@
 #ifndef SERVER_MODEL
 #define SERVER_MODEL
 
+#include <unistd.h>
+#include <dirent.h>
+#include <algorithm>
 #include "Location.hpp"
 #include "GlobalModel.hpp"
 
+String	readFile(const String& path);
 class	ServerModel : public GlobalModel
 {
 	std::vector<Location>	location;
@@ -16,39 +20,33 @@ class	ServerModel : public GlobalModel
 		~ServerModel( void )	throw();
 		void	setLocation(std::vector<Location>& _location);
 		void	addLocation(Location _location);
+		static	Location	getLocationByPath(std::vector<Location> locations, const String& srcPath);
 
 		const std::vector<Location>&	getLocation( void ) const;
 
-		template <typename T>
-		static bool	findLocationByPath(
-								const std::vector<Location>& locations,
-								String& destPath, const String& srcPath,
-								void (*to_do) (const Location&, T&), T& value)
+		static int	checkIsDirectory(String filename)
 		{
-			std::vector<Location>::const_iterator ibegin = locations.begin();
-			std::vector<Location>::const_iterator iend = locations.end();
-			bool	isDone = false;
-			while (ibegin < iend)
+			if (!access(filename.c_str(), F_OK))
 			{
-				String tmpPath(destPath);
-				tmpPath.append(ibegin->getPath());
-				if (!srcPath.compare(tmpPath) && tmpPath.length() == srcPath.length())
+				DIR *dir = opendir(filename.c_str());
+				if (dir != NULL)
 				{
-					to_do(*ibegin, value);
-					isDone = true;
+					closedir(dir);
+					return (1);
 				}
-				if (isDone)
-					return (true);
-				if (ibegin->getInnerLocation().empty() == false && findLocationByPath(ibegin->getInnerLocation(), tmpPath, srcPath, to_do, value) == true)
-					return (true);
-				ibegin++;
+				return (0);
 			}
-			return (false);
+			return (-1);
 		}
 
+		template <typename T>
+		static bool	findLocationByPath(std::vector<Location> locations, const String& rootPath,
+								const String& srcPath, void (*to_do) (const Location&, T&), T& value);
+
 		static	void	printServerModelInfo(const ServerModel& serverModel);
-		
+
 };
 
-#endif
+#include "../Templates/ServerModel.tpp"
 
+#endif

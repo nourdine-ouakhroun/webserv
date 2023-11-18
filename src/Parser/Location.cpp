@@ -35,6 +35,7 @@ Location& Location::operator=(const Location& target)
 void	Location::setPath(const String& Path)
 {
 	path = Path;
+	path.trim(" \t\n\r");
 }
 
 const String&	Location::getPath( void ) const
