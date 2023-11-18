@@ -4,9 +4,6 @@
 ParssingRequist::ParssingRequist( void ){
 
 }
-ParssingRequist::ParssingRequist( String requistLine ){
-	this->requistLine = requistLine;
-}
 
 Data ParssingRequist::SpliteEvryLine( String LineRequist)
 {
@@ -16,22 +13,54 @@ Data ParssingRequist::SpliteEvryLine( String LineRequist)
 	if(Position != SIZE_T_MAX)
 	{
 		_data.setKey(LineRequist.substr(0, Position));
-		_data.setValue(LineRequist.substr(Position + 1));
+		_data.setValue(LineRequist.substr(Position + 2));
 	}
 	else
 		throw std::runtime_error("");
 
 	return(_data);
 }
-void ParssingRequist::setreq( std::vector<String> requses )
+_requset ParssingRequist::setreq( std::vector<String> requses )
 {
-	for (size_t i = 1; i < requses.size(); i++)
+	_requset _req;
+
+	_req.requistLine = requses[0];
+	size_t i;
+	for (i = 1; i < requses.size(); i++)
 	{
-		Data _data(SpliteEvryLine(requses[i]));
+		Data _data;
+		try{
+			_data = SpliteEvryLine(requses[i]);
+		}
+		catch(...){
+			break;
+		};
 		String valeu = _data.getValue();
-		requsteContent[_data.getKey()] = valeu.split(',');
+		_req.header[_data.getKey()] = valeu.split(',');
 	}
-	std::cout << requsteContent["host"][0] << std::endl;
+	if(++i != requses.size())
+	{
+		for (; i < requses.size(); i++)
+		{
+			_req.body.push_back(requses[i]);
+		}
+	}
+	for (std::map<String, std::vector<String> >::iterator it = _req.header.begin(); it != _req.header.end(); it++)
+	{
+		std::cout << "Key : [ " <<  it->first << " ] ";
+		std::cout << "Valeus : [";
+		for (size_t i = 0; i < it->second.size(); i++)
+		{
+			std::cout << it->second[i] << " ";
+		}
+		std::cout << " ]" << std::endl;
+	}
+	std::cout << "body :" << std::endl;
+	for (i = 0;i < _req.body.size();i++)
+	{
+		std::cout <<"[ " << _req.body[i] << " ]" << std::endl;
+	}
+	return _req;
 }
 std::vector<String>	ParssingRequist::SplitBynewLine( String RequistContent )
 {
