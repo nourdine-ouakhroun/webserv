@@ -5,15 +5,19 @@
 #include <map>
 #include <vector>
 
+struct _requset{
+	String requistLine;
+	std::map<String, std::vector<String> > header;
+	std::vector<String> body;
+};
+
 class ParssingRequist
 {
 	private :
-		std::map<String, std::vector<String> > requsteContent;
-		String requistLine;
+
 		ParssingRequist( void );
 	public :
-		ParssingRequist( String );
-		void setreq( std::vector<String> );
+		static _requset setreq( std::vector<String> );
 		~ParssingRequist();
 		static Data	SpliteEvryLine( String );
 		static std::vector<String>	SplitBynewLine( String );
