@@ -50,14 +50,14 @@ class	ServerModel : public GlobalModel
 				String tmpPath;
 				tmpPath.append(ibegin->getPath());
 				std::vector<Data> aliases = ibegin->getData("alias");
+				Logger::info(std::cout, "srcPath : ", srcPath);
+				Logger::info(std::cout, "tmpPath : ", tmpPath);
 				for (size_t i = 0; i < aliases.size(); i++)
 				{
 					std::vector<String> values = String(aliases[i].getValue()).split();
 					if (std::find(values.begin(), values.end(), srcPath) != values.end())
 						return (to_do(*ibegin, value), true);
 				}
-				// checkIsDirectory(String(rootPath).append(srcPath));
-				//
 				if (!srcPath.compare(tmpPath.trim(" \t\n\r")) && tmpPath.length() == srcPath.length())
 					return (to_do(*ibegin, value), true);
 				if (ibegin->getInnerLocation().empty() == false \
@@ -69,8 +69,7 @@ class	ServerModel : public GlobalModel
 		}
 
 		static	void	printServerModelInfo(const ServerModel& serverModel);
-		
+
 };
 
 #endif
-
