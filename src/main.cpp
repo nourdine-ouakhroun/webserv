@@ -12,19 +12,25 @@ void	to_do(const Location& __unused loca, T& value)
 		return ;
 	}
 	String file(data.at(0).getValue());
-	file.append(loca.getPath());
 			 /* |   check if the path ended with /   | */
 	file.append((file.end() - 1)[0] == '/' ? "" : "/");
-	std::vector<String> indexs = String(loca.getData("index").at(0).getValue()).split();
+	std::vector<Data> indexes = loca.getData("index");
+	if (indexes.empty() == true)
+	{
+		value.append(ERROR_403);
+		return ;
+	}
+	std::vector<String> indexs = String(indexes.at(0).getValue()).split();
 	for (size_t i = 0; i < indexs.size(); i++)
 	{
 		String tmp(file);
 		tmp.append(indexs.at(i));
+		Logger::error(std::cerr, "Hello : ", tmp);
 		value = readFile(tmp);
 		if (value.length() != 0)
 			return ;
 	}
-	value.append("404 hello world");
+	value.append(ERROR_404);
 }
 
 
@@ -40,18 +46,18 @@ String	handler(ServerData& servers, std::vector<Data> header)
 	// content.append("Content-Type: ").append(String(model.getData("Accept").at(0).getValue()).split(',').at(0));
 	// content.append("\r\n");
 	String path(String(model.getData("Method").begin()->getValue()).split()[1]);
-	path.rightTrim("/").trim(" \t\r\n");
+	path.trim(" \t\r\n");
 	ServerModel server = servModel.at(0);
 	std::vector<Data> roots = server.getData("root");
 	String root;
 	if (roots.empty() == false)
 		root = roots.at(0).getValue();
-	if (server.checkIsDirectory(root.append(path)) == false)
+	if (root.empty() == false && server.checkIsDirectory(root.append(path)) == 0)
 	{
+		Logger::warn(std::cout, "root value : ", root);
 		content.append(readFile(root));
 		return (content);
 	}
-	// exit(0);
 	if (ServerModel::findLocationByPath(servModel.at(0).getLocation(), root, path, to_do, content) == false)
 		return (ERROR_404);
 	return (content);

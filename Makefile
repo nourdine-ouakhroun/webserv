@@ -13,9 +13,10 @@ SRCS	=	src/main.cpp \
 		src/Exception/ServerException.cpp \
 		src/Server/Server.cpp \
 		src/Utils/ServerData.cpp \
-		src/Utils/Poll.cpp 
+		src/Utils/Poll.cpp
 #		src/Utils/Select.cpp
 
+TEMPLATES =	src/Templates/*.tpp
 HEADERS	=	src/Includes/*.hpp
 
 
@@ -33,7 +34,7 @@ ${NAME}	: ${OBJS}
 	${CPP} ${CPPFLAGS} $^ -o $@
 	@echo "finish !!"
 
-${BIN}/%.o	:	src/%.cpp ${HEADERS}
+${BIN}/%.o	:	src/%.cpp ${HEADERS} ${HEADERS}
 	@mkdir -p $(dir $@)
 	${CPP} ${CPPFLAGS} -c $< -o $@
 
