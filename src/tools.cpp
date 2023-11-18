@@ -1,7 +1,5 @@
 #include "Server.hpp"
 
-
-
 String	readFile(const String& path)
 {
 	String content;
@@ -65,5 +63,7 @@ std::vector<int>	openAllPorts(const std::vector<ServerModel>& serversInfo, Serve
 			ports.push_back(newSocket);
 		}
 	}
+	if (ports.empty() == true)
+		throw (ServerException("Invalid Ports."));
 	return (ports);
 }
