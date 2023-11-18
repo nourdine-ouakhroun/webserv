@@ -22,6 +22,27 @@ String	ServerRun::ParssingRecuistContent(String	ContentRequist)
 {
 	std::vector <String> spletLines = ParssingRequist::SplitBynewLine(ContentRequist);
 	_requset _requisteconten = ParssingRequist::setreq(spletLines);
+	std::cout << "requist line :" << std::endl;
+	for (size_t i = 0;i < _requisteconten.requistLine.size();i++)
+	{
+		std::cout <<"[ " << _requisteconten.requistLine[i] << " ]" << std::endl;
+	}
+	std::cout << "headre :" << std::endl;
+	for (std::map<String, std::vector<String> >::iterator it = _requisteconten.header.begin(); it != _requisteconten.header.end(); it++)
+	{
+		std::cout << "Key : [ " <<  it->first << " ] ";
+		std::cout << "Valeus : [";
+		for (size_t i = 0; i < it->second.size(); i++)
+		{
+			std::cout << it->second[i] << " ";
+		}
+		std::cout << " ]" << std::endl;
+	}
+	std::cout << "body :" << std::endl;
+	for (size_t i = 0;i < _requisteconten.body.size();i++)
+	{
+		std::cout <<"[ " << _requisteconten.body[i] << " ]" << std::endl;
+	}
 	return "<h1> hello </h1>";
 }
 
@@ -83,7 +104,7 @@ void	ServerRun::HandelRequist(struct pollfd	*struct_fds ,size_t	i, std::vector<s
 		}
 		if(bytes < 0 && !ContentRequist.size())
 			return;
-		std::cout << ContentRequist << std::endl;
+		// std::cout << ContentRequist << std::endl;
 		std::string respond = status("200 OK", ParssingRecuistContent(ContentRequist));
 		write(struct_fds[i].fd, respond.c_str(), respond.length());
 		close(struct_fds[i].fd);
