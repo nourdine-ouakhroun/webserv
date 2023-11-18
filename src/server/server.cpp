@@ -67,15 +67,28 @@ Server::Server()
 	servAddr.sin_addr.s_addr = htonl(INADDR_ANY);
 	
 	servFd = errorExit(socket(AF_INET, SOCK_STREAM, 0), "Error : socket!.");
+	fcntl(servFd, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
 	errorExit(bind(servFd, (SA *)&servAddr, sizeof(servAddr)), "Error : bind!.");
 	errorExit(listen(servFd, 10), "Error : listen!.");
 
 	int countReq = 1 ;
 	Request req;
-	while (1) {
 		std::cout << "http://localhost:" << PORT << std::endl;
-		clientFd = errorExit(accept(servFd, (SA *) NULL, NULL), "Error : accept!.");
-		req.readRequest(clientFd);
+	while (1) {
+		clientFd = accept(servFd, NULL, NULL);
+		// std::cout << clientFd << std::endl;
+		if (clientFd < 0)
+			continue ;
+		fcntl(clientFd, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
+		sleep(2);
+		// std::cout << clientFd << std::endl;
+		
+
+		std::string request = req.readRequest(clientFd);
+		req.checkRequest(request);
+		req.displayReq();
+
+
 		
 		std::cout << "countReq : " << countReq++ << std::endl;
 		std::cout << "-----------------------------------------------------" << std::endl;
