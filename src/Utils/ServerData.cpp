@@ -73,27 +73,6 @@ std::vector<ServerModel>	ServerData::getServersByPort(const unsigned short& port
 	return (serv);
 }
 
-// std::vector<ServerModel>	ServerData::getServersByPortAndServerName(const unsigned short& port, const String& serverName)
-// {
-// 	bool	checker = false;
-// 	std::vector<ServerModel>	serv;
-// 	std::vector<ServerModel>::iterator iterBegin = servers.begin();
-// 	std::vector<ServerModel>::iterator iterEnd = servers.end();
-// 	while (iterBegin < iterEnd)
-// 	{
-// 		std::vector<Data> sName = iterBegin->getData("server_name");
-// 		std::vector<Data> value = iterBegin->getData("listen");
-// 		std::vector<String> values = sName.split();
-// 		if (find(values.begin(), values.end(), serverName) != values.end())
-// 				checker = true;
-// 		for (size_t i = 0; i < value.size(); i++)
-// 			if (checker == true && value.empty() == false && (unsigned short)std::strtol(value[i].getValue().c_str(), NULL, 10) == port)
-// 				serv.push_back(*iterBegin);
-// 		iterBegin++;
-// 	}
-// 	return (serv);
-// }
-
 const std::vector<ServerModel>&	ServerData::getAllServers()
 {
 	return (servers);

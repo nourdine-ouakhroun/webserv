@@ -14,9 +14,11 @@ SRCS	= src/Parser/Parser.cpp \
 		src/Server/Server.cpp\
 		src/Server/ParssingRequist.cpp\
 		src/Server/Cgi.cpp\
+		src/Utils/Poll.cpp\
+		src/tools.cpp
+#		src/Utils/Select.cpp
 
-
-
+TEMPLATES =	src/Templates/*.tpp
 HEADERS	=	src/Includes/*.hpp
 
 
@@ -34,7 +36,7 @@ ${NAME}	: ${OBJS}
 	${CPP} ${CPPFLAGS} $^ -o $@
 	@echo "finish !!"
 
-${BIN}/%.o	:	src/%.cpp ${HEADERS}
+${BIN}/%.o	:	src/%.cpp ${HEADERS} ${HEADERS}
 	@mkdir -p $(dir $@)
 	${CPP} ${CPPFLAGS} -c $< -o $@
 
