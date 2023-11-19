@@ -45,48 +45,47 @@ void printreq(_requset _requisteconten)
 void getrespond(const Location & _location, String &respond)
 {
 	( void )respond;
-	std::map<String, String> locations;
 	std::vector<Data> _data = _location.getAllData();
 	String Allpath;
-	for (size_t i = 0; i < _data.size(); i++)
+	std::vector<Data> roots = _location.getData("root");
+	/**
+	 * @attention exit if non root
+	*/
+	if (roots.empty() == true)
+		return ;
+	Allpath = String(roots.at(0).getValue()).append(_location.getPath()).append("/");
+	std::vector<Data> indexs = _location.getData("index");
+	if(indexs.empty() == true)
+		return ;
+	for (size_t i = 0; i < indexs.size(); i++)
 	{
-		locations[_data[i].getKey()] = _data[i].getValue();
-	}
-
-	// std::vector<Data> roots = _location.getData("root");
-	// if (roots.empty() == true)
-		// return ;
-	// String path(roots.at(0).getValue());
-	Allpath = locations["root"].append(_location.getPath()).append("/");
-	std::cout << "Allpath : " << Allpath << std::endl;
-	std::vector<String> index = locations["index"].split();
-	
-	for (size_t i = 0; i < index.size(); i++)
-	{
-		String tmp(Allpath);
-		tmp.append(index[i]);
-		int fd = open(tmp.c_str() , O_RDONLY);
-		if(fd < 0)
-			continue;
-		if(tmp.substr(tmp.find('.')) != "html")
+		std::vector<String> index = String(indexs[i].getValue()).split();
+		for (size_t j = 0; j < index.size(); j++)
 		{
-			Cgi CgiScript(tmp);
-			std::string responCgi = CgiScript.HandelScript();
-			respond = responCgi;
+			String tmp(Allpath);
+			tmp.append(index[j]);
+			int fd = open(tmp.c_str() , O_RDONLY);
+			if(fd < 0)
+				continue;
+			if(tmp.find('.') != SIZE_T_MAX && tmp.substr(tmp.find('.') + 1) != "html")
+			{
+				Cgi CgiScript(tmp);
+				std::string responCgi = CgiScript.HandelScript();
+				respond = responCgi;
+				return ;
+			}
+			char res[200];
+			bzero(res, 200);
+			ssize_t bytes = 0;
+			while((bytes = read(fd, res, 199)) != 0)
+			{
+				respond.append(res);
+				bzero(res, 200);
+				if (bytes < 199)
+					break;
+			}
 			return ;
 		}
-		char res[200];
-		bzero(res, 200);
-		ssize_t bytes = 0;
-		while((bytes = read(fd, res, 199)) != 0)
-		{
-			respond.append(res);
-			bzero(res, 200);
-			if (bytes < 199)
-				break;
-		}
-		break;
-
 	}
 	
 }
@@ -95,7 +94,6 @@ String	ServerRun::ParssingRecuistContent(String	ContentRequist)
 	_requset					requist;
 	std::string					port;
 	String						respond;
-	String						path("");
 	std::string					serverName;
 	std::vector<String>			spletLines;
 	std::vector<ServerModel>	Serv;
@@ -118,8 +116,11 @@ String	ServerRun::ParssingRecuistContent(String	ContentRequist)
 		std::cout << "error : ambeguis server" << std::endl;
 		exit(1);
 	}
+	String	path;
+	std::vector<Data> root = Serv[0].getData("root");
+	if(!root.empty())
+		path = root[0].getValue();
 	ServerModel::findLocationByPath(Serv[0].getLocation(), path,requist.requistLine[1], getrespond, respond);
-	// std::cout << path << std::endl;
 	return respond;
 }
 
@@ -181,7 +182,7 @@ void	ServerRun::HandelRequist(struct pollfd	*struct_fds ,size_t	i, std::vector<s
 		}
 		if(bytes < 0 && !ContentRequist.size())
 			return;
-		// std::cout << ContentRequist << std::endl;
+		std::cout << ContentRequist << std::endl;
 		std::string respond = status("200 OK", ParssingRecuistContent(ContentRequist));
 		write(struct_fds[i].fd, respond.c_str(), respond.length());
 		close(struct_fds[i].fd);

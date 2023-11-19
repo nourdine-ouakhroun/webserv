@@ -1,0 +1,23 @@
+window.mltvConf = {
+    fusionPath: "https://fusion.molotov.tv",
+    apiPath: "https://fapi.molotov.tv",
+    repoHash: "2.134.5 - dfadc65ddf61d2b72afcfad5d37f1b617a78d395",
+    facebookAppId: "777617075619041",
+    fbEnabled: false,
+    giftEnabled: false,
+    googleEnabled: true,
+    appleAppId: "tv.molotov.website",
+    appleEnabled: false,
+    seoEnabled: true,
+    htmlImagesUrl: "https://socialimg.molotov.tv",
+    segment : {
+        apiKey : "UfkakUvjcigPlw94qjHubGijQKi74edI",
+        analyticsJSDir : "https://cdn.segment.com/analytics.js/v1/",
+    },
+    googleId: "989731475993-kcjbpoiqabplli9022m6t57aqu2akvcn.apps.googleusercontent.com",
+    staticUrl: "https://images.molotov.tv/data/landing",
+    adyenPublicKey: "10001|F5C7EFE3C1212C4AED1CB7E03327F1E4218700A6BE3C980C50F5C6C53ECC24D3A40AB23084F2385F0AC68F5883FA1E3A4EA7835367254A4932A514685E0EBD0D1A8EF0C6803917D249DB06FD8755EA9CFD109B6B3302796F6DDAED4B0A1265B9D82FBE456AA8591D3646A9F142DBAE137BB9FD38B634D9CC4D9CE9B9C42765CDF54BA5EC0DDB14968AF67AC26C21DA173B676F49226CCBF26B2316752ADB3CD97A6613BC658F1FD5E26CD309E9AD4ED230BDBBC259D14D1164492B01FF9DE58ADE3494B41D39BCDBD531AB960034D5FBC488DEBAA06D857F5EE2B8F0BE830D3AC17D9F1B163B87FC8428FA7BFADA27305C08C9BB112FC1ADA3580C813A77DE55",
+    proxyHost: "192.168.200.240",
+    proxyPort: "8000",
+    recurlyKey: "fra-WKfKhIC365T9yh9WjBXqrq",
+}
