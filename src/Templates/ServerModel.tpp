@@ -32,7 +32,6 @@ bool	ServerModel::findLocationByPath(std::vector<Location> locations, const Stri
 			std::vector<Data> aliases = ibegin->getData("alias");
 			for (size_t i = 0; i < aliases.size(); i++)
 			{
-				std::cout << "{ " << ibegin->getData("root").at(0).getValue() << " }" << std::endl;
 				std::vector<String> values = String(aliases[i].getValue()).split();
 				if (std::find(values.begin(), values.end(), srcPath) != values.end())
 				{
@@ -43,7 +42,12 @@ bool	ServerModel::findLocationByPath(std::vector<Location> locations, const Stri
 				}
 			}
 		}
-		if (!srcPath.compare(tmpPath.trim(" \t\n\r")) && tmpPath.length() == srcPath.length())
+		tmpPath.trim(" \t\n\r");
+		if (srcPath.size() > 0)
+			if (srcPath.at(srcPath.size() - 1) == '/' && tmpPath.at(tmpPath.size() - 1) != '/')
+				tmpPath.append("/");
+		
+		if (!srcPath.compare(tmpPath) && tmpPath.length() == srcPath.length())
 			return (to_do(*ibegin, value), true);
 		if (ibegin->getInnerLocation().empty() == false \
 			&& findLocationByPath(ibegin->getInnerLocation(), ibegin->getData("root").at(0).getValue(), srcPath, to_do, value) == true)
