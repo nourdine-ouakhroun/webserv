@@ -33,7 +33,15 @@ std::vector<ServerModel>	getServer(ServerData& servers, std::vector<Data> header
 {
 	GlobalModel model(header);
 	std::vector<ServerModel>	servModel;
-	long host = std::strtol(model.getData("Host").at(0).getValue().c_str(), NULL, 10);
+	String strHost(model.getData("Host").at(0).getValue());
+	std::vector<String> str = strHost.split(':');
+	if (str.empty() == false)
+	{
+		servModel = servers.getServersByServerName(str.at(0));
+		if (servModel.empty() == false)
+			return (servModel);
+	}
+	long host = std::strtol(strHost.c_str(), NULL, 10);
 	if (host != 0)
 		servModel = servers.getServersByPort(getPort(model.getData("Host").at(0).getValue()));
 	else

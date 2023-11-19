@@ -1,4 +1,5 @@
 #include "Parser.hpp"
+#include "Checker.hpp"
 #include "Server.hpp"
 
 
@@ -25,7 +26,6 @@ void	to_do(const Location& __unused loca, T& value)
 	{
 		String tmp(file);
 		tmp.append(indexs.at(i));
-		Logger::error(std::cerr, "Hello : ", tmp);
 		value = readFile(tmp);
 		if (value.length() != 0)
 			return ;
@@ -49,17 +49,12 @@ String	handler(ServerData& servers, std::vector<Data> header)
 	path.trim(" \t\r\n");
 	ServerModel server = servModel.at(0);
 	// setLogs(server);
-	Logger::info(std::cout, "hello world : ", "Test Again.");
 	std::vector<Data> roots = server.getData("root");
 	String root;
 	if (roots.empty() == false)
 		root = roots.at(0).getValue();
 	if (root.empty() == false && server.checkIsDirectory(root.append(path)) == 0)
-	{
-		// Logger::warn<std::fstream, String>(std::fstream(server.access_log), "root value : ", root);
-		content.append(readFile(root));
-		return (content);
-	}
+		return (content.append(readFile(root)));
 	if (ServerModel::findLocationByPath(servModel.at(0).getLocation(), root, path, to_do, content) == false)
 		return (ERROR_404);
 	return (content);
@@ -67,6 +62,7 @@ String	handler(ServerData& servers, std::vector<Data> header)
 
 bool	requestHandler(const std::vector<int>& port, Server& server, ServerData& serv, int readyFd)
 {
+	// static	size_t	totalByteSend;
 	if (readyFd > -1)
 	{
 		if (find(port.begin(), port.end(), readyFd) != port.end())
@@ -81,13 +77,15 @@ bool	requestHandler(const std::vector<int>& port, Server& server, ServerData& se
 			String header = server.recieve(readyFd);
 			if (header.empty() == true)
 				return (true);
-			// std::cout << header << std::endl;
-			std::cout << "---------------------------------------------------------------------" << std::endl;
-			String content("HTTP/1.1 200 ok\r\n\r\n");
+			std::cout << header << std::endl;
+			String content("HTTP/1.1 200 OK\r\n\r\n");
 			content.append(handler(serv, Parser::parseHeader(header)));
-			// ssize_t sender = server.send(readyFd, content);
-			if (server.send(readyFd, content) == -1)
+			std::cout << "==================> Response <=====================" << std::endl;
+			std::cout << content << std::endl;
+			ssize_t sender = server.send(readyFd, content);
+			if (sender == -1)
 				Logger::error(std::cerr, "Send Failed.", "");
+			std::cout << "Sender : " << sender << std::endl;
 			close(readyFd);
 			server.fds.erase_fd(readyFd);
 		}
@@ -148,6 +146,8 @@ void	start(Parser& parser)
 	try
 	{
 		Parser parser(av[1]);
+		Checker checker(parser.getServers());
+		checker.fullCheck();
 		start(parser);
 	}
 	catch (ParsingException& e)
