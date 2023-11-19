@@ -29,7 +29,6 @@ class	ServerModel : public GlobalModel
 			if (!access(filename.c_str(), F_OK))
 			{
 				DIR *dir = opendir(filename.c_str());
-				std::cout << "DIR : " << &dir << std::endl;
 				if (dir != NULL)
 				{
 					closedir(dir);
