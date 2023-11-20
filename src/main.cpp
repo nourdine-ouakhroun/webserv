@@ -2,7 +2,6 @@
 #include "Checker.hpp"
 #include "Server.hpp"
 
-
 template <typename T>
 void	to_do(const Location& loca, T& value)
 {
@@ -18,7 +17,7 @@ void	to_do(const Location& loca, T& value)
 	std::vector<Data> indexes = loca.getData("index");
 	if (indexes.empty() == true)
 	{
-		value.append(ERROR_403);
+		value = ERROR_403;
 		return ;
 	}
 	std::vector<String> indexs = String(indexes.at(0).getValue()).split();
@@ -43,20 +42,20 @@ String	handler(ServerData& servers, std::vector<Data> header)
 	servModel = getServer(servers, header);
 	if (servModel.empty() == true)
 		servModel = servers.getAllServers();
-	// content.append("Content-Type: ").append(String(model.getData("Accept").at(0).getValue()).split(',').at(0));
-	// content.append("\r\n");
 	String path(String(model.getData("Method").begin()->getValue()).split()[1]);
 	path.trim(" \t\r\n");
 	ServerModel server = servModel.at(0);
-	// setLogs(server);
 	std::vector<Data> roots = server.getData("root");
 	String root;
 	if (roots.empty() == false)
 		root = roots.at(0).getValue();
 	if (root.empty() == false && server.checkIsDirectory(root.append(path)) == 0)
 		return (content.append(readFile(root)));
-	if (ServerModel::findLocationByPath(servModel.at(0).getLocation(), root, path, to_do, content) == false)
-		return (ERROR_404);
+	path.rightTrim("/");
+	Location	loca = ServerModel::getLocationByPath(servModel.at(0).getLocation(), path);
+	content = ERROR_404;
+	if (loca.getPath().empty() == false)
+		to_do(loca, content);
 	return (content);
 }
 
@@ -124,6 +123,7 @@ void	start(Parser& parser)
 	ServerData servers(parser.getServers());
 	try
 	{
+		// servers.displayServers();
 		createServer(servers);
 	}
 	catch (std::exception& e)
