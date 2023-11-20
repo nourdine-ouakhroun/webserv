@@ -6,6 +6,9 @@ ServerModel::ServerModel( void ) : GlobalModel()
 
 ServerModel::ServerModel(const GlobalModel& model, const std::vector<Location>& _location) : GlobalModel(model), location(_location)
 {
+	std::vector<Data> serverRoot = getData("root");
+	if (serverRoot.empty() == false)
+		addRootToLocation(location, serverRoot.at(0).getValue());
 }
 
 ServerModel::~ServerModel( void ) throw()
@@ -24,6 +27,9 @@ ServerModel& ServerModel::operator=(const ServerModel& target)
 	{
 		GlobalModel::operator=(target);
 		location = target.location;
+		std::vector<Data> serverRoot = getData("root");
+		if (serverRoot.empty() == false)
+			addRootToLocation(location, serverRoot.at(0).getValue());
 	}
 	return (*this);
 }
@@ -31,6 +37,9 @@ ServerModel& ServerModel::operator=(const ServerModel& target)
 void	ServerModel::setLocation(std::vector<Location>& _location)
 {
 	location = _location;
+	std::vector<Data> serverRoot = getData("root");
+	if (serverRoot.empty() == false)
+		addRootToLocation(location, serverRoot.at(0).getValue());
 }
 
 const std::vector<Location>&	ServerModel::getLocation( void ) const
@@ -72,4 +81,22 @@ Location	ServerModel::getLocationByPath(std::vector<Location> locations, const S
 		ibegin++;
 	}
 	return (Location());
+}
+
+void	ServerModel::addRootToLocation(std::vector<Location>&	servers, const String& serverRoot)
+{
+	if (servers.empty() == true)
+		return ;
+	for (size_t i = 0; i < servers.size(); i++)
+	{
+		String rootValue(serverRoot);
+		std::vector<Data> roots = servers.at(i).getData("root");
+		if (roots.empty() == true)
+			servers.at(i).addData(Data("root", rootValue));
+		else
+			rootValue = roots.at(0).getValue();
+		std::vector<Location>& innerLocation = servers.at(i).getInnerLocation();
+		if (innerLocation.empty() == false)
+			addRootToLocation(innerLocation, rootValue);
+	}
 }
