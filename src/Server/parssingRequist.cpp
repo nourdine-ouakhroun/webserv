@@ -13,7 +13,7 @@ Data ParssingRequist::SpliteEvryLine( String LineRequist)
 	if(Position != SIZE_T_MAX)
 	{
 		_data.setKey(LineRequist.substr(0, Position));
-		_data.setValue(LineRequist.substr(Position + 2));
+		_data.setValue(LineRequist.substr(Position + 2, LineRequist.size() - (Position + 2) - 1));
 	}
 	else
 		throw std::runtime_error("");

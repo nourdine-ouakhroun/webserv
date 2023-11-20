@@ -14,7 +14,6 @@ int	ServerRun::Newsocket()
 	}
 	int option = 1;
 	setsockopt(socketfd, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(int));
-	std::cout << socketfd << std::endl;
 	return socketfd;
 }
 void printreq(_requset _requisteconten)
@@ -44,7 +43,6 @@ void printreq(_requset _requisteconten)
 
 void getrespond(const Location & _location, String &respond)
 {
-	( void )respond;
 	std::vector<Data> _data = _location.getAllData();
 	String Allpath;
 	std::vector<Data> roots = _location.getData("root");
@@ -74,6 +72,7 @@ void getrespond(const Location & _location, String &respond)
 				respond = responCgi;
 				return ;
 			}
+			respond.clear();
 			char res[200];
 			bzero(res, 200);
 			ssize_t bytes = 0;
@@ -93,34 +92,53 @@ String	ServerRun::ParssingRecuistContent(String	ContentRequist)
 {
 	_requset					requist;
 	std::string					port;
-	String						respond;
-	std::string					serverName;
+	String						respond(ERROR_404);
+	String						serverName;
 	std::vector<String>			spletLines;
 	std::vector<ServerModel>	Serv;
-	ServerModel 				finalserver;
 
 	spletLines 	= ParssingRequist::SplitBynewLine(ContentRequist);
 	requist 	= ParssingRequist::setreq(spletLines);
-	serverName = requist.header["Host"].size() != 1 ? "" : requist.header["Host"][0].split(':')[0];
+	serverName	= requist.header["Host"].size() != 1 ? "" : requist.header["Host"][0].split(':')[0];
 	if(serverName.empty())
-	{
-		std::cout << "error : Host not fonde" << std::endl;
-		exit(1);
-	}
+		return "<h1> Invalid URL </h1>";
+
+	/**
+		* @details check the if the Host have a port, if not you can work with port 80
+	*/
+ 
 	port = requist.header["Host"][0].split(':').size() == 2 ? requist.header["Host"][0].split(':')[1] : "80";
 	Serv = servers.getServersByPort((unsigned short)strtol(port.c_str(), NULL, 10));
-	if(Serv.size() > 1)
-		Serv = servers.getServersByServerName(serverName);
-	if(Serv.size() > 1)
+
+	/**
+		* @details check the if the Host is exist
+	*/
+	for (size_t index_Serv = 0; index_Serv < Serv.size(); index_Serv++)
 	{
-		std::cout << "error : ambeguis server" << std::endl;
-		exit(1);
+		std::vector<Data>	_data;
+
+		_data = Serv[index_Serv].getData("server_name");
+		for (size_t index_data = 0; index_data < _data.size(); index_data++)
+		{
+			std::vector<String>	serversname;
+
+			serversname = String(_data[index_data].getValue()).split();
+			for (size_t index_serversname = 0; index_serversname < serversname.size(); index_serversname++)
+			{
+				if(serversname[index_serversname] == serverName)
+				{
+					String				path;
+					std::vector<Data>	root;
+
+					root = Serv[index_Serv].getData("root");
+					if(!root.empty())
+						path = root[0].getValue();
+					ServerModel::findLocationByPath(Serv[index_Serv].getLocation(), path,requist.requistLine[1], getrespond, respond);
+					return respond;
+				}
+			}
+		}
 	}
-	String	path;
-	std::vector<Data> root = Serv[0].getData("root");
-	if(!root.empty())
-		path = root[0].getValue();
-	ServerModel::findLocationByPath(Serv[0].getLocation(), path,requist.requistLine[1], getrespond, respond);
 	return respond;
 }
 
@@ -141,7 +159,7 @@ std::string status(std::string statuscode, std::string stringcode)
 	(void) stringcode;
 	std::string header = "HTTP/1.1 ";
 	header.append(statuscode);
-	header.append("\r\nContent-Type: text/html\r\n\r\n");
+	header.append("\r\n\r\n");
 	header.append(stringcode);
 	return header;
 }
@@ -184,6 +202,7 @@ void	ServerRun::HandelRequist(struct pollfd	*struct_fds ,size_t	i, std::vector<s
 			return;
 		std::cout << ContentRequist << std::endl;
 		std::string respond = status("200 OK", ParssingRecuistContent(ContentRequist));
+		// std::cout << respond << std::endl;
 		write(struct_fds[i].fd, respond.c_str(), respond.length());
 		close(struct_fds[i].fd);
 		erase(struct_fdsS,i);
@@ -211,7 +230,10 @@ void	ServerRun::acceptRquist( std::vector<int>	servers )
 			exit(1);
 		}
 		if (pollValeu == 0)
+		{
+			std::cout << "RELOAD SERVER" << std::endl;
 			continue ;
+		}
 		for(size_t i = 0; i < struct_fdsC.size(); i++)
 			HandelRequist(&struct_fdsC[0], i, struct_fdsS, servers);
 	}
@@ -232,15 +254,26 @@ void	ServerRun::RunAllServers()
 	for(size_t i = 0; i < ports.size(); i++)
 	{
 		int serverfd = this->Newsocket();
-		std::cout << ports[i] << std::endl;
-		this->bindConection(ports[i], serverfd); 
+		if(this->bindConection(ports[i], serverfd))
+		{
+			std::cout << "PORT : " << ports[i] << " can't bind" << std::endl;
+			continue;
+		}
+		std::cout << "PORT : " << ports[i] << " binded" << std::endl;
+		this->listenSocket(serverfd);
+		serversSocket.push_back(serverfd);
+	}
+	if(!serversSocket.size())
+	{
+		int serverfd = this->Newsocket();
+		this->bindConection(80, serverfd);
 		this->listenSocket(serverfd);
 		serversSocket.push_back(serverfd);
 	}
 	this->acceptRquist( serversSocket );
 }
 
-void	ServerRun::bindConection(int port, int socketfd)
+bool	ServerRun::bindConection(int port, int socketfd)
 {
 	struct sockaddr_in addressSocketStruct;
 	bzero(&addressSocketStruct, sizeof(addressSocketStruct));
@@ -248,12 +281,10 @@ void	ServerRun::bindConection(int port, int socketfd)
 	addressSocketStruct.sin_port = htons(port);
 	addressSocketStruct.sin_addr.s_addr = INADDR_ANY;
 
-	int bindr =  bind(socketfd,	(struct sockaddr *)&addressSocketStruct, sizeof(addressSocketStruct));
-	if(bindr < 0)
-	{
-		std::cout << "error : the conectin not binded ." << std::endl;
-		exit(0);
-	}
+	if(bind(socketfd,	(struct sockaddr *)&addressSocketStruct, sizeof(addressSocketStruct)) == 0)
+		return 0;
+	close(socketfd);
+	return 1;
 }
 void ServerRun::listenSocket(int socketfd)
 {
