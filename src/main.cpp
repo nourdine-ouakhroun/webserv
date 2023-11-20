@@ -4,7 +4,7 @@
 
 
 template <typename T>
-void	to_do(const Location& __unused loca, T& value)
+void	to_do(const Location& loca, T& value)
 {
 	std::vector<Data>	data = loca.getData("root");
 	if (data.empty() == true)
