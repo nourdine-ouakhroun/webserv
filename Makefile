@@ -4,6 +4,7 @@ NAME	=	webserv
 SRCS	=	src/main.cpp \
 		src/tools.cpp \
 		src/Parser/Parser.cpp \
+		src/Parser/Checker.cpp \
 		src/Parser/Location.cpp \
 		src/Models/GlobalModel.cpp \
 		src/Models/ServerModel.cpp \
@@ -34,7 +35,7 @@ ${NAME}	: ${OBJS}
 	${CPP} ${CPPFLAGS} $^ -o $@
 	@echo "finish !!"
 
-${BIN}/%.o	:	src/%.cpp ${HEADERS} ${HEADERS}
+${BIN}/%.o	:	src/%.cpp ${HEADERS} ${TEMPLATES}
 	@mkdir -p $(dir $@)
 	${CPP} ${CPPFLAGS} -c $< -o $@
 
