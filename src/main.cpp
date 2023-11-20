@@ -2,6 +2,9 @@
 #include "Checker.hpp"
 #include "Server.hpp"
 
+String	checkIsFile(const std::vector<Location>& locations, String filePath);
+
+
 template <typename T>
 void	to_do(const Location& loca, T& value)
 {
@@ -49,8 +52,12 @@ String	handler(ServerData& servers, std::vector<Data> header)
 	String root;
 	if (roots.empty() == false)
 		root = roots.at(0).getValue();
+	Logger::success(std::cout, "path : ", path);
 	if (root.empty() == false && server.checkIsDirectory(root.append(path)) == 0)
 		return (content.append(readFile(root)));
+	content = checkIsFile(servModel.at(0).getLocation(), path);
+	if (content.empty() == false)
+		return (content);
 	path.rightTrim("/");
 	Location	loca = ServerModel::getLocationByPath(servModel.at(0).getLocation(), path);
 	content = ERROR_404;
@@ -76,11 +83,12 @@ bool	requestHandler(const std::vector<int>& port, Server& server, ServerData& se
 			String header = server.recieve(readyFd);
 			if (header.empty() == true)
 				return (true);
-			// std::cout << header << std::endl;
+			std::cout << header << std::endl;
 			String content("HTTP/1.1 200 OK\r\n\r\n");
 			content.append(handler(serv, Parser::parseHeader(header)));
-			// std::cout << "==================> Response <=====================" << std::endl;
-			// std::cout << content << std::endl;
+			std::cout << "==================> Response Start <=====================" << std::endl;
+			std::cout << content << std::endl;
+			std::cout << "==================> Response End <=====================" << std::endl;
 			ssize_t sender = server.send(readyFd, content);
 			if (sender == -1)
 				Logger::error(std::cerr, "Send Failed.", "");
