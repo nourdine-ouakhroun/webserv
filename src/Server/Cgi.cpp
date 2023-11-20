@@ -17,7 +17,7 @@ Cgi::Cgi(std::string ScriptName)
 	}
 	if(this->PathScript.substr(PathScript.find('.')) == ".py")
 	{
-		std::string cmd("/usr/bin/python ");
+		std::string cmd("/usr/bin/python3 ");
 		cmd.append(PathScript);
 		MultCGI[".py"] = cmd;
 	}
