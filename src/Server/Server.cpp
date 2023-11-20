@@ -11,7 +11,7 @@ int	Server::createNewSocket(unsigned short port)
 	int nSocket = socket(AF_INET, SOCK_STREAM, 0);
 	if (nSocket < 0)
 		return (-1);
-	fcntl(nSocket, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
+	// fcntl(nSocket, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
 	int status = setsockopt(nSocket, SOL_SOCKET ,SO_REUSEADDR , &opt, sizeof(int));
     if(status < 0)
 	{
@@ -41,7 +41,7 @@ Server::Server(const unsigned short &_port)
 	int socketFd = socket(AF_INET, SOCK_STREAM, 0);
 	if (socketFd < 0)
 		throw (ServerException("socket faild."));
-	fcntl(socketFd, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
+	// fcntl(socketFd, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
 	int status = setsockopt(socketFd, SOL_SOCKET ,SO_REUSEADDR , &opt, sizeof(int));
 	if(status < 0)
 	{
@@ -91,7 +91,7 @@ int 	Server::accept(int targetSocket)
 					);
 	if (newSocket < 0)
 		return (errorNumber);
-	fcntl(newSocket, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
+	// fcntl(newSocket, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
 	return (newSocket);
 }
 
@@ -115,9 +115,15 @@ String	Server::recieve(int socket)
 
 int	Server::send(int socket, String response)
 {
-
-	int	nBit = (int)::send(socket, response.c_str(), response.length(), 0);
-	if (nBit < 0)
-		return (errorNumber);
-	return (nBit);
+	int	totalBytes = 0;
+	while (1)
+	{
+		int	nBit = (int)::send(socket, response.c_str(), response.length(), 0);
+		if (nBit < 0)
+			return (errorNumber);
+		totalBytes += nBit;
+		if (totalBytes == (int)response.length())
+			break ;
+	}
+	return (totalBytes);
 }
