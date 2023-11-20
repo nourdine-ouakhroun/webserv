@@ -77,15 +77,15 @@ bool	requestHandler(const std::vector<int>& port, Server& server, ServerData& se
 			String header = server.recieve(readyFd);
 			if (header.empty() == true)
 				return (true);
-			std::cout << header << std::endl;
+			// std::cout << header << std::endl;
 			String content("HTTP/1.1 200 OK\r\n\r\n");
 			content.append(handler(serv, Parser::parseHeader(header)));
-			std::cout << "==================> Response <=====================" << std::endl;
-			std::cout << content << std::endl;
+			// std::cout << "==================> Response <=====================" << std::endl;
+			// std::cout << content << std::endl;
 			ssize_t sender = server.send(readyFd, content);
 			if (sender == -1)
 				Logger::error(std::cerr, "Send Failed.", "");
-			std::cout << "Sender : " << sender << std::endl;
+			// std::cout << "Sender : " << sender << std::endl;
 			close(readyFd);
 			server.fds.erase_fd(readyFd);
 		}
