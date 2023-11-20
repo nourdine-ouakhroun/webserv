@@ -7,7 +7,7 @@
 class Data
 {
 	String	key;
-	String value;
+	String	value;
 
 	public :
 		Data(const String& _key, const String& _value);
