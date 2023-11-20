@@ -9,6 +9,7 @@
 #include <fcntl.h>
 #include <map>
 #include <vector>
+#include <sstream>
 
 typedef std::map<std::string, std::string> smap;
 
@@ -17,21 +18,30 @@ class Request
 private:
 	std::vector<std::string>	requestLine;
 	smap						headerRequest;
-	smap						bodyRequest;
+	int 						clientFd;
+	// smap						bodyRequest;
 public:
 	Request( void );
 	~Request( void );
+	Request( int clientFd );
 
 	int			errorExit(int status, std::string errorMsg);
-	std::string	readRequest(const int &clientFd);
-	void		checkRequest(std::string);
+	std::string	readRequest();
+	
+	void		parseReq(std::string);
 	void		parseLine(std::string);
+	void		parseHeader(std::string h1);
+	
+	
 	void		displayReq();
 
 
 
-	void	parseHeader(std::string h1, int hOrb);
 	// void 	parseBody(std::string h1, int hOrb);
+
+	// start from here
+	void 	requestIsFormed();
+	void 	statusCodeError(int statusCode, std::string phrase);
 };
 
 

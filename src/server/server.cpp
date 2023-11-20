@@ -72,7 +72,6 @@ Server::Server()
 	errorExit(listen(servFd, 10), "Error : listen!.");
 
 	int countReq = 1 ;
-	Request req;
 		std::cout << "http://localhost:" << PORT << std::endl;
 	while (1) {
 		clientFd = accept(servFd, NULL, NULL);
@@ -84,9 +83,9 @@ Server::Server()
 		// std::cout << clientFd << std::endl;
 		
 
-		std::string request = req.readRequest(clientFd);
-		req.checkRequest(request);
-		req.displayReq();
+		Request req(clientFd);
+		std::string request = req.readRequest();
+		req.parseReq(request);
 
 
 		

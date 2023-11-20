@@ -8,7 +8,7 @@
 #include <unistd.h>
 #define SA 		struct sockaddr
 #define SA_IN 	struct sockaddr_in
-#define PORT 80
+#define PORT 8080
 #define SIZE 2048
 
 class	Server
