@@ -12,13 +12,13 @@ class GlobalModel
 		GlobalModel( void );
 		GlobalModel(std::vector<Data> _data);
 		GlobalModel(const GlobalModel& copy);
-		virtual ~GlobalModel( void );
-		GlobalModel&	operator=(const GlobalModel& target);
-		void	addData(const Data& _data);
-		std::vector<Data>	getData(const String& key) const;
+		virtual						~GlobalModel( void );
+		GlobalModel&				operator=(const GlobalModel& target);
+		void						addData(const Data& _data);
+		std::vector<Data>			getData(const String& key) const;
 		const std::vector<Data>&	getAllData( void ) const;
-		bool	isExist(const Data& value);
-		static	void	printGlobalModel(const GlobalModel&, String&);
+		bool						isExist(const Data& value);
+		static	void				printGlobalModel(const GlobalModel&, String&);
 };
 
 #endif

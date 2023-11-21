@@ -36,7 +36,7 @@ ${NAME}	: ${OBJS}
 	${CPP} ${CPPFLAGS} $^ -o $@
 	@echo "finish !!"
 
-${BIN}/%.o	:	src/%.cpp ${HEADERS} ${HEADERS}
+${BIN}/%.o	:	src/%.cpp ${HEADERS} ${TEMPLATES}
 	@mkdir -p $(dir $@)
 	${CPP} ${CPPFLAGS} -c $< -o $@
 
