@@ -1,38 +1,88 @@
 #include "Parser.hpp"
 #include "Checker.hpp"
 #include "Server.hpp"
+#include <dirent.h>
 
 String	checkIsFile(const std::vector<Location>& locations, String filePath);
 
-
-template <typename T>
-void	to_do(const Location& loca, T& value)
+String	tryFiles(const std::vector<String>& files, const String& path)
 {
-	std::vector<Data>	data = loca.getData("root");
-	if (data.empty() == true)
+	String value;
+	for (size_t i = 0; i < files.size() - 1; i++)
 	{
-		value.append(ERROR_404);
-		return ;
-	}
-	String file(data.at(0).getValue());
-			 /* |   check if the path ended with /   | */
-	file.append((file.end() - 1)[0] == '/' ? "" : "/");
-	std::vector<Data> indexes = loca.getData("index");
-	if (indexes.empty() == true)
-	{
-		value = ERROR_403;
-		return ;
-	}
-	std::vector<String> indexs = String(indexes.at(0).getValue()).split();
-	for (size_t i = 0; i < indexs.size(); i++)
-	{
-		String tmp(file);
-		tmp.append(indexs.at(i));
+		String tmp(path);
+		tmp.append(files.at(i));
 		value = readFile(tmp);
 		if (value.length() != 0)
-			return ;
+			return (value);
 	}
-	value.append(ERROR_404);
+	return (value);
+}
+
+String	getFileContent(const std::vector<String>& indexes, const String& path)
+{
+	String value;
+	for (size_t i = 0; i < indexes.size(); i++)
+	{
+		String tmp(path);
+		tmp.append(indexes.at(i));
+		value = readFile(tmp);
+		if (value.length() != 0)
+			return (value);
+	}
+	return (value);
+}
+
+String	getDirectoryContent(const String& dirname, String path)
+{
+	DIR	*dir = opendir(dirname.c_str());
+	if (!dir)
+		return "";
+	String body("<h1>Index of ");
+	body.append(path).append("</h1><hr><pre>");
+	struct dirent *dirp;
+	path.trim("/");
+	while ((dirp = readdir(dir)) != NULL)
+	{
+		/**
+		 * @brief body end with this form.
+		 *		<h1>Index of /test</h1><hr><pre><a href="/test/.">.</a><br>
+		 */
+		body.append("<a href=\"").append(path).append("/").append(dirp->d_name).append("\">");
+		body.append(dirp->d_name).append("</a><br>");
+		// std::cout << dirp->d_name << std::endl;
+		// std::cout << body << std::endl;
+	}
+	body.append("</pre><hr>");
+	closedir(dir);
+	return (body);
+}
+
+String	to_do(const Location& loca)
+{
+	String content;
+	String	path(loca.getPath());
+	std::vector<Data>	data = loca.getData("root");
+	if (data.empty() == true)
+		return (ERROR_404);
+	String file(data.at(0).getValue());
+	file.append(path).append((file.end() - 1)[0] == '/' ? "" : "/"); // -> check if the path ended with '/'
+	std::vector<Data> indexes = loca.getData("index");
+	std::vector<Data> autoIndex = loca.getData("autoindex");
+	if (indexes.empty() == true && (autoIndex.empty() == true || (autoIndex.empty() == false && !autoIndex.at(0).getValue().compare("off"))))
+		return (ERROR_403);
+	if (autoIndex.empty() == false && !autoIndex.at(0).getValue().compare("on"))
+		return (getDirectoryContent(file, path));
+	content = tryFiles(String(loca.getData("try_files").at(0).getValue()).split(), file);
+	if (content.empty() == false)
+		return (content);
+	for (size_t i = 0; i < indexes.size(); i++)
+	{
+		content = getFileContent(String(indexes.at(i).getValue()).split(), file);
+		if (content.empty() == false)
+			return (content);
+	}
+	return (ERROR_404);
 }
 
 
@@ -60,15 +110,13 @@ String	handler(ServerData& servers, std::vector<Data> header)
 		return (content);
 	path.rightTrim("/");
 	Location	loca = ServerModel::getLocationByPath(servModel.at(0).getLocation(), path);
-	content = ERROR_404;
 	if (loca.getPath().empty() == false)
-		to_do(loca, content);
+		return (to_do(loca));
 	return (content);
 }
 
 bool	requestHandler(const std::vector<int>& port, Server& server, ServerData& serv, int readyFd)
 {
-	// static	size_t	totalByteSend;
 	if (readyFd > -1)
 	{
 		if (find(port.begin(), port.end(), readyFd) != port.end())
@@ -83,12 +131,9 @@ bool	requestHandler(const std::vector<int>& port, Server& server, ServerData& se
 			String header = server.recieve(readyFd);
 			if (header.empty() == true)
 				return (true);
-			std::cout << header << std::endl;
+			// std::cout << header << std::endl;
 			String content("HTTP/1.1 200 OK\r\n\r\n");
 			content.append(handler(serv, Parser::parseHeader(header)));
-			std::cout << "==================> Response Start <=====================" << std::endl;
-			std::cout << content << std::endl;
-			std::cout << "==================> Response End <=====================" << std::endl;
 			ssize_t sender = server.send(readyFd, content);
 			if (sender == -1)
 				Logger::error(std::cerr, "Send Failed.", "");
