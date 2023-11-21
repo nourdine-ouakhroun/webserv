@@ -1,129 +1,104 @@
-#include "Server.hpp"
+#include "server.hpp"
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <fstream>
+#include <ctime>
 
-Server::Server( void )
-{
-	socketLen = sizeof(socketData);
-}
+#include "Request.hpp"
 
-int	Server::createNewSocket(unsigned short port)
+
+std::string readHtml(std::string file)
 {
-	int opt = 1;
-	int nSocket = socket(AF_INET, SOCK_STREAM, 0);
-	if (nSocket < 0)
-		return (-1);
-	// fcntl(nSocket, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
-	int status = setsockopt(nSocket, SOL_SOCKET ,SO_REUSEADDR , &opt, sizeof(int));
-    if(status < 0)
-	{
-       	std::cerr << "Couldn't set options" << std::endl;
-		return (-1);
+	std::ifstream	in;
+	std::string		content;
+	std::string		input;
+
+	in.open(file);
+	if (in.is_open()) {
+		while (std::getline(in, input,'\n'))
+		{
+			content += input;
+		}
 	}
-	struct sockaddr_in socketData;
-	bzero(&socketData, socketLen);
-	socketData.sin_port = htons(port);
-	socketData.sin_family = AF_INET;
-	socketData.sin_addr.s_addr = INADDR_ANY;
-	if (bind(nSocket, (struct sockaddr *)&socketData, socketLen) < 0 || listen(nSocket, 5) < 0)
+	return (content);
+}
+
+// void checkRequest(std::string request)
+// {
+// 	std::string					line;
+// 	std::vector<std::string>	content;
+// 	size_t						pos = 0;
+
+// 	while ((pos = request.find("\r\n")) != std::string::npos)
+// 	{
+// 		if (request == "\r\n")
+// 			break ;
+// 		line = request.substr(0, pos);
+// 		request = request.substr(pos + 2, request.length());
+// 		// line += '\n';
+// 		content.push_back(line);
+
+// 	}
+// 	// line = line.substr(0, line.length() - 1);
+// 	size_t i = 0;
+// 	while (i < content.size())
+// 	{
+// 		std::cout << content[i];
+// 		i++;
+// 	}
+// }
+
+int	errorExit(int status, std::string errorMsg)
+{
+	if (status < 0)
 	{
-		close(nSocket);
-		nSocket = -1;
-		return (-1);
+		std::cerr << errorMsg << std::endl;
+		exit (1);
 	}
-	fds.push_fd(nSocket);
-	return (nSocket);
+	return (status);
 }
 
-Server::Server(const unsigned short &_port)
+Server::Server()
 {
-	int opt = 1;
-	socketLen = sizeof(socketData);
-	port = _port;
-	int socketFd = socket(AF_INET, SOCK_STREAM, 0);
-	if (socketFd < 0)
-		throw (ServerException("socket faild."));
-	// fcntl(socketFd, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
-	int status = setsockopt(socketFd, SOL_SOCKET ,SO_REUSEADDR , &opt, sizeof(int));
-	if(status < 0)
-	{
-       		std::cerr << "Couldn't set options" << std::endl;
-		throw (ServerException("setsockopt faild."));
+	bzero(&servAddr ,sizeof(servAddr));
+	servAddr.sin_family = AF_INET;
+	servAddr.sin_port = htons(PORT);
+	servAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+	
+	servFd = errorExit(socket(AF_INET, SOCK_STREAM, 0), "Error : socket!.");
+	fcntl(servFd, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
+	errorExit(bind(servFd, (SA *)&servAddr, sizeof(servAddr)), "Error : bind!.");
+	errorExit(listen(servFd, 10), "Error : listen!.");
+
+	int countReq = 1 ;
+		std::cout << "http://localhost:" << PORT << std::endl;
+	while (1) {
+		clientFd = accept(servFd, NULL, NULL);
+		// std::cout << clientFd << std::endl;
+		if (clientFd < 0)
+			continue ;
+		fcntl(clientFd, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
+		sleep(2);
+		// std::cout << clientFd << std::endl;
+		
+
+		Request req(clientFd);
+		std::string request = req.readRequest();
+		req.parseReq(request);
+
+
+		
+		std::cout << "countReq : " << countReq++ << std::endl;
+		std::cout << "-----------------------------------------------------" << std::endl;
+		std::string	response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n"+readHtml("html.html");
+		write(clientFd, response.c_str(), strlen(response.c_str()));
+		close(clientFd);
 	}
-	bzero(&socketData, socketLen);
-	socketData.sin_port = htons(port);
-	socketData.sin_family = AF_INET;
-	socketData.sin_addr.s_addr = INADDR_ANY;
-	if (bind(socketFd, (struct sockaddr *)&socketData, socketLen) < 0 || listen(socketFd, 5) < 0)
-	{
-		close(socketFd);
-		throw (ServerException("bind faild."));
-	}
-	fds.push_fd(socketFd);
 }
 
-Server::Server(const Server& copy)
+Server::~Server()
 {
-	*this = copy;
-}
-
-Server::~Server( void ) throw()
-{
-	// close(socketFd);
-}
-
-Server&	Server::operator=(const Server& target)
-{
-	if (this != &target)
-	{
-		fds = target.fds;
-		socketData = target.socketData;
-		socketLen = target.socketLen;
-		port = target.port;
-	}
-	return (*this);
-}
-
-int 	Server::accept(int targetSocket)
-{
-	int newSocket = (int)::accept(
-						targetSocket,
-						(struct sockaddr *)&socketData, 
-						(socklen_t *)&socketLen
-					);
-	if (newSocket < 0)
-		return (errorNumber);
-	// fcntl(newSocket, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
-	return (newSocket);
-}
-
-String	Server::recieve(int socket)
-{
-	String	buffer;
-	char	tmp[100];
-
-	while (1)
-	{
-		bzero(tmp, 100);
-		int nBytes;
-		if ((nBytes = (int)recv(socket, tmp, 99, 0)) < 0)
-			break ;
-		buffer.append(tmp);
-		if (nBytes < 99)
-			break ;
-	}
-	return (buffer);
-}
-
-int	Server::send(int socket, String response)
-{
-	int	totalBytes = 0;
-	while (1)
-	{
-		int	nBit = (int)::send(socket, response.c_str(), response.length(), 0);
-		if (nBit < 0)
-			return (errorNumber);
-		totalBytes += nBit;
-		if (totalBytes == (int)response.length())
-			break ;
-	}
-	return (totalBytes);
+	close(servFd);
+	// close(newfd);
 }
