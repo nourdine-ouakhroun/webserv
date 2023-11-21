@@ -22,31 +22,15 @@ class	ServerModel : public GlobalModel
 		void	addLocation(Location _location);
 		static	Location	getLocationByPath(std::vector<Location> locations, const String& srcPath);
 		const std::vector<Location>&	getLocation( void ) const;
-		void	addRootToLocation(std::vector<Location>&	servers, const String& serverRoot);
+		void	addDirectiveToLocation(std::vector<Location>&	servers, const String& key, const String& serverRoot);
+		void	addDirectives(const String& key);
 
-		static int	checkIsDirectory(String filename)
-		{
-			if (!access(filename.c_str(), F_OK))
-			{
-				DIR *dir = opendir(filename.c_str());
-				if (dir != NULL)
-				{
-					closedir(dir);
-					return (1);
-				}
-				return (0);
-			}
-			return (-1);
-		}
-
-		template <typename T>
-		static bool	findLocationByPath(std::vector<Location> locations, const String& rootPath,
-								const String& srcPath, void (*to_do) (const Location&, T&), T& value);
+		static int	checkIsDirectory(const String& filename);
 
 		static	void	printServerModelInfo(const ServerModel& serverModel);
 
 };
 
-#include "../Templates/ServerModel.tpp"
+// #include "../Templates/ServerModel.tpp"
 
 #endif
