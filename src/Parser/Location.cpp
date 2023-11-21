@@ -48,6 +48,11 @@ const std::vector<Location>&	Location::getInnerLocation( void ) const
 	return (innerLocation);
 }
 
+std::vector<Location>&	Location::getInnerLocation( void )
+{
+	return (innerLocation);
+}
+
 void	Location::printAllLocations(const std::vector<Location>& locations, String& str)
 {
 	std::vector<Location>::const_iterator ibegin = locations.begin();
