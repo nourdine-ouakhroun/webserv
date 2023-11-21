@@ -265,7 +265,7 @@ Parser::Parser(const String& _fileName) : fileName(_fileName)
 	checkSyntax(); // Checking syntax error and throwing an Exception when error exists.
 	splitContentIntoServers();	// Split File Content into vector of vector of String.
 	getFinalResualt();	// convert vector of vector String into vector of ServerModel.
-	checkKeys(); // check is there is unknow Keys.
+	checkServerKeys(); // check is there is unknow Keys.
 }
 
 /**
@@ -657,15 +657,11 @@ std::vector<Data>	Parser::parseHeader(const String& header)
 	return (vec);
 }
 
-/**
- * @brief	Check All Keys inside File config is exists.
-*/
-void	Parser::checkKeys( void )
+void    Parser::checkLocationKeys(const std::vector<Location>& loca, const std::vector<String>& keys)
 {
-	std::vector<String> keys = String(KEYS).split(' ');
-	for (unsigned int i = 0; i < (unsigned int)servers.size(); i++)
-	{
-		std::vector<Data> _data = servers.at((unsigned int)i).getAllData();
+    for (size_t i = 0; i < loca.size(); i++)
+    {
+		std::vector<Data> _data = loca.at((unsigned int)i).getAllData();
 		for (unsigned int j = 0; j < (unsigned int)_data.size(); j++)
 			if (find(keys.begin(), keys.end(), _data.at(j).getKey()) == keys.end())
 			{
@@ -673,6 +669,29 @@ void	Parser::checkKeys( void )
 				message.append(_data.at(j).getKey()).append("'.");
 				throw (ParsingException(message));
 			}
+        if (loca.at(i).getInnerLocation().empty() == false)
+            checkLocationKeys(loca.at(i).getInnerLocation(), keys);  
+    }
+}
+/**
+ * @brief	Check All Keys inside File config is exists.
+*/
+void	Parser::checkServerKeys( void )
+{
+	std::vector<String> keys = String(KEYS).split(' ');
+	for (unsigned int i = 0; i < (unsigned int)servers.size(); i++)
+	{
+		std::vector<Data> _data = servers.at((unsigned int)i).getAllData();
+		for (unsigned int j = 0; j < (unsigned int)_data.size(); j++)
+		{
+			if (find(keys.begin(), keys.end(), _data.at(j).getKey()) == keys.end())
+			{
+				String message("Invalid Key '");
+				message.append(_data.at(j).getKey()).append("'.");
+				throw (ParsingException(message));
+			}
+		}
+		checkLocationKeys(servers.at(i).getLocation(), keys);
 	}
 }
 
