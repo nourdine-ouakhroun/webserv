@@ -5,6 +5,33 @@
 
 String	checkIsFile(const std::vector<Location>& locations, String filePath);
 
+String	tryFiles(const std::vector<String>& files, const String& path)
+{
+	String value;
+	for (size_t i = 0; i < files.size() - 1; i++)
+	{
+		String tmp(path);
+		tmp.append(files.at(i));
+		value = readFile(tmp);
+		if (value.length() != 0)
+			return (value);
+	}
+	return (value);
+}
+
+String	getFileContent(const std::vector<String>& indexes, const String& path)
+{
+	String value;
+	for (size_t i = 0; i < indexes.size(); i++)
+	{
+		String tmp(path);
+		tmp.append(indexes.at(i));
+		value = readFile(tmp);
+		if (value.length() != 0)
+			return (value);
+	}
+	return (value);
+}
 
 String	getDirectoryContent(const String& dirname, String path)
 {
@@ -33,6 +60,7 @@ String	getDirectoryContent(const String& dirname, String path)
 
 String	to_do(const Location& loca)
 {
+	String content;
 	String	path(loca.getPath());
 	std::vector<Data>	data = loca.getData("root");
 	if (data.empty() == true)
@@ -45,14 +73,14 @@ String	to_do(const Location& loca)
 		return (ERROR_403);
 	if (autoIndex.empty() == false && !autoIndex.at(0).getValue().compare("on"))
 		return (getDirectoryContent(file, path));
-	std::vector<String> indexs = String(indexes.at(0).getValue()).split();
-	for (size_t i = 0; i < indexs.size(); i++)
+	content = tryFiles(String(loca.getData("try_files").at(0).getValue()).split(), file);
+	if (content.empty() == false)
+		return (content);
+	for (size_t i = 0; i < indexes.size(); i++)
 	{
-		String tmp(file);
-		tmp.append(indexs.at(i));
-		value = readFile(tmp);
-		if (value.length() != 0)
-			return (value);
+		content = getFileContent(String(indexes.at(i).getValue()).split(), file);
+		if (content.empty() == false)
+			return (content);
 	}
 	return (ERROR_404);
 }
@@ -82,9 +110,8 @@ String	handler(ServerData& servers, std::vector<Data> header)
 		return (content);
 	path.rightTrim("/");
 	Location	loca = ServerModel::getLocationByPath(servModel.at(0).getLocation(), path);
-	content = ERROR_404;
 	if (loca.getPath().empty() == false)
-		to_do(loca, content);
+		return (to_do(loca));
 	return (content);
 }
 
