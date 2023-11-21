@@ -42,23 +42,61 @@ void printreq(_requset _requisteconten)
 	}
 }
 
-String getrespond(const Location & _location, const String &path)
+String getRespond(const ServerModel & server, const String &path)
 {
 	String						respond(ERROR_404);
-	std::vector<Data> _data = _location.getAllData();
 	String Allpath;
-	std::vector<Data> roots = _location.getData("root");
-	/**
-	 * @attention exit if non root
-	*/
+	std::vector<Data> roots = server.getData("root");
 	if (roots.empty() == true)
 		return respond;
-	Allpath = String(roots.at(0).getValue()).append(_location.getPath()).append("/");
+	Allpath = String(roots.at(0).getValue()).append("/");
 	std::vector<Data> indexs;
 	if(path.empty())
-		indexs = _location.getData("index");
+		indexs = server.getData("index");
 	else
 		indexs.push_back(Data("index", path));
+	if(indexs.empty() == true)
+		return respond;
+	for (size_t i = 0; i < indexs.size(); i++)
+	{
+		std::vector<String> index = String(indexs[i].getValue()).split();
+		for (size_t j = 0; j < index.size(); j++)
+		{
+			String tmp(Allpath);
+			tmp.append(index[j]);
+			int fd = open(tmp.c_str() , O_RDONLY);
+			if(fd < 0)
+				continue;
+			// if(tmp.find('.') != SIZE_T_MAX && tmp.substr(tmp.find('.') + 1) != "html")
+			// {
+			// 	Cgi CgiScript(tmp);
+			// 	std::string responCgi = CgiScript.HandelScript();
+			// 	respond = responCgi;
+			// 	return respond;
+			// }
+			respond.clear();
+			char res[200];
+			bzero(res, 200);
+			ssize_t bytes = 0;
+			while((bytes = read(fd, res, 199)) != 0)
+			{
+				respond.append(res);
+				bzero(res, 200);
+				if (bytes < 199)
+					break;
+			}
+			return respond;
+		}
+	}
+	return respond;
+}
+String getRespondLocation(const Location & _location, const std::string & path)
+{
+	String						respond(ERROR_404);
+	String Allpath;
+	Allpath = String(path).append("/");
+	std::vector<Data> indexs;
+	indexs = _location.getData("index");
 	if(indexs.empty() == true)
 		return respond;
 	for (size_t i = 0; i < indexs.size(); i++)
@@ -155,20 +193,18 @@ String	ServerRun::ParssingRecuistContent(String	ContentRequist)
 						if(!loca.getData("root").size())
 							path = std::string(loca.getData("root")[0].getValue()).append(requist.requistLine[1]);
 						if (IsDirectory(path) == 1)
-							return (getrespond(loca, ""));
+							return (getRespondLocation(loca, path));
 						else
 							return ERROR_404;
 					}
-					else
+					if (IsDirectory(path) == 0)
 					{
-						std::cout << path << std::endl;
-						if (IsDirectory(path) == 0)
-							return(getrespond(loca, path));
-						else if(IsDirectory(path) == 1)
-							return(getrespond(loca, path));
-						else
-							return ERROR_404;
+						return(getRespond(Serv[index_Serv], requist.requistLine[1]));
 					}
+					else if(IsDirectory(path) == 1)
+						return(getRespond(Serv[index_Serv], ""));
+					else
+						return ERROR_404;
 				}
 			}
 		}
