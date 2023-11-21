@@ -1,42 +1,46 @@
-NAME	=	webServ
+NAME	=	webserv
 
 
-SRCS	=	src/main.cpp \
+SRCS	=	src/Server/main.cpp \
 		src/Parser/Parser.cpp \
-		src/Parser/Server.cpp \
+		src/Parser/Checker.cpp \
 		src/Parser/Location.cpp \
 		src/Models/GlobalModel.cpp \
 		src/Models/ServerModel.cpp \
 		src/Models/Data.cpp \
 		src/Utils/String.cpp \
 		src/Exception/ParsingException.cpp \
-		src/Utils/ServerData.cpp
-#		src/parser/InnerLocation.cpp \
+		src/Exception/ServerException.cpp \
+		src/Server/server.cpp \
+		src/Server/Request.cpp \
+		src/Utils/ServerData.cpp \
+		src/Utils/Poll.cpp
+#		src/Utils/Select.cpp
 
-HEADERS	=	src/Parser/Parser.hpp \
-		src/Parser/Server.hpp \
-		src/Parser/Location.hpp \
-		src/Models/Data.hpp \
-		src/Utils/String.hpp \
-		src/Exception/ParsingException.hpp \
-		src/Models/GlobalModel.hpp \
-		src/Utils/ServerData.hpp
+TEMPLATES =	src/Templates/*.tpp
+HEADERS	=	src/Includes/*.hpp src/Server/server.hpp src/Server/Request.hpp
+
 
 CPP	=	c++
-CPPFLAGS	=	-Wall -Wextra -Werror -std=c++98 -Wconversion# -fsanitize=address
+CPPFLAGS	=	-Wall -Wextra -Werror -std=c++98 -O3 -I./src/Includes# -fsanitize=address
 
-OBJS	=	${SRCS:.cpp=.o}
+BIN		=	bin
+
+OBJS	=	${SRCS:src/%.cpp=${BIN}/%.o}
+
 
 all	:	${NAME}
 
-${NAME}	:	${OBJS}
+${NAME}	: ${OBJS}
 	${CPP} ${CPPFLAGS} $^ -o $@
+	@echo "finish !!"
 
-%.o	:	%.cpp ${HEADERS}
+${BIN}/%.o	:	src/%.cpp ${HEADERS} ${TEMPLATES}
+	@mkdir -p $(dir $@)
 	${CPP} ${CPPFLAGS} -c $< -o $@
 
 clean	:
-	rm -rf ${OBJS}
+	rm -rf ${BIN}
 
 fclean	:	clean
 	rm -rf ${NAME}
