@@ -1,28 +1,50 @@
 #include "Parser.hpp"
 #include "Checker.hpp"
 #include "Server.hpp"
+#include <dirent.h>
 
 String	checkIsFile(const std::vector<Location>& locations, String filePath);
 
 
-template <typename T>
-void	to_do(const Location& loca, T& value)
+String	getDirectoryContent(const String& dirname, String path)
 {
+	DIR	*dir = opendir(dirname.c_str());
+	if (!dir)
+		return "";
+	String body("<h1>Index of ");
+	body.append(path).append("</h1><hr><pre>");
+	struct dirent *dirp;
+	path.trim("/");
+	while ((dirp = readdir(dir)) != NULL)
+	{
+		/**
+		 * @brief body end with this form.
+		 *		<h1>Index of /test</h1><hr><pre><a href="/test/.">.</a><br>
+		 */
+		body.append("<a href=\"").append(path).append("/").append(dirp->d_name).append("\">");
+		body.append(dirp->d_name).append("</a><br>");
+		// std::cout << dirp->d_name << std::endl;
+		// std::cout << body << std::endl;
+	}
+	body.append("</pre><hr>");
+	closedir(dir);
+	return (body);
+}
+
+String	to_do(const Location& loca)
+{
+	String	path(loca.getPath());
 	std::vector<Data>	data = loca.getData("root");
 	if (data.empty() == true)
-	{
-		value.append(ERROR_404);
-		return ;
-	}
+		return (ERROR_404);
 	String file(data.at(0).getValue());
-			 /* |   check if the path ended with /   | */
-	file.append((file.end() - 1)[0] == '/' ? "" : "/");
+	file.append(path).append((file.end() - 1)[0] == '/' ? "" : "/"); // -> check if the path ended with '/'
 	std::vector<Data> indexes = loca.getData("index");
-	if (indexes.empty() == true)
-	{
-		value = ERROR_403;
-		return ;
-	}
+	std::vector<Data> autoIndex = loca.getData("autoindex");
+	if (indexes.empty() == true && (autoIndex.empty() == true || (autoIndex.empty() == false && !autoIndex.at(0).getValue().compare("off"))))
+		return (ERROR_403);
+	if (autoIndex.empty() == false && !autoIndex.at(0).getValue().compare("on"))
+		return (getDirectoryContent(file, path));
 	std::vector<String> indexs = String(indexes.at(0).getValue()).split();
 	for (size_t i = 0; i < indexs.size(); i++)
 	{
@@ -30,9 +52,9 @@ void	to_do(const Location& loca, T& value)
 		tmp.append(indexs.at(i));
 		value = readFile(tmp);
 		if (value.length() != 0)
-			return ;
+			return (value);
 	}
-	value.append(ERROR_404);
+	return (ERROR_404);
 }
 
 
@@ -68,7 +90,6 @@ String	handler(ServerData& servers, std::vector<Data> header)
 
 bool	requestHandler(const std::vector<int>& port, Server& server, ServerData& serv, int readyFd)
 {
-	// static	size_t	totalByteSend;
 	if (readyFd > -1)
 	{
 		if (find(port.begin(), port.end(), readyFd) != port.end())
@@ -83,12 +104,9 @@ bool	requestHandler(const std::vector<int>& port, Server& server, ServerData& se
 			String header = server.recieve(readyFd);
 			if (header.empty() == true)
 				return (true);
-			std::cout << header << std::endl;
+			// std::cout << header << std::endl;
 			String content("HTTP/1.1 200 OK\r\n\r\n");
 			content.append(handler(serv, Parser::parseHeader(header)));
-			std::cout << "==================> Response Start <=====================" << std::endl;
-			std::cout << content << std::endl;
-			std::cout << "==================> Response End <=====================" << std::endl;
 			ssize_t sender = server.send(readyFd, content);
 			if (sender == -1)
 				Logger::error(std::cerr, "Send Failed.", "");
