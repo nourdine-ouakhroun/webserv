@@ -41,6 +41,10 @@
         "initializer_list": "cpp",
         "iomanip": "cpp",
         "ios": "cpp",
+<<<<<<< HEAD
+=======
+        "iosfwd": "cpp",
+>>>>>>> Esalim
         "iostream": "cpp",
         "istream": "cpp",
         "iterator": "cpp",
