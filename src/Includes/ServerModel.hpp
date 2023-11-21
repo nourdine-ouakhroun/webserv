@@ -22,7 +22,8 @@ class	ServerModel : public GlobalModel
 		void	addLocation(Location _location);
 		static	Location	getLocationByPath(std::vector<Location> locations, const String& srcPath);
 		const std::vector<Location>&	getLocation( void ) const;
-		void	addRootToLocation(std::vector<Location>&	servers, const String& serverRoot);
+		void	addDirectiveToLocation(std::vector<Location>&	servers, const String& key, const String& serverRoot);
+		void	addDirectives(const String& key);
 
 		static int	checkIsDirectory(String filename)
 		{
