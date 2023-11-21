@@ -1,4 +1,5 @@
 #include"Server.hpp"
+#include <sys/stat.h>
 
 ServerRun::ServerRun(ServerData	smodel)
 {
@@ -41,8 +42,9 @@ void printreq(_requset _requisteconten)
 	}
 }
 
-void getrespond(const Location & _location, String &respond)
+String getrespond(const Location & _location, const String &path)
 {
+	String						respond(ERROR_404);
 	std::vector<Data> _data = _location.getAllData();
 	String Allpath;
 	std::vector<Data> roots = _location.getData("root");
@@ -50,11 +52,15 @@ void getrespond(const Location & _location, String &respond)
 	 * @attention exit if non root
 	*/
 	if (roots.empty() == true)
-		return ;
+		return respond;
 	Allpath = String(roots.at(0).getValue()).append(_location.getPath()).append("/");
-	std::vector<Data> indexs = _location.getData("index");
+	std::vector<Data> indexs;
+	if(path.empty())
+		indexs = _location.getData("index");
+	else
+		indexs.push_back(Data("index", path));
 	if(indexs.empty() == true)
-		return ;
+		return respond;
 	for (size_t i = 0; i < indexs.size(); i++)
 	{
 		std::vector<String> index = String(indexs[i].getValue()).split();
@@ -70,7 +76,7 @@ void getrespond(const Location & _location, String &respond)
 				Cgi CgiScript(tmp);
 				std::string responCgi = CgiScript.HandelScript();
 				respond = responCgi;
-				return ;
+				return respond;
 			}
 			respond.clear();
 			char res[200];
@@ -83,16 +89,30 @@ void getrespond(const Location & _location, String &respond)
 				if (bytes < 199)
 					break;
 			}
-			return ;
+			return respond;
 		}
 	}
+	return respond;
+}
+int IsDirectory(std::string path)
+{
+	if (!access(path.c_str(), F_OK))
+	{
+		DIR *dir = opendir(path.c_str());
+		if (dir != NULL)
+		{
+			closedir(dir);
+			return (1);
+		}
+		return (0);
+	}
+	return (-1);
 	
 }
 String	ServerRun::ParssingRecuistContent(String	ContentRequist)
 {
 	_requset					requist;
 	std::string					port;
-	String						respond(ERROR_404);
 	String						serverName;
 	std::vector<String>			spletLines;
 	std::vector<ServerModel>	Serv;
@@ -128,18 +148,25 @@ String	ServerRun::ParssingRecuistContent(String	ContentRequist)
 				if(serversname[index_serversname] == serverName)
 				{
 					String				path;
-					std::vector<Data>	root;
-
-					root = Serv[index_Serv].getData("root");
-					if(!root.empty())
-						path = root[0].getValue();
-					ServerModel::findLocationByPath(Serv[index_Serv].getLocation(), path,requist.requistLine[1], getrespond, respond);
-					return respond;
+					Location loca = ServerModel::getLocationByPath(Serv[index_Serv].getLocation(), path);
+    				if (IsDirectory(requist.requistLine[1]) == 1)
+					{
+						if(path.empty())
+							path.append("/");
+						if (loca.getPath().empty() == false)
+							return (getrespond(loca, ""));
+					}
+					else if(IsDirectory(requist.requistLine[1]) == 0)
+					{
+						// std::cout << "ddddddddd" << std::endl;
+						return(getrespond(loca, requist.requistLine[1]));
+					}
 				}
 			}
 		}
 	}
-	return respond;
+	
+	return ERROR_404;
 }
 
 void erase(std::vector<struct pollfd> & struct_fdsS, size_t j)
