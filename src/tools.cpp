@@ -1,6 +1,5 @@
 #include "Server.hpp"
 
-
 String	checkIsFile(const std::vector<Location>& locations, String filePath)
 {
 	String	value;

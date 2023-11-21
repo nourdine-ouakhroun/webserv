@@ -6,9 +6,15 @@ ServerModel::ServerModel( void ) : GlobalModel()
 
 ServerModel::ServerModel(const GlobalModel& model, const std::vector<Location>& _location) : GlobalModel(model), location(_location)
 {
-	std::vector<Data> serverRoot = getData("root");
-	if (serverRoot.empty() == false)
-		addRootToLocation(location, serverRoot.at(0).getValue());
+	addDirectives("root");
+	addDirectives("autoindex");
+}
+
+void	ServerModel::addDirectives(const String& key)
+{
+	std::vector<Data> data = getData(key);
+	if (data.empty() == false)
+		addDirectiveToLocation(location, key, data.at(0).getValue());
 }
 
 ServerModel::~ServerModel( void ) throw()
@@ -27,9 +33,8 @@ ServerModel& ServerModel::operator=(const ServerModel& target)
 	{
 		GlobalModel::operator=(target);
 		location = target.location;
-		std::vector<Data> serverRoot = getData("root");
-		if (serverRoot.empty() == false)
-			addRootToLocation(location, serverRoot.at(0).getValue());
+		addDirectives("root");
+		addDirectives("autoindex");
 	}
 	return (*this);
 }
@@ -37,9 +42,8 @@ ServerModel& ServerModel::operator=(const ServerModel& target)
 void	ServerModel::setLocation(std::vector<Location>& _location)
 {
 	location = _location;
-	std::vector<Data> serverRoot = getData("root");
-	if (serverRoot.empty() == false)
-		addRootToLocation(location, serverRoot.at(0).getValue());
+	addDirectives("root");
+	addDirectives("autoindex");
 }
 
 const std::vector<Location>&	ServerModel::getLocation( void ) const
@@ -83,20 +87,20 @@ Location	ServerModel::getLocationByPath(std::vector<Location> locations, const S
 	return (Location());
 }
 
-void	ServerModel::addRootToLocation(std::vector<Location>&	servers, const String& serverRoot)
+void	ServerModel::addDirectiveToLocation(std::vector<Location>&	servers, const String& key, const String& serverDirective)
 {
 	if (servers.empty() == true)
 		return ;
 	for (size_t i = 0; i < servers.size(); i++)
 	{
-		String rootValue(serverRoot);
-		std::vector<Data> roots = servers.at(i).getData("root");
+		String rootValue(serverDirective);
+		std::vector<Data> roots = servers.at(i).getData(key);
 		if (roots.empty() == true)
-			servers.at(i).addData(Data("root", rootValue));
+			servers.at(i).addData(Data(key, rootValue));
 		else
 			rootValue = roots.at(0).getValue();
 		std::vector<Location>& innerLocation = servers.at(i).getInnerLocation();
 		if (innerLocation.empty() == false)
-			addRootToLocation(innerLocation, rootValue);
+			addDirectiveToLocation(innerLocation, key, rootValue);
 	}
 }
