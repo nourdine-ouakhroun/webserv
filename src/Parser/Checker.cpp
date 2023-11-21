@@ -79,6 +79,35 @@ void    Checker::checkValues( void )
     }
 }
 
+void    Checker::checkLocationValues(const std::vector<Location>& loca, String key)
+{
+    if (loca.empty() == true)
+        return ;
+    std::vector<String> booleanValues;
+    booleanValues.push_back("on");
+    booleanValues.push_back("off");
+    for (size_t i = 0; i < loca.size(); i++)
+    {
+        std::vector<Data> data = loca.at(i).getData(key);
+        if (data.size() > 1 || (data.size() == 1
+            && std::find(booleanValues.begin(), booleanValues.end(), data.at(0).getValue()) == booleanValues.end()))
+            throw (ParsingException("Check Faild."));
+        if (loca.at(i).getInnerLocation().empty() == false)
+            checkLocationValues(loca.at(i).getInnerLocation(), key);  
+    }
+}
+
+void    Checker::checkBooleanValues(String key)
+{
+    for (size_t i = 0; i < servers.size(); i++)
+    {
+        std::vector<Data> data = servers.at(i).getData(key);
+        if (data.size() > 1)
+            throw (ParsingException("Check Faild."));
+        checkLocationValues(servers.at(i).getLocation(), key);
+    }
+}
+
 void    Checker::fullCheck( void )
 {
     if (servers.empty() == true)
@@ -86,4 +115,6 @@ void    Checker::fullCheck( void )
     checkValues();
     checkDuplicate("root");
     checkDuplicate("try_files");
+    checkDuplicate("autoindex");
+    checkBooleanValues("autoindex");
 }
