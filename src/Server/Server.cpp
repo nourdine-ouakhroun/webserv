@@ -96,17 +96,15 @@ String getrespond(const Location & _location, const String &path)
 }
 int IsDirectory(std::string path)
 {
-	if (!access(path.c_str(), F_OK))
+	if(access(path.c_str(), F_OK) == 0)
 	{
-		DIR *dir = opendir(path.c_str());
-		if (dir != NULL)
-		{
-			closedir(dir);
-			return (1);
-		}
-		return (0);
+		DIR *directory =  opendir(path.c_str());
+		if(directory == NULL)
+			return 0;
+		closedir(directory);
+		return 1;
 	}
-	return (-1);
+	return -1;
 	
 }
 String	ServerRun::ParssingRecuistContent(String	ContentRequist)
@@ -126,7 +124,7 @@ String	ServerRun::ParssingRecuistContent(String	ContentRequist)
 	/**
 		* @details check the if the Host have a port, if not you can work with port 80
 	*/
- 
+
 	port = requist.header["Host"][0].split(':').size() == 2 ? requist.header["Host"][0].split(':')[1] : "80";
 	Serv = servers.getServersByPort((unsigned short)strtol(port.c_str(), NULL, 10));
 
@@ -148,18 +146,28 @@ String	ServerRun::ParssingRecuistContent(String	ContentRequist)
 				if(serversname[index_serversname] == serverName)
 				{
 					String				path;
-					Location loca = ServerModel::getLocationByPath(Serv[index_Serv].getLocation(), path);
-    				if (IsDirectory(requist.requistLine[1]) == 1)
+					path = Serv[index_Serv].getData("root").size() ? std::string(Serv[index_Serv].getData("root")[0].getValue()).append(requist.requistLine[1]) : "";
+					if(path.empty())
+						path.append("/");
+					Location loca = ServerModel::getLocationByPath(Serv[index_Serv].getLocation(), requist.requistLine[1]);
+					if (loca.getPath().empty() == false)
 					{
-						if(path.empty())
-							path.append("/");
-						if (loca.getPath().empty() == false)
+						if(!loca.getData("root").size())
+							path = std::string(loca.getData("root")[0].getValue()).append(requist.requistLine[1]);
+						if (IsDirectory(path) == 1)
 							return (getrespond(loca, ""));
+						else
+							return ERROR_404;
 					}
-					else if(IsDirectory(requist.requistLine[1]) == 0)
+					else
 					{
-						// std::cout << "ddddddddd" << std::endl;
-						return(getrespond(loca, requist.requistLine[1]));
+						std::cout << path << std::endl;
+						if (IsDirectory(path) == 0)
+							return(getrespond(loca, path));
+						else if(IsDirectory(path) == 1)
+							return(getrespond(loca, path));
+						else
+							return ERROR_404;
 					}
 				}
 			}
