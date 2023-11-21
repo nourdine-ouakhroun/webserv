@@ -17,6 +17,8 @@ class Checker
         void        checkLocation(const std::vector<Location>& loca, String key);
         void        checkValues( void );
         void        checkLocationValues(const std::vector<Location>& loca);
+        void        checkLocationValues(const std::vector<Location>& loca, String key);
+        void        checkBooleanValues(String key);
 
 
 };
