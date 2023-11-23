@@ -25,6 +25,7 @@ _requset ParssingRequist::setreq( std::vector<String> requses )
 	_requset _req;
 
 	_req.requistLine = requses[0].split();
+	// _req.requistLine[1].rightTrim("/");
 	size_t i;
 	for (i = 1; i < requses.size(); i++)
 	{
