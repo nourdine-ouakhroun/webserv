@@ -21,6 +21,8 @@ std::string readHtml(std::string file)
 			content += input;
 		}
 	}
+	else
+		std::cout << "file html.html not open"<< std::endl;
 	return (content);
 }
 
@@ -85,13 +87,17 @@ Server::Server()
 
 		Request req(clientFd);
 		std::string request = req.readRequest();
+		// std::cout << "-----------------------------------------------------" << std::endl;
+		// std::cout << request << std::endl;
+		// std::cout << "countReq : " << countReq++ << std::endl;
+		// std::cout << "-----------------------------------------------------" << std::endl;
 		req.parseReq(request);
 
 
 		
-		std::cout << "countReq : " << countReq++ << std::endl;
-		std::cout << "-----------------------------------------------------" << std::endl;
-		std::string	response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n"+readHtml("html.html");
+		std::string website = readHtml("/Users/mzeroual/Desktop/cursus/webserv/src/Server/web.html");
+		// std::cout << website ;
+		std::string	response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n"+website;
 		write(clientFd, response.c_str(), strlen(response.c_str()));
 		close(clientFd);
 	}
