@@ -109,13 +109,13 @@ String getRespondLocation(const Location & _location, const std::string & path)
 			int fd = open(tmp.c_str() , O_RDONLY);
 			if(fd < 0)
 				continue;
-			if(tmp.find('.') != SIZE_T_MAX && tmp.substr(tmp.find('.') + 1) != "html")
-			{
-				Cgi CgiScript(tmp);
-				std::string responCgi = CgiScript.HandelScript();
-				respond = responCgi;
-				return respond;
-			}
+			// if(tmp.find('.') != SIZE_T_MAX && tmp.substr(tmp.find('.') + 1) != "html")
+			// {
+			// 	Cgi CgiScript(tmp);
+			// 	std::string responCgi = CgiScript.HandelScript();
+			// 	respond = responCgi;
+			// 	return respond;
+			// }
 			respond.clear();
 			char res[200];
 			bzero(res, 200);
@@ -145,6 +145,16 @@ int IsDirectory(std::string path)
 	return -1;
 	
 }
+std::string status(std::string statuscode, std::string stringcode)
+{
+	(void) statuscode;
+	(void) stringcode;
+	std::string header = "HTTP/1.1 ";
+	header.append(statuscode);
+	header.append("\r\n\r\n");
+	header.append(stringcode);
+	return header;
+}
 String	ServerRun::ParssingRecuistContent(String	ContentRequist)
 {
 	_requset					requist;
@@ -169,6 +179,7 @@ String	ServerRun::ParssingRecuistContent(String	ContentRequist)
 	/**
 		* @details check the if the Host is exist
 	*/
+
 	for (size_t index_Serv = 0; index_Serv < Serv.size(); index_Serv++)
 	{
 		std::vector<Data>	_data;
@@ -193,18 +204,28 @@ String	ServerRun::ParssingRecuistContent(String	ContentRequist)
 						if(!loca.getData("root").size())
 							path = std::string(loca.getData("root")[0].getValue()).append(requist.requistLine[1]);
 						if (IsDirectory(path) == 1)
-							return (getRespondLocation(loca, path));
+						{
+							if(requist.requistLine[1].back() != '/')
+								return(status("301 Moved Permanently\r\nLocation: http://" + serversname[index_serversname] + requist.requistLine[1] + "/", ""));
+							return (status("200 OK", getRespondLocation(loca, path)));
+						}
 						else
-							return ERROR_404;
+							return status("404 KO", ERROR_404);
 					}
+					std::cout << requist.requistLine[1] << std::endl;
 					if (IsDirectory(path) == 0)
-					{
-						return(getRespond(Serv[index_Serv], requist.requistLine[1]));
-					}
+						return(status("200 OK", getRespond(Serv[index_Serv], requist.requistLine[1])));
 					else if(IsDirectory(path) == 1)
-						return(getRespond(Serv[index_Serv], ""));
+					{
+						if(requist.requistLine[1].back() != '/')
+						{
+							std::cout << serversname[index_serversname] << std::endl;
+							return(status("301 Moved Permanently\r\nLocation: http://" + serversname[index_serversname] + requist.requistLine[1] + "/", ""));
+						}
+						return(status("200 OK", getRespond(Serv[index_Serv], "")));
+					}
 					else
-						return ERROR_404;
+						return status("404 KO", ERROR_404);
 				}
 			}
 		}
@@ -224,16 +245,7 @@ void erase(std::vector<struct pollfd> & struct_fdsS, size_t j)
 	struct_fdsS = returnFds;
 }
 
-std::string status(std::string statuscode, std::string stringcode)
-{
-	(void) statuscode;
-	(void) stringcode;
-	std::string header = "HTTP/1.1 ";
-	header.append(statuscode);
-	header.append("\r\n\r\n");
-	header.append(stringcode);
-	return header;
-}
+
 
 void	ServerRun::HandelRequist(struct pollfd	*struct_fds ,size_t	i, std::vector<struct pollfd>	&struct_fdsS, std::vector<int> servers)
 {
@@ -272,7 +284,7 @@ void	ServerRun::HandelRequist(struct pollfd	*struct_fds ,size_t	i, std::vector<s
 		if(bytes < 0 && !ContentRequist.size())
 			return;
 		std::cout << ContentRequist << std::endl;
-		std::string respond = status("200 OK", ParssingRecuistContent(ContentRequist));
+		std::string respond = ParssingRecuistContent(ContentRequist);
 		// std::cout << respond << std::endl;
 		write(struct_fds[i].fd, respond.c_str(), respond.length());
 		close(struct_fds[i].fd);
