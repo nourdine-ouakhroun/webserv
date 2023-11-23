@@ -195,10 +195,12 @@ String	ServerRun::ParssingRecuistContent(String	ContentRequist)
 				if(serversname[index_serversname] == serverName)
 				{
 					String				path;
+					String				path_header = requist.requistLine[1];
 					path = Serv[index_Serv].getData("root").size() ? std::string(Serv[index_Serv].getData("root")[0].getValue()).append(requist.requistLine[1]) : "";
 					if(path.empty())
 						path.append("/");
-					Location loca = ServerModel::getLocationByPath(Serv[index_Serv].getLocation(), requist.requistLine[1]);
+					
+					Location loca = ServerModel::getLocationByPath(Serv[index_Serv].getLocation(), path_header.rightTrim("/"));
 					if (loca.getPath().empty() == false)
 					{
 						if(!loca.getData("root").size())
@@ -218,10 +220,7 @@ String	ServerRun::ParssingRecuistContent(String	ContentRequist)
 					else if(IsDirectory(path) == 1)
 					{
 						if(requist.requistLine[1].back() != '/')
-						{
-							std::cout << serversname[index_serversname] << std::endl;
 							return(status("301 Moved Permanently\r\nLocation: http://" + serversname[index_serversname] + requist.requistLine[1] + "/", ""));
-						}
 						return(status("200 OK", getRespond(Serv[index_Serv], "")));
 					}
 					else
