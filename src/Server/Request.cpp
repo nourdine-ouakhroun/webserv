@@ -8,7 +8,9 @@ std::vector<std::string> split(std::string line, std::string sep)
 	size_t pos = 0;
 	while ((pos = line.find(sep)) != std::string::npos)
 	{
-		sp.push_back(line.substr(0, pos));
+		std::string l = line.substr(0, pos);
+		if (!l.empty())
+			sp.push_back(l);
 		line = line.substr(pos + sep.length(), line.length());
 	}
 	sp.push_back(line.substr(0, line.length()));
@@ -189,10 +191,23 @@ void    Request::parseReq(std::string request)
 				boundray = split(contentType[1], "=");
 				if (!boundray.empty() && boundray.size() == 2)
 				{
-					std::cout << boundray[1] << std::endl;
-					// std::cout 
+					std::string boundrayStart = "--" + boundray[1];
+					std::string boundrayEnd = boundrayStart + "--";
+
+
+					std::vector<std::string> ss = split(bodyReq, boundrayStart);
+					if (!ss.empty())
+					{
+						// std::cout << "|" << boundray[1] << "|" << std::endl;
+						// std::cout << "|" << boundrayStart << "|" <<std::endl;
+						for (size_t i = 0; i < ss.size(); i++)
+						{
+							std::cout << "content = " << ss[i] << std::endl;
+						}
+						
+					}
+					
 				}
-				
 			}
 			else if (contentType[0] == "application/x-www-form-urlencoded")
 			{
