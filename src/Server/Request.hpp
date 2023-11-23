@@ -11,15 +11,16 @@
 #include <vector>
 #include <sstream>
 
-typedef std::map<std::string, std::string> smap;
+typedef std::map<std::string, std::string> maps;
 
 class Request
 {
 private:
 	std::vector<std::string>	requestLine;
-	smap						headerRequest;
+	maps						headerRequest;
+	maps						bodyRequest;
+	// maps						params;
 	int 						clientFd;
-	// smap						bodyRequest;
 public:
 	Request( void );
 	~Request( void );
@@ -33,7 +34,7 @@ public:
 	void		parseHeader(std::string h1);
 	
 	
-	void		displayReq();
+	void		displayReq( int HorB );
 
 
 
@@ -42,6 +43,10 @@ public:
 	// start from here
 	void 	requestIsFormed();
 	void 	statusCodeError(int statusCode, std::string phrase);
+	std::string methodeIs( void )
+	{
+		return (requestLine[0]);
+	}
 };
 
 

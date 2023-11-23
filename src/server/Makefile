@@ -4,7 +4,7 @@ CXX = c++
 CXXFLAGS = -Wall -Wextra -Werror
 
 SRCS =	main.cpp\
-		server.cpp\
+		Server.cpp\
 		Request.cpp
 
 RM = rm -f
@@ -16,7 +16,7 @@ NAME = webserv
 all : $(OBJS)
 	$(CXX) $(CXXFLAGS) $(OBJS) -o  $(NAME)
 %.o : %.cpp
-	$(CXX) $(CXXFLAGS) -I../Includes -c $< -o $@
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean :
 	$(RM) $(OBJS)
