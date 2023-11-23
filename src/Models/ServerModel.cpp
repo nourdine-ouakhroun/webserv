@@ -69,7 +69,7 @@ Location	ServerModel::getLocationByPath(std::vector<Location> locations, const S
 	std::vector<Location>::iterator iend = locations.end();
 	while (ibegin < iend)
 	{
-		String tmpPath(ibegin->getPath());
+		String tmpPath(String(ibegin->getPath()).rightTrim("/"));
 		if (!srcPath.compare(tmpPath) && tmpPath.length() == srcPath.length())
 			return (*ibegin);
 		if (ibegin->getInnerLocation().empty() == false)
