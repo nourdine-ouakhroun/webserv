@@ -42,7 +42,7 @@ void printreq(_requset _requisteconten)
 	}
 }
 
-String getRespond(const ServerModel & server, const String &path)
+String ServerRun::getRespond(const ServerModel & server, const String &path)
 {
 	String						respond(ERROR_404);
 	String Allpath;
@@ -68,10 +68,10 @@ String getRespond(const ServerModel & server, const String &path)
 			if(fd < 0)
 				continue;
 			std::string extantion = tmp.find_last_of('.') != SIZE_T_MAX ? tmp.substr(tmp.find_last_of('.')) : "";
-			if(extantion == ".php" || extantion == ".cgi" || extantion == ".py")
+			if(extantion == ".php" || extantion == ".cgi" || extantion == ".py"/*|| extantion == ".pl"*/)
 			{
 				Cgi CgiScript(tmp);
-				std::string responCgi = CgiScript.HandelScript();
+				std::string responCgi = CgiScript.HandelScript(this->query);
 				respond = responCgi;
 				return respond;
 			}
@@ -91,7 +91,7 @@ String getRespond(const ServerModel & server, const String &path)
 	}
 	return respond;
 }
-String getRespondLocation(const Location & _location, const std::string & path)
+String ServerRun::getRespondLocation(const Location & _location, const std::string & path)
 {
 	String						respond(ERROR_404);
 	String Allpath;
@@ -108,15 +108,14 @@ String getRespondLocation(const Location & _location, const std::string & path)
 			String tmp(Allpath);
 			tmp.append(index[j]);
 			int fd = open(tmp.c_str() , O_RDONLY);
-			std::cout << tmp.c_str() << std::endl;
 			if(fd < 0)
 				continue;
 			std::string extantion = tmp.find_last_of('.') != SIZE_T_MAX ? tmp.substr(tmp.find_last_of('.')) : "";
 			std::cout << tmp.substr(tmp.find_last_of('.')) << std::endl;
-			if(extantion == ".php" || extantion == ".cgi" || extantion == ".py")
+			if(extantion == ".php" || extantion == ".cgi" || extantion == ".py"/*|| extantion == ".pl"*/)
 			{
 				Cgi CgiScript(tmp);
-				std::string responCgi = CgiScript.HandelScript();
+				std::string responCgi = CgiScript.HandelScript(this->query);
 				respond = responCgi;
 				return respond;
 			}
@@ -176,14 +175,7 @@ void ServerRun::cgi(std::vector<String> line)
                 {
                     std::vector<String> keyValue = content[i].split('=');
                     if (!keyValue.empty())
-                        this->query[keyValue[0]] = keyValue[1];
-                }
-                if (!this->query.empty())
-                {
-                    for (std::map<String, String>::iterator it = this->query.begin(); it != this->query.end(); it++)
-                    {
-                        std::cout << it->first << " = " << it->second << std::endl;
-                    }
+                        this->query.push_back(keyValue[1]);
                 }
             }
 
@@ -201,6 +193,8 @@ String	ServerRun::ParssingRecuistContent(String	ContentRequist)
 	spletLines 	= ParssingRequist::SplitBynewLine(ContentRequist);
 	requist 	= ParssingRequist::setreq(spletLines);
 	cgi(requist.requistLine);
+	if(requist.requistLine[1].find("?") != SIZE_T_MAX)
+		requist.requistLine[1] = requist.requistLine[1].substr(0, requist.requistLine[1].find("?"));
 	serverName	= requist.header["Host"].size() != 1 ? "" : requist.header["Host"][0].split(':')[0];
 	if(serverName.empty())
 		return "<h1> Invalid URL </h1>";
@@ -239,7 +233,6 @@ String	ServerRun::ParssingRecuistContent(String	ContentRequist)
 					{
 						if(!loca.getData("root").size())
 							path = std::string(loca.getData("root")[0].getValue()).append(requist.requistLine[1]);
-						std::cout << path << std::endl;
 						if (IsDirectory(path) == 1)
 						{
 							if(requist.requistLine[1].back() != '/')
