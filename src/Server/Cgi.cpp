@@ -57,9 +57,6 @@ std::string Cgi::HandelScript(std::vector<String> argvs)
 			exit(0);    
 		}
 	}
-	/**
-	 * @attention while read
-	*/
 	waitpid(-1, 0, 0);
 	String						respond;
 	char res[200];
