@@ -1,4 +1,3 @@
-ExampleGet your own PHP Server
 <!DOCTYPE html>
 <html>
 <body>

@@ -3,42 +3,32 @@
 Cgi::Cgi(std::string ScriptName)
 {
 	PathScript = ScriptName;
-	// if(this->PathScript.substr(PathScript.find('.')) == ".cpp")
-	// {
-	// 	std::string cmd("/usr/bin/c++ ");
-	// 	cmd.append(PathScript).append(" && ./a.out && /bin/rm -f a.out");
-	// 	MultCGI[".cpp"] = cmd;
-	// }
-	// if(this->PathScript.substr(PathScript.find('.')) == ".c")
-	// {
-	// 	std::string cmd("/usr/bin/gcc ");
-	// 	cmd.append(PathScript).append(" && ./a.out && /bin/rm -f a.out");
-	// 	MultCGI[".c"] = cmd;
-	// }
-	// if(this->PathScript.substr(PathScript.find('.')) == ".py")
-	// {
-	// 	std::string cmd("/usr/bin/python3 ");
-	// 	cmd.append(PathScript);
-	// 	MultCGI[".py"] = cmd;
-	// }
-	if(this->PathScript.substr(PathScript.find('.')) == ".php")
+	if(this->PathScript.substr(PathScript.find_last_of('.')) == ".cgi")
 	{
-		std::string cmd("/usr/bin/php ");
-		cmd.append(PathScript);
+		std::string cmd("./");
+		MultCGI[".cgi"] = cmd;
+	}
+	if(this->PathScript.substr(PathScript.find_last_of('.')) == ".py")
+	{
+		std::string cmd("/usr/bin/python3");
+		MultCGI[".py"] = cmd;
+	}
+	if(this->PathScript.substr(PathScript.find_last_of('.')) == ".php")
+	{
+		std::string cmd("/usr/bin/php");
 		MultCGI[".php"] = cmd;
 	}
 }
 std::string Cgi::HandelScript()
 {
 	int			forkValeu = 0;
-	char		beffur[2024] = {0};
 	int			fd[2];
 	std::string	ext;
 
-	ext = this->PathScript.substr(PathScript.find('.'));
+	ext = this->PathScript.substr(PathScript.find_last_of('.'));
 	if(MultCGI[ext].size() == 0)
 		return ERROR_404;
-	const char *argv[] = {"	", "-c", (char*)MultCGI[ext].c_str(),NULL};
+	const char *argv[] = {(char*)MultCGI[ext].c_str(), (char*)PathScript.c_str(),NULL};
 	pipe(fd);
 	forkValeu = fork();
 	if(forkValeu == 0)
@@ -51,11 +41,24 @@ std::string Cgi::HandelScript()
 			exit(0);    
 		}
 	}
+	// /**
+	//  * @attention while read
+	// */
 	waitpid(-1, 0, 0);
-	read(fd[0], beffur, 2023);
+	String						respond;
+	char res[200];
+	bzero(res, 200);
+	ssize_t bytes = 0;
+	while((bytes = read(fd[0], res, 199)) != 0)
+	{
+		respond.append(res);
+		bzero(res, 200);
+		if (bytes < 199)
+			break;
+	}
 	close(fd[0]);
 	close(fd[1]);
-	return beffur;
+	return respond;
 }
 Cgi::~Cgi()
 {
