@@ -13,8 +13,8 @@ class   Cgi{
     public :
         Cgi( std::string );
         ~Cgi();
+        std::string HandelScript(std::vector<String>);
 
-        std::string HandelScript();
 };
 
 

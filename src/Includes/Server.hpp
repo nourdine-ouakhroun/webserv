@@ -32,9 +32,11 @@ class	ServerRun
 		void	listenSocket(int	serverfd);
 		void	RunAllServers();
 		void cgi(std::vector<String>);
+		String getRespond(const ServerModel & server, const String &path);
+		String getRespondLocation(const Location & _location, const std::string & path);
 
 	private :
-		std::map<String, String> query;
+		std::vector<String> query;
 		ServerData servers;
 
 };
