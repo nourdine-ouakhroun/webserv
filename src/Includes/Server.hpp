@@ -7,6 +7,7 @@
 #include <sys/types.h>
 #include <netdb.h>
 #include<vector>
+#include<map>
 #include <sys/poll.h>
 #include <sys/select.h>
 #include "Parser.hpp"
@@ -30,8 +31,10 @@ class	ServerRun
 		void	acceptRquist( std::vector<int>	servers );
 		void	listenSocket(int	serverfd);
 		void	RunAllServers();
+		void cgi(std::vector<String>);
 
 	private :
+		std::map<String, String> query;
 		ServerData servers;
 
 };
