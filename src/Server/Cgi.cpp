@@ -18,11 +18,11 @@ Cgi::Cgi(std::string ScriptName)
 		std::string cmd("/usr/bin/php");
 		MultCGI[".php"] = cmd;
 	}
-	/*if(this->PathScript.substr(PathScript.find_last_of('.')) == ".pl")
+	if(this->PathScript.substr(PathScript.find_last_of('.')) == ".pl")
 	{
 		std::string cmd("/usr/bin/perl");
 		MultCGI[".pl"] = cmd;
-	}*/
+	}
 }
 std::string Cgi::HandelScript(std::vector<String> argvs)
 {
@@ -37,13 +37,9 @@ std::string Cgi::HandelScript(std::vector<String> argvs)
 	memset(argv, 0, (argvs.size() + 3) * sizeof(char *));
 	argv[0] = (char *)MultCGI[ext].c_str();
 	argv[1] = (char *)PathScript.c_str();
-	for (size_t i = 2; i < argvs.size(); i++)
+	for (size_t i = 0; i < argvs.size(); i++)
 	{
-		argv[i] = (char *)argvs[i-2].c_str();
-	}
-	for (size_t i = 0; argv[i]; i++)
-	{
-		std::cout << argv[i] << std::endl;
+		argv[i + 2] = (char *)argvs[i].c_str();
 	}
 	pipe(fd);
 	forkValeu = fork();
