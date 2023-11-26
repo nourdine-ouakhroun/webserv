@@ -14,12 +14,12 @@ void	Data::setValue(const String& Value)
 	value = Value;
 }
 
-const String& Data::getKey( void ) const
+String Data::getKey( void ) const
 {
 	return (key);
 }
 
-const String& Data::getValue( void ) const
+String Data::getValue( void ) const
 {
 	return (value);
 }

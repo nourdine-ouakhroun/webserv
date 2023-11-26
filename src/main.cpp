@@ -3,7 +3,18 @@
 #include "Server.hpp"
 #include <dirent.h>
 
-String	checkIsFile(const std::vector<Location>& locations, String filePath);
+String	getRootPath(String	root, String path)
+{
+	String file(root);
+	file.append(path).append((file.end() - 1)[0] == '/' ? "" : "/");
+	return (file);
+}
+
+String	getAliasPath(String	aliasPath)
+{
+	aliasPath.rightTrim("/");
+	return (aliasPath.append("/"));
+}
 
 String	tryFiles(const std::vector<String>& files, const String& path)
 {
@@ -43,16 +54,10 @@ String	getDirectoryContent(const String& dirname, String path)
 	struct dirent *dirp;
 	path.trim("/");
 	while ((dirp = readdir(dir)) != NULL)
-	{
-		/**
-		 * @brief body end with this form.
-		 *		<h1>Index of /test</h1><hr><pre><a href="/test/.">.</a><br>
-		 */
-		body.append("<a href=\"").append(path).append("/").append(dirp->d_name).append("\">");
-		body.append(dirp->d_name).append("</a><br>");
-		// std::cout << dirp->d_name << std::endl;
-		// std::cout << body << std::endl;
-	}
+		body.append("<a href=\"").append(path)
+			.append("/").append(dirp->d_name)
+			.append("\">").append(dirp->d_name)
+			.append("</a><br>");
 	body.append("</pre><hr>");
 	closedir(dir);
 	return (body);
@@ -62,23 +67,33 @@ String	to_do(const Location& loca)
 {
 	String content;
 	String	path(loca.getPath());
+	String file;
 	std::vector<Data>	data = loca.getData("root");
+	file = getRootPath(data.at(0).getValue(), path);
+	if (loca.getData("alias").empty() == false)
+	{
+		data = loca.getData("alias");
+		file = getAliasPath(data.at(0).getValue());
+	}
 	if (data.empty() == true)
 		return (ERROR_404);
-	String file(data.at(0).getValue());
-	file.append(path).append((file.end() - 1)[0] == '/' ? "" : "/"); // -> check if the path ended with '/'
 	std::vector<Data> indexes = loca.getData("index");
 	std::vector<Data> autoIndex = loca.getData("autoindex");
-	if (indexes.empty() == true && (autoIndex.empty() == true || (autoIndex.empty() == false && !autoIndex.at(0).getValue().compare("off"))))
+	std::vector<Data> tryfiles = loca.getData("try_files");
+	if (!tryfiles.size() 
+		&& indexes.empty() == true && (autoIndex.empty() == true || (autoIndex.empty() == false && !autoIndex.at(0).getValue().compare("off"))))
 		return (ERROR_403);
 	if (autoIndex.empty() == false && !autoIndex.at(0).getValue().compare("on"))
 		return (getDirectoryContent(file, path));
-	content = tryFiles(String(loca.getData("try_files").at(0).getValue()).split(), file);
-	if (content.empty() == false)
-		return (content);
+	if (tryfiles.empty() == false)
+	{
+		content = tryFiles(tryfiles.at(0).getValue().split(), file);
+		if (content.empty() == false)
+			return (content);
+	}
 	for (size_t i = 0; i < indexes.size(); i++)
 	{
-		content = getFileContent(String(indexes.at(i).getValue()).split(), file);
+		content = getFileContent(indexes.at(i).getValue().split(), file);
 		if (content.empty() == false)
 			return (content);
 	}
@@ -92,27 +107,38 @@ String	handler(ServerData& servers, std::vector<Data> header)
 	std::vector<ServerModel>	servModel;
 	String	content;
 
+	// content.append("\r\n");
 	servModel = getServer(servers, header);
 	if (servModel.empty() == true)
 		servModel = servers.getAllServers();
-	String path(String(model.getData("Method").begin()->getValue()).split()[1]);
+	String path(model.getData("Method").begin()->getValue().split()[1]);
 	path.trim(" \t\r\n");
 	ServerModel server = servModel.at(0);
 	std::vector<Data> roots = server.getData("root");
 	String root;
 	if (roots.empty() == false)
 		root = roots.at(0).getValue();
-	Logger::success(std::cout, "path : ", path);
 	if (root.empty() == false && server.checkIsDirectory(root.append(path)) == 0)
-		return (content.append(readFile(root)));
-	content = checkIsFile(servModel.at(0).getLocation(), path);
-	if (content.empty() == false)
-		return (content);
+	{
+		String str = readFile(root);
+		std::vector<Data> accept = model.getData("Accept");
+		if (accept.empty() == false)
+		{
+			content.append("Content-Length: ");
+			content.append(std::to_string(str.size()));
+			content.append("\r\nContent-Type: ");
+			content.append("image/jpeg");
+			content.append("\r\n");
+		}
+		content.append("\r\n");
+		return (content.append(str));
+	}
 	path.rightTrim("/");
+	// content.append("\r\n");
 	Location	loca = ServerModel::getLocationByPath(servModel.at(0).getLocation(), path);
 	if (loca.getPath().empty() == false)
-		return (to_do(loca));
-	return (content);
+		return (content.append(to_do(loca)));
+	return (content.append(ERROR_404));
 }
 
 bool	requestHandler(const std::vector<int>& port, Server& server, ServerData& serv, int readyFd)
@@ -131,13 +157,16 @@ bool	requestHandler(const std::vector<int>& port, Server& server, ServerData& se
 			String header = server.recieve(readyFd);
 			if (header.empty() == true)
 				return (true);
-			// std::cout << header << std::endl;
+			std::cout << header << std::endl << std::endl;
 			String content("HTTP/1.1 200 OK\r\n\r\n");
 			content.append(handler(serv, Parser::parseHeader(header)));
+			// std::cout << content << std::endl;
+			// std::ofstream str("content.txt");
+			// str << content;
 			ssize_t sender = server.send(readyFd, content);
 			if (sender == -1)
-				Logger::error(std::cerr, "Send Failed.", "");
-			// std::cout << "Sender : " << sender << std::endl;
+			{
+			}
 			close(readyFd);
 			server.fds.erase_fd(readyFd);
 		}
@@ -176,7 +205,6 @@ void	start(Parser& parser)
 	ServerData servers(parser.getServers());
 	try
 	{
-		// servers.displayServers();
 		createServer(servers);
 	}
 	catch (std::exception& e)
@@ -185,10 +213,6 @@ void	start(Parser& parser)
 	}
 }
 
-
-/**
- * @brief	main function.
- */
  int	main(int ac, char **av)
 {
 	if (ac < 2)
@@ -209,22 +233,3 @@ void	start(Parser& parser)
 	}
 	return (0);
 }
-
-/**
- * String str("the configuration file");
- * str.append(av[1]);
- * Logger::success(std::cout, str, " syntax is ok.");
- * Logger::success(std::cout, str, " test is successfuli.");
-*/
-
-// ACCESS_LOG
-// {
-		// exit(0);
-	// String access_log = servModel.at(0).getData("access_log").at(0).getValue();
-	// if (access_log.contains("main") == true)
-	// {
-	// 	std::ofstream accessLogFile(access_log.split()[0].trim(" \t\n\r"));
-	// 	Logger::info(accessLogFile, "Hello World", " Test 1");
-	// }
-	// std::vector<Data> hosts = model.getData("Method");
-// }

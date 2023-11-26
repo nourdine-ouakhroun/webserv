@@ -1,28 +1,5 @@
 #include "Server.hpp"
-
-String	checkIsFile(const std::vector<Location>& locations, String filePath)
-{
-	String	value;
-	if (locations.empty())
-		return value;
-	for (size_t i = 0; i < locations.size(); i++)
-	{
-		std::vector<Data> roots = locations.at(i).getData("root");
-		String root;
-		if (roots.empty() == false)
-			root = roots.at(0).getValue();
-		if (root.empty() == false && ServerModel::checkIsDirectory(root.append(filePath)) == 0)
-		{
-			std::cout << "root : " << root << std::endl;
-			return (value.append(readFile(root)));
-		}
-		value = checkIsFile(locations.at(i).getInnerLocation(), filePath);
-		if (value.empty() == false)
-			return (value);
-		value.clear();
-	}
-	return (value);
-}
+#include "Logger.hpp"
 
 String	readFile(const String& path)
 {
