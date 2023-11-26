@@ -41,6 +41,48 @@ void printreq(_requset _requisteconten)
 		std::cout <<"[ " << _requisteconten.body[i] << " ]" << std::endl;
 	}
 }
+template<typename T>
+int filterCgi(T _Data, std::map<String , String> &cgiscipts)
+{
+	int status = false;
+	std::vector<Data> Option = _Data.getData("Options");
+	if(Option.size() > 1)
+		Logger::warn(std::cerr, "options : ", "duplicate");
+	if(Option.size() < 1)
+		return status;
+	for (size_t i = 0; i < Option.size(); i++)
+	{
+		if(Option[i].getValue() == "+ExecCG")
+			status = true;
+	}
+	if(status == false)
+	{
+		Logger::warn(std::cerr, "options : ", "Feld to Find +ExecCG, CGI will not executed");
+		return status;
+	}
+	status = false;
+	std::vector<Data> AddHandler = _Data.getData("AddHandler");
+	if(AddHandler.size() < 1)
+	{
+		Logger::warn(std::cerr, "AddHandler: ", "dose not foud, CGI will not executed");
+		return status;
+	}
+	for (size_t i = 0; i < AddHandler.size(); i++)
+	{
+		std::vector<String> valeu = String(AddHandler[i].getValue()).split();
+		if(valeu.size() == 2)
+		{
+			status = true;
+			cgiscipts[valeu[1]] =  valeu[0];
+		}
+	}
+	if(status == false)
+	{
+		Logger::warn(std::cerr, "AddHandler : ", "Feld to Find scipts, CGI will not executed");
+		return status;
+	}
+	return status;
+}
 
 String ServerRun::getRespond(const ServerModel & server, const String &path)
 {
@@ -67,10 +109,11 @@ String ServerRun::getRespond(const ServerModel & server, const String &path)
 			int fd = open(tmp.c_str() , O_RDONLY);
 			if(fd < 0)
 				continue;
-			std::string extantion = tmp.find_last_of('.') != SIZE_T_MAX ? tmp.substr(tmp.find_last_of('.')) : "";
-			if(extantion == ".php" || extantion == ".cgi" || extantion == ".py"|| extantion == ".pl")
+			if(tmp.find_last_of(".") != SIZE_T_MAX
+				&& filterCgi(server, cgiscipts) == true
+					&& cgiscipts[tmp.substr(tmp.find_last_of("."))].size())
 			{
-				Cgi CgiScript(tmp);
+				Cgi CgiScript(tmp, cgiscipts);
 				std::string responCgi = CgiScript.HandelScript(this->query);
 				respond = responCgi;
 				return respond;
@@ -91,7 +134,8 @@ String ServerRun::getRespond(const ServerModel & server, const String &path)
 	}
 	return respond;
 }
-String ServerRun::getRespondLocation(const Location & _location, const std::string & path)
+
+String ServerRun::getRespondLocation(const Location & _location, const std::string & path, const ServerModel & server)
 {
 	String						respond(ERROR_404);
 	String Allpath;
@@ -110,11 +154,11 @@ String ServerRun::getRespondLocation(const Location & _location, const std::stri
 			int fd = open(tmp.c_str() , O_RDONLY);
 			if(fd < 0)
 				continue;
-			std::string extantion = tmp.find_last_of('.') != SIZE_T_MAX ? tmp.substr(tmp.find_last_of('.')) : "";
-			std::cout << tmp.substr(tmp.find_last_of('.')) << std::endl;
-			if(extantion == ".php" || extantion == ".cgi" || extantion == ".py"|| extantion == ".pl")
+			if(tmp.find_last_of(".") != SIZE_T_MAX
+				&& (filterCgi(_location, cgiscipts) == true || filterCgi(server, cgiscipts) == true) 
+					&& cgiscipts[tmp.substr(tmp.find_last_of("."))].size())
 			{
-				Cgi CgiScript(tmp);
+				Cgi CgiScript(tmp, cgiscipts);
 				std::string responCgi = CgiScript.HandelScript(this->query);
 				respond = responCgi;
 				return respond;
@@ -236,7 +280,7 @@ String	ServerRun::ParssingRecuistContent(String	ContentRequist)
 						{
 							if(requist.requistLine[1].back() != '/')
 								return(status("301 Moved Permanently\r\nLocation: http://" + serversname[index_serversname] + requist.requistLine[1] + "/", ""));
-							return (status("200 OK", getRespondLocation(loca, path)));
+							return (status("200 OK", getRespondLocation(loca, path, Serv[index_Serv])));
 						}
 						else
 							return status("404 KO", ERROR_404);

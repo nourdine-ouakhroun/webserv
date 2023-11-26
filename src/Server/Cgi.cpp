@@ -1,28 +1,9 @@
 #include"Cgi.hpp"
 
-Cgi::Cgi(std::string ScriptName)
+Cgi::Cgi(std::string ScriptName, std::map<String, String> scripts)
 {
 	PathScript = ScriptName;
-	if(this->PathScript.substr(PathScript.find_last_of('.')) == ".cgi")
-	{
-		std::string cmd("./");
-		MultCGI[".cgi"] = cmd;
-	}
-	if(this->PathScript.substr(PathScript.find_last_of('.')) == ".py")
-	{
-		std::string cmd("/usr/bin/python3");
-		MultCGI[".py"] = cmd;
-	}
-	if(this->PathScript.substr(PathScript.find_last_of('.')) == ".php")
-	{
-		std::string cmd("/usr/bin/php");
-		MultCGI[".php"] = cmd;
-	}
-	if(this->PathScript.substr(PathScript.find_last_of('.')) == ".pl")
-	{
-		std::string cmd("/usr/bin/perl");
-		MultCGI[".pl"] = cmd;
-	}
+	MultCGI = scripts;
 }
 std::string Cgi::HandelScript(std::vector<String> argvs)
 {
