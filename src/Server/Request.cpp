@@ -6,6 +6,7 @@ Request::Request( void )
 
 Request::Request(const String& _request)
 {
+    
 }
 Request::Request(const Request& copy)
 {
