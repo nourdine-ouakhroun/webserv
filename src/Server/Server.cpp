@@ -68,7 +68,7 @@ String ServerRun::getRespond(const ServerModel & server, const String &path)
 			if(fd < 0)
 				continue;
 			std::string extantion = tmp.find_last_of('.') != SIZE_T_MAX ? tmp.substr(tmp.find_last_of('.')) : "";
-			if(extantion == ".php" || extantion == ".cgi" || extantion == ".py"/*|| extantion == ".pl"*/)
+			if(extantion == ".php" || extantion == ".cgi" || extantion == ".py"|| extantion == ".pl")
 			{
 				Cgi CgiScript(tmp);
 				std::string responCgi = CgiScript.HandelScript(this->query);
@@ -112,7 +112,7 @@ String ServerRun::getRespondLocation(const Location & _location, const std::stri
 				continue;
 			std::string extantion = tmp.find_last_of('.') != SIZE_T_MAX ? tmp.substr(tmp.find_last_of('.')) : "";
 			std::cout << tmp.substr(tmp.find_last_of('.')) << std::endl;
-			if(extantion == ".php" || extantion == ".cgi" || extantion == ".py"/*|| extantion == ".pl"*/)
+			if(extantion == ".php" || extantion == ".cgi" || extantion == ".py"|| extantion == ".pl")
 			{
 				Cgi CgiScript(tmp);
 				std::string responCgi = CgiScript.HandelScript(this->query);
@@ -178,7 +178,6 @@ void ServerRun::cgi(std::vector<String> line)
                         this->query.push_back(keyValue[1]);
                 }
             }
-
         }
     }
 }
