@@ -49,7 +49,7 @@ void    Checker::checkLocationValues(const std::vector<Location>& loca)
         if (data.empty() == false)
             for (size_t j = 0; j < data.size(); j++)
                 if (data.at(j).getValue().empty() == true)
-                    throw (ParsingException(String(data.at(j).getKey()).append(" directive is duplicate.")));
+                    throw (ParsingException(data.at(j).getKey().append(" directive is duplicate.")));
         if (loca.at(i).getInnerLocation().empty() == false)
             checkLocationValues(loca.at(i).getInnerLocation());  
     }
@@ -74,7 +74,7 @@ void    Checker::checkValues( void )
         if (data.empty() == false)
             for (size_t j = 0; j < data.size(); j++)
                 if (data.at(j).getValue().empty() == true)
-                    throw (ParsingException(String(data.at(j).getKey()).append(" directive is duplicate.")));
+                    throw (ParsingException(data.at(j).getKey().append(" directive is duplicate.")));
         checkLocationValues(servers.at(i).getLocation());
     }
 }
@@ -114,6 +114,7 @@ void    Checker::fullCheck( void )
         return ;
     checkValues();
     checkDuplicate("root");
+    checkDuplicate("alias");
     checkDuplicate("try_files");
     checkDuplicate("autoindex");
     checkBooleanValues("autoindex");

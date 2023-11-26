@@ -109,8 +109,10 @@ int		ServerModel::checkIsDirectory(const String& filename)
 {
 	DIR *dir;
 	if (!access(filename.c_str(), F_OK))
+	{
 		if ((dir = opendir(filename.c_str())) != NULL)
 			return (closedir(dir), 1);
 		return (0);
+	}
 	return (-1);
 }
