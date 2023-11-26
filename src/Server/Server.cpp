@@ -155,8 +155,8 @@ String ServerRun::getRespondLocation(const Location & _location, const std::stri
 			if(fd < 0)
 				continue;
 			if(tmp.find_last_of(".") != SIZE_T_MAX
-				&& (filterCgi(_location, cgiscipts) == true || filterCgi(server, cgiscipts) == true) 
-					&& cgiscipts[tmp.substr(tmp.find_last_of("."))].size())
+				&& ((filterCgi(_location, cgiscipts) == true && cgiscipts[tmp.substr(tmp.find_last_of("."))].size())
+				|| (filterCgi(server, cgiscipts) == true && cgiscipts[tmp.substr(tmp.find_last_of("."))].size())))
 			{
 				Cgi CgiScript(tmp, cgiscipts);
 				std::string responCgi = CgiScript.HandelScript(this->query);
