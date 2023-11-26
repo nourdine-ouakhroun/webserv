@@ -3,7 +3,7 @@
 
 #include "Parser.hpp"
 #include "ServerException.hpp"
-#include <algorithm>    // std::find
+#include <algorithm>
 
 
 #define	ERROR_404	"<h1 style=\"text-align: center;\">404 Page not found.</h1>"

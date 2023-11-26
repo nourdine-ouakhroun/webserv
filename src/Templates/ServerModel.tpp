@@ -32,7 +32,7 @@ bool	ServerModel::findLocationByPath(std::vector<Location> locations, const Stri
 			std::vector<Data> aliases = ibegin->getData("alias");
 			for (size_t i = 0; i < aliases.size(); i++)
 			{
-				std::vector<String> values = String(aliases[i].getValue()).split();
+				std::vector<String> values = aliases[i].getValue().split();
 				if (std::find(values.begin(), values.end(), srcPath) != values.end())
 				{
 					Location l = getLocationByPath(tmplocations, srcPath);
