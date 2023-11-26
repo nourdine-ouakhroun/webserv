@@ -14,8 +14,8 @@ class Data
 		Data(const String& _key, const String& _value);
 		void	setKey(const String& Key);
 		void	setValue(const String& Value);
-		const String&	getKey( void ) const;
-		const String&	getValue( void ) const;
+		String	getKey( void ) const;
+		String	getValue( void ) const;
 		
 		static	void	printData(const Data& data, String&);
 };
