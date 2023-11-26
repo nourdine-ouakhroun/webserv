@@ -33,10 +33,11 @@ class	ServerRun
 		void	RunAllServers();
 		void cgi(std::vector<String>);
 		String getRespond(const ServerModel & server, const String &path);
-		String getRespondLocation(const Location & _location, const std::string & path);
+		String getRespondLocation(const Location & _location, const std::string & path, const ServerModel & server);
 
 	private :
 		std::vector<String> query;
+        std::map<String, String> cgiscipts;
 		ServerData servers;
 
 };
