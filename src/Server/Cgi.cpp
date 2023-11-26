@@ -54,7 +54,7 @@ std::string Cgi::HandelScript(std::vector<String> argvs)
 		}
 	}
 	waitpid(-1, 0, 0);
-	String						respond;
+	String	respond;
 	char res[200];
 	bzero(res, 200);
 	ssize_t bytes = 0;
