@@ -41,8 +41,9 @@ void printreq(_requset _requisteconten)
 		std::cout <<"[ " << _requisteconten.body[i] << " ]" << std::endl;
 	}
 }
+
 template<typename T>
-int filterCgi(T _Data, std::map<String , String> &cgiscipts)
+int filterCgiOption(T _Data)
 {
 	int status = false;
 	std::vector<Data> Option = _Data.getData("Options");
@@ -60,11 +61,16 @@ int filterCgi(T _Data, std::map<String , String> &cgiscipts)
 		Logger::warn(std::cerr, "options : ", "Feld to Find +ExecCG, CGI will not executed");
 		return status;
 	}
-	status = false;
+	return status;
+}
+template<typename T>
+int filterCgiAddHandler(T _Data, std::map<String , String> &cgiscipts)
+{
+	int status = false;
+
 	std::vector<Data> AddHandler = _Data.getData("AddHandler");
 	if(AddHandler.size() < 1)
 	{
-		Logger::warn(std::cerr, "AddHandler: ", "dose not foud, CGI will not executed");
 		return status;
 	}
 	for (size_t i = 0; i < AddHandler.size(); i++)
@@ -78,7 +84,6 @@ int filterCgi(T _Data, std::map<String , String> &cgiscipts)
 	}
 	if(status == false)
 	{
-		Logger::warn(std::cerr, "AddHandler : ", "Feld to Find scipts, CGI will not executed");
 		return status;
 	}
 	return status;
@@ -110,7 +115,8 @@ String ServerRun::getRespond(const ServerModel & server, const String &path)
 			if(fd < 0)
 				continue;
 			if(tmp.find_last_of(".") != SIZE_T_MAX
-				&& filterCgi(server, cgiscipts) == true
+				&& filterCgiOption(server) == true 
+					&& filterCgiAddHandler(server, cgiscipts) == true
 					&& cgiscipts[tmp.substr(tmp.find_last_of("."))].size())
 			{
 				Cgi CgiScript(tmp, cgiscipts);
@@ -154,14 +160,30 @@ String ServerRun::getRespondLocation(const Location & _location, const std::stri
 			int fd = open(tmp.c_str() , O_RDONLY);
 			if(fd < 0)
 				continue;
-			if(tmp.find_last_of(".") != SIZE_T_MAX
-				&& ((filterCgi(_location, cgiscipts) == true && cgiscipts[tmp.substr(tmp.find_last_of("."))].size())
-				|| (filterCgi(server, cgiscipts) == true && cgiscipts[tmp.substr(tmp.find_last_of("."))].size())))
+			if(tmp.find_last_of(".") != SIZE_T_MAX)
 			{
-				Cgi CgiScript(tmp, cgiscipts);
-				std::string responCgi = CgiScript.HandelScript(this->query);
-				respond = responCgi;
-				return respond;
+				if(filterCgiOption(_location) == true || filterCgiOption(server) == true)
+				{
+					if(filterCgiAddHandler(_location, cgiscipts) == true && cgiscipts[tmp.substr(tmp.find_last_of("."))].size())
+					{
+						Cgi CgiScript(tmp, cgiscipts);
+						std::string responCgi = CgiScript.HandelScript(this->query);
+						respond = responCgi;
+						return respond;
+					}
+					else if(filterCgiAddHandler(server, cgiscipts) == true  && cgiscipts[tmp.substr(tmp.find_last_of("."))].size())
+					{
+						Cgi CgiScript(tmp, cgiscipts);
+						std::string responCgi = CgiScript.HandelScript(this->query);
+						respond = responCgi;
+						return respond;
+					}
+					else if(cgiscipts.empty())
+						Logger::warn(std::cerr, "AddHandler :" , "can't find the cgi-script");	
+				}
+				else
+					Logger::warn(std::cerr, "Options :" , "can't find the +ExecCG");	
+
 			}
 			respond.clear();
 			char res[200];
