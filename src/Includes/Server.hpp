@@ -1,46 +1,32 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Server.hpp                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: nouakhro <nouakhro@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/11/27 16:41:52 by nouakhro          #+#    #+#             */
+/*   Updated: 2023/11/27 17:22:45 by nouakhro         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef SERVER_HPP
 #define SERVER_HPP
-#include<sstream>
-#include <sys/socket.h>
-#include <iostream>
-#include <unistd.h>
-#include <sys/types.h>
-#include <netdb.h>
-#include<vector>
-#include<map>
-#include <sys/poll.h>
-#include <sys/select.h>
-#include "Parser.hpp"
-#include"Cgi.hpp"
-#include "ParssingRequist.hpp"
-
-struct _Data { 
-	std::string	file; 
-	std::string	respond;
-};
-class	ServerRun
+#include"ServerData.hpp"
+#include"Parser.hpp"
+#include"ServerModel.hpp"
+#include<sys/socket.h>
+class	Server
 {
-	public :
-		ServerRun(ServerData);
-		~ServerRun();
+private:
+	ServerData	servers;
+	std::vector<int> fdports;
+public:
+	Server( ServerData );
+	~Server();
 
-		int		Newsocket();
-		bool	bindConection(int	Port, int	sreverfd);
-		void	HandelRequist(struct pollfd	*struct_fds ,size_t	i,std::vector<struct pollfd>&, std::vector<int>);
-		String	ParssingRecuistContent( String );
-		void	acceptRquist( std::vector<int>	servers );
-		void	listenSocket(int	serverfd);
-		void	RunAllServers();
-		void cgi(std::vector<String>);
-		String getRespond(const ServerModel & server, const String &path);
-		String getRespondLocation(const Location & _location, const std::string & path, const ServerModel & server);
-
-	private :
-		std::vector<String> query;
-        std::map<String, String> cgiscipts;
-		ServerData servers;
-
+	void	runAllServers();
+	void	setSocket(int);
 };
 
-void	acceptRquist( std::vector<int>	servers );
 #endif
