@@ -2,34 +2,29 @@
 #ifndef REQUEST_HPP
 #define REQUEST_HPP
 
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <iostream>
-#include <unistd.h>
-#include <fcntl.h>
-#include <map>
-#include <vector>
-#include <sstream>
+#include "RequestLine.hpp"
 
-typedef std::map<std::string, std::string> maps;
 
 class Request
 {
 private:
-	std::vector<std::string>	requestLine;
+	std::string					request;
+
+	// std::vector<std::string>	requestLine;
 	maps						headerRequest;
 	maps						bodyRequest;
-	// maps						params;
-	int 						clientFd;
+	maps						query;
+	maps						mimeType;
 public:
 	Request( void );
 	~Request( void );
-	Request( int clientFd );
+	Request( std::string );
+	void setMimeType();
 
 	int			errorExit(int status, std::string errorMsg);
-	std::string	readRequest();
+	// std::string	readRequest();
 	
-	void		parseReq(std::string);
+	RequestLine		parse(std::string);
 	void		parseLine(std::string);
 	void		parseHeader(std::string h1);
 	
@@ -41,15 +36,28 @@ public:
 	// void 	parseBody(std::string h1, int hOrb);
 
 	// start from here
-	void 	requestIsFormed();
-	void 	statusCodeError(int statusCode, std::string phrase);
-	std::string methodeIs( void )
+	// void 	requestIsFormed();
+	// void 	statusCodeError(int statusCode, std::string phrase);
+	// const std::vector<std::string> &getRequestLine() const
+	// {
+	// 	return(requestLine);
+	// }
+	// std::string methodeIs( void )
+	// {
+	// 	return (requestLine[0]);
+	// }
+	std::string getMimeType(const std::string &extension)
 	{
-		return (requestLine[0]);
+		if (mimeType[extension].empty())
+		{
+			return ("Content-Type: " + mimeType[".html"]);
+		}
+		return ("Content-Type: " + mimeType[extension]);
 	}
 };
 
 
+std::string	readRequest(int clientFd);
 
 
 #endif

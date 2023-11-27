@@ -1,11 +1,7 @@
-#include "server.hpp"
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <fstream>
-#include <ctime>
 
-#include "Request.hpp"
+
+#include "server.hpp"
+
 
 
 std::string readHtml(std::string file)
@@ -85,19 +81,32 @@ Server::Server()
 		// std::cout << clientFd << std::endl;
 		
 
-		Request req(clientFd);
-		std::string request = req.readRequest();
+		std::string request = readRequest(clientFd);
 		// std::cout << "-----------------------------------------------------" << std::endl;
 		// std::cout << request << std::endl;
 		// std::cout << "countReq : " << countReq++ << std::endl;
 		// std::cout << "-----------------------------------------------------" << std::endl;
-		req.parseReq(request);
+		Request req(request);
+		RequestLine reqLine = req.parse(request);
 
+		std::cout << reqLine.getMethode() << std::endl;
+		std::cout << reqLine.getQuery() << std::endl;
+		std::cout << reqLine.getHttpVersion() << std::endl;
+		// std::string website;
+		// if (req.getRequestLine()[1].size() == 1)
+		// 	 website = readHtml("/Users/mzeroual/Desktop/cursus/webserv/src/Server/templatemo_562_space_dynamic/index.html");
+		// else
+		// 	 website = readHtml("/Users/mzeroual/Desktop/cursus/webserv/src/Server/templatemo_562_space_dynamic/"+req.getRequestLine()[1]);
+		// // std::cout << website ;
+		// size_t pos;
+		// std::string extention;
+		// if ((pos = req.getRequestLine()[1].rfind(".")) != std::string::npos)
+		// {
+		// 	extention = req.getRequestLine()[1].substr(pos + 1, req.getRequestLine()[1].length());
+		// 	// std::cout << "Extention = " << req.getMimeType(extention) << std::endl;
+		// }
+		std::string	response = "HTTPv1_0 200 OK\r\nContent-Type: image/png\r\n\r\nhttps://profile.intra.42.fr/assets/42_logo_black-684989d43d629b3c0ff6fd7e1157ee04db9bb7a73fba8ec4e01543d650a1c607.png";
 
-		
-		std::string website = readHtml("/Users/mzeroual/Desktop/cursus/webserv/src/Server/web.html");
-		// std::cout << website ;
-		std::string	response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n"+website;
 		write(clientFd, response.c_str(), strlen(response.c_str()));
 		close(clientFd);
 	}
