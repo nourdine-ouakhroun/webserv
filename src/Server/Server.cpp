@@ -181,9 +181,6 @@ String ServerRun::getRespondLocation(const Location & _location, const std::stri
 					else if(cgiscipts.empty())
 						Logger::warn(std::cerr, "AddHandler :" , "can't find the cgi-script");	
 				}
-				else
-					Logger::warn(std::cerr, "Options :" , "can't find the +ExecCG");	
-
 			}
 			respond.clear();
 			char res[200];
