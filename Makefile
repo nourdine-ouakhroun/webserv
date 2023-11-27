@@ -4,6 +4,7 @@ NAME	=	webserv
 SRCS	=	src/Server/main.cpp \
 			src/Server/Server.cpp \
 			src/Server/Request.cpp \
+			src/Server/RequestLine.cpp \
 			src/Parser/Parser.cpp \
 			src/Parser/Checker.cpp \
 			src/Parser/Location.cpp \
