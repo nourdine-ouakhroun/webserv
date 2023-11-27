@@ -3,6 +3,21 @@
 #include "Server.hpp"
 #include <dirent.h>
 
+String  getContentFile(String file)
+{
+    std::fstream new_file;
+    
+    new_file.open(file, std::ios::in);
+    if (new_file.is_open() == false)
+        return ("");
+    String  sa;
+    String  content;
+    while (std::getline(new_file, sa))
+        content.append(sa).append("\n");
+    new_file.close();
+    return content;
+}
+
 String	getRootPath(String	root, String path)
 {
 	String file(root);
@@ -100,14 +115,12 @@ String	to_do(const Location& loca)
 	return (ERROR_404);
 }
 
-
 String	handler(ServerData& servers, std::vector<Data> header)
 {
 	GlobalModel model(header);
 	std::vector<ServerModel>	servModel;
 	String	content;
 
-	// content.append("\r\n");
 	servModel = getServer(servers, header);
 	if (servModel.empty() == true)
 		servModel = servers.getAllServers();
@@ -120,21 +133,21 @@ String	handler(ServerData& servers, std::vector<Data> header)
 		root = roots.at(0).getValue();
 	if (root.empty() == false && server.checkIsDirectory(root.append(path)) == 0)
 	{
-		String str = readFile(root);
+		String str = getContentFile(root);
 		std::vector<Data> accept = model.getData("Accept");
 		if (accept.empty() == false)
 		{
 			content.append("Content-Length: ");
 			content.append(std::to_string(str.size()));
 			content.append("\r\nContent-Type: ");
-			content.append("image/jpeg");
+			content.append(accept.at(0).getValue().split(',').at(0));
 			content.append("\r\n");
 		}
 		content.append("\r\n");
 		return (content.append(str));
 	}
 	path.rightTrim("/");
-	// content.append("\r\n");
+	content.append("\r\n");
 	Location	loca = ServerModel::getLocationByPath(servModel.at(0).getLocation(), path);
 	if (loca.getPath().empty() == false)
 		return (content.append(to_do(loca)));
@@ -157,12 +170,9 @@ bool	requestHandler(const std::vector<int>& port, Server& server, ServerData& se
 			String header = server.recieve(readyFd);
 			if (header.empty() == true)
 				return (true);
-			std::cout << header << std::endl << std::endl;
-			String content("HTTP/1.1 200 OK\r\n\r\n");
+			// std::cout << header << std::endl << std::endl;
+			String content("HTTP/1.1 200 OK\r\n");
 			content.append(handler(serv, Parser::parseHeader(header)));
-			// std::cout << content << std::endl;
-			// std::ofstream str("content.txt");
-			// str << content;
 			ssize_t sender = server.send(readyFd, content);
 			if (sender == -1)
 			{
