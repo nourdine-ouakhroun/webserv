@@ -93,13 +93,17 @@ String	to_do(const Location& loca)
 	if (data.empty() == true)
 		return (ERROR_404);
 	std::vector<Data> indexes = loca.getData("index");
+	if (indexes.empty() == true)
+		indexes.push_back(Data("index", "index.html"));
 	std::vector<Data> autoIndex = loca.getData("autoindex");
 	std::vector<Data> tryfiles = loca.getData("try_files");
+	content = getFileContent(indexes.at(0).getValue().split(), file);
 	if (!tryfiles.size() 
-		&& indexes.empty() == true && (autoIndex.empty() == true || (autoIndex.empty() == false && !autoIndex.at(0).getValue().compare("off"))))
+		&& content.empty() == true && (autoIndex.empty() == true || (autoIndex.empty() == false && !autoIndex.at(0).getValue().compare("off"))))
 		return (ERROR_403);
-	if (autoIndex.empty() == false && !autoIndex.at(0).getValue().compare("on"))
+	if (content.empty() == true && autoIndex.empty() == false && !autoIndex.at(0).getValue().compare("on"))
 		return (getDirectoryContent(file, path));
+	content.clear();
 	if (tryfiles.empty() == false)
 	{
 		content = tryFiles(tryfiles.at(0).getValue().split(), file);
@@ -140,7 +144,7 @@ String	handler(ServerData& servers, std::vector<Data> header)
 			content.append("Content-Length: ");
 			content.append(std::to_string(str.size()));
 			content.append("\r\nContent-Type: ");
-			content.append(accept.at(0).getValue().split(',').at(0));
+			content.append(accept.at(0).getValue());
 			content.append("\r\n");
 		}
 		content.append("\r\n");
@@ -170,15 +174,15 @@ bool	requestHandler(const std::vector<int>& port, Server& server, ServerData& se
 			String header = server.recieve(readyFd);
 			if (header.empty() == true)
 				return (true);
-			// std::cout << header << std::endl << std::endl;
+			std::cout << header << std::endl << std::endl;
 			String content("HTTP/1.1 200 OK\r\n");
 			content.append(handler(serv, Parser::parseHeader(header)));
 			ssize_t sender = server.send(readyFd, content);
 			if (sender == -1)
 			{
+				close(readyFd);
+				server.fds.erase_fd(readyFd);
 			}
-			close(readyFd);
-			server.fds.erase_fd(readyFd);
 		}
 	}
 	return (true);
