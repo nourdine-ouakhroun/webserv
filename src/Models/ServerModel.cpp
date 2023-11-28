@@ -7,6 +7,8 @@ ServerModel::ServerModel( void ) : GlobalModel()
 ServerModel::ServerModel(const GlobalModel& model, const std::vector<Location>& _location) : GlobalModel(model), location(_location)
 {
 	addDirectives("root");
+	addDirectives("Options");
+	addDirectives("AddHandler");
 	addDirectives("autoindex");
 }
 
@@ -33,7 +35,9 @@ ServerModel& ServerModel::operator=(const ServerModel& target)
 	{
 		GlobalModel::operator=(target);
 		location = target.location;
+		addDirectives("Options");
 		addDirectives("root");
+		addDirectives("AddHandler");
 		addDirectives("autoindex");
 	}
 	return (*this);
@@ -43,6 +47,8 @@ void	ServerModel::setLocation(std::vector<Location>& _location)
 {
 	location = _location;
 	addDirectives("root");
+	addDirectives("Options");
+	addDirectives("AddHandler");
 	addDirectives("autoindex");
 }
 
