@@ -16,7 +16,8 @@ SRCS	= src/Parser/Parser.cpp \
 		src/Server/Cgi.cpp\
 		src/Utils/Poll.cpp\
 		src/tools.cpp\
-		src/Server/ManageServers.cpp
+		src/Server/ManageServers.cpp\
+		src/Server/FileDepandenc.cpp
 #		src/Utils/Select.cpp
 
 TEMPLATES =	src/Templates/*.tpp
