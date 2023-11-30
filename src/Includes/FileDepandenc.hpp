@@ -6,7 +6,7 @@
 /*   By: nouakhro <nouakhro@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/29 19:51:28 by nouakhro          #+#    #+#             */
-/*   Updated: 2023/11/29 23:24:18 by nouakhro         ###   ########.fr       */
+/*   Updated: 2023/11/30 23:39:39 by nouakhro         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@ public:
     const int &getStatus() const;
     void setRequist(const std::string);
     void setStatus(const int &);
+    std::string boundery;
     pollfd fdpoll;
 };
 
