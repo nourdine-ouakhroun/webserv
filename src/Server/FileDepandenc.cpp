@@ -10,24 +10,24 @@
 // {
 // 	std::cout << "destractor" << std::endl;
 // }
-void FileDepandenc::eraseRequist(size_t _n, size_t linght)
-{
-	this->requist.erase(_n, linght);
-}
+// void FileDepandenc::eraseRequist(size_t _n, size_t linght)
+// {
+// 	this->requist.erase(_n, linght);
+// }
 
-const std::string &FileDepandenc::getRequist() const 
-{
-	return requist;
-}
+// const std::string &FileDepandenc::getRequist() const 
+// {
+// 	return requist;
+// }
 const int &FileDepandenc::getStatus() const
 {
 	return status;
 }
 
-void FileDepandenc::setRequist(std::string requist) 
-{
-	this->requist.append(requist);
-}
+// void FileDepandenc::setRequist(std::string requist) 
+// {
+// 	this->requist.append(requist);
+// }
 void FileDepandenc::setStatus(const int &status)
 {
 	this->status = status;
