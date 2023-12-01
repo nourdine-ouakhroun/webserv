@@ -10,6 +10,10 @@
 // {
 // 	std::cout << "destractor" << std::endl;
 // }
+void FileDepandenc::eraseRequist(size_t _n, size_t linght)
+{
+	this->requist.erase(_n, linght);
+}
 
 const std::string &FileDepandenc::getRequist() const 
 {
