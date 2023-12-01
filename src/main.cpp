@@ -1,82 +1,4 @@
-#include "Parser.hpp"
-#include "Checker.hpp"
-#include "Server.hpp"
-#include <dirent.h>
-
-String  getContentFile(String file)
-{
-    std::fstream new_file;
-    
-    new_file.open(file, std::ios::in);
-    if (new_file.is_open() == false)
-        return ("");
-    String  sa;
-    String  content;
-    while (std::getline(new_file, sa))
-        content.append(sa).append("\n");
-    new_file.close();
-    return content;
-}
-
-String	getRootPath(String	root, String path)
-{
-	String file(root);
-	file.append(path).append((file.end() - 1)[0] == '/' ? "" : "/");
-	return (file);
-}
-
-String	getAliasPath(String	aliasPath)
-{
-	aliasPath.rightTrim("/");
-	return (aliasPath.append("/"));
-}
-
-String	tryFiles(const std::vector<String>& files, const String& path)
-{
-	String value;
-	for (size_t i = 0; i < files.size() - 1; i++)
-	{
-		String tmp(path);
-		tmp.append(files.at(i));
-		value = readFile(tmp);
-		if (value.length() != 0)
-			return (value);
-	}
-	return (value);
-}
-
-String	getFileContent(const std::vector<String>& indexes, const String& path)
-{
-	String value;
-	for (size_t i = 0; i < indexes.size(); i++)
-	{
-		String tmp(path);
-		tmp.append(indexes.at(i));
-		value = readFile(tmp);
-		if (value.length() != 0)
-			return (value);
-	}
-	return (value);
-}
-
-String	getDirectoryContent(const String& dirname, String path)
-{
-	DIR	*dir = opendir(dirname.c_str());
-	if (!dir)
-		return "";
-	String body("<h1>Index of ");
-	body.append(path).append("</h1><hr><pre>");
-	struct dirent *dirp;
-	path.trim("/");
-	while ((dirp = readdir(dir)) != NULL)
-		body.append("<a href=\"").append(path)
-			.append("/").append(dirp->d_name)
-			.append("\">").append(dirp->d_name)
-			.append("</a><br>");
-	body.append("</pre><hr>");
-	closedir(dir);
-	return (body);
-}
+#include "webserver.h"
 
 String	to_do(const Location& loca)
 {
@@ -119,13 +41,12 @@ String	to_do(const Location& loca)
 	return (ERROR_404);
 }
 
-String	handler(ServerData& servers, std::vector<Data> header)
+ResponseHeader	handler(ServerData& servers, GlobalModel &model)
 {
-	GlobalModel model(header);
 	std::vector<ServerModel>	servModel;
-	String	content;
+	ResponseHeader	responseHeader;
 
-	servModel = getServer(servers, header);
+	servModel = getServer(servers, model.getAllData());
 	if (servModel.empty() == true)
 		servModel = servers.getAllServers();
 	String path(model.getData("Method").begin()->getValue().split()[1]);
@@ -140,22 +61,21 @@ String	handler(ServerData& servers, std::vector<Data> header)
 		String str = getContentFile(root);
 		std::vector<Data> accept = model.getData("Accept");
 		if (accept.empty() == false)
-		{
-			content.append("Content-Length: ");
-			content.append(std::to_string(str.size()));
-			content.append("\r\nContent-Type: ");
-			content.append(accept.at(0).getValue());
-			content.append("\r\n");
-		}
-		content.append("\r\n");
-		return (content.append(str));
+			responseHeader.contentLength(std::to_string(str.size())).contentType(accept.at(0).getValue());
+		responseHeader.body(str);
+		return (responseHeader);
 	}
+	// if (*(path.end() - 1) != '/')
+	// {
+	// 	responseHeader.status("301 Moved Permanently").location("127.0.0.1:8080" + path + "/");
+	// 	return (responseHeader);
+	// }
 	path.rightTrim("/");
-	content.append("\r\n");
 	Location	loca = ServerModel::getLocationByPath(servModel.at(0).getLocation(), path);
 	if (loca.getPath().empty() == false)
-		return (content.append(to_do(loca)));
-	return (content.append(ERROR_404));
+		return (responseHeader.body(to_do(loca)));
+	responseHeader.status("404 Not Found").body(ERROR_404);
+	return (responseHeader);
 }
 
 bool	requestHandler(const std::vector<int>& port, Server& server, ServerData& serv, int readyFd)
@@ -174,15 +94,21 @@ bool	requestHandler(const std::vector<int>& port, Server& server, ServerData& se
 			String header = server.recieve(readyFd);
 			if (header.empty() == true)
 				return (true);
-			std::cout << header << std::endl << std::endl;
-			String content("HTTP/1.1 200 OK\r\n");
-			content.append(handler(serv, Parser::parseHeader(header)));
-			ssize_t sender = server.send(readyFd, content);
-			if (sender == -1)
+			std::cout << header << std::endl;
+			GlobalModel model(Parser::parseHeader(header));
+			ResponseHeader response = handler(serv, model);
+			// ssize_t sender = server.send(readyFd, content);
+			server.send(readyFd, response.toString());
+			std::vector<Data> connection = model.getData("Connection");
+			if (connection.empty() == false && connection.at(0).getValue().contains("keep-alive") == false)
 			{
-				close(readyFd);
-				server.fds.erase_fd(readyFd);
 			}
+			close(readyFd);
+			server.fds.erase_fd(readyFd);
+
+			// if (sender == -1)
+			// {
+			// }
 		}
 	}
 	return (true);
@@ -199,8 +125,7 @@ void	runServerByPoll(ServerData& serv, Server& server, std::vector<int> port)
 		if (pollReturn == 0)
 			continue ;
 		for (int i = 0; i < (int)tmpPoll.fdsSize(); i++)
-			if (requestHandler(port, server, serv, tmpPoll.getReadyFd(i)) == false)
-				break ;
+			requestHandler(port, server, serv, tmpPoll.getReadyFd(i));
 	}
 }
 

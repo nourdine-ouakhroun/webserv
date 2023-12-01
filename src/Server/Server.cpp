@@ -118,7 +118,7 @@ ssize_t	Server::send(int socket, String response)
 	ssize_t	totalBytes = 0;
     while (1)
     {
-        ssize_t	nBit = ::send(socket, response.c_str(), response.length(), 0);
+        ssize_t	nBit = ::send(socket, response.c_str() + totalBytes, response.length() - (size_t)totalBytes, 0);
         if (nBit < 0)
                 return (-1);
         totalBytes += nBit;
