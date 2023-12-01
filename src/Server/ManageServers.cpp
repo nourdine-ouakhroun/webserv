@@ -5,7 +5,6 @@ ManageServers::ManageServers(ServerData	srvers)
 	this->servers = srvers;
 }
 
-
 void ManageServers::runAllServers()
 {
 	std::vector <ServerModel> allservers =  servers.getAllServers();
@@ -68,19 +67,32 @@ std::string readRequist(FileDepandenc &file)
 			break;
 		size_t pos;
 		file.setRequist(req);
-		// std::cout << file.getRequist() << std::endl;
-		if(file.getStatus() == 0 && file.boundery.empty() && (pos = std::string(req).find("boundary=", 0)) != SIZE_T_MAX)
+		if(file.header.empty() && (pos = file.getRequist().find("\r\n\r\n", 0)) != SIZE_T_MAX)
+		{
+			file.header = file.getRequist().substr(0, pos + 4);
+			file.eraseRequist(0, pos + 4);
+		}
+		if(file.getStatus() == 0 && file.boundery.empty() && (pos = file.header.find("boundary=", 0)) != SIZE_T_MAX)
 		{
 			file.setStatus(1);
-			file.boundery = std::string(req).substr(pos + 9, std::string(req).find("\r\n", (pos + 9)) - (pos + 9));
+			file.boundery = file.header.substr(pos + 9, file.header.find("\r\n", (pos + 9)) - (pos + 9));
 			std::cout << "**********" <<  file.boundery   << "**********" << std::endl;
+		}
+		if(!file.header.empty() && (pos = file.getRequist().find("\r\n\r\n", 0)) != SIZE_T_MAX)
+		{
+			std::string content = file.getRequist().substr(0 , pos);
+			if((pos = content.find("filename=")) != SIZE_T_MAX)
+				std::cout << content.substr(pos + 9, content.find("\r\n" , pos) - (pos + 9));
+			exit(1);
 		}
 		if(!file.boundery.empty() && file.getStatus() && std::string(req).find( "--" + file.boundery + "--" ) != SIZE_T_MAX)
 		{
-			std::cout << "**********" <<  "--" + file.boundery + "--"   << "**********" << std::endl;
-			std::cout << "**********" << req   << "**********" << std::endl;
+			// std::cout << "**********" <<  "--" + file.boundery + "--"   << "**********" << std::endl;
+			// std::cout << "**********" << req   << "**********" << std::endl;
 			file.setStatus(0);
 		}
+		// std::cout << file.getRequist() << std::endl;
+		// std::cout << file.getRequist() << std::endl;
 
 		// if(bytes != (ssize_t)strlen(req))
 		// {
@@ -98,6 +110,12 @@ std::string readRequist(FileDepandenc &file)
 		// std::cout << "(" << bytes << ")" << "*" << std::string(req).length() << "*" <<  "["<<  k << "]" << file.getRequist().length() << std::endl;
 
 	}
+	// if(file.getRequist().size())
+	// {
+	// 	std::cout << "dsdsdsds" << std::endl;
+	// 	exit(1);
+
+	// }
 	// if(file.getRequist().size() > 60000000)
 	// {
 	// 	std::cout << file.getRequist() << std::endl;
@@ -105,6 +123,7 @@ std::string readRequist(FileDepandenc &file)
 	// }
 	if(file.getStatus() || file.getRequist().empty())
 		throw std::runtime_error("");
+	std::cout << file.getRequist() << std::endl;
 	return "HTTP/1.1 200 OK\r\n\r\n <h1> hello </h1>";
 }
 void ManageServers::handler(std::vector<FileDepandenc> &working, std::vector<FileDepandenc> &master, size_t i)
