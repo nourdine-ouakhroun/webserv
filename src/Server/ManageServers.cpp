@@ -52,7 +52,7 @@ void erase(std::vector<FileDepandenc> & struct_fdsS, size_t j)
 	struct_fdsS = returnFds;
 }
 // static size_t k;
-// static unsigned int l;
+
 std::string readRequist(FileDepandenc &file)
 {
 	ssize_t		bytes;
@@ -66,29 +66,37 @@ std::string readRequist(FileDepandenc &file)
 		if(bytes <= 0)
 			break;
 		size_t pos;
-		file.setRequist(req);
-		if(file.header.empty() && (pos = file.getRequist().find("\r\n\r\n", 0)) != SIZE_T_MAX)
+
+		file.requist.append(req, (size_t)bytes);
+		// std::cout << file.requist.size() << std::endl;
+		// exit(1);
+		// if(file.header.empty() && (pos = file.getRequist().find("\r\n\r\n", 0)) != SIZE_T_MAX)
+		// {
+		// 	std::cout << file.getRequist().substr(0, pos + 4) << std::endl;
+		// 	// file.header = file.getRequist().substr(0, pos + 4);
+		// 	file.eraseRequist(0, pos + 4);
+		// }
+		// if((pos = file.getRequist().find("\r\n", 0)) != SIZE_T_MAX)
+		// {
+		// 	std::cout << file.getRequist().substr(0, pos + 2) << std::endl;
+		// 	file.eraseRequist(0, pos + 2);
+		// 	// std::cout << file.getRequist() << std::endl;
+		// 	std::cout << "*******************************************************************************************************************" << std::endl;
+		// }
+		if(file.getStatus() == 0 && file.boundery.empty() && (pos = file.requist.find("boundary=", 0)) != SIZE_T_MAX)
 		{
-			file.header = file.getRequist().substr(0, pos + 4);
-			file.eraseRequist(0, pos + 4);
-		}
-		if(file.getStatus() == 0 && file.boundery.empty() && (pos = file.header.find("boundary=", 0)) != SIZE_T_MAX)
-		{
+			file.boundery = file.requist.substr(pos + 9, file.requist.find("\r\n", (pos + 9)) - (pos + 9));
 			file.setStatus(1);
-			file.boundery = file.header.substr(pos + 9, file.header.find("\r\n", (pos + 9)) - (pos + 9));
-			std::cout << "**********" <<  file.boundery   << "**********" << std::endl;
 		}
-		if(!file.header.empty() && (pos = file.getRequist().find("\r\n\r\n", 0)) != SIZE_T_MAX)
+		// if(!file.header.empty() && (pos = file.getRequist().find("\r\n\r\n", 0)) != SIZE_T_MAX)
+		// {
+		// 	std::string content = file.getRequist().substr(0 , pos);
+		// 	if((pos = content.find("filename=")) != SIZE_T_MAX)
+		// 		std::cout << content.substr(pos + 9, content.find("\r\n" , pos) - (pos + 9));
+		// 	exit(1);
+		// }
+		if(!file.boundery.empty() && file.getStatus() && file.requist.find( "--" + file.boundery + "--" ) != SIZE_T_MAX)
 		{
-			std::string content = file.getRequist().substr(0 , pos);
-			if((pos = content.find("filename=")) != SIZE_T_MAX)
-				std::cout << content.substr(pos + 9, content.find("\r\n" , pos) - (pos + 9));
-			exit(1);
-		}
-		if(!file.boundery.empty() && file.getStatus() && std::string(req).find( "--" + file.boundery + "--" ) != SIZE_T_MAX)
-		{
-			// std::cout << "**********" <<  "--" + file.boundery + "--"   << "**********" << std::endl;
-			// std::cout << "**********" << req   << "**********" << std::endl;
 			file.setStatus(0);
 		}
 		// std::cout << file.getRequist() << std::endl;
@@ -106,7 +114,6 @@ std::string readRequist(FileDepandenc &file)
 		// 	exit(0);
 		// }
 		// k+=(size_t)bytes;
-		// l++;
 		// std::cout << "(" << bytes << ")" << "*" << std::string(req).length() << "*" <<  "["<<  k << "]" << file.getRequist().length() << std::endl;
 
 	}
@@ -121,9 +128,14 @@ std::string readRequist(FileDepandenc &file)
 	// 	std::cout << file.getRequist() << std::endl;
 	// 	exit(0);
 	// }
-	if(file.getStatus() || file.getRequist().empty())
+	if(file.getStatus()|| file.requist.empty())
 		throw std::runtime_error("");
-	std::cout << file.getRequist() << std::endl;
+	// for (size_t i = 0; i < file.requist.size(); i++)
+	// {
+	// 	std::cout << "(" << "[" << file.requist[i] << "]" << " : " << (int)file.requist[i] << ")" << std::endl;
+	// }
+	
+	// std::cout << file.requist << std::endl;
 	return "HTTP/1.1 200 OK\r\n\r\n <h1> hello </h1>";
 }
 void ManageServers::handler(std::vector<FileDepandenc> &working, std::vector<FileDepandenc> &master, size_t i)
