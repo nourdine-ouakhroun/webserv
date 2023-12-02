@@ -8,6 +8,8 @@ ServerModel::ServerModel(const GlobalModel& model, const std::vector<Location>& 
 {
 	addDirectives("root");
 	addDirectives("error_page");
+	addDirectives("error_log");
+	addDirectives("access_log");
 	addDirectives("Options");
 	addDirectives("AddHandler");
 	addDirectives("autoindex");
@@ -38,6 +40,8 @@ ServerModel& ServerModel::operator=(const ServerModel& target)
 		location = target.location;
 		addDirectives("Options");
 		addDirectives("error_page");
+		addDirectives("error_log");
+		addDirectives("access_log");
 		addDirectives("root");
 		addDirectives("AddHandler");
 		addDirectives("autoindex");
@@ -50,6 +54,8 @@ void	ServerModel::setLocation(std::vector<Location>& _location)
 	location = _location;
 	addDirectives("root");
 	addDirectives("error_page");
+	addDirectives("error_log");
+	addDirectives("access_log");
 	addDirectives("Options");
 	addDirectives("AddHandler");
 	addDirectives("autoindex");
