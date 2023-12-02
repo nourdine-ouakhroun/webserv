@@ -48,3 +48,6 @@ fclean		:	clean
 	rm -rf ${NAME}
 
 re		: fclean all
+
+run		:	all
+	./webServ configurations/default.conf
