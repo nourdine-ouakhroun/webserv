@@ -113,17 +113,17 @@ String	Server::recieve(int socket)
 	return (buffer);
 }
 
-int	Server::send(int socket, String response)
+ssize_t	Server::send(int socket, String response)
 {
-	int	totalBytes = 0;
-	while (1)
-	{
-		int	nBit = (int)::send(socket, response.c_str(), response.length(), 0);
-		if (nBit < 0)
-			return (errorNumber);
-		totalBytes += nBit;
-		if (totalBytes == (int)response.length())
-			return (-1);
-	}
-	return (totalBytes);
+	ssize_t	totalBytes = 0;
+    while (1)
+    {
+        ssize_t	nBit = ::send(socket, response.c_str() + totalBytes, response.length() - (size_t)totalBytes, 0);
+        if (nBit < 0)
+                return (-1);
+        totalBytes += nBit;
+        if (totalBytes == (ssize_t)response.length())
+                return (-1);
+    }
+    return (totalBytes);
 }

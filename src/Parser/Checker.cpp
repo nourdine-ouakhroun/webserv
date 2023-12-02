@@ -114,6 +114,7 @@ void    Checker::fullCheck( void )
         return ;
     checkValues();
     checkDuplicate("root");
+    checkDuplicate("return");
     checkDuplicate("alias");
     checkDuplicate("try_files");
     checkDuplicate("autoindex");
