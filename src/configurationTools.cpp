@@ -69,8 +69,8 @@ String	getDirectoryContent(const String& dirname, String path)
 	struct dirent *dirp;
 	path.trim("/");
 	while ((dirp = readdir(dir)) != NULL)
-		body.append("<a href=\"").append(path)
-			.append("/").append(dirp->d_name)
+		body.append("<a href=\"")
+			.append("").append(dirp->d_name)
 			.append("\">").append(dirp->d_name)
 			.append("</a><br>");
 	body.append("</pre><hr>");
