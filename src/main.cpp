@@ -1,5 +1,43 @@
 #include "webserver.h"
 
+
+template <typename T>
+void	handleLoggges(const T& server)
+{
+	static int stdout_fd;
+	static int stderr_fd;
+
+	/**
+	 * @attention possible fd leaks here.
+	*/
+	if (!stdout_fd && (stdout_fd = dup(STDOUT_FILENO)) == -1)
+		throw (std::runtime_error("dup() function failed."));
+	if (!stderr_fd && (stderr_fd = dup(STDERR_FILENO)) == -1)
+		throw (std::runtime_error("dup() function failed."));
+	if (dup2(stdout_fd, STDOUT_FILENO) == -1 || dup2(stderr_fd, STDERR_FILENO) == -1)
+		throw (std::runtime_error("dup2() function failed."));
+
+	std::vector<Data> accessLog = server.getData("access_log");
+	std::vector<Data> errorLog = server.getData("error_log");
+	if (accessLog.empty() == false)
+	{
+		int file_fd = open(accessLog.at(0).getValue().c_str() , O_CREAT | O_APPEND | O_RDWR, 0777);
+		if (file_fd == -1 || dup2(file_fd, STDOUT_FILENO) == -1 || close(file_fd) == -1)
+			throw (std::runtime_error("dup2() function failed."));
+		close(file_fd);
+	}
+	if (errorLog.empty() == false)
+	{
+		int file_fd = open(errorLog.at(0).getValue().c_str() , O_CREAT | O_APPEND | O_RDWR, 0777);
+		if (file_fd == -1 || dup2(file_fd, STDERR_FILENO) == -1)
+		{
+			close(file_fd);
+			throw (std::runtime_error("dup2() function failed."));
+		}
+		close(file_fd);
+	}
+}
+
 ResponseHeader	getErrorPage(std::vector<Data> errorPages, String errorNumber, String message)
 {
 	ResponseHeader responseHeader;
@@ -55,12 +93,14 @@ ResponseHeader	to_do(const T& loca, String path)
 	String file;
 	ResponseHeader responseHeader;
 
+	handleLoggges(loca);
 	try {
 		return (autoIndexing(loca, path));
 	}
 	catch (std::exception){
 
 	}
+	Logger::success(std::cout, "hello world", " mehdi salim");
 	std::vector<Data>	data = loca.getData("root");
 	file = getRootPath(data.at(0).getValue(), path);
 	if (loca.getData("alias").empty() == false)
@@ -106,6 +146,7 @@ ResponseHeader	handler(ServerData& servers, GlobalModel &model)
 	String path(model.getData("Method").begin()->getValue().split()[1]);
 	path.trim(" \t\r\n");
 	ServerModel server = servModel.at(0);
+	handleLoggges(server);
 	std::vector<Data> roots = server.getData("root");
 	String root;
 	if (roots.empty() == false)
