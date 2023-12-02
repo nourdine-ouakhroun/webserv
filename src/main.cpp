@@ -163,7 +163,16 @@ bool	requestHandler(const std::vector<int>& port, Server& server, ServerData& se
 				return (true);
 			// std::cout << header << std::endl;
 			GlobalModel model(Parser::parseHeader(header));
-			ResponseHeader response = handler(serv, model);
+			ResponseHeader response;
+			try
+			{
+				response = handler(serv, model);
+			}
+			catch(const std::exception& e)
+			{
+				Logger::error(std::cerr, "catch exception in requestHandler function : ", e.what());
+				response.status("500 Internal Server Error");
+			}
 
 			server.send(readyFd, response.toString());
 
