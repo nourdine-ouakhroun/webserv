@@ -118,5 +118,7 @@ void    Checker::fullCheck( void )
     checkDuplicate("alias");
     checkDuplicate("try_files");
     checkDuplicate("autoindex");
+    checkDuplicate("error_log");
+    checkDuplicate("access_log");
     checkBooleanValues("autoindex");
 }
