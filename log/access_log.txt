@@ -1,0 +1,4 @@
+Sat Dec  2 18:47:39 2023 [SUCCESS] : REQUEST ==> GET /assets/images/afds/ HTTP/1.1
+Sat Dec  2 18:47:39 2023 [SUCCESS] : RESPONSE ==> HTTP/1.1 404 Not Found
+Sat Dec  2 18:49:30 2023 [SUCCESS] : REQUEST ==> GET /assets/images/afds/ HTTP/1.1
+Sat Dec  2 18:49:30 2023 [SUCCESS] : RESPONSE ==> HTTP/1.1 404 Not Found
