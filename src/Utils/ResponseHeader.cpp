@@ -66,6 +66,8 @@ String  ResponseHeader::toString( void )
         response.append("Content-Length: " + this->_contentLength + "\r\n");
     if (!this->_connection.empty())
         response.append("Connection: " + this->_connection + "\r\n");
+    if (!this->_location.empty())
+        response.append("Location: " + this->_location + "\r\n");
     response.append("\r\n");
     response.append(this->_body);
     return (response);
