@@ -1,88 +1,66 @@
-#include "Parser.hpp"
-#include "Checker.hpp"
-#include "Server.hpp"
-#include <dirent.h>
+#include "webserver.h"
 
-String  getContentFile(String file)
+ResponseHeader	getErrorPage(std::vector<Data> errorPages, String errorNumber, String message)
 {
-    std::fstream new_file;
-    
-    new_file.open(file, std::ios::in);
-    if (new_file.is_open() == false)
-        return ("");
-    String  sa;
-    String  content;
-    while (std::getline(new_file, sa))
-        content.append(sa).append("\n");
-    new_file.close();
-    return content;
-}
-
-String	getRootPath(String	root, String path)
-{
-	String file(root);
-	file.append(path).append((file.end() - 1)[0] == '/' ? "" : "/");
-	return (file);
-}
-
-String	getAliasPath(String	aliasPath)
-{
-	aliasPath.rightTrim("/");
-	return (aliasPath.append("/"));
-}
-
-String	tryFiles(const std::vector<String>& files, const String& path)
-{
-	String value;
-	for (size_t i = 0; i < files.size() - 1; i++)
+	ResponseHeader responseHeader;
+	for (size_t i = 0; i < errorPages.size(); i++)
 	{
-		String tmp(path);
-		tmp.append(files.at(i));
-		value = readFile(tmp);
-		if (value.length() != 0)
-			return (value);
+		std::vector<String> numbers = errorPages.at(i).getValue().split();
+		for (size_t i = 0; i < numbers.size() - 1; i++)
+			if (!numbers.at(i).compare(errorNumber))
+				return (responseHeader.status("302	Found").location(*(numbers.end() - 1)));
 	}
-	return (value);
+	responseHeader.status(errorNumber + " " + message).body("<h1>" + errorNumber + " " + message + "</h1>");
+	return (responseHeader);
 }
 
-String	getFileContent(const std::vector<String>& indexes, const String& path)
-{
-	String value;
-	for (size_t i = 0; i < indexes.size(); i++)
-	{
-		String tmp(path);
-		tmp.append(indexes.at(i));
-		value = readFile(tmp);
-		if (value.length() != 0)
-			return (value);
-	}
-	return (value);
-}
-
-String	getDirectoryContent(const String& dirname, String path)
-{
-	DIR	*dir = opendir(dirname.c_str());
-	if (!dir)
-		return "";
-	String body("<h1>Index of ");
-	body.append(path).append("</h1><hr><pre>");
-	struct dirent *dirp;
-	path.trim("/");
-	while ((dirp = readdir(dir)) != NULL)
-		body.append("<a href=\"").append(path)
-			.append("/").append(dirp->d_name)
-			.append("\">").append(dirp->d_name)
-			.append("</a><br>");
-	body.append("</pre><hr>");
-	closedir(dir);
-	return (body);
-}
-
-String	to_do(const Location& loca)
+template <typename T>
+ResponseHeader	autoIndexing(T& loca, String	path)
 {
 	String content;
-	String	path(loca.getPath());
 	String file;
+	ResponseHeader responseHeader;
+
+	std::vector<Data>	data = loca.getData("root");
+	file = getRootPath(data.at(0).getValue(), path);
+	if (loca.getData("alias").empty() == false)
+	{
+		data = loca.getData("alias");
+		file = getAliasPath(data.at(0).getValue());
+	}
+
+	if (data.empty() == true)
+		return (getErrorPage(loca.getData("error_page"), "404", "Not Found"));
+
+	std::vector<Data> indexes = loca.getData("index");
+	if (indexes.empty() == true)
+		indexes.push_back(Data("index", "index.html"));
+
+	std::vector<Data> autoIndex = loca.getData("autoindex");
+	std::vector<Data> tryfiles = loca.getData("try_files");
+	content = getFileContent(indexes.at(0).getValue().split(), file);
+
+	if (!tryfiles.size() && content.empty() == true && (autoIndex.empty() == false && !autoIndex.at(0).getValue().compare("off")))
+		return (getErrorPage(loca.getData("error_page"), "403", "Forbidden"));
+
+	if (content.empty() == true && autoIndex.empty() == false && !autoIndex.at(0).getValue().compare("on"))
+		return (responseHeader.body(getDirectoryContent(file, path)));
+	throw (std::exception());
+}
+
+template <typename T>
+ResponseHeader	to_do(const T& loca, String path)
+{
+	String content;
+	String file;
+	ResponseHeader responseHeader;
+
+	try {
+		return (autoIndexing(loca, path));
+	}
+	catch (std::exception){
+
+	}
 	std::vector<Data>	data = loca.getData("root");
 	file = getRootPath(data.at(0).getValue(), path);
 	if (loca.getData("alias").empty() == false)
@@ -91,37 +69,38 @@ String	to_do(const Location& loca)
 		file = getAliasPath(data.at(0).getValue());
 	}
 	if (data.empty() == true)
-		return (ERROR_404);
-	std::vector<Data> indexes = loca.getData("index");
-	std::vector<Data> autoIndex = loca.getData("autoindex");
+		return (getErrorPage(loca.getData("error_page"), "404", "Not Found"));
+
 	std::vector<Data> tryfiles = loca.getData("try_files");
-	if (!tryfiles.size() 
-		&& indexes.empty() == true && (autoIndex.empty() == true || (autoIndex.empty() == false && !autoIndex.at(0).getValue().compare("off"))))
-		return (ERROR_403);
-	if (autoIndex.empty() == false && !autoIndex.at(0).getValue().compare("on"))
-		return (getDirectoryContent(file, path));
 	if (tryfiles.empty() == false)
 	{
-		content = tryFiles(tryfiles.at(0).getValue().split(), file);
+		std::vector<String> files2try = tryfiles.at(0).getValue().split();
+		content = tryFiles(files2try, file);
 		if (content.empty() == false)
-			return (content);
+			responseHeader.body(content);
+		else
+			responseHeader.status("301 Moved Permanently").location(*(files2try.end() - 1));
+		return (responseHeader);
 	}
+
+	std::vector<Data> indexes = loca.getData("index");
+	if (indexes.empty() == true)
+		indexes.push_back(Data("index", "index.html"));
 	for (size_t i = 0; i < indexes.size(); i++)
 	{
 		content = getFileContent(indexes.at(i).getValue().split(), file);
 		if (content.empty() == false)
-			return (content);
+			return (responseHeader.body(content));
 	}
-	return (ERROR_404);
+	return (getErrorPage(loca.getData("error_page"), "404", "Not Found"));
 }
 
-String	handler(ServerData& servers, std::vector<Data> header)
+ResponseHeader	handler(ServerData& servers, GlobalModel &model)
 {
-	GlobalModel model(header);
 	std::vector<ServerModel>	servModel;
-	String	content;
+	ResponseHeader	responseHeader;
 
-	servModel = getServer(servers, header);
+	servModel = getServer(servers, model.getAllData());
 	if (servModel.empty() == true)
 		servModel = servers.getAllServers();
 	String path(model.getData("Method").begin()->getValue().split()[1]);
@@ -136,22 +115,34 @@ String	handler(ServerData& servers, std::vector<Data> header)
 		String str = getContentFile(root);
 		std::vector<Data> accept = model.getData("Accept");
 		if (accept.empty() == false)
-		{
-			content.append("Content-Length: ");
-			content.append(std::to_string(str.size()));
-			content.append("\r\nContent-Type: ");
-			content.append(accept.at(0).getValue().split(',').at(0));
-			content.append("\r\n");
-		}
-		content.append("\r\n");
-		return (content.append(str));
+			responseHeader.contentLength(std::to_string(str.size()));
+		responseHeader.body(str);
+		return (responseHeader);
 	}
+	if (*(path.end() - 1) != '/')
+		return (responseHeader.status("301 Moved Permanently").location(path + "/"));
 	path.rightTrim("/");
-	content.append("\r\n");
 	Location	loca = ServerModel::getLocationByPath(servModel.at(0).getLocation(), path);
+	std::vector<Data> returns = loca.getData("return");
+	if (returns.empty() == false)
+	{
+		std::vector<String> values = returns.at(0).getValue().split();
+		/**
+		 * @attention status should be dynamic.
+		*/
+		responseHeader.status(values.at(0) + " Moved Permanently");
+		if (values.size() == 2)
+			responseHeader.location(values.at(1));
+		return (responseHeader);
+	}
 	if (loca.getPath().empty() == false)
-		return (content.append(to_do(loca)));
-	return (content.append(ERROR_404));
+		return (to_do(loca, loca.getPath()));
+	if (path.empty() == true || (path.size() == 1 && path.at(0) == '/'))
+		return (to_do(servModel.at(0), ""));
+	try { return (autoIndexing(servModel.at(0), path)); }
+	catch (std::exception) {}
+
+	return (getErrorPage(servModel.at(0).getData("error_page"), "404", "Not Found"));
 }
 
 bool	requestHandler(const std::vector<int>& port, Server& server, ServerData& serv, int readyFd)
@@ -170,15 +161,18 @@ bool	requestHandler(const std::vector<int>& port, Server& server, ServerData& se
 			String header = server.recieve(readyFd);
 			if (header.empty() == true)
 				return (true);
-			// std::cout << header << std::endl << std::endl;
-			String content("HTTP/1.1 200 OK\r\n");
-			content.append(handler(serv, Parser::parseHeader(header)));
-			ssize_t sender = server.send(readyFd, content);
-			if (sender == -1)
+			// std::cout << header << std::endl;
+			GlobalModel model(Parser::parseHeader(header));
+			ResponseHeader response = handler(serv, model);
+
+			server.send(readyFd, response.toString());
+
+			String method(model.getData("Method").begin()->getValue().split()[0]);
+			if (!method.compare("GET"))
 			{
+				close(readyFd);
+				server.fds.erase_fd(readyFd);
 			}
-			close(readyFd);
-			server.fds.erase_fd(readyFd);
 		}
 	}
 	return (true);
@@ -195,8 +189,7 @@ void	runServerByPoll(ServerData& serv, Server& server, std::vector<int> port)
 		if (pollReturn == 0)
 			continue ;
 		for (int i = 0; i < (int)tmpPoll.fdsSize(); i++)
-			if (requestHandler(port, server, serv, tmpPoll.getReadyFd(i)) == false)
-				break ;
+			requestHandler(port, server, serv, tmpPoll.getReadyFd(i));
 	}
 }
 
