@@ -1,5 +1,57 @@
 #include "webserver.h"
 
+
+template <typename T>
+void	handleLoggges(const T& server)
+{
+	static int stdout_fd;
+	static int stderr_fd;
+
+	/**
+	 * @attention possible fd leaks here.
+	*/
+	if (!stdout_fd && (stdout_fd = dup(STDOUT_FILENO)) == -1)
+	{
+		Logger::error(std::cerr , "dup() function failed.", "");
+		return ;
+	}
+	if (!stderr_fd && (stderr_fd = dup(STDERR_FILENO)) == -1)
+	{
+		Logger::error(std::cerr , "dup() function failed.", "");
+		return ;
+	}
+	if (dup2(stdout_fd, STDOUT_FILENO) == -1 || dup2(stderr_fd, STDERR_FILENO) == -1)
+	{
+		Logger::error(std::cerr , "dup2() function failed.", "");
+		return ;
+	}
+
+	std::vector<Data> accessLog = server.getData("access_log");
+	std::vector<Data> errorLog = server.getData("error_log");
+	if (accessLog.empty() == false)
+	{
+		int file_fd = open(accessLog.at(0).getValue().c_str() , O_CREAT | O_APPEND | O_RDWR, 0777);
+		if (file_fd == -1 || dup2(file_fd, STDOUT_FILENO) == -1 || close(file_fd) == -1)
+		{
+			close(file_fd);
+			Logger::error(std::cerr , "failed to open access_log file : ", accessLog.at(0).getValue().c_str());
+			return ;
+		}
+		close(file_fd);
+	}
+	if (errorLog.empty() == false)
+	{
+		int file_fd = open(errorLog.at(0).getValue().c_str() , O_CREAT | O_APPEND | O_RDWR, 0777);
+		if (file_fd == -1 || dup2(file_fd, STDERR_FILENO) == -1)
+		{
+			close(file_fd);
+			Logger::error(std::cerr , "failed to open error_log file : ", errorLog.at(0).getValue().c_str());
+			return ;
+		}
+		close(file_fd);
+	}
+}
+
 ResponseHeader	getErrorPage(std::vector<Data> errorPages, String errorNumber, String message)
 {
 	ResponseHeader responseHeader;
@@ -56,11 +108,13 @@ ResponseHeader	to_do(const T& loca, String path)
 	ResponseHeader responseHeader;
 
 	try {
+		handleLoggges(loca);
 		return (autoIndexing(loca, path));
 	}
 	catch (std::exception){
 
 	}
+	Logger::success(std::cout, "hello world", " mehdi salim");
 	std::vector<Data>	data = loca.getData("root");
 	file = getRootPath(data.at(0).getValue(), path);
 	if (loca.getData("alias").empty() == false)
@@ -103,9 +157,12 @@ ResponseHeader	handler(ServerData& servers, GlobalModel &model)
 	servModel = getServer(servers, model.getAllData());
 	if (servModel.empty() == true)
 		servModel = servers.getAllServers();
-	String path(model.getData("Method").begin()->getValue().split()[1]);
+	String method = model.getData("Method").begin()->getValue();
+	String path(method.split()[1]);
 	path.trim(" \t\r\n");
 	ServerModel server = servModel.at(0);
+	handleLoggges(server);
+	Logger::success(std::cout, "REQUEST ==> ", method);
 	std::vector<Data> roots = server.getData("root");
 	String root;
 	if (roots.empty() == false)
@@ -161,7 +218,6 @@ bool	requestHandler(const std::vector<int>& port, Server& server, ServerData& se
 			String header = server.recieve(readyFd);
 			if (header.empty() == true)
 				return (true);
-			// std::cout << header << std::endl;
 			GlobalModel model(Parser::parseHeader(header));
 			ResponseHeader response;
 			try
@@ -173,8 +229,9 @@ bool	requestHandler(const std::vector<int>& port, Server& server, ServerData& se
 				Logger::error(std::cerr, "catch exception in requestHandler function : ", e.what());
 				response.status("500 Internal Server Error");
 			}
-
-			server.send(readyFd, response.toString());
+			String resStr = response.toString();
+			Logger::success(std::cout, "RESPONSE ==> ", resStr.substr(0, resStr.find('\r')));
+			server.send(readyFd, resStr);
 
 			String method(model.getData("Method").begin()->getValue().split()[0]);
 			if (!method.compare("GET"))
