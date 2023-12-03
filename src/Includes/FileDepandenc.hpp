@@ -6,7 +6,7 @@
 /*   By: nouakhro <nouakhro@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/29 19:51:28 by nouakhro          #+#    #+#             */
-/*   Updated: 2023/12/02 00:44:58 by nouakhro         ###   ########.fr       */
+/*   Updated: 2023/12/03 20:04:41 by nouakhro         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,9 +25,10 @@ public:
     // void eraseRequist(size_t _n, size_t linght);
     void setStatus(const int &);
     std::string requist;
+    std::string rest;
     std::string boundery;
     // std::string header;
-    size_t lenght;
+    // size_t lenght;
     pollfd fdpoll;
 };
 
