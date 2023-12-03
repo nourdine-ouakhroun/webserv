@@ -65,9 +65,18 @@ std::string readRequist(FileDepandenc &file)
 		bytes = recv(file.fdpoll.fd, req, 2024, 0);
 		if(bytes <= 0)
 			break;
+		std::string reqtmp = req;
+		reqtmp.insert(0, file.rest);
 		size_t pos;
-
-		file.requist.append(req, (size_t)bytes);
+		pos = reqtmp.find_last_of("\r\n");
+		std::cout << pos << std::endl;
+		std::string resttmp = reqtmp.substr(pos + 2, reqtmp.size());
+		std::string filtred = reqtmp.substr(0 , pos + 2);
+		file.requist.append(filtred, filtred.size());
+		std::cout << file.requist << std::endl;
+		// file.rest = resttmp;
+		// if(file.requist.find("Hello"))
+			exit(1);
 		// std::cout << file.requist.size() << std::endl;
 		// exit(1);
 		// if(file.header.empty() && (pos = file.getRequist().find("\r\n\r\n", 0)) != SIZE_T_MAX)
@@ -83,11 +92,11 @@ std::string readRequist(FileDepandenc &file)
 		// 	// std::cout << file.getRequist() << std::endl;
 		// 	std::cout << "*******************************************************************************************************************" << std::endl;
 		// }
-		if(file.getStatus() == 0 && file.boundery.empty() && (pos = file.requist.find("boundary=", 0)) != SIZE_T_MAX)
-		{
-			file.boundery = file.requist.substr(pos + 9, file.requist.find("\r\n", (pos + 9)) - (pos + 9));
-			file.setStatus(1);
-		}
+		// if(file.getStatus() == 0 && file.boundery.empty() && (pos = file.requist.find("boundary=", 0)) != SIZE_T_MAX)
+		// {
+		// 	file.boundery = file.requist.substr(pos + 9, file.requist.find("\r\n", (pos + 9)) - (pos + 9));
+		// 	file.setStatus(1);
+		// }
 		// if(!file.header.empty() && (pos = file.getRequist().find("\r\n\r\n", 0)) != SIZE_T_MAX)
 		// {
 		// 	std::string content = file.getRequist().substr(0 , pos);
@@ -95,10 +104,10 @@ std::string readRequist(FileDepandenc &file)
 		// 		std::cout << content.substr(pos + 9, content.find("\r\n" , pos) - (pos + 9));
 		// 	exit(1);
 		// }
-		if(!file.boundery.empty() && file.getStatus() && file.requist.find( "--" + file.boundery + "--" ) != SIZE_T_MAX)
-		{
-			file.setStatus(0);
-		}
+		// if(!file.boundery.empty() && file.getStatus() && file.requist.find( "--" + file.boundery + "--" ) != SIZE_T_MAX)
+		// {
+		// 	file.setStatus(0);
+		// }
 		// std::cout << file.getRequist() << std::endl;
 		// std::cout << file.getRequist() << std::endl;
 
@@ -135,7 +144,7 @@ std::string readRequist(FileDepandenc &file)
 	// 	std::cout << "(" << "[" << file.requist[i] << "]" << " : " << (int)file.requist[i] << ")" << std::endl;
 	// }
 	
-	// std::cout << file.requist << std::endl;
+	std::cout << file.requist << std::endl;
 	return "HTTP/1.1 200 OK\r\n\r\n <h1> hello </h1>";
 }
 void ManageServers::handler(std::vector<FileDepandenc> &working, std::vector<FileDepandenc> &master, size_t i)
