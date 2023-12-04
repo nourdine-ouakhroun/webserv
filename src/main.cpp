@@ -111,7 +111,7 @@ ResponseHeader	to_do(const T& loca, String path)
 		handleLoggges(loca);
 		return (autoIndexing(loca, path));
 	}
-	catch (std::exception){
+	catch (std::exception&){
 
 	}
 	Logger::success(std::cout, "hello world", " mehdi salim");
@@ -172,7 +172,11 @@ ResponseHeader	handler(ServerData& servers, GlobalModel &model)
 		String str = getContentFile(root);
 		std::vector<Data> accept = model.getData("Accept");
 		if (accept.empty() == false)
-			responseHeader.contentLength(std::to_string(str.size()));
+		{
+			std::ostringstream oss;
+			oss << str.size();
+			responseHeader.contentLength(oss.str());
+		}
 		responseHeader.body(str);
 		return (responseHeader);
 	}
@@ -197,7 +201,7 @@ ResponseHeader	handler(ServerData& servers, GlobalModel &model)
 	if (path.empty() == true || (path.size() == 1 && path.at(0) == '/'))
 		return (to_do(servModel.at(0), ""));
 	try { return (autoIndexing(servModel.at(0), path)); }
-	catch (std::exception) {}
+	catch (std::exception&) {}
 
 	return (getErrorPage(servModel.at(0).getData("error_page"), "404", "Not Found"));
 }
