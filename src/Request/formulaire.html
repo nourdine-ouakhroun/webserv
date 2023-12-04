@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>Formulaire</title>
+</head>
+<body>
+<h1>Formulaire d'inscription</h1>
+
+<form oninput="o.value=a.value*b.value">
+ <input  name="a" value="2" type="number"> x 
+ <input  name="b" value="3" type="number"> = 
+ <output name="o">6</output>
+</form>
+
+<input type="search" name="q" placeholder="Enter your search key.." form="form1"/>
+
+<form action="result.php" method="post" id="form1" enctype="multipart/form-data"><!-- novalidate -->
+<fieldset>
+<legend> Informations Personnelles</legend>
+	<input type="hidden" name="auteur" value="GMIH" >
+	<table>
+		<tr>
+			<td><label for="idcne">CNE</label></td>
+			<td><input type="text" name="cne" id="idcne" pattern="[A-Za-z][0-9]{9}" title="Code lettre+9 chiffres"></td>
+		</tr>
+		<tr>
+			<td>Nom</td>
+			<td><input type="text" name="nom" minlength="3" maxlength="20" size="15" required autofocus ></td>
+		</tr>
+		<tr>
+			<td>Prenom</td>
+			<td><input type="text" name="prenom" placeholder="Entrer votre prénom.."></td>
+		</tr>
+		<tr>
+			<td>Date de naissance</td>
+			<td><input type="date" name="dateNaiss" value="2003-12-17" min="1991-12-17" max="2004-12-17" step=5  required></td>
+		</tr>
+		<tr>
+			<td>Tel</td>
+			<td><input type="tel" name="tel" placeholder="(212) 666-666666"  pattern="\([0-9]{3}\) [0-9]{3}-[0-9]{6}" ></td>
+		</tr>
+		<tr>
+			<td>Emails</td>
+			<td><input type="email"  name="emails" multiple value="foo@bar.org, bob@sponge.org"></td>
+		</tr>
+		<tr>
+			<td>Page Facebook</td>
+			<td><input type="url" name="facebook"></td>
+		</tr>
+		<tr>
+			<td>couleur préferée</td>
+			<td><input type="color" name="couleur"></td>
+		</tr>
+		<tr>
+			<td>Taille</td>
+			<td><input type="range" name="taille" min="140" max="200"  step="5" ></td>
+		</tr>
+		<tr>
+			<td>Adresse</td>
+			<td><Textarea name="adresse" rows=3 cols=50  minlength=10 maxlength=100 placeholder="adresse sur 2 lignes" wrap="hard" required> ligne1&#10;ligne2  </textarea></td> <!--default rows=2 cols=20-->
+		</tr>
+		<tr>
+			<td>Genre</td>
+			<td> <input type="radio" name="genre" value="H" checked>Homme <input type="radio" name="genre" value="F" >Femme </td> 
+		</tr>
+		<tr>
+			<td>Photo</td>
+			<td><input type="file" name="photo" accept="image/*" ></td><!--accept=extension ou type MIME (Type/sous-type) -->
+		</tr>
+		<tr>
+			<td>Capture photo</td>
+			<td><input type="file" name="photo" accept="image/*" capture></td><!--capture="user" front camera capture="environment" rear camera-->
+		</tr>
+		<tr>
+			<td>Capture video</td>
+			<td><input type="file" name="photo" accept="video/*" capture></td> <!--The capture attribute works on Android and iOS, but is ignored on desktop.-->
+		</tr>
+		<tr>
+			<td>documents légalisés</td>
+			<td><input type="file" name="docs" accept=".docx,.ppt,.pdf,.png,.jpeg,image/jpg,video/*,audio/*,application/*,text/*,font/*,multipart/*,message/*,model/*" multiple></td>
+		</tr>
+	</table>
+</fieldset>
+<fieldset>
+<legend> Authentification</legend>
+	<table>
+		<tr>
+			<td>nom d'utilisateur</td>
+			<td><input type="text" name="username" ></td>
+		</tr>	
+		<tr>
+			<td>mot de passe</td>
+			<td><input type="password" name="password"></td>
+		</tr>
+</table>
+</fieldset>
+		
+<fieldset>
+<legend> Formation</legend>
+	<table>
+		<tr>
+			<td>Organisme</td>
+			<td><input type="text" name="organisme" value="OFPPT" disabled></td>
+		</tr><tr>
+			<td>Etablissement</td>
+			<td><input type="text" name="efp" value="IFMOTICA" readonly></td>
+		</tr>
+		<tr>
+			<td>Date/Heure d'inscription</td>
+			<td>
+				<input type="datetime-local" name="heure">
+				<input type="datetime" name="heure">
+				<input type="time" name="rdv_time" />
+				<input type="week" name="no_semaine" />
+				<input type="month" name="bdaymonth" />
+			</td>
+		</tr>
+		<tr>
+			<td>Note Bac</td>
+			<td><input type="number" name="note" min="10" max="20" step="0.5" ></td>
+		</tr>
+		<tr>
+			<td>Langues</td>
+			<td>
+				<input type="checkbox" name="langues" value="ar" checked>Arabe
+				<input type="checkbox" name="langues" value="fr" checked>Francais
+				<input type="checkbox" name="langues" value="en" id="en"><label for="en">Anglais</label>
+				<label><input type="checkbox" name="langues" value="es">Espagnol</label>
+			</td>
+		</tr>
+		<tr>
+			<td>Niveau d'études</td>
+			<td>
+				<input name="niveau" list="niveaux"/>
+				<datalist id="niveaux">
+					<option value="Technicien Spécialisé">
+					<option value="Technicien">
+					<option value="Qualification">
+					<option value="Spécialisation">
+				</datalist>
+			</td>
+		</tr>
+		<tr>
+			<td>Bac</td>
+			<td>
+				<select name="bac" required>
+					<option value="">sélectionner un type</option>
+					<option value="svt">SVT</option>
+					<option value="pc" selected>PC</option>
+					<option value="sm">SM</option>
+					<option value="eco">Economie</option>
+					<option value="ltr">Litteraire</option>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td>Pays</td>
+			<td>
+				<select name="pays" size="6">
+					<optgroup label="Afrique">
+						<option value="ma">Maroc</option>
+						<option value="ts">Tunisie</option>
+						<option value="eg">Egypt</option>
+					</optgroup>
+					<optgroup label="Europe">
+						<option value="es">Espagne</option>
+						<option value="fr">France</option>
+						<option value="it">Italie</option>
+					</optgroup>	
+					<optgroup label="Asie">
+						<option value="ch">Chine</option>
+						<option value="pl">Palestine</option>
+						<option value="qt">Qatar</option>
+					</optgroup>
+					<optgroup label="Amerique">
+						<option value="br">Brésil</option>
+						<option value="ca">Canada</option>
+						<option value="ag">Argentine</option>
+					</optgroup>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td>Filières choisies</td>
+			<td>
+				<select name="filiere" multiple> <!--default size=4-->
+					<option value="tdi">TDI</option>
+					<option value="tdm">TDM</option>
+					<option value="tri">TRI</option>
+					<option value="tsge">TSGE</option>
+					<option value="tsfc">TSFC</option>
+				</select>
+			</td>
+		</tr>
+		
+		<tr>
+			<td colspan=2>
+				<input type="reset" value="Annuler">
+				<input type="button" value="déclencher"  onclick="alert('Hello world !')" >
+				<input type="submit" value="Envoyer" ><!--formnovalidate  formaction="action2.php" formmethod="post" >-->
+				<input type="image" src="go.png" alt="Go" width="48" height="48">
+
+						
+				<button type="reset">Effacer <img src="delete.png" alt="oops" /></button>
+				<button type="button">déclencher <img src="accept.png" alt="wow" /></button>
+				<button type="submit">Send <img src="accept.png" alt="wow" /></button>	
+			</td>
+		</tr>
+	</table>
+</fieldset>
+</form>
+</body>
+</html>

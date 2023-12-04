@@ -1,16 +1,18 @@
 #include "Server.hpp"
-// #include "Parser.hpp"
-// #include "Checker.hpp"
+#include "../Includes/Parser.hpp"
+#include "../Includes/Checker.hpp"
+#include "../Includes/ServerData.hpp"
 
 
 
-int main()
+int main(int ac, char *av[])
 {
-
-	// Parser parsing(av[1]);
-	// Checker	check(parsing.getServers());
-	// check.fullCheck();
-	// ServerData servers(parsing.getServers());
+	if (ac != 2)
+		return (0);
+	Parser parsing(av[1]);
+	Checker	check(parsing.getServers());
+	check.fullCheck();
+	ServerData servers(parsing.getServers());
 	
 	Server	s;
 }
