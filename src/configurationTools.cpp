@@ -3,6 +3,16 @@
 #include "Server.hpp"
 #include <dirent.h>
 
+bool	checkFile(String file)
+{
+	std::fstream new_file;
+    
+    new_file.open(file.c_str(), std::ios::in);
+	if (new_file.is_open() == false)
+    	return (false);
+	return (true);
+}
+
 String  getContentFile(String file)
 {
     std::fstream new_file;
@@ -52,11 +62,10 @@ String	getFileContent(const std::vector<String>& indexes, const String& path)
 	{
 		String tmp(path);
 		tmp.append(indexes.at(i));
-		value = readFile(tmp);
-		if (value.length() != 0)
-			return (value);
+		if (checkFile(tmp) == true)
+			return (tmp);
 	}
-	return (value);
+	return ("");
 }
 
 String	getDirectoryContent(const String& dirname, String path)
