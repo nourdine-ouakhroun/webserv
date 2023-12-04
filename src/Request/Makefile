@@ -2,11 +2,7 @@ NAME	=	webserv
 
 SRCS	=	main.cpp \
 			Request.cpp \
-			RequestLine.cpp \
-			RequestHeader.cpp \
-			RequestBody.cpp \
 			StatusCode.cpp \
-			Response.cpp \
 			Server.cpp \
 
 OBJS	=	$(SRCS:%.cpp=%.o)
@@ -18,7 +14,8 @@ CXXFLAGS = -Wall -Wextra -Werror
 all	:	$(NAME)
 
 $(NAME)	: $(OBJS)
-	$(CXX) $(CXXFLAGS) $(OBJS) -o $(NAME)
+	make -C ../../
+	$(CXX) $(CXXFLAGS) $(OBJS) ../../*.o -o $(NAME)
 	@echo "finish !!"
 
 %.o	: %.cpp 

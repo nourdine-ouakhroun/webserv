@@ -40,13 +40,16 @@ div {
 <h3>Simple Form</h3>
 
 <div>
-  <form  action="/Users/mzeroual/Desktop/cursus/webserv/afficherInfo.py" method="get" enctype="multipart/form-data">                                    <!-- multipart/form-data with (boundray) key -->
+  <form  action="/Users/mzeroual/Desktop/cursus/webserv/afficherInfo.py" method="post" enctype="multipart/form-data">                                    <!-- multipart/form-data with (boundray) key -->
                                                                                              <!-- application/x-www-form-urlencoded without (boundray) key -->
     <label for="fname">First Name</label>
     <input type="text" id="fname" name="firstname" placeholder="Your name..">
 
     <label for="lname">Last Name</label>
     <input type="text" id="lname" name="lastname" placeholder="Your last name..">
+    <input type="number" id="lname" name="number" placeholder="Your last name..">
+    <input type="email" id="lname" name="email" placeholder="Your last name..">
+    <input type="radio" id="lname" name="radiobuttom" placeholder="Your last name..">
 
     <label for="country">Country</label>
     <select id="country" name="country">
