@@ -6,7 +6,7 @@
 /*   By: nouakhro <nouakhro@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/29 19:51:28 by nouakhro          #+#    #+#             */
-/*   Updated: 2023/12/03 20:04:41 by nouakhro         ###   ########.fr       */
+/*   Updated: 2023/12/04 21:14:44 by nouakhro         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ public:
     std::string rest;
     std::string boundery;
     // std::string header;
-    // size_t lenght;
+    size_t lenght;
     pollfd fdpoll;
 };
 
