@@ -13,6 +13,7 @@ class ResponseHeader
     String  _location;
     String  _connection;
     String  _body;
+    String  _fileName;
     public:
         ResponseHeader( void );
         ResponseHeader& protocol(const String& _protocol);
@@ -23,6 +24,8 @@ class ResponseHeader
         ResponseHeader& location(const String& _location);
         ResponseHeader& connection(const String& _connection);
         ResponseHeader& body(const String& _body);
+        ResponseHeader& fileName(const String& file);
+        String  getFileName( void ) const ;
         String  toString( void );
 
 };
