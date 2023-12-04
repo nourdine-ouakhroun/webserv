@@ -7,7 +7,7 @@ String  getContentFile(String file)
 {
     std::fstream new_file;
     
-    new_file.open(file, std::ios::in);
+    new_file.open(file.c_str(), std::ios::in);
     if (new_file.is_open() == false)
         return ("");
     String  sa;
