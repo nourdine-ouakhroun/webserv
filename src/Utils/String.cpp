@@ -153,3 +153,41 @@ String	String::convertVectorToString(const std::vector<String>& strings, unsigne
 	}
 	return (dest);
 }
+
+size_t String::memStringSearchLast(std::string sstring, size_t lentgh)
+{
+	for (size_t i = lentgh; i > 0; i--)
+	{
+		if(sstring[sstring.size() - 1] == (*this)[i])
+		{
+			size_t j = sstring.size() - 1;
+			for (; j > 0 && (*this)[i] == sstring[j]; j-- && i--);
+			if(j == 0)
+				return i;
+		}
+	}
+	return SIZE_T_MAX;
+}
+
+String String::memSubstr(size_t begin, size_t end)
+{
+   	String dest;
+	for (size_t i = begin; i < end; i++)
+		dest.push_back((*this)[i]);
+	return dest;
+}
+
+size_t String::memStringSearch(std::string sstring, size_t lentgh)
+{
+	for (size_t i = 0; i < lentgh; i++)
+	{
+		if(sstring[0] == (*this)[i])
+		{
+			size_t j = 0;
+			for (; j < sstring.size() && (*this)[i] == sstring[j]; j++ && i++);
+			if(j == sstring.size() - 1)
+				return (i - (sstring.size() - 1));
+		}
+	}
+	return SIZE_T_MAX;
+}
