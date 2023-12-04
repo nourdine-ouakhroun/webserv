@@ -2,88 +2,51 @@
 #ifndef REQUEST_HPP
 #define REQUEST_HPP
 
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <unistd.h>
-#include <fcntl.h>
-
-#include <sstream>
+#include <iostream>
 #include <fstream>
-#include <ctime>
+#include <vector>
+#include <unistd.h>
+#include <map>
 
-#include "RequestLine.hpp"
-#include "RequestHeader.hpp"
-#include "RequestBody.hpp"
 
+typedef std::map<std::string, std::string> maps;
 
 class Request
 {
-private:
-	std::string					request;
+    private:
+        std::string method;
+        std::string url;
+        std::string version;
+        std::string pathname;
+        std::string query;
+        
+        maps        _header;
+        maps        _body;
+    public:
+        Request( void );
+        ~Request( void );
 
-	RequestLine					requestLine;
-	RequestHeader				requestHeader;
-	RequestBody					requestBody;
+        void parseRequestLine( std::string reqLine );
+        void parseHeader( std::string reqHeader );
+        void parseBody( std::string reqBody );
 
+        const std::string& header(const std::string &key);
+        void parseUrl();
 
-	// std::vector<std::string>	requestLine;
-
-	
-	maps						mimeType;
-
-
-public:
-	Request( void );
-	~Request( void );
-	Request( std::string );
-
-    // set attribute
-	// void			setMimeType();
-
-    // get attribute
-	RequestLine		getRequestLine() const;
-	RequestHeader	getRequestHeader() const;
-	RequestBody		getRequestBody() const;
-
-	int			errorExit(int status, std::string errorMsg);
-	// std::string	readRequest();
-	
-	void		parseRequest(std::string);
-	// void		parseLine(std::string);
-	void		parseHeader(std::string h1);
-	
-	
-	// void		displayReq( int HorB );
+        const std::string &getMethod( void ) const;
+        const std::string &getUrl( void ) const;
+        const std::string &getVersion( void ) const;
+        const std::string &getPathname( void ) const;
+        const std::string &getQuery( void ) const;
 
 
 
-	void 	parseBody(std::string h1, int hOrb);
 
-	// start from here
-	// void 	requestIsFormed();
-	// void 	statusCodeError(int statusCode, std::string phrase);
-	// const std::vector<std::string> &getRequestLine() const
-	// {
-	// 	return(requestLine);
-	// }
-	// std::string methodeIs( void )
-	// {
-	// 	return (requestLine[0]);
-	// }
-	void setMimeType();
-	std::string getMimeType(const std::string &extension)
-	{
-		if (mimeType[extension].empty())
-		{
-			return ("Content-Type: " + mimeType[".html"]);
-		}
-		return ("Content-Type: " + mimeType[extension]);
-	}
+	    void parseRequest( std::string request );
+
 };
-
-
 std::string	readRequest(int clientFd);
+std::vector<std::string> split(std::string line, std::string sep);
 
 
 #endif

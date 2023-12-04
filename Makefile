@@ -2,9 +2,13 @@ NAME	=	webserv
 
 
 SRCS	=	src/Server/main.cpp \
-			src/Server/Server.cpp \
 			src/Server/Request.cpp \
 			src/Server/RequestLine.cpp \
+			src/Server/RequestHeader.cpp \
+			src/Server/RequestBody.cpp \
+			src/Server/Response.cpp \
+			src/Server/Server.cpp \
+									\
 			src/Parser/Parser.cpp \
 			src/Parser/Checker.cpp \
 			src/Parser/Location.cpp \
@@ -19,11 +23,11 @@ SRCS	=	src/Server/main.cpp \
 
 
 TEMPLATES =	src/Templates/*.tpp
-HEADERS	=	src/Includes/*.hpp src/Server/server.hpp src/Server/Request.hpp
+HEADERS	=	src/Includes/*.hpp src/Server/Server.hpp src/Server/Request.hpp
 
 
 CPP	=	c++
-CPPFLAGS	=	-I./src/Includes# -fsanitize=address
+CPPFLAGS	=	-I ./src/Includes# -fsanitize=address
 
 BIN		=	bin
 
@@ -35,6 +39,7 @@ all	:	${NAME}
 ${NAME}	: ${OBJS}
 	${CPP} ${CPPFLAGS} $^ -o $@
 	@echo "finish !!"
+	@echo $(TEMPLATES)
 
 ${BIN}/%.o	:	src/%.cpp ${HEADERS} ${TEMPLATES}
 	@mkdir -p $(dir $@)
