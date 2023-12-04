@@ -2,7 +2,7 @@
 
 
 template <typename T>
-void	handleLoggges(const T& server)
+void	handleLogges(const T& server)
 {
 	static int stdout_fd;
 	static int stderr_fd;
@@ -108,13 +108,13 @@ ResponseHeader	to_do(const T& loca, String path)
 	ResponseHeader responseHeader;
 
 	try {
-		handleLoggges(loca);
+		// handleLogges(loca);
 		return (autoIndexing(loca, path));
 	}
 	catch (std::exception&){
 
 	}
-	Logger::success(std::cout, "hello world", " mehdi salim");
+
 	std::vector<Data>	data = loca.getData("root");
 	file = getRootPath(data.at(0).getValue(), path);
 	if (loca.getData("alias").empty() == false)
@@ -144,7 +144,7 @@ ResponseHeader	to_do(const T& loca, String path)
 	{
 		content = getFileContent(indexes.at(i).getValue().split(), file);
 		if (content.empty() == false)
-			return (responseHeader.body(content));
+			return (responseHeader.fileName(content));
 	}
 	return (getErrorPage(loca.getData("error_page"), "404", "Not Found"));
 }
@@ -161,23 +161,15 @@ ResponseHeader	handler(ServerData& servers, GlobalModel &model)
 	String path(method.split()[1]);
 	path.trim(" \t\r\n");
 	ServerModel server = servModel.at(0);
-	handleLoggges(server);
-	Logger::success(std::cout, "REQUEST ==> ", method);
+	// handleLogges(server);
+	// Logger::success(std::cout, "REQUEST ==> ", method);
 	std::vector<Data> roots = server.getData("root");
 	String root;
 	if (roots.empty() == false)
 		root = roots.at(0).getValue();
 	if (root.empty() == false && server.checkIsDirectory(root.append(path)) == 0)
 	{
-		String str = getContentFile(root);
-		std::vector<Data> accept = model.getData("Accept");
-		if (accept.empty() == false)
-		{
-			std::ostringstream oss;
-			oss << str.size();
-			responseHeader.contentLength(oss.str());
-		}
-		responseHeader.body(str);
+		responseHeader.fileName(root);
 		return (responseHeader);
 	}
 	if (*(path.end() - 1) != '/')
@@ -208,6 +200,8 @@ ResponseHeader	handler(ServerData& servers, GlobalModel &model)
 
 bool	requestHandler(const std::vector<int>& port, Server& server, ServerData& serv, int readyFd)
 {
+	static String oldPath;
+
 	if (readyFd > -1)
 	{
 		if (find(port.begin(), port.end(), readyFd) != port.end())
@@ -222,19 +216,42 @@ bool	requestHandler(const std::vector<int>& port, Server& server, ServerData& se
 			String header = server.recieve(readyFd);
 			if (header.empty() == true)
 				return (true);
+			// std::cout << header << std::endl;
 			GlobalModel model(Parser::parseHeader(header));
 			ResponseHeader response;
 			try
 			{
+				// String method = model.getData("Method").begin()->getValue();
+				// if (method.compare(oldPath))
+				// {
 				response = handler(serv, model);
+				// 	std::cout << model.getData("Referer").size() << "    |    " << model.getData("Origin").size() << std::endl;
+				// 	if (!model.getData("Referer").size() && !model.getData("Origin").size())
+				// 		oldPath = method;
+				// }
+				// else
+				// 	response.status("304 Not Modified");
 			}
 			catch(const std::exception& e)
 			{
 				Logger::error(std::cerr, "catch exception in requestHandler function : ", e.what());
 				response.status("500 Internal Server Error");
 			}
+			String filename = response.getFileName();
+			if (filename.empty() == false)
+			{
+				String str = getContentFile(filename);
+				std::vector<Data> accept = model.getData("Accept");
+				if (accept.empty() == false)
+				{
+					std::ostringstream oss;
+					oss << str.size();
+					response.contentLength(oss.str());
+				}
+				response.body(str);
+			}
 			String resStr = response.toString();
-			Logger::success(std::cout, "RESPONSE ==> ", resStr.substr(0, resStr.find('\r')));
+			// Logger::success(std::cout, "RESPONSE ==> ", resStr.substr(0, resStr.find('\r')));
 			server.send(readyFd, resStr);
 
 			String method(model.getData("Method").begin()->getValue().split()[0]);
@@ -282,7 +299,7 @@ void	start(Parser& parser)
 	}
 	catch (std::exception& e)
 	{
-		Logger::error(std::cerr, "I can't found the exact server, Reason => ", e.what());
+		// Logger::error(std::cerr, "I can't found the exact server, Reason => ", e.what());
 	}
 }
 
@@ -290,7 +307,7 @@ void	start(Parser& parser)
 {
 	if (ac < 2)
 	{
-		Logger::error(std::cerr, "Invalid argument", ".");
+		// Logger::error(std::cerr, "Invalid argument", ".");
 		return (1);
 	}
 	try
@@ -302,7 +319,7 @@ void	start(Parser& parser)
 	}
 	catch (ParsingException& e)
 	{
-		Logger::error(std::cerr, e.what(), "");
+		// Logger::error(std::cerr, e.what(), "");
 	}
 	return (0);
 }
