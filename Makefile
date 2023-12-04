@@ -50,4 +50,4 @@ fclean		:	clean
 re		: fclean all
 
 run		:	all
-	./webServ configurations/default.conf
+	./webserv configurations/default.conf

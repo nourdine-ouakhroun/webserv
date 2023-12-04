@@ -56,6 +56,18 @@ ResponseHeader& ResponseHeader::body(const String& _body)
     return (*this);
 }
 
+ResponseHeader& ResponseHeader::fileName(const String& fileName)
+{
+    this->_fileName = fileName;
+    return (*this);
+}
+
+String ResponseHeader::getFileName( void ) const
+{
+    return (this->_fileName);
+}
+
+
 String  ResponseHeader::toString( void )
 {
     String response(this->_protocol + " " + this->_status + "\r\n");
