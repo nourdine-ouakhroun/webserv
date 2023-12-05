@@ -1,6 +1,4 @@
-#include "Parser.hpp"
-#include "Checker.hpp"
-#include "Server.hpp"
+#include "webserver.h"
 #include <dirent.h>
 
 bool	checkFile(String file)

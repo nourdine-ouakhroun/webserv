@@ -1,10 +1,10 @@
-#include "ServerModel.hpp"
+#include "ServerPattern.hpp"
 
-ServerModel::ServerModel( void ) : GlobalModel()
+ServerPattern::ServerPattern( void ) : GeneralPattern()
 {
 }
 
-ServerModel::ServerModel(const GlobalModel& model, const std::vector<Location>& _location) : GlobalModel(model), location(_location)
+ServerPattern::ServerPattern(const GeneralPattern& model, const std::vector<LocationPattern>& _location) : GeneralPattern(model), location(_location)
 {
 	addDirectives("root");
 	addDirectives("error_page");
@@ -15,28 +15,28 @@ ServerModel::ServerModel(const GlobalModel& model, const std::vector<Location>& 
 	addDirectives("autoindex");
 }
 
-void	ServerModel::addDirectives(const String& key)
+void	ServerPattern::addDirectives(const String& key)
 {
 	std::vector<Data> data = getData(key);
 	if (data.empty() == false)
 		addDirectiveToLocation(location, key, data.at(0).getValue());
 }
 
-ServerModel::~ServerModel( void ) throw()
+ServerPattern::~ServerPattern( void ) throw()
 {
 	location.clear();
 }
 
-ServerModel::ServerModel(const ServerModel& copy) : GlobalModel(copy)
+ServerPattern::ServerPattern(const ServerPattern& copy) : GeneralPattern(copy)
 {
 	*this = copy;
 }
 
-ServerModel& ServerModel::operator=(const ServerModel& target)
+ServerPattern& ServerPattern::operator=(const ServerPattern& target)
 {
 	if (this != &target)
 	{
-		GlobalModel::operator=(target);
+		GeneralPattern::operator=(target);
 		location = target.location;
 		addDirectives("Options");
 		addDirectives("error_page");
@@ -49,7 +49,7 @@ ServerModel& ServerModel::operator=(const ServerModel& target)
 	return (*this);
 }
 
-void	ServerModel::setLocation(std::vector<Location>& _location)
+void	ServerPattern::setLocation(std::vector<LocationPattern>& _location)
 {
 	location = _location;
 	addDirectives("root");
@@ -61,31 +61,31 @@ void	ServerModel::setLocation(std::vector<Location>& _location)
 	addDirectives("autoindex");
 }
 
-const std::vector<Location>&	ServerModel::getLocation( void ) const
+const std::vector<LocationPattern>&	ServerPattern::getLocation( void ) const
 {
 	return (location);
 }
 
-void	ServerModel::addLocation(Location _location)
+void	ServerPattern::addLocation(LocationPattern _location)
 {
 	location.push_back(_location);
 }
 
-void	ServerModel::printServerModelInfo(const ServerModel& serverModel)
+void	ServerPattern::printServerPatternInfo(const ServerPattern& serverPattern)
 {
 	String s("\t");
-	GlobalModel::printGlobalModel(serverModel, s);
+	GeneralPattern::printGeneralPattern(serverPattern, s);
 	std::cout << s << ">>>> Location Info <<<<\n";
-	Location::printAllLocations(serverModel.getLocation(), s);
+	LocationPattern::printAllLocations(serverPattern.getLocation(), s);
 }
 
-Location	ServerModel::getLocationByPath(std::vector<Location> locations, const String& srcPath)
+LocationPattern	ServerPattern::getLocationByPath(std::vector<LocationPattern> locations, const String& srcPath)
 {
-	static std::vector<Location> tmplocations;
+	static std::vector<LocationPattern> tmplocations;
 	if (tmplocations.empty() == true)
 		tmplocations = locations;
-	std::vector<Location>::iterator ibegin = locations.begin();
-	std::vector<Location>::iterator iend = locations.end();
+	std::vector<LocationPattern>::iterator ibegin = locations.begin();
+	std::vector<LocationPattern>::iterator iend = locations.end();
 	while (ibegin < iend)
 	{
 		String tmpPath(ibegin->getPath());
@@ -93,16 +93,16 @@ Location	ServerModel::getLocationByPath(std::vector<Location> locations, const S
 			return (*ibegin);
 		if (ibegin->getInnerLocation().empty() == false)
 		{
-			Location loca = getLocationByPath(ibegin->getInnerLocation(), srcPath);
+			LocationPattern loca = getLocationByPath(ibegin->getInnerLocation(), srcPath);
 			if (loca.getPath().empty() == false)
 				return (loca);
 		}
 		ibegin++;
 	}
-	return (Location());
+	return (LocationPattern());
 }
 
-void	ServerModel::addDirectiveToLocation(std::vector<Location>&	servers, const String& key, const String& serverDirective)
+void	ServerPattern::addDirectiveToLocation(std::vector<LocationPattern>&	servers, const String& key, const String& serverDirective)
 {
 	if (servers.empty() == true)
 		return ;
@@ -114,13 +114,13 @@ void	ServerModel::addDirectiveToLocation(std::vector<Location>&	servers, const S
 			servers.at(i).addData(Data(key, rootValue));
 		else
 			rootValue = roots.at(0).getValue();
-		std::vector<Location>& innerLocation = servers.at(i).getInnerLocation();
+		std::vector<LocationPattern>& innerLocation = servers.at(i).getInnerLocation();
 		if (innerLocation.empty() == false)
 			addDirectiveToLocation(innerLocation, key, rootValue);
 	}
 }
 
-int		ServerModel::checkIsDirectory(const String& filename)
+int		ServerPattern::checkIsDirectory(const String& filename)
 {
 	DIR *dir;
 	if (!access(filename.c_str(), F_OK))
@@ -130,4 +130,16 @@ int		ServerModel::checkIsDirectory(const String& filename)
 		return (0);
 	}
 	return (-1);
+}
+
+bool	ServerPattern::empty( void ) const
+{
+	if (GeneralPattern::empty() && location.empty())
+		return (true);
+	return (false);
+}
+
+void	ServerPattern::execute( void ) const
+{
+	std::cout << "HELLO WORLD" << std::endl;
 }
