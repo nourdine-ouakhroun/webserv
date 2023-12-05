@@ -1,7 +1,7 @@
 #ifndef	SERVERDATA_HPP
 #define	SERVERDATA_HPP
 
-#include "Parser.hpp"
+#include "../Parsing/Parser.hpp"
 #include "ServerException.hpp"
 #include <algorithm>
 
@@ -11,19 +11,19 @@
 
 class ServerData
 {
-	std::vector<ServerModel> servers;
+	std::vector<ServerPattern> servers;
 
 	public :
 		ServerData( void );
-		ServerData(const std::vector<ServerModel>&);
+		ServerData(const std::vector<ServerPattern>&);
 		ServerData(const ServerData&);
 		ServerData&	operator=(const ServerData&);
-		void	setServerData(const std::vector<ServerModel>&);
+		void	setServerData(const std::vector<ServerPattern>&);
 		void	displayServers( void );
-		std::vector<ServerModel>	getServersByServerName(const String& serverName);
-		std::vector<ServerModel>	getServersByPort(const unsigned short& port);
-		const std::vector<ServerModel>&	getAllServers();
-		const ServerModel&	getDefaultServer( void );
+		std::vector<ServerPattern>	getServersByServerName(const String& serverName);
+		std::vector<ServerPattern>	getServersByPort(const unsigned short& port);
+		const std::vector<ServerPattern>&	getAllServers();
+		const ServerPattern&	getDefaultServer( void );
 
 };
 

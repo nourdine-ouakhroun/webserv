@@ -40,8 +40,8 @@ class Server
 
 String	readFile(const String& path);
 unsigned short	getPort(String	value);
-std::vector<ServerModel>	getServer(ServerData& servers, std::vector<Data> header);
-std::vector<int>	openAllPorts(const std::vector<ServerModel>& serversInfo, Server& server);
+std::vector<ServerPattern>	getServer(ServerData& servers, std::vector<Data> header);
+std::vector<int>	openAllPorts(const std::vector<ServerPattern>& serversInfo, Server& server);
 
 
 #endif

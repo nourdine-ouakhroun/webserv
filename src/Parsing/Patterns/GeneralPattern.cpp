@@ -1,25 +1,25 @@
-#include "GlobalModel.hpp"
+#include "GeneralPattern.hpp"
 
-GlobalModel::GlobalModel( void )
+GeneralPattern::GeneralPattern( void )
 {
 
 }
 
-GlobalModel::GlobalModel(std::vector<Data> _data) : data(_data)
+GeneralPattern::GeneralPattern(std::vector<Data> _data) : data(_data)
 {
 }
 
-GlobalModel::GlobalModel(const GlobalModel& copy)
+GeneralPattern::GeneralPattern(const GeneralPattern& copy)
 {
 	*this = copy;
 }
 
 
-GlobalModel::~GlobalModel( void )
+GeneralPattern::~GeneralPattern( void )  throw()
 {
 }
 
-GlobalModel&	GlobalModel::operator=(const GlobalModel& target)
+GeneralPattern&	GeneralPattern::operator=(const GeneralPattern& target)
 {
 	if (this != &target)
 	{
@@ -28,12 +28,12 @@ GlobalModel&	GlobalModel::operator=(const GlobalModel& target)
 	return (*this);
 }
 
-void	GlobalModel::addData(const Data& _data)
+void	GeneralPattern::addData(const Data& _data)
 {
 	data.push_back(_data);
 }
 
-std::vector<Data>	GlobalModel::getData(const String& key) const
+std::vector<Data>	GeneralPattern::getData(const String& key) const
 {
 	std::vector<Data>	returnData;
 	std::vector<Data>::const_iterator	iterBegin = data.begin();
@@ -47,14 +47,14 @@ std::vector<Data>	GlobalModel::getData(const String& key) const
 	return (returnData);
 }
 
-const std::vector<Data>&	GlobalModel::getAllData( void ) const
+const std::vector<Data>&	GeneralPattern::getAllData( void ) const
 {
 	return (data);
 }
 
 
 
-bool	GlobalModel::isExist(const Data& value)
+bool	GeneralPattern::isExist(const Data& value)
 {
 	std::vector<Data>::const_iterator	iterBegin = data.begin();
 	std::vector<Data>::const_iterator	iterEnd = data.end();
@@ -68,9 +68,17 @@ bool	GlobalModel::isExist(const Data& value)
 	return (false);
 }
 
+bool	GeneralPattern::empty( void ) const
+{
+	return (data.empty());
+}
 
+String	GeneralPattern::getPath( void ) const
+{
+	return ("");
+}
 
-void	GlobalModel::printGlobalModel(const GlobalModel& model, String &str)
+void	GeneralPattern::printGeneralPattern(const GeneralPattern& model, String &str)
 {
 	std::vector<Data>::const_iterator	ibegin = model.getAllData().begin();
 	std::vector<Data>::const_iterator	iend = model.getAllData().end();
@@ -79,4 +87,8 @@ void	GlobalModel::printGlobalModel(const GlobalModel& model, String &str)
 		Data::printData(*ibegin, str);
 		ibegin++;
 	}
+}
+
+void	GeneralPattern::execute( void ) const
+{
 }

@@ -2,21 +2,21 @@ NAME		=	webserv
 
 
 SRCS		=	src/main.cpp \
-				src/configurationTools.cpp \
 				src/tools.cpp \
-				src/Parser/Parser.cpp \
-				src/Parser/Checker.cpp \
-				src/Parser/Location.cpp \
-				src/Models/GlobalModel.cpp \
-				src/Models/ServerModel.cpp \
-				src/Models/Data.cpp \
+				src/configurationTools.cpp \
+				src/Parsing/Parser.cpp \
+				src/Parsing/Checker.cpp \
+				src/Parsing/Data.cpp \
+				src/Parsing/Patterns/LocationPattern.cpp \
+				src/Parsing/Patterns/GeneralPattern.cpp \
+				src/Parsing/Patterns/ServerPattern.cpp \
 				src/Utils/String.cpp \
 				src/Exception/ParsingException.cpp \
+				src/Utils/ServerData.cpp \
 				src/Exception/ServerException.cpp \
 				src/Server/Server.cpp \
-				src/Utils/ServerData.cpp \
+				src/Utils/Poll.cpp \
 				src/Utils/ResponseHeader.cpp \
-				src/Utils/Poll.cpp
 #				src/Utils/Select.cpp
 
 TEMPLATES	=	src/Templates/*.tpp
