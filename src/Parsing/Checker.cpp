@@ -10,7 +10,7 @@ Checker::~Checker( void )
     servers.clear();
 }
 
-Checker::Checker(const std::vector<ServerModel>& _servers) : servers(_servers)
+Checker::Checker(const std::vector<ServerPattern>& _servers) : servers(_servers)
 {
 }
 
@@ -25,7 +25,7 @@ Checker& Checker::operator=(const Checker& target)
     return (*this);
 }
 
-void    Checker::checkLocation(const std::vector<Location>& loca, String key)
+void    Checker::checkLocation(const std::vector<LocationPattern>& loca, String key)
 {
     if (loca.empty() == true)
         return ;
@@ -39,7 +39,7 @@ void    Checker::checkLocation(const std::vector<Location>& loca, String key)
     }
 }
 
-void    Checker::checkLocationValues(const std::vector<Location>& loca)
+void    Checker::checkLocationValues(const std::vector<LocationPattern>& loca)
 {
     if (loca.empty() == true)
         return ;
@@ -79,7 +79,7 @@ void    Checker::checkValues( void )
     }
 }
 
-void    Checker::checkLocationValues(const std::vector<Location>& loca, String key)
+void    Checker::checkLocationValues(const std::vector<LocationPattern>& loca, String key)
 {
     if (loca.empty() == true)
         return ;
