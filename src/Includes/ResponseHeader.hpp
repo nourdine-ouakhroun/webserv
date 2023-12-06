@@ -12,10 +12,14 @@ class ResponseHeader
     String  _contentLength;
     String  _location;
     String  _connection;
-    String  _body;
+    String  *_body;
     String  _fileName;
     public:
         ResponseHeader( void );
+        ~ResponseHeader( void );
+        ResponseHeader(const ResponseHeader& copy);
+        ResponseHeader& operator=(const ResponseHeader& target);
+        
         ResponseHeader& protocol(const String& _protocol);
         ResponseHeader& status(const String& _status);
         ResponseHeader& server(const String& server);
@@ -23,10 +27,10 @@ class ResponseHeader
         ResponseHeader& contentLength(const String& _contentLength);
         ResponseHeader& location(const String& _location);
         ResponseHeader& connection(const String& _connection);
-        ResponseHeader& body(const String& _body);
+        ResponseHeader& body(String* _body);
         ResponseHeader& fileName(const String& file);
         String  getFileName( void ) const ;
-        String  toString( void );
+        String* toString( void );
 
 };
 

@@ -31,7 +31,7 @@ class Server
 		int		getAvailabeFD( void );
 		int		accept(int targetSocket);
 		String	recieve(int socket);
-		ssize_t	send(int socket, String response);
+		ssize_t	send(int socket, String &response);
 		Poll	getFds( void ) const
 		{
 			return (fds);
