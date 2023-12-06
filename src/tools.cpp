@@ -30,11 +30,13 @@ unsigned short	getPort(String	value)
 	return port;
 }
 
-std::vector<ServerModel>	getServer(ServerData& servers, std::vector<Data> header)
+std::vector<ServerPattern>	getServer(ServerData& servers, std::vector<Data> header)
 {
-	GlobalModel model(header);
-	std::vector<ServerModel>	servModel;
+	GeneralPattern model(header);
+	std::vector<ServerPattern>	servModel;
 	String strHost(model.getData("Host").at(0).getValue());
+	if (strHost.empty())
+		return (servers.getServersByServerName("\"\""));
 	std::vector<String> str = strHost.split(':');
 	if (str.empty() == false)
 	{
@@ -53,7 +55,7 @@ std::vector<ServerModel>	getServer(ServerData& servers, std::vector<Data> header
 }
 
 
-std::vector<int>	openAllPorts(const std::vector<ServerModel>& serversInfo, Server& server)
+std::vector<int>	openAllPorts(const std::vector<ServerPattern>& serversInfo, Server& server)
 {
 	std::vector<int> ports;
 	int newSocket;
