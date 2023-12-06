@@ -34,9 +34,11 @@ int    Poll::getReadyFd(int idx)
     return (-1);
 }
 
-size_t  Poll::fdsSize( void )
+unsigned int Poll::fdsSize( void )
 {
-    return (fds.size());
+    if (fds.size() > (size_t)UINT_MAX)
+        return (UINT_MAX);
+    return ((unsigned int)fds.size());
 }
 
 int		Poll::waitingRequest( void )
