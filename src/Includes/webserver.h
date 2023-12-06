@@ -8,7 +8,7 @@
 #include <dirent.h>
 #include <map>
 
-String  getContentFile(String file);
+String*  getContentFile(String file);
 String	getRootPath(String	root, String path);
 String	getAliasPath(String	aliasPath);
 String	tryFiles(const std::vector<String>& files, const String& path);

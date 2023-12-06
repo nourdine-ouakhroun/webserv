@@ -31,6 +31,10 @@ void    Checker::checkLocation(const std::vector<LocationPattern>& loca, String 
         return ;
     for (size_t i = 0; i < loca.size(); i++)
     {
+        if (loca.at(i).getData("listen").empty() == false 
+            || loca.at(i).getData("server_name").empty() == false)
+            throw (ParsingException("Check Faild."));
+        
         std::vector<Data> data = loca.at(i).getData(key);
         if (data.size() > 1)
             throw (ParsingException("Check Faild."));
