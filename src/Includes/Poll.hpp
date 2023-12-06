@@ -1,7 +1,7 @@
 #ifndef POLL_HPP
 #define POLL_HPP
 
-#include <poll.h>
+#include <sys/poll.h>
 #include <vector>
 #include <cstddef>
 
@@ -14,7 +14,7 @@ class   Poll
         Poll(const Poll& copy);
         ~Poll( void );
         Poll&   operator=(const Poll& target);
-        size_t  fdsSize( void );
+        unsigned int fdsSize( void );
         int     getReadyFd(int fd);
         int	    waitingRequest( void );
         void    push_fd(int fd);

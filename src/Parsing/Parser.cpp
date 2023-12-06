@@ -150,7 +150,7 @@
 
 /**
  * @brief	AFTER GET FINAL RESUALT :
- * ~~~~~~~~~~~~~~~~~~ std::vector<ServerModel> servers ~~~~~~~~~~~~~~~~~~~
+ * ~~~~~~~~~~~~~~~~~~ std::vector<ServerPattern> servers ~~~~~~~~~~~~~~~~~~~
  * INDEX: 0
  * 		{
  * 			std::vector<Data> data :
@@ -162,7 +162,7 @@
  * 				|error_page |...40x.html|
  * 				-------------------------
  * 
- * 			std::vector<Location> location :
+ * 			std::vector<LocationPattern> location :
  * 				INDEX: 0
  * 				{
  * 					String Path : "/"
@@ -175,7 +175,7 @@
  * 						|	index	| index.html|
  * 						-------------------------
  * 
- * 					std::vector<Location> location :
+ * 					std::vector<LocationPattern> location :
  * 						INDEX: 0
  * 						{
  * 							String Path :
@@ -189,7 +189,7 @@
  * 								|	index	| index.html|
  * 								-------------------------
  * 	
- * 							std::vector<Location> location :
+ * 							std::vector<LocationPattern> location :
  * 								empty.					
  * 						}
  * 					
@@ -206,7 +206,7 @@
  * 				|error_page |...40x.html|
  * 				-------------------------
  * 
- * 			std::vector<Location> location :
+ * 			std::vector<LocationPattern> location :
  * 				INDEX: 0
  * 				{
  * 					String Path : "/"
@@ -219,7 +219,7 @@
  * 						|	index	| index.html|
  * 						-------------------------
  * 
- * 					std::vector<Location> location :
+ * 					std::vector<LocationPattern> location :
  * 						INDEX: 0
  * 						{
  * 							String Path :
@@ -233,7 +233,7 @@
  * 								|	index	| index.html|
  * 								-------------------------
  * 	
- * 							std::vector<Location> location :
+ * 							std::vector<LocationPattern> location :
  * 								empty.					
  * 						}
  * 					
@@ -522,10 +522,10 @@ Data	Parser::extractDataFromString(String& line)
  * @return	new Location that extact from the config.
  * @exception	no-throw exception.
 */
-Location	Parser::getLocations(std::vector<String>::iterator& begin, const std::vector<String>::iterator& end, String	path)
+LocationPattern	Parser::getLocations(std::vector<String>::iterator& begin, const std::vector<String>::iterator& end, String	path)
 {
-	std::vector<Location> newLocation; // Return Value.
-	GlobalModel model; // For Data vector.
+	std::vector<LocationPattern> newLocation; // Return Value.
+	LocationPattern model; // For Data vector.
 	while (begin < end)
 	{
 		// If *begin equal } : the end of Location, skip this line and break.
@@ -534,7 +534,7 @@ Location	Parser::getLocations(std::vector<String>::iterator& begin, const std::v
 			begin++;
 			break ;
 		}
-		// If *begin location } : new Location, skip this line and go in to recursion, else add data to Data vector (GlobalModel).
+		// If *begin location } : new Location, skip this line and go in to recursion, else add data to Data vector (AGeneralPattern).
 		if (!begin->compare(0, 9, "location "))
 		{
 			String _path = extractDataFromString(*begin).getValue();
@@ -544,7 +544,7 @@ Location	Parser::getLocations(std::vector<String>::iterator& begin, const std::v
 		else
 			model.addData(extractDataFromString(*(begin++)));
 	}
-	return (Location(model, path, newLocation));
+	return (LocationPattern(model, path, newLocation));
 }
 
 /**
@@ -553,7 +553,7 @@ Location	Parser::getLocations(std::vector<String>::iterator& begin, const std::v
 */
 void	Parser::parsingFile(std::vector<String> content)
 {
-	ServerModel server;
+	ServerPattern server;
 	std::vector<String>::iterator iBegin = content.begin();
 	std::vector<String>::iterator iEnd = content.end();
 	while (iBegin < iEnd)
@@ -593,10 +593,10 @@ void	Parser::getFinalResualt( void )
  * @brief	Prant Server Model Infos.
  * @param	server	Server to print
 */
-void	Parser::printServerModel(const ServerModel& server)
+void	Parser::printServerModel(const ServerPattern& server)
 {
-	std::vector<Location>::const_iterator b = server.getLocation().begin();
-	std::vector<Location>::const_iterator e = server.getLocation().end();
+	std::vector<LocationPattern>::const_iterator b = server.getLocation().begin();
+	std::vector<LocationPattern>::const_iterator e = server.getLocation().end();
 	while (b < e)
 	{
 		printLocations(*b);
@@ -610,7 +610,7 @@ void	Parser::printServerModel(const ServerModel& server)
  * @return	(none).
  * @exception	no-throw exception.
 */
-void	Parser::printLocations(const Location& locs)
+void	Parser::printLocations(const LocationPattern& locs)
 {
 	static String s;
 	if (locs.getAllData().empty() == true)
@@ -618,14 +618,14 @@ void	Parser::printLocations(const Location& locs)
 	// printing Path of Location.
 	std::cout << s << "Path : " << locs.getPath() << std::endl;
 
-	// printing All data from GlobalModel (Key, Value).
+	// printing All data from AGeneralPattern (Key, Value).
 	std::vector<Data> vec = locs.getAllData();
-	for (std::vector<Location>::size_type i = 0; i < vec.size(); i++)
+	for (std::vector<LocationPattern>::size_type i = 0; i < vec.size(); i++)
 		Data::printData(vec.at(i), s);
 
-	// printing All Location from GlobalModel (Key, Value).
-	std::vector<Location> innerLoc = locs.getInnerLocation();
-	for (std::vector<Location>::size_type i = 0; i < innerLoc.size(); i++)
+	// printing All Location from AGeneralPattern (Key, Value).
+	std::vector<LocationPattern> innerLoc = locs.getInnerLocation();
+	for (std::vector<LocationPattern>::size_type i = 0; i < innerLoc.size(); i++)
 	{
 		s.append("\t");
 		printLocations(innerLoc.at(i));
@@ -657,7 +657,7 @@ std::vector<Data>	Parser::parseHeader(const String& header)
 	return (vec);
 }
 
-void    Parser::checkLocationKeys(const std::vector<Location>& loca, const std::vector<String>& keys)
+void    Parser::checkLocationKeys(const std::vector<LocationPattern>& loca, const std::vector<String>& keys)
 {
     for (size_t i = 0; i < loca.size(); i++)
     {
@@ -712,7 +712,7 @@ const std::vector<std::vector<String> >&	Parser::getServersContents( void ) cons
  * @return	constant refrance vector of Server Model.
  * @exception	no-throw exception.
 */
-const	std::vector<ServerModel>&	Parser::getServers( void ) const
+const	std::vector<ServerPattern>&	Parser::getServers( void ) const
 {
 	return (servers);
 }
