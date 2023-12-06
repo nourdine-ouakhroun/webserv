@@ -11,19 +11,19 @@ bool	checkFile(String file)
 	return (true);
 }
 
-String  getContentFile(String file)
+String*  getContentFile(String file)
 {
     std::fstream new_file;
     
     new_file.open(file.c_str(), std::ios::in);
     if (new_file.is_open() == false)
-        return ("");
+        return (NULL);
     String  sa;
-    String  content;
+    String  *content = new String();
     while (std::getline(new_file, sa))
-        content.append(sa).append("\n");
+        content->append(sa + "\n");
     new_file.close();
-    return content;
+    return (content);
 }
 
 String	getRootPath(String	root, String path)
@@ -44,11 +44,12 @@ String	tryFiles(const std::vector<String>& files, const String& path)
 	String value;
 	for (size_t i = 0; i < files.size() - 1; i++)
 	{
-		String tmp(path);
-		tmp.append(files.at(i));
-		value = readFile(tmp);
-		if (value.length() != 0)
-			return (value);
+		String tmp(files.at(i));
+		String::size_type pos = tmp.find("$uri");
+		if (pos != String::npos)
+			tmp.replace(pos, 4, path);
+		if (checkFile(tmp) == true)
+			return (tmp);
 	}
 	return (value);
 }

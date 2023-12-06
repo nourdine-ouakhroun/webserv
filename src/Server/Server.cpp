@@ -113,7 +113,7 @@ String	Server::recieve(int socket)
 	return (buffer);
 }
 
-ssize_t	Server::send(int socket, String response)
+ssize_t	Server::send(int socket, String&	response)
 {
 	ssize_t	totalBytes = 0;
     while (1)

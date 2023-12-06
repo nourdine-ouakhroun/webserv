@@ -5,6 +5,41 @@ ResponseHeader::ResponseHeader( void )
     this->_protocol    = "HTTP/1.1";
     this->_status      = "200 OK";
     this->_server      = "webserv";
+    _body = NULL;
+}
+
+ResponseHeader::~ResponseHeader( void )
+{
+    delete _body;
+    _body = NULL;
+}
+
+
+ResponseHeader::ResponseHeader(const ResponseHeader& copy)
+{
+    _body = NULL;
+    *this = copy;
+}
+
+ResponseHeader& ResponseHeader::operator=(const ResponseHeader& target)
+{
+    if (this != &target)
+    {
+        _protocol = target._protocol;
+        _status = target._status;
+        _server = target._server;
+        _contentType = target._contentType;
+        _contentLength = target._contentLength;
+        _location = target._location;
+        _connection = target._connection;
+        _fileName = target._fileName;
+        if (target._body)
+        {
+            delete _body;
+            _body = new String(*target._body);
+        }
+    }
+    return (*this);
 }
 
 ResponseHeader& ResponseHeader::protocol(const String& _protocol)
@@ -50,7 +85,7 @@ ResponseHeader& ResponseHeader::connection(const String& _connection)
     return (*this);
 }
 
-ResponseHeader& ResponseHeader::body(const String& _body)
+ResponseHeader& ResponseHeader::body(String* _body)
 {
     this->_body = _body;
     return (*this);
@@ -68,19 +103,20 @@ String ResponseHeader::getFileName( void ) const
 }
 
 
-String  ResponseHeader::toString( void )
+String*  ResponseHeader::toString( void )
 {
-    String response(this->_protocol + " " + this->_status + "\r\n");
-    response.append("Server: " + this->_server + "\r\n");
+    String* response = new String(this->_protocol + " " + this->_status + "\r\n");
+    response->append("Server: " + this->_server + "\r\n");
     if (!this->_contentLength.empty())
-        response.append("Content-Type: " + this->_contentType + "\r\n");
+        response->append("Content-Type: " + this->_contentType + "\r\n");
     if (!this->_contentLength.empty())
-        response.append("Content-Length: " + this->_contentLength + "\r\n");
+        response->append("Content-Length: " + this->_contentLength + "\r\n");
     if (!this->_connection.empty())
-        response.append("Connection: " + this->_connection + "\r\n");
+        response->append("Connection: " + this->_connection + "\r\n");
     if (!this->_location.empty())
-        response.append("Location: " + this->_location + "\r\n");
-    response.append("\r\n");
-    response.append(this->_body);
+        response->append("Location: " + this->_location + "\r\n");
+    response->append("\r\n");
+    if (this->_body)
+        response->append(*(this->_body));
     return (response);
 }
