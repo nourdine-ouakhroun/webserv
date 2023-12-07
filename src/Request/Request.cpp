@@ -38,11 +38,9 @@ std::vector<std::string> split(std::string line, std::string sep)
 
 Request::Request( void )
 {
-
 }
 Request::~Request( void )
 {
-
 }
 
 void    Request::parseRequest(std::string request)
@@ -97,11 +95,6 @@ void Request::parseRequestLine( std::string reqLine )
 			if (!sp[2].empty())
 				this->version = sp[2];
 		}
-		// std::cout << methode << std::endl;
-		// std::cout << url << std::endl;
-		// std::cout << version << std::endl;
-		// std::cout <<  pathname<< std::endl;
-		// std::cout << query << std::endl;
 	}
 }
 void Request::parseHeader( std::string reqHeader )
@@ -137,15 +130,9 @@ void Request::parseHeader( std::string reqHeader )
 }
 void Request::parseBody( std::string reqBody )
 {
-	std::string content;
-	std::string key1;
 	std::string key;
 	std::string value;
-	maps parseBody;
-	std::vector<std::string> params;
-	// std::cout  << "------------------------------------------" << std::endl;
-	std::cout  << "#"<<  reqBody << "#" << std::endl;
-	// std::cout  << "------------------------------------------" << std::endl;
+
 	if (this->getMethod() == "POST" && this->header("Content-Type") == "application/x-www-form-urlencoded")
 		this->query = reqBody;
 	else if (this->getMethod() == "POST" && this->header("Content-Type") == "multipart/form-data")
@@ -159,97 +146,21 @@ void Request::parseBody( std::string reqBody )
 			for (size_t i = 0; i < sBoundary.size() - 1; i++)
 			{
 				std::vector<std::string> s = split(sBoundary[i], "\n");
-				// if (!s.empty())
-				// {
-					if (!s[0].empty())
-					{
-						std::vector<std::string> s2 = split(s[0], "; ");
-						for (size_t j = 0; j < s2.size(); j++)
-						{
-							if (j == 0) {
-								std::vector<std::string> s3 = split(s2[0], ": ");
-								key = s3[0];
-								value = s3[1];
-								// parseBody.insert(std::make_pair(key, value));
-							}
-							else {
-								std::vector<std::string> s3 = split(s2[j], "=");
-								// key = s3[0];
-								key = s3[1].substr(1, s3[1].length() - 2);
-								value = s[1];
-							}
-							std::cout << key << " " << value << std::endl;
-							// parseBody.insert(std::make_pair(key, value));
-
-							// std::cout << key << " " << << " " << value << std::endl;
-						}
-						
-					}
-					// if (!s[1].empty())
-					// 	value = s[1];
-					// parseBody.insert(std::make_pair(key1, value));
-			}
-				// }
-				// }
-				// for (size_t j = 0; j < s.size(); j++)
-				// {
-				// 	std::vector<std::string> s1 = split(s[j], "; ");
-				// 	for (size_t l = 0; l < s1.size(); l++)
-				// 	{
-				// 		std::vector<std::string> s2;
-				// 		if (l == 0)
-				// 		{
-				// 			s2 = split(s1[l], ": ");
-				// 			if (!s2[0].empty())
-				// 			{
-				// 				key = s2[0];
-				// 				if (!s2[1].empty())
-				// 				{
-				// 					value = s2[1];
-				// 					parseBody.insert(std::make_pair(key, value));
-
-				// 				}
-				// 			}
-				// 		}
-				// 		// else
-				// 		// {
-				// 		// 	s2 = split(s1[l], "=");
-				// 		// 	key = s2[1].substr(1, s2[1].length() - 2);
-				// 		// 	std::cout << key << std::endl;
-				// 		// }
-				// 		// if (s2.size() == 1)
-				// 		// {
-				// 		// 	content = s2[0];
-							// parseBody.insert(std::make_pair(key, content));
-				// 		// 	// std::cout << key << " " << content << std::endl;
-				// 		// }
-				// 	}
-				// 	// parseBody.insert(std::make_pair(key, content));
-
-				// }
-				for (maps::iterator it = parseBody.begin(); it != parseBody.end(); it++)
+				if (!s.empty() && !s[0].empty())
 				{
-					std::cout << it->first << " " << it->second << std::endl;
+					size_t pos = 0;
+					if ((pos = s[0].find("name")) != std::string::npos)
+					{
+						key = s[0].substr(pos + 6, (s[0].length() - (pos + 7)));
+						if (!s[1].empty())
+							value = s[1];
+						_body.insert(std::make_pair(key, value));
+						key.clear();
+						value.clear();
+					}
 				}
-				// key = ;
-				// value = content;
-
-				// std::cout << parseBody["Content-Disposition"] << std::endl;
-				// std::cout << parseBody["name"] << std::endl;
-				// std::cout << content << std::endl;
-			// }
-			// for (size_t i = 0; i < params.size(); i++)
-			// {
-			// 	// std::vector<std::string> s = split(sBoundary[i], "\n");
-
-			// 	// if ()
-			// 	std::cout << params[i] << std::endl;
-			// }
-			// reqBody.find(end) != std::string::npos;
-			// while (reqBody.find(end) != std::string::npos);
-
+			}
 		}
-
 	}
 }
 
@@ -269,6 +180,10 @@ void Request::parseUrl()
 const std::string &Request::header(const std::string &key)
 {
 	return (this->_header[key]);
+}
+const std::string &Request::body(const std::string &key)
+{
+	return (this->_body[key]);
 }
 
 const std::string &Request::getMethod() const
@@ -291,71 +206,13 @@ const std::string &Request::getQuery() const
 {
     return (this->query);
 }
-// void Request::set(std::pair<std::string, std::string> keyvalue)
-// {
-// 	this->_header = keyValue
-// }
 
+const maps &Request::getHeader( void ) const
+{
+	return (this->_header);
+}
+const maps &Request::getBody( void ) const
+{
+	return (this->_body);
+}
 
-
-
-// void     Request::parseRequest( std::string request )
-// {
-// 	size_t headerPos = request.find("\r\n\r\n");
-// 	if (headerPos != std::string::npos)
-// 	{
-// 		size_t start = request.find("\r\n");
-// 		if (start != std::string::npos)
-// 			this->requestLine = request.substr(0, start);
-// 		size_t i = start + 2;
-// 		while (i < headerPos)
-// 		{
-// 			if (request[i] != '\r')
-// 				this->requestHeader += request[i];
-// 			i++;
-// 		}
-// 		i = headerPos + 4;
-// 		while (i < request.length())
-// 		{
-// 			if (request[i] != '\r')
-// 				this->requestBody += request[i];
-// 			i++;
-// 		}
-// 	}
-// 	// if (this->methode == "GET")
-// 	// {
-// 	// 	GetMethod	get;
-
-// 	// 	get.parseRequestLine(this->requestLine);
-// 	// 	get.parseHeader(this->requestHeader);
-// 	// }
-// 	// 	GetMethod get;
-// 	// if (this->requestLine == "GET")
-// 	// {
-// 	// 	get.parseRequestLine(this->requestLine);
-// 	// 	get.parseHeader(this->requestHeader);
-// 	// }
-// 	// 	return (get);
-// 	// else if (this->methode == "POST")
-// 	// {
-// 	// 	PostMethod post;
-// 	// 	post.parseRequestLine(this->requestLine);
-// 	// }
-// 	// else if (this->methode == "DELETE")
-// 	// {
-// 	// 	DeleteMethod Delete;
-// 	// 	post.parseRequestLine(this->requestLine);
-// 	// }
-
-// 	// std::cout << "#" << this->requestLine << "#\n" << std::flush;
-// 	// std::cout << "------------------------------\n" << std::flush;
-// 	// std::cout << "$" << this->requestHeader << "$\n" << std::flush;
-// 	// std::cout << "------------------------------\n" << std::flush;
-// 	// std::cout << "&" << this->requestBody << "&\n" << std::flush;
-// 	// std::cout << "------------------------------\n" << std::flush;
-
-
-// 	// std::cout << "#" << requestLine[0] << " " << requestLine[1] << " " << requestLine[2] << "#" << std::endl;
-// 	// std::cout << "&" << headerReq << "&" << std::endl;
-// 	// std::cout << "$" << bodyReq << "$" << std::endl;
-// }
