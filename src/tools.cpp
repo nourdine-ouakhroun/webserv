@@ -34,7 +34,11 @@ std::vector<ServerPattern>	getServer(ServerData& servers, std::vector<Data> head
 {
 	GeneralPattern model(header);
 	std::vector<ServerPattern>	servModel;
-	String strHost(model.getData("Host").at(0).getValue());
+	// String strHost(model.getData("Host").at(0).getValue());
+	String strHost;
+    if (model.getData("Host").empty() == true)
+            return (servModel);
+    strHost = model.getData("Host").at(0).getValue();
 	if (strHost.empty())
 		return (servers.getServersByServerName("\"\""));
 	std::vector<String> str = strHost.split(':');

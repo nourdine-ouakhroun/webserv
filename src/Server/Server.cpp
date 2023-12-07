@@ -116,9 +116,11 @@ String	Server::recieve(int socket)
 ssize_t	Server::send(int socket, String&	response)
 {
 	ssize_t	totalBytes = 0;
+	size_t responseLength = response.length();
     while (1)
     {
-        ssize_t	nBit = ::send(socket, response.c_str() + totalBytes, response.length() - (size_t)totalBytes, 0);
+        ssize_t	nBit = ::send(socket, response.c_str() + totalBytes, responseLength - (size_t)totalBytes, 0);
+		std::cout << "nBit : " << nBit << std::endl;
         if (nBit < 0)
                 return (-1);
         totalBytes += nBit;
