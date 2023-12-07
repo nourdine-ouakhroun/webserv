@@ -65,7 +65,13 @@
         "typeinfo": "cpp",
         "unordered_map": "cpp",
         "utility": "cpp",
+<<<<<<< HEAD
         "vector": "cpp",
         "filesystem": "cpp"
+=======
+        "__memory": "cpp",
+        "filesystem": "cpp",
+        "*.tpp": "cpp"
+>>>>>>> f3f039a06da86de9be865837114aa04434ca318c
     }
 }
