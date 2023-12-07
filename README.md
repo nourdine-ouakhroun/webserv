@@ -3,21 +3,28 @@
  <img width=400px height=400px src="readme-assets/webserv1.svg" alt="Project logo"></a>
 </p>
 
-<h1 align="center"> WEBSERVER </h1>
+<h1 align="center"> <b><i>WEBSERVER</i></b> </h1>
 
 <div align="center">
 
-[![Status](https://img.shields.io/badge/status-active-success.svg)]()
+[![Status](https://img.shields.io/badge/status-active-success.svg)]() [![License](https://img.shields.io/badge/license-MIT-blue.svg)](/LICENSE)
 <!-- [![GitHub Issues](https://img.shields.io/github/issues/kylelobo/The-Documentation-Compendium.svg)](https://github.com/kylelobo/The-Documentation-Compendium/issues) -->
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](/LICENSE)
 
 </div>
 
----
+<br>
 
-<p align="center"> 
-    <br> 
+<p align="center">
+  <b>
+    This project is about writing we own HTTP server.<br>
+    You will be able to test it with an actual browser.<br>
+    HTTP is one of the most used protocols on the internet.<br>
+    Knowing its arcane will be useful, even if you won’t be working on a website.<br>
+  </b>
 </p>
+
+
+---
 
 ## 📝 Table of Contents
 
@@ -33,7 +40,10 @@
 
 ## 🧐 About <a name = "about"></a>
 
-Write about 1-2 paragraphs describing the purpose of your project.
+This project is about writing we own HTTP server using C++, 
+You will be able to test it with an actual browser.
+HTTP is one of the most used protocols on the internet.
+Knowing its arcane will be useful, even if you won’t be working on a website.
 
 ## 🏁 Getting Started <a name = "getting_started"></a>
 
