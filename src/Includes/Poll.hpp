@@ -4,6 +4,7 @@
 #include <sys/poll.h>
 #include <vector>
 #include <cstddef>
+#include <climits>
 
 class   Poll
 {
