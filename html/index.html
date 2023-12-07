@@ -1,11 +1,36 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Document</title>
-    <link rel="alternate icon" class="js-site-favicon" type="image/png" href="https://github.githubassets.com/favicons/favicon.png">
-</head>
-<body>
-    <h1> HELLO FROM INDEX.HTML </h1>
-</body>
-</html>
+<head></head> 
+<body> 
+<b>Please Fill in the Information:</b><br> 
+<form action="./index.pl" method="get"> 
+First Name:<br> 
+<input type="text" name="first_name" size="25" maxlength="100"><br> 
+
+Last Name:<br> 
+<input type="text" name="last_name" size="25" maxlength="100"><br> 
+<br> 
+Languages:<br> 
+<input type="checkbox" name="python" value="yes">Python 
+<input type="checkbox" name="java" value="yes">Java 
+<input type="checkbox" name="kotlin" value="yes">Kotlin 
+<input type="checkbox" name="perl" value="yes">Perl 
+<input type="checkbox" name="swift" value="yes">Swift 
+<br> 
+Payment: <select name=payment> 
+<option>---Select---</option> 
+<Option value="Paypal"> Paypal </option> 
+<Option value="Internet Banking"> Internet Banking </option> 
+<Option value="Credit Card"> Credict Card </option> 
+<Option value="Paytm"> Paytm </option> 
+</select><br> 
+<br> 
+First Time Customer?<br> 
+<input type="radio" name="first_time" value="Yes">Yes 
+<input type="radio" name="first_time" value="No">No<br> 
+<br> 
+Feedback:<br> 
+<textarea wrap= "virtual" name="feedback" cols="25" rows="3"></textarea><br> 
+<br> 
+<input type="submit" value="Place Order"> 
+</form> 
+</body> 
+</html> 
