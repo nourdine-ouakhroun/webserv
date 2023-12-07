@@ -222,7 +222,7 @@ bool	requestHandler(const std::vector<int>& port, Server& server, ServerData& se
 		String header = server.recieve(readyFd);
 		if (header.empty() == true)
 			return (true);
-		// std::cout << header << std::endl;
+		std::cout << header << std::endl;
 		GeneralPattern model(Parser::parseHeader(header));
 		ResponseHeader response;
 		try
@@ -240,6 +240,10 @@ bool	requestHandler(const std::vector<int>& port, Server& server, ServerData& se
 					std::ostringstream oss;
 					oss << str->size();
 					response.contentLength(oss.str());
+					// std::cout << accept.at(0).getValue().split(':').at(0) << std::endl;
+					if (accept.at(0).getValue().split(':').at(0).contains("image") == true)
+						response.contentType("*/*");
+					response.connection("close");
 				}
 				response.body(str);
 			}
@@ -253,7 +257,15 @@ bool	requestHandler(const std::vector<int>& port, Server& server, ServerData& se
 		// static int nlog;
 		// std::cout << ++nlog << " ";
 		// Logger::success(std::cout, "Response ==> ", resStr->substr(0, resStr->find('\r')));
-		server.send(readyFd, *resStr);
+		// ssize_t resStrlen = (ssize_t)resStr->length();
+		// while (1)
+		// {
+			ssize_t sender = server.send(readyFd, *resStr);
+			// std::cout << "resStrlen : " << resStrlen << std::endl;
+			std::cout << "sender : " << sender << std::endl;
+		// 	if (sender == resStrlen || sender == -1)
+		// 		break ;
+		// }
 		delete resStr;
 		String method(model.getData("Method").begin()->getValue().split()[0]);
 		if (!method.compare("GET"))
