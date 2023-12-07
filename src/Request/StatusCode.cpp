@@ -95,7 +95,7 @@ bool StatusCode::isFormed(Request req)
     return (1);
 }
 
-bool StatusCode::isMatched( const std::string &path )
+bool StatusCode::isMatched( const std::string &path)
 {
     std::cout << path << std::endl;
     return (1);

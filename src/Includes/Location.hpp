@@ -18,7 +18,7 @@ class	Location : public GlobalModel
 		void	setPath(const String& Path);
 		const String&	getPath( void ) const;
 		const std::vector<Location>&	getInnerLocation( void ) const;
-
+		std::vector<Location>&	getInnerLocation( void );
 		static	void	printAllLocations(const std::vector<Location>&, String&);
 };
 
