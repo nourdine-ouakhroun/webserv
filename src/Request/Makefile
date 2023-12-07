@@ -2,6 +2,7 @@ NAME	=	webserv
 
 SRCS	=	main.cpp \
 			Request.cpp \
+			Response.cpp \
 			StatusCode.cpp \
 			Server.cpp \
 

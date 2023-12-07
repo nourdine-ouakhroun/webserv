@@ -2,11 +2,7 @@
 #ifndef REQUEST_HPP
 #define REQUEST_HPP
 
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include <unistd.h>
-#include <map>
+#include "StatusCode.hpp"
 
 
 typedef std::map<std::string, std::string> maps;
@@ -30,7 +26,10 @@ class Request
         void parseHeader( std::string reqHeader );
         void parseBody( std::string reqBody );
 
-        const std::string& header(const std::string &key);
+	    void parseRequest( std::string request );
+
+        const std::string& header(const std::string &key) ;
+        const std::string& body(const std::string &key) ;
         void parseUrl();
 
         const std::string &getMethod( void ) const;
@@ -38,15 +37,11 @@ class Request
         const std::string &getVersion( void ) const;
         const std::string &getPathname( void ) const;
         const std::string &getQuery( void ) const;
-
-
-
-
-	    void parseRequest( std::string request );
-
+        
+        const maps &getHeader( void ) const;
+        const maps &getBody( void ) const;
 };
 std::string	readRequest(int clientFd);
 std::vector<std::string> split(std::string line, std::string sep);
-
 
 #endif
