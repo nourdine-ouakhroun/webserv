@@ -61,49 +61,55 @@ std::string readRequist(FileDepandenc &file)
 
 	memset(req, 0, 2025);
 	bytes = recv(file.fdpoll.fd, req, 2024, 0);
-	if(bytes > 0 || !file.filtred.empty() || !file.rest.empty())
+	if(bytes > 0 || !file.filtred.empty())
 	{
-		// try
-		// {
-			std::string reqtmp(req, (size_t)bytes);
-		// }
-		// catch(const std::exception& e){}
-		
-		reqtmp.insert(0, file.rest);
+		std::string request;
+		if(bytes > 0)
+			request = std::string(req, (size_t)bytes);
+		request.insert(0, file.filtred);
 		if(file.requist.empty())
 		{
+			// std::cout << request << std::endl;
+
 			file.contenlenght = 0;
 			file.lenght = 0;
 			size_t pos;
-			pos = reqtmp.find("\r\n\r\n");
+			pos = request.find("\r\n\r\n");
 			if(pos == SIZE_T_MAX)
-				pos = reqtmp.size();
+				pos = request.size();
 			else
-				pos+=4;
-			file.filtred = reqtmp.substr(0 , pos);
-			file.rest = reqtmp.substr(pos);
-			file.requist = file.filtred;
-			pos = reqtmp.find("boundary=");
-			file.boundery = pos != SIZE_T_MAX ? reqtmp.substr(pos + 9, reqtmp.find("\r\n", pos + 9) - (pos + 9)) : "";
-			pos = reqtmp.find("Content-Length: ");
-			file.lenght = file.rest.size();
+				pos += 4;
+			file.requist = request.substr(0 , pos);
+			file.filtred = request.substr(pos);
+			pos = request.find("boundary=");
+			file.boundary = pos != SIZE_T_MAX ? request.substr(pos + 9, request.find("\r\n", pos + 9) - (pos + 9)) : "";
+			pos = request.find("Content-Length: ");
 			if(pos != SIZE_T_MAX)
 				file.contenlenght = (size_t)strtol(file.requist.substr(pos + 16, file.requist.find("\r\n", pos)).c_str(), NULL, 10);
+			file.lenght += file.filtred.size();
 		}
 		else
 		{
-
-			if(file.boundery.empty() == false)
+			// std::cout << "fddf" << std::endl;
+			file.filtred.clear();
+			size_t pos;
+			pos = request.find_last_of("\r\n");
+			// std::cout << pos << std::endl;
+			if(pos == SIZE_T_MAX)
+				pos = request.size();
+			else
+				pos++;
+			file.filtred = request.substr(0 , pos);
+			if(file.boundary.empty() == false)
 			{
 				size_t pos;
-				if(file.status == true && (pos = file.filtred.find(file.boundery)) != SIZE_T_MAX)
+				if(file.status == true && (pos = file.filtred.find(file.boundary)) != SIZE_T_MAX)
 				{
 					std::string tmpstrig(file.filtred.substr(0, file.filtred.find_last_of("\r\n",pos) - 1));
 					write(file.fd, tmpstrig.c_str(), tmpstrig.size());
 					file.status = false;
 					close(file.fd);
 					file.filtred.erase(0, file.filtred.find("\r\n\r\n", pos) + 4);
-					file.rest.insert(0, file.filtred.c_str(), file.filtred.size());
 					std::cout << "close" << std::endl;
 				}
 				else if((pos = file.filtred.find("filename=")) != SIZE_T_MAX || file.status == true)
@@ -111,30 +117,37 @@ std::string readRequist(FileDepandenc &file)
 					if(file.status == false)
 					{
 						std::cout << "open" << std::endl;
-						file.fd = open(file.filtred.substr(pos + 10, file.filtred.find("\r\n", pos) - (pos + 10) - 1).c_str(), O_CREAT | O_RDWR | O_APPEND , 0777);
-						std::string tmpstrig(file.filtred);
+						size_t end = file.filtred.find("\r\n", pos);
+						file.fd = open(file.filtred.substr(pos + 10, end - (pos + 10) - 1).c_str(), O_CREAT | O_RDWR | O_APPEND , 0777);
 						file.filtred.erase(0, file.filtred.find("\r\n\r\n", pos) + 4);
-						file.rest.insert(0, file.filtred.c_str(), file.filtred.size());
 						write(file.fd, file.filtred.c_str(), file.filtred.size());
 					}
 					else
+					{
 						write(file.fd, file.filtred.c_str(), file.filtred.size());
+						file.filtred.clear();
+					}
 					file.status = true;
 				}
+				else
+				{
+					file.requist.append(file.filtred);
+					file.filtred.clear();
+				}
 			}
-			size_t pos;
-			pos = reqtmp.find_last_of("\r\n");
-			if(pos == SIZE_T_MAX)
-				pos = reqtmp.size();
-			else
-				pos++;
-			file.filtred = reqtmp.substr(0 , pos);
-			file.rest = reqtmp.substr(pos);
+			file.filtred.append(request.substr(pos));
 			file.lenght += file.filtred.size();
+		
 		}
+
 	}
-	if(file.lenght != file.contenlenght || file.requist.empty())
+			// std::cout << file.lenght << " : "  << file.contenlenght << " : " << file.filtred.size() << std::endl;
+
+	// std::cout << file.lenght << file.contenlenght << file.requist.empty() << std::endl;
+	if(file.lenght != file.contenlenght || !file.filtred.empty() || file.requist.empty())
 		throw std::runtime_error("");
+	// std::cout << file.requist << std::endl;
+	
 	return "HTTP/1.1 200 OK\r\n\r\n <h1> hello </h1>";
 }
 void ManageServers::handler(std::vector<FileDepandenc> &working, std::vector<FileDepandenc> &master, size_t i)

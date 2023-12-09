@@ -6,7 +6,7 @@
 /*   By: nouakhro <nouakhro@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/29 19:51:28 by nouakhro          #+#    #+#             */
-/*   Updated: 2023/12/06 12:16:20 by nouakhro         ###   ########.fr       */
+/*   Updated: 2023/12/09 01:06:29 by nouakhro         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ public:
     std::string requist;
     std::string rest;
     std::string filtred;
-    std::string boundery;
+    std::string boundary;
     bool status;
     int fd;
     // std::string header;
