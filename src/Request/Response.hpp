@@ -9,6 +9,7 @@ class Response
 {
 private:
     std::string         response;
+    maps                mimeType;
     const std::string   ENDLINE;
 public:
     Response( void );
@@ -19,7 +20,9 @@ public:
     void    addBlankLine( void );
     void    addBody( std::string content);
 
-
+    void    setMimeType( void );
+    
+    std::string getMimeType( const std::string &key) const;
     const   std::string &getResponse() const;
     void    checkStatus( const StatusCode &statusCode );
 

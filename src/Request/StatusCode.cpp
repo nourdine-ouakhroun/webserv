@@ -1,4 +1,24 @@
 #include "StatusCode.hpp"
+#include "ManageServers.hpp"
+std::string readFile(int fd)
+{
+    std::string		request;
+	ssize_t			byte = 0;
+	size_t			readbyte = 1024;
+	char			buf[readbyte + 1];
+
+	while(1)
+	{
+		byte = read(fd, buf, readbyte);
+		if (byte <= 0)
+            break;
+		buf[byte] = 0;
+		request += buf;
+		if (byte < (ssize_t)readbyte)
+			break ;
+	}
+	return (request);
+}
 
 StatusCode::StatusCode( void ) : statusCode(200), version("HTTP/1.1"), msg("OK")
 {
@@ -32,7 +52,10 @@ const std::string &StatusCode::getMsg( void ) const
 {
     return (this->msg);
 }
-
+const std::string &StatusCode::getBody( void ) const
+{
+    return (this->body);
+}
 
 
 
@@ -64,6 +87,8 @@ bool     StatusCode::isAllowed(const std::string &url)
 
 bool StatusCode::isFormed(Request req)
 {
+    // std::cout << req.header("Transfer-Encoding") << std::endl;
+    // std::cout << req.getMethod() << std::endl;
     if ((!req.header("Transfer-Encoding").empty() && req.header("Transfer-Encoding") != "chunked") || !this->isAllowed(req.getPathname()))
     {
         this->statusCode = 501;
@@ -95,9 +120,49 @@ bool StatusCode::isFormed(Request req)
     return (1);
 }
 
-bool StatusCode::isMatched( const std::string &path)
+bool StatusCode::isMatched( const Request &req, std::vector<ServerModel> servers )
 {
-    std::cout << path << std::endl;
+    // std::cout << "here" << std::endl;
+
+    // std::cout << req.getHost() << "$"  << req.getPort() << std::endl;
+    // std::cout << req.getHost() << "$"  << req.getPort() << std::endl;
+    for (size_t server = 0; server < servers.size(); server++)
+    {
+        std::string fullPath;
+		std::string root;
+        std::vector<Data> data = servers[server].getLocationByPath(servers[server].getLocation(), req.getPathname()).getAllData();
+        for (size_t dataIndex = 0; dataIndex < data.size(); dataIndex++)
+        {
+           if (data[dataIndex].getKey() == "root")
+				root = data[dataIndex].getValue();
+			else if (data[dataIndex].getKey() == "alias")
+				root = data[dataIndex].getValue();
+			else if (data[dataIndex].getKey() == "index")
+			{
+				std::vector<std::string> value = split(data[dataIndex].getValue(), " ");
+				for (size_t k = 0; k < value.size(); k++)
+				{
+					fullPath = root + "/" + value[k];
+					std::cout << fullPath << std::endl;
+                    if (access(fullPath.c_str(), R_OK | F_OK) == 0)
+                    {
+                        int fd;
+                        if ((fd = open(fullPath.c_str(), O_RDONLY)) != -1)
+                        {
+                            std::string str = readFile(fd);
+                            this->body = str;
+                            return (1);
+                        }
+                    }
+				}
+			}
+            // std::cout << data[dataIndex].getKey() << "#" << data[dataIndex].getValue() << std::endl;
+        }
+        
+    }
+    // this->statusCode = 404;
+    // this->version = req.getVersion();
+    // this->msg = "Not Found";
     return (1);
 }
 
