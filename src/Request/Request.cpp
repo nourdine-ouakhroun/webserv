@@ -1,24 +1,4 @@
 #include "Request.hpp"
-
-std::string	readRequest(int clientFd)
-{
-	std::string	request;
-	int			byte = 0;
-	int			readbyte = 1;
-	char		buf[readbyte + 1];
-	while(1)
-	{
-		byte = read(clientFd, buf, readbyte);
-		if (byte <= 0)
-			break ;
-		buf[byte] = 0;
-		request += buf;
-		if (byte < readbyte)
-			break ;
-	}
-	return (request);
-}
-
 std::vector<std::string> split(std::string line, std::string sep)
 {
 	std::vector<std::string> sp;
@@ -36,7 +16,7 @@ std::vector<std::string> split(std::string line, std::string sep)
 	return (sp);
 }
 
-Request::Request( void )
+Request::Request( void ) : port(80)
 {
 }
 Request::~Request( void )
@@ -75,6 +55,7 @@ void    Request::parseRequest(std::string request)
 	}
 	this->parseHeader(headerReq);
 	this->parseBody(bodyReq);
+	this->parsePortAndHost();
 }
 
 void Request::parseRequestLine( std::string reqLine )
@@ -177,13 +158,23 @@ void Request::parseUrl()
     	this->pathname = this->url.substr(0, this->url.length());
 }
 
-const std::string &Request::header(const std::string &key)
+std::string Request::header(const std::string &key) const
 {
-	return (this->_header[key]);
+	for (maps::const_iterator it = this->_header.begin(); it != this->_header.end(); it++)
+	{
+		if (it->first == key)
+			return (it->second);
+	}
+	return ("");
 }
-const std::string &Request::body(const std::string &key)
+std::string Request::body(const std::string &key) const
 {
-	return (this->_body[key]);
+	for (maps::const_iterator it = this->_header.begin(); it != this->_header.end(); it++)
+	{
+		if (it->first == key)
+			return (it->second);
+	}
+	return ("");
 }
 
 const std::string &Request::getMethod() const
@@ -202,10 +193,28 @@ const std::string &Request::getPathname() const
 {
     return (this->pathname);
 }
+void	Request::parsePortAndHost( void )
+{
+	std::vector<std::string> s = split(this->header("Host"), ":");
+	if (!s.empty() && !s[0].empty() && !s[1].empty())
+	{
+		this->host = s[0];
+		this->port = std::atoi(s[1].c_str());
+	}
+}
+const std::string &Request::getHost( void ) const
+{
+	return (this->host);
+}
+const int         &Request::getPort( void ) const
+{
+	return (this->port);
+}
 const std::string &Request::getQuery() const
 {
     return (this->query);
 }
+
 
 const maps &Request::getHeader( void ) const
 {
@@ -216,3 +225,11 @@ const maps &Request::getBody( void ) const
 	return (this->_body);
 }
 
+std::string Request::extention( const std::string &path) const
+{
+	size_t pos = path.rfind(".");
+	std::string extention;
+	if (pos != std::string::npos)
+		extention = path.substr(pos, path.length());
+	return (extention);
+}

@@ -1,4 +1,28 @@
 #include"ManageServers.hpp"
+#include "../Request/Request.hpp"
+#include "../Request/Response.hpp"
+#include"FileDepandenc.hpp"
+// #include "../Request/StatusCode.hpp"
+
+std::string	readRequest(int clientFd)
+{
+	std::string		request;
+	ssize_t			byte = 0;
+	size_t			readbyte = 1024;
+	char			buf[readbyte + 1];
+
+	while(1)
+	{
+		byte = read(clientFd, buf, readbyte);
+		if (byte <= 0 && request.empty())
+			throw std::runtime_error("") ;
+		buf[byte] = 0;
+		request += buf;
+		if (byte < (ssize_t)readbyte)
+			break ;
+	}
+	return (request);
+}
 
 ManageServers::ManageServers(ServerData	srvers)
 {
@@ -52,98 +76,68 @@ void erase(std::vector<FileDepandenc> & struct_fdsS, size_t j)
 	struct_fdsS = returnFds;
 }
 
-std::string readRequist(FileDepandenc &file)
-{
-	/**
-	 * @attention chof rah 3ndk hadchi comantaih caml yak 
-	 * had function khdm fwst nha dakchi li knti dayr nta
-	 * ana khlini tanfini lik dik requist ok zwin ylh rah dinmk mongooooool mkhli liya session ma9lti liya chno ndir fiha wach nzid lik chi 7aja wach n9s lik chi7aja mongoooooooooooooool 
-	*/
-	ssize_t		bytes;
-	String	boundary;
-	bytes = 0;
-	char		req[2025];
+// std::string readRequist(FileDepandenc &file)
+// {
+// 	/**
+// 	 * @attention chof rah 3ndk hadchi comantaih caml yak 
+// 	 * had function khdm fwst nha dakchi li knti dayr nta
+// 	 * ana khlini tanfini lik dik requist ok zwin ylh rah dinmk mongooooool mkhli liya session ma9lti liya chno ndir fiha wach nzid lik chi 7aja wach n9s lik chi7aja mongoooooooooooooool 
+// 	*/
+// 	ssize_t		bytes;
+// 	String	boundary;
+// 	bytes = 0;
+// 	char		req[2025];
 
-	memset(req, 0, 2025);
-	bytes = recv(file.fdpoll.fd, req, 2024, 0);
-	if(bytes > 0 || !file.filtred.empty() || !file.rest.empty())
-	{
-		// try
-		// {
-			std::string reqtmp(req, (size_t)bytes);
-		// }
-		// catch(const std::exception& e){}
-		
-		reqtmp.insert(0, file.rest);
-		if(file.requist.empty())
-		{
-			file.contenlenght = 0;
-			file.lenght = 0;
-			size_t pos;
-			pos = reqtmp.find("\r\n\r\n");
-			if(pos == SIZE_T_MAX)
-				pos = reqtmp.size();
-			else
-				pos+=4;
-			file.filtred = reqtmp.substr(0 , pos);
-			file.rest = reqtmp.substr(pos);
-			file.requist = file.filtred;
-			pos = reqtmp.find("boundary=");
-			file.boundery = pos != SIZE_T_MAX ? reqtmp.substr(pos + 9, reqtmp.find("\r\n", pos + 9) - (pos + 9)) : "";
-			pos = reqtmp.find("Content-Length: ");
-			file.lenght = file.rest.size();
-			if(pos != SIZE_T_MAX)
-				file.contenlenght = (size_t)strtol(file.requist.substr(pos + 16, file.requist.find("\r\n", pos)).c_str(), NULL, 10);
-		}
-		else
-		{
+// 	memset(req, 0, 2025);
+// 	bytes = recv(file.fdpoll.fd, req, 2024, 0);
+// 	if(bytes <= 0)
+// 		throw std::runtime_error("");
+// 	return req;
+// 	std::cout << bytes << std::endl;
+// 	// try {
+// 	// 	Request request;
+// 	// 	request.parseRequest(req);
+// 	// 	std::cout << request.getPathname() << std::endl;
+// 	// 	std::cout << request.header("Host") << std::endl;
 
-			if(file.boundery.empty() == false)
-			{
-				size_t pos;
-				if(file.status == true && (pos = file.filtred.find(file.boundery)) != SIZE_T_MAX)
-				{
-					std::string tmpstrig(file.filtred.substr(0, file.filtred.find_last_of("\r\n",pos) - 1));
-					write(file.fd, tmpstrig.c_str(), tmpstrig.size());
-					file.status = false;
-					close(file.fd);
-					file.filtred.erase(0, file.filtred.find("\r\n\r\n", pos) + 4);
-					file.rest.insert(0, file.filtred.c_str(), file.filtred.size());
-					std::cout << "close" << std::endl;
-				}
-				else if((pos = file.filtred.find("filename=")) != SIZE_T_MAX || file.status == true)
-				{
-					if(file.status == false)
-					{
-						std::cout << "open" << std::endl;
-						file.fd = open(file.filtred.substr(pos + 10, file.filtred.find("\r\n", pos) - (pos + 10) - 1).c_str(), O_CREAT | O_RDWR | O_APPEND , 0777);
-						std::string tmpstrig(file.filtred);
-						file.filtred.erase(0, file.filtred.find("\r\n\r\n", pos) + 4);
-						file.rest.insert(0, file.filtred.c_str(), file.filtred.size());
-						write(file.fd, file.filtred.c_str(), file.filtred.size());
-					}
-					else
-						write(file.fd, file.filtred.c_str(), file.filtred.size());
-					file.status = true;
-				}
-			}
-			size_t pos;
-			pos = reqtmp.find_last_of("\r\n");
-			if(pos == SIZE_T_MAX)
-				pos = reqtmp.size();
-			else
-				pos++;
-			file.filtred = reqtmp.substr(0 , pos);
-			file.rest = reqtmp.substr(pos);
-			file.lenght += file.filtred.size();
-		}
-	}
-	if(file.lenght != file.contenlenght || file.requist.empty())
-		throw std::runtime_error("");
-	return "HTTP/1.1 200 OK\r\n\r\n <h1> hello </h1>";
-}
+// 	// 	StatusCode status;
+// 	// 	Response res;
+// 	// 	if(!status.isFormed(request))
+// 	// 	{
+// 	// 		res.addRequestLine(status.getVersion(), std::to_string(status.getStatusCode()), status.getMsg());
+// 	// 		res.addHeader("Server" , "webserv");
+// 	// 		res.addBlankLine();
+// 	// 		res.addBody(status.getMsg());
+// 	// 	}
+// 	// 	else
+// 	// 	{
+// 	// 		if (!status.isMatched(request.getPathname()))
+// 	// 		{
+				
+// 	// 		}
+
+// 	// 		res.addRequestLine(status.getVersion(), std::to_string(status.getStatusCode()), status.getMsg());
+// 	// 		res.addHeader("Server" , "webserv");
+// 	// 		res.addBlankLine();
+// 	// 		res.addBody(status.getMsg());
+// 	// 	}
+
+// 	// 	// std::string ResponseBody;
+// 	// 	// ResponseBody = readHtml("/Users/mzeroual/Desktop/webserv/src/Request/formulaire.html");
+// 	// 	// write(clientFd, res.getResponse().c_str(), res.getResponse().length());
+// 	// 	// close(clientFd);
+// 	// 	return res.getResponse();
+// 	// }
+// 	// catch(...)
+// 	// 	{
+// 	// 		std::cerr << "error here " << std::endl;
+// 	// 	}
+// 	return "HTTP/1.1 200 OK \r\n\r\nhello";
+// }
+
 void ManageServers::handler(std::vector<FileDepandenc> &working, std::vector<FileDepandenc> &master, size_t i)
 {
+	
 	if(working[i].fdpoll.revents & POLLIN || working[i].fdpoll.revents & POLLOUT)
 	{
 		for (size_t j = 0; j < fdSockets.size(); j++)
@@ -156,6 +150,7 @@ void ManageServers::handler(std::vector<FileDepandenc> &working, std::vector<Fil
 				/**
 				 * @attention check fcntl fhm chno katakhd mziaaaaan
 				*/
+
 				fcntl(newfd, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
 				FileDepandenc tmp;
 				pollfd fd;
@@ -166,15 +161,71 @@ void ManageServers::handler(std::vector<FileDepandenc> &working, std::vector<Fil
 				return;
 			}
 		}
+		// std::cout << working[i].fdpoll.fd << std::endl;
+		std::string request;
+		try
+		{
+			request = readRequest(working[i].fdpoll.fd);
+		}
+		catch(const std::exception )
+		{
+			return ;
+		}
+		Request req;
+
+
+		std::cout << request << std::endl;
+		req.parseRequest(request);
+		
+		
+
+
+		StatusCode status;
+		// status.
+		Response res;
+		
+		// if(!status.isFormed(req) || !status.isMatched(req, servers.getAllServers()))
+		if(!status.isMatched(req, servers.getAllServers()))
+		{
+			res.addRequestLine(status.getVersion(), std::to_string(status.getStatusCode()), status.getMsg());
+			res.addHeader("Server" , "webserv");
+			res.addBlankLine();
+			res.addBody(status.getMsg());
+		}
+		else
+		{
+			// std::cout << "here --" << std::endl;
+			// if ()
+			// {
+			// 	res.addRequestLine(status.getVersion(), std::to_string(status.getStatusCode()), status.getMsg());
+			// 	res.addHeader("Server" , "webserv");
+			// 	res.addBlankLine();
+			// 	res.addBody(status.getMsg());
+			// }
+
+			res.addRequestLine(status.getVersion(), std::to_string(status.getStatusCode()), status.getMsg());
+			res.addHeader("Server", "webserv");
+			std::cout << req.getPathname() << std::endl << std::flush;
+			std::cout << req.extention(req.getPathname()) << std::endl << std::flush;
+			std::cout << res.getMimeType(req.extention(req.getPathname())) << std::endl << std::flush;
+			std::string MIMEType = res.getMimeType(req.extention(req.getPathname()));
+			if (!MIMEType.empty())
+				res.addHeader("Content-Type", MIMEType);
+			// res.addHeader("Content-Length" , req.header(std::to_string(status.getBody().length()));
+			res.addBlankLine();
+			res.addBody(status.getBody());
+		}
+
+
 		std::string respond;
-		try{respond = readRequist(master[i]);}
-		catch(std::runtime_error){return ;};
-		write(working[i].fdpoll.fd, respond.c_str(), respond.size());
-		std::cout << "hiiiii" << std::endl;
+		// std::cout << res.getResponse() << std::endl;
+		write(working[i].fdpoll.fd, res.getResponse().c_str(), res.getResponse().size());
+		// std::cout << "hiiiii" << std::endl;
 		close(working[i].fdpoll.fd);
 		erase(master,i);
 	}
 }
+
 void ManageServers::acceptConection()
 {
 	std::vector<FileDepandenc> master;
