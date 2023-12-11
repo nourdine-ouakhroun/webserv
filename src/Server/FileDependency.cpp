@@ -1,4 +1,4 @@
-#include"FileDepandenc.hpp"
+#include"FileDepandency.hpp"
 
 
 FileDepandenc::FileDepandenc(/* args */)
@@ -6,6 +6,7 @@ FileDepandenc::FileDepandenc(/* args */)
     contenlenght = 0;
     lenght = 0;
     status = false;
+	int 		method = -1;
 }
 
 FileDepandenc::~FileDepandenc()
@@ -25,11 +26,20 @@ FileDepandenc::~FileDepandenc()
 // 	return status;
 // }
 
-// void FileDepandenc::setRequist(std::string requist) 
-// {
-// 	this->requist.append(requist);
-// }
-// void FileDepandenc::setStatus(const int &status)
-// {
-// 	this->status = status;
-// }
+void FileDepandenc::setRequist(std::string requist, size_t lenght) 
+{
+	this->requist.append(re);
+}
+void FileDepandenc::setFdPoll(int fd, short events)
+{
+	this->fdpoll.fd = fd;
+	this->fdpoll.events = events;
+}
+void FileDepandenc::setFdPoll(pollfd &poll_struct)
+{
+	this->fdpoll = poll_struct;
+}
+pollfd &FileDepandenc::getFdPoll() const 
+{
+    this->fdpoll;
+}
