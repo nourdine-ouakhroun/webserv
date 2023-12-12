@@ -13,9 +13,18 @@
 #ifndef MANAGESERVERS
 #define MANAGESERVERS
 #include"Server.hpp"
-#include"FileDepandency.hpp"
+#include"FileDependency.hpp"
 #include<poll.h>
 #include<fstream>
+
+#define NPOS  std::string::npos 
+#define GET 0
+#define POST 1
+#define DELET 2
+
+#ifndef READ_NUMBER
+#define READ_NUMBER 2025
+#endif
 typedef struct sockaddr_in S_address;
 class	ManageServers
 {
