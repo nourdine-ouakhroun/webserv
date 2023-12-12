@@ -21,7 +21,7 @@ SRCS	= src/Parser/Parser.cpp \
 		src/Request/main.cpp \
 		src/Request/Request.cpp \
 		src/Request/Response.cpp \
-		src/Request/StatusCode.cpp
+# 		src/Request/StatusCode.cpp
 #		src/Request/Server.cpp
 #		src/Utils/Select.cpp
 
