@@ -1,10 +1,7 @@
-
 #ifndef REQUEST_HPP
 #define REQUEST_HPP
 
-#include "StatusCode.hpp"
-
-
+#include "Response.hpp"
 typedef std::map<std::string, std::string> maps;
 
 class Request
@@ -14,8 +11,8 @@ class Request
         std::string url;
         std::string version;
         std::string pathname;
-        std::string host;
-        int         port;
+        //std::string host;
+        //int         port;
         std::string query;
         
         maps        _header;

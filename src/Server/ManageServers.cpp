@@ -1,7 +1,6 @@
-#include"ManageServers.hpp"
+#include "ManageServers.hpp"
 #include "../Request/Request.hpp"
-#include "../Request/Response.hpp"
-#include"FileDepandenc.hpp"
+#include "FileDepandenc.hpp"
 // #include "../Request/StatusCode.hpp"
 
 std::string	readRequest(int clientFd)
@@ -171,56 +170,67 @@ void ManageServers::handler(std::vector<FileDepandenc> &working, std::vector<Fil
 		{
 			return ;
 		}
+
+
 		Request req;
-
-
-		std::cout << request << std::endl;
+		// std::cout << request << std::endl;
 		req.parseRequest(request);
-		
-		
-
-
-		StatusCode status;
-		// status.
+		// std::cout << req.header("Accept").substr(0, req.header("Accept").find(",")) << std::endl;
+		// std::cout << req.header("User-Agent") << std::endl;
+		// std::cout << req.header("Connection") << std::endl;
 		Response res;
-		
-		// if(!status.isFormed(req) || !status.isMatched(req, servers.getAllServers()))
-		if(!status.isMatched(req, servers.getAllServers()))
-		{
-			res.addRequestLine(status.getVersion(), std::to_string(status.getStatusCode()), status.getMsg());
-			res.addHeader("Server" , "webserv");
-			res.addBlankLine();
-			res.addBody(status.getMsg());
-		}
+		res.setHeader("server", "dokoko");
+		res.setHeader("Content-Type", req.header("Accept").substr(0, req.header("Accept").find(",")));
+		std::cout << "pathname = " << req.getPathname() << std::endl;
+		if (req.getPathname() == "/")
+			res.setBody(readFile("/Users/mzeroual/Desktop/webserv/src/Request/webTestGetmethode/index.html"));
 		else
-		{
-			// std::cout << "here --" << std::endl;
-			// if ()
-			// {
-			// 	res.addRequestLine(status.getVersion(), std::to_string(status.getStatusCode()), status.getMsg());
-			// 	res.addHeader("Server" , "webserv");
-			// 	res.addBlankLine();
-			// 	res.addBody(status.getMsg());
-			// }
+			res.setBody(readFile("/Users/mzeroual/Desktop/webserv/src/Request/webTestGetmethode" + req.getPathname()));
+		// res.setHeader("Content-Length", std::to_string(res.getResponse().size()));
+		res.makeHeaderResponse();
+		res.makeBodyResponse();
+		std::cout << req.getQuery() << std::endl;
+		// std::cout << res.getResponse();
 
-			res.addRequestLine(status.getVersion(), std::to_string(status.getStatusCode()), status.getMsg());
-			res.addHeader("Server", "webserv");
-			std::cout << req.getPathname() << std::endl << std::flush;
-			std::cout << req.extention(req.getPathname()) << std::endl << std::flush;
-			std::cout << res.getMimeType(req.extention(req.getPathname())) << std::endl << std::flush;
-			std::string MIMEType = res.getMimeType(req.extention(req.getPathname()));
-			if (!MIMEType.empty())
-				res.addHeader("Content-Type", MIMEType);
-			// res.addHeader("Content-Length" , req.header(std::to_string(status.getBody().length()));
-			res.addBlankLine();
-			res.addBody(status.getBody());
-		}
+		// // status.
+		// Response res;
+		
+		// // if(!status.isFormed(req) || !status.isMatched(req, servers.getAllServers()))
+		// if(!status.isMatched(req, servers.getAllServers()))
+		// {
+		// 	res.addRequestLine(status.getVersion(), std::to_string(status.getStatusCode()), status.getMsg());
+		// 	res.addHeader("Server" , "webserv");
+		// 	res.addBlankLine();
+		// 	res.addBody(status.getMsg());
+		// }
+		// else
+		// {
+		// 	// std::cout << "here --" << std::endl;
+		// 	// if ()
+		// 	// {
+		// 	// 	res.addRequestLine(status.getVersion(), std::to_string(status.getStatusCode()), status.getMsg());
+		// 	// 	res.addHeader("Server" , "webserv");
+		// 	// 	res.addBlankLine();
+		// 	// 	res.addBody(status.getMsg());
+		// 	// }
+
+		// 	res.addRequestLine(status.getVersion(), std::to_string(status.getStatusCode()), status.getMsg());
+		// 	res.addHeader("Server", "webserv");
+		// 	std::cout << req.getPathname() << std::endl << std::flush;
+		// 	std::cout << req.extention(req.getPathname()) << std::endl << std::flush;
+		// 	std::cout << res.getMimeType(req.extention(req.getPathname())) << std::endl << std::flush;
+		// 	std::string MIMEType = res.getMimeType(req.extention(req.getPathname()));
+		// 	if (!MIMEType.empty())
+		// 		res.addHeader("Content-Type", MIMEType);
+		// 	// res.addHeader("Content-Length" , req.header(std::to_string(status.getBody().length()));
+		// 	res.addBlankLine();
+		// 	res.addBody(status.getBody());
+		// }
 
 
-		std::string respond;
-		// std::cout << res.getResponse() << std::endl;
-		write(working[i].fdpoll.fd, res.getResponse().c_str(), res.getResponse().size());
-		// std::cout << "hiiiii" << std::endl;
+		// std::string respond;
+		// respond = "HTTP/1.1 200 OK\r\n\r\nOK";
+		std::cout << write(working[i].fdpoll.fd, res.getResponse().c_str(), res.getResponse().size()) << " | " << res.getResponse().size() << std::endl;
 		close(working[i].fdpoll.fd);
 		erase(master,i);
 	}

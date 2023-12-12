@@ -1,4 +1,5 @@
 #include "Request.hpp"
+
 std::vector<std::string> split(std::string line, std::string sep)
 {
 	std::vector<std::string> sp;
@@ -16,7 +17,7 @@ std::vector<std::string> split(std::string line, std::string sep)
 	return (sp);
 }
 
-Request::Request( void ) : port(80)
+Request::Request( void )
 {
 }
 Request::~Request( void )
@@ -32,13 +33,13 @@ void    Request::parseRequest(std::string request)
 	size_t headerPos = request.find("\r\n\r\n");
 	if (headerPos != std::string::npos)
 	{
-		size_t i = 0;
 		size_t start = request.find("\r\n");
 		if (start != std::string::npos)
 		{
 			std::string line = request.substr(0, start);
 				this->parseRequestLine(line);
 		}
+		size_t i = 0;
 		while (i < headerPos)
 		{
 			if (request[i] != '\r')
@@ -55,7 +56,7 @@ void    Request::parseRequest(std::string request)
 	}
 	this->parseHeader(headerReq);
 	this->parseBody(bodyReq);
-	this->parsePortAndHost();
+	// this->parsePortAndHost();
 }
 
 void Request::parseRequestLine( std::string reqLine )
@@ -193,6 +194,7 @@ const std::string &Request::getPathname() const
 {
     return (this->pathname);
 }
+/*
 void	Request::parsePortAndHost( void )
 {
 	std::vector<std::string> s = split(this->header("Host"), ":");
@@ -210,6 +212,7 @@ const int         &Request::getPort( void ) const
 {
 	return (this->port);
 }
+*/
 const std::string &Request::getQuery() const
 {
     return (this->query);
