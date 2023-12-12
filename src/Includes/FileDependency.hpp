@@ -18,7 +18,7 @@ class   FileDependency
 {
 private:
 
-	std::string	requist;
+	std::string	request;
 	std::string	boundary;
 	size_t		lenght;
 	size_t		contenlenght;
@@ -28,13 +28,26 @@ private:
 
 public:
 
-	void setFdPoll(int fd, short events);
-	void setRequist(std::string requist, size_t lenght);
-	void setFdPoll(pollfd &poll_struct);
-	pollfd &getFdPoll() const;
 	FileDependency();
 	~FileDependency();
 
+	void			setFdPoll(const pollfd &);
+	void			setFdPoll(const int &, const short &);
+	void			setRequist(const std::string &, const size_t &);
+	void 			setMethod(const int &);
+	void			setLenght(const size_t &);
+	void			setContenlenght(const size_t &);
+	void			setBoundary(const std::string	&);
+	void			setFd(const int &);
+
+	const std::string&	getRequist() const;
+	const std::string&	getBoundary() const;
+	const pollfd&		getFdPoll() const;
+	const size_t &		getLenght() const;
+	const size_t &		getContenlenght() const;
+	const int &			getMethod() const;
+	const int &			getFd() const;
+	
 	std::string	rest;
 };
 

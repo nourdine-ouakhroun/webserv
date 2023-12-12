@@ -1,45 +1,96 @@
-#include"FileDepandency.hpp"
+#include"FileDependency.hpp"
 
 
-FileDepandenc::FileDepandenc(/* args */)
+FileDependency::FileDependency(/* args */)
 {
     contenlenght = 0;
     lenght = 0;
-    status = false;
-	int 		method = -1;
+	method = -1;
 }
 
-FileDepandenc::~FileDepandenc()
+FileDependency::~FileDependency()
 {
 }
-// void FileDepandenc::eraseRequist(size_t _n, size_t linght)
+// void FileDependency::eraseRequist(size_t _n, size_t linght)
 // {
 // 	this->requist.erase(_n, linght);
 // }
 
-// const std::string &FileDepandenc::getRequist() const 
+// const std::string &FileDependency::getRequist() const 
 // {
 // 	return requist;
 // }
-// const int &FileDepandenc::getStatus() const
+// const int &FileDependency::getStatus() const
 // {
 // 	return status;
 // }
-
-void FileDepandenc::setRequist(std::string requist, size_t lenght) 
+const int &			FileDependency::getMethod() const
 {
-	this->requist.append(re);
+	return this->method;
 }
-void FileDepandenc::setFdPoll(int fd, short events)
+void 			FileDependency::setMethod(const int & method)
+{
+	this->method = method;
+}
+
+const std::string & FileDependency::getRequist() const
+{
+	return this->request;
+}
+
+void FileDependency::setRequist(const std::string& request,const size_t& lenght) 
+{
+	this->request.append(request, this->request.size(), lenght);
+}
+
+void FileDependency::setFdPoll(const int &fd, const short & events)
 {
 	this->fdpoll.fd = fd;
 	this->fdpoll.events = events;
 }
-void FileDepandenc::setFdPoll(pollfd &poll_struct)
+
+void FileDependency::setFdPoll(const pollfd &poll_struct)
 {
 	this->fdpoll = poll_struct;
 }
-pollfd &FileDepandenc::getFdPoll() const 
+
+const pollfd &FileDependency::getFdPoll() const
 {
-    this->fdpoll;
+    return this->fdpoll;
+}
+
+const std::string &FileDependency::getBoundary() const
+{
+	return this->boundary;
+}
+const size_t& FileDependency::getContenlenght() const
+{
+	return this->contenlenght;
+}
+const size_t & FileDependency::getLenght() const
+{
+	return this->lenght;
+}
+
+void FileDependency::setLenght(const size_t & lenght)
+{
+	this->lenght = lenght;
+}
+void FileDependency::setContenlenght(const size_t & contenlenght)
+{
+	this->contenlenght = contenlenght;
+}
+void FileDependency::setBoundary(const std::string &	boundary)
+{
+	this->boundary = boundary;
+}
+
+const int	&FileDependency::getFd() const
+{
+	return this->fd;
+}
+
+void		FileDependency::setFd(const int &fd)
+{
+	this->fd = fd;
 }
