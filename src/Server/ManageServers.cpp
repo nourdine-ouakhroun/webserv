@@ -100,6 +100,100 @@ void setOnlyHeadre(FileDependency &file, std::string request)
 		}
 	}
 }
+void putInString(FileDependency &file)
+{
+	size_t	begin;
+
+	if((begin = file.rest.find(file.getBoundary())) != NPOS)
+	{
+		size_t	end = file.rest.find_last_of("\r\n", begin) + 1;
+		file.setRequist(file.rest.substr(0, end));
+		file.setLenght(end);
+		file.rest.erase(0, end);
+		file.status = DEFAULT;
+	}
+	throw std::runtime_error("");
+}
+void putInFile(FileDependency &file)
+{
+	size_t	begin;
+
+	if((begin = file.rest.find(file.getBoundary())) != NPOS)
+	{
+		size_t	end = file.rest.find_last_of("\r\n", begin);
+		if(end == NPOS)
+			end = 0;
+		else
+			end -= 1 ;
+		file.setLenght(end);
+		write(file.getFd(), file.rest.substr(0, end).c_str(), file.rest.substr(0, end).size());
+		close(file.getFd());
+		file.rest.erase(0, end);
+		file.status = DEFAULT;
+		throw std::runtime_error("");
+	}
+	size_t	end = file.rest.find_last_of("\r\n") + 1;
+	write(file.getFd(), file.rest.substr(0, end).c_str(), file.rest.substr(0, end).size());
+	file.setLenght(end);
+	file.rest.erase(0, end);
+	throw std::runtime_error("");
+}
+
+void checkIfFile(FileDependency &file, size_t	&begin)
+{
+
+	begin = file.rest.find_last_of("\r\n", begin);
+	if(begin == NPOS)
+		begin = 0;
+	else
+		begin += 2;
+	size_t	end = file.rest.find("\r\n\r\n", begin);
+	if(end == NPOS)
+		throw std::runtime_error("");
+	std::string tmp_string(file.rest.substr(begin,  (end + 4) - begin));
+	file.rest.erase(begin, (end + 4) - begin);
+	file.setLenght(((end + 4) - begin));
+	size_t	pos = tmp_string.find("filename=\"", begin);
+	if(pos != NPOS)
+	{
+		std::string filename(tmp_string.substr(pos + 10, tmp_string.find("\"", pos + 10) - (pos + 10)));
+		int	fd = open(filename.c_str(), O_CREAT | O_RDWR | O_APPEND, 0777);
+		file.setFd(fd);
+		file.status = PUTINFILE;
+		throw std::runtime_error("");
+	}
+	file.status = PUTINSTRING;
+	file.setRequist(tmp_string);
+	throw std::runtime_error("");
+}
+
+void removePartOfupload(FileDependency &file, std::string &request)
+{
+	size_t		begin;
+
+	if(file.getBoundary().empty() == false)
+	{
+		file.rest = request;
+		if(file.status == PUTINSTRING)
+			putInString(file);
+		if(file.status == PUTINFILE)
+			putInFile(file);
+		if(file.rest.find("--" + file.getBoundary() + "--") != NPOS)
+		{
+			file.setLenght(file.rest.size());
+			file.setRequist(file.rest);
+			file.rest.erase(0, file.rest.size());
+			throw std::runtime_error("");
+		}
+		if(file.status == DEFAULT && (begin = file.rest.find(file.getBoundary()) != NPOS))
+			checkIfFile(file, begin);
+	}
+	else
+	{
+		file.setRequist(request);
+		file.setLenght(request.size());
+	}
+}
 
 std::string readRequist(FileDependency &file)
 {
@@ -117,90 +211,12 @@ std::string readRequist(FileDependency &file)
 			bytes = 0;
 		std::string request (buffer, (size_t)bytes);
 		request.insert(0, file.rest);
-
 		if(file.getMethod() == -1)
 			methodSerch(file, request);
 		else if(file.getRequist().empty() == true)
 			setOnlyHeadre(file, request);
 		else if(file.getMethod() == POST)
-		{
-
-			if(file.getBoundary().empty() == false)
-			{
-				// std::cout << request << std::endl;
-				// exit(1);
-				file.rest = request;
-				size_t begin;
-				if(file.status == PUTINSTRING)
-				{
-					if((begin = file.rest.find(file.getBoundary())) != NPOS)
-					{
-						size_t	end = file.rest.find_last_of("\r\n", begin) + 1;
-						file.setRequist(file.rest.substr(0, end));
-						file.setLenght(end);
-						file.rest.erase(0, end);
-						file.status = DEFAULT;
-					}
-					throw std::runtime_error("");
-				}
-				if(file.status == PUTINFILE)
-				{
-					if((begin = file.rest.find(file.getBoundary())) != NPOS)
-					{
-						size_t	end = file.rest.find_last_of("\r\n", begin);
-						if(end == NPOS)
-							end = 0;
-						else
-							end -= 1 ;
-						file.setLenght(end);
-						write(file.getFd(), file.rest.substr(0, end).c_str(), file.rest.substr(0, end).size());
-						close(file.getFd());
-						file.rest.erase(0, end);
-						file.status = DEFAULT;
-						throw std::runtime_error("");
-					}
-					size_t	end = file.rest.find_last_of("\r\n") + 1;
-					write(file.getFd(), file.rest.substr(0, end).c_str(), file.rest.substr(0, end).size());
-					file.setLenght(end);
-					file.rest.erase(0, end);
-					throw std::runtime_error("");
-				}
-				if(file.rest.find("--" + file.getBoundary() + "--") != NPOS)
-				{
-					file.setLenght(file.rest.size());
-					file.setRequist(file.rest);
-					file.rest.erase(0, file.rest.size());
-					throw std::runtime_error("");
-				}
-				if(file.status == DEFAULT && (begin = file.rest.find(file.getBoundary()) != NPOS))
-				{
-					begin = file.rest.find_last_of("\r\n", begin);
-					if(begin == NPOS)
-						begin = 0;
-					else
-						begin += 2;
-					size_t	end = file.rest.find("\r\n\r\n", begin);
-					if(end == NPOS)
-						throw std::runtime_error("");
-					std::string tmp_string(file.rest.substr(begin,  (end + 4) - begin));
-					file.rest.erase(begin, (end + 4) - begin);
-					file.setLenght(((end + 4) - begin));
-					size_t	pos = tmp_string.find("filename=\"", begin);
-					if(pos != NPOS)
-					{
-						std::string filename(tmp_string.substr(pos + 10, tmp_string.find("\"", pos + 10) - (pos + 10)));
-						int	fd = open(filename.c_str(), O_CREAT | O_RDWR | O_APPEND, 0777);
-						file.setFd(fd);
-						file.status = PUTINFILE;
-						throw std::runtime_error("");
-					}
-					file.status = PUTINSTRING;
-					file.setRequist(tmp_string);
-					// file.setRequist(tmp_string, tmp_string.size());
-					throw std::runtime_error("");
-				}
-			}
-		}
+			removePartOfupload(file, request);
 	}
 	if(file.getLenght() != file.getContenlenght() || !file.rest.empty() || file.getRequist().empty())
 		throw std::runtime_error("");
