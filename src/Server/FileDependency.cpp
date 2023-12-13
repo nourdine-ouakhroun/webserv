@@ -6,6 +6,7 @@ FileDependency::FileDependency(/* args */)
     contenlenght = 0;
     lenght = 0;
 	method = -1;
+	status = 0;
 }
 
 FileDependency::~FileDependency()
@@ -38,11 +39,14 @@ const std::string & FileDependency::getRequist() const
 	return this->request;
 }
 
-void FileDependency::setRequist(const std::string& request,const size_t& lenght) 
+// void FileDependency::setRequist(const std::string& request,const size_t& lenght) 
+// {
+// 	this->request.append(request, this->request.size(), lenght);
+// }
+void FileDependency::setRequist(const std::string& request) 
 {
-	this->request.append(request, this->request.size(), lenght);
+	this->request.append(request);
 }
-
 void FileDependency::setFdPoll(const int &fd, const short & events)
 {
 	this->fdpoll.fd = fd;
@@ -74,7 +78,7 @@ const size_t & FileDependency::getLenght() const
 
 void FileDependency::setLenght(const size_t & lenght)
 {
-	this->lenght = lenght;
+	this->lenght += lenght;
 }
 void FileDependency::setContenlenght(const size_t & contenlenght)
 {
