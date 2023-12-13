@@ -14,6 +14,11 @@
 #define FILEDEPANDENCY_HPP
 #include<iostream>
 #include<poll.h>
+
+#define PUTINFILE 1
+#define DEFAULT 0
+#define PUTINSTRING 2
+
 class   FileDependency
 {
 private:
@@ -33,7 +38,8 @@ public:
 
 	void			setFdPoll(const pollfd &);
 	void			setFdPoll(const int &, const short &);
-	void			setRequist(const std::string &, const size_t &);
+	// void			setRequist(const std::string &, const size_t &);
+	void			setRequist(const std::string &);
 	void 			setMethod(const int &);
 	void			setLenght(const size_t &);
 	void			setContenlenght(const size_t &);
@@ -48,6 +54,7 @@ public:
 	const int &			getMethod() const;
 	const int &			getFd() const;
 	
+	int			status;
 	std::string	rest;
 };
 
