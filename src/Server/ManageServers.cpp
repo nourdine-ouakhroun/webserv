@@ -138,7 +138,6 @@ std::string readRequist(FileDependency &file)
 						file.rest.erase(0, end);
 						file.status = DEFAULT;
 					}
-
 					throw std::runtime_error("");
 				}
 				if(file.status == PUTINFILE)
@@ -149,7 +148,7 @@ std::string readRequist(FileDependency &file)
 						if(end == NPOS)
 							end = 0;
 						else
-							end += 1;
+							end -= 1 ;
 						file.setLenght(end);
 						write(file.getFd(), file.rest.substr(0, end).c_str(), file.rest.substr(0, end).size());
 						close(file.getFd());
@@ -163,17 +162,24 @@ std::string readRequist(FileDependency &file)
 					file.rest.erase(0, end);
 					throw std::runtime_error("");
 				}
-				if(file.status == DEFAULT && (begin = request.find(file.getBoundary()) != NPOS))
+				if(file.rest.find("--" + file.getBoundary() + "--") != NPOS)
 				{
-					begin = request.find_last_of("\r\n", begin);
+					file.setLenght(file.rest.size());
+					file.setRequist(file.rest);
+					file.rest.erase(0, file.rest.size());
+					throw std::runtime_error("");
+				}
+				if(file.status == DEFAULT && (begin = file.rest.find(file.getBoundary()) != NPOS))
+				{
+					begin = file.rest.find_last_of("\r\n", begin);
 					if(begin == NPOS)
 						begin = 0;
 					else
 						begin += 2;
-					size_t	end = request.find("\r\n\r\n", begin);
+					size_t	end = file.rest.find("\r\n\r\n", begin);
 					if(end == NPOS)
 						throw std::runtime_error("");
-					std::string tmp_string(request.substr(begin,  (end + 4) - begin));
+					std::string tmp_string(file.rest.substr(begin,  (end + 4) - begin));
 					file.rest.erase(begin, (end + 4) - begin);
 					file.setLenght(((end + 4) - begin));
 					size_t	pos = tmp_string.find("filename=\"", begin);
@@ -193,10 +199,10 @@ std::string readRequist(FileDependency &file)
 			}
 		}
 	}
-
+	// std::cout << file.getLenght() << " : " << file.getContenlenght() << std::endl;
 	if(file.getLenght() != file.getContenlenght() || !file.rest.empty() || file.getRequist().empty())
 		throw std::runtime_error("");
-
+	std::cout << file.getRequist() << std::endl;
 	return "HTTP/1.1 200 OK\r\n\r\n <h1> hello </h1>";
 }
 void ManageServers::handler(std::vector<FileDependency> &working, std::vector<FileDependency> &master, size_t i)
