@@ -124,8 +124,11 @@ std::string readRequist(FileDependency &file)
 			setOnlyHeadre(file, request);
 		else if(file.getMethod() == POST)
 		{
+
 			if(file.getBoundary().empty() == false)
 			{
+				// std::cout << request << std::endl;
+				// exit(1);
 				file.rest = request;
 				size_t begin;
 				if(file.status == PUTINSTRING)
@@ -186,7 +189,7 @@ std::string readRequist(FileDependency &file)
 					if(pos != NPOS)
 					{
 						std::string filename(tmp_string.substr(pos + 10, tmp_string.find("\"", pos + 10) - (pos + 10)));
-						int	fd = open(filename.append("_test").c_str(), O_CREAT | O_RDWR | O_APPEND, 0777);
+						int	fd = open(filename.c_str(), O_CREAT | O_RDWR | O_APPEND, 0777);
 						file.setFd(fd);
 						file.status = PUTINFILE;
 						throw std::runtime_error("");
@@ -199,7 +202,6 @@ std::string readRequist(FileDependency &file)
 			}
 		}
 	}
-	// std::cout << file.getLenght() << " : " << file.getContenlenght() << std::endl;
 	if(file.getLenght() != file.getContenlenght() || !file.rest.empty() || file.getRequist().empty())
 		throw std::runtime_error("");
 	std::cout << file.getRequist() << std::endl;
