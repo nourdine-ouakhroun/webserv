@@ -33,7 +33,14 @@ void 			FileDependency::setMethod(const int & method)
 {
 	this->method = method;
 }
-
+void			FileDependency::setFileName(const std::string &filename)
+{
+	this->filename = filename;
+}
+const std::string&	FileDependency::getFileName() const
+{
+	return filename;
+}
 const std::string & FileDependency::getRequist() const
 {
 	return this->request;
@@ -52,13 +59,16 @@ void FileDependency::setFdPoll(const int &fd, const short & events)
 	this->fdpoll.fd = fd;
 	this->fdpoll.events = events;
 }
-
+void FileDependency::setFdPoll(const short & events)
+{
+	this->fdpoll.events = events;
+}
 void FileDependency::setFdPoll(const pollfd &poll_struct)
 {
 	this->fdpoll = poll_struct;
 }
 
-const pollfd &FileDependency::getFdPoll() const
+pollfd &FileDependency::getFdPoll()
 {
     return this->fdpoll;
 }

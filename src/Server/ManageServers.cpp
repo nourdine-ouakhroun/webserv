@@ -57,6 +57,9 @@ int headerMethod(String line)
 	if(line.empty() == true)
 		throw std::runtime_error("");
 	std::vector<String> splited = line.split();
+	/**
+	 * @todo protection
+	*/
 	if(splited[0] == "GET")
 		return 0;
 	if(splited[0] == "POST")
@@ -69,21 +72,21 @@ int headerMethod(String line)
 
 void methodSerch(FileDependency &file, std::string request)
 {
-	file.rest = request;
 	size_t pos = request.find("\r\n");
 	if(pos != NPOS)
+	{
 		file.setMethod(headerMethod(request.substr(0, pos)));
+		return;
+	}
 	throw std::runtime_error("");
 }
 
 void setOnlyHeadre(FileDependency &file, std::string request)
 {
-	file.rest = request;
 	size_t	pos = request.find("\r\n\r\n");
 	if(pos == NPOS)
 		throw std::runtime_error("");
 	file.setRequist(request.substr(0, pos + 4));
-	// file.setRequist(request.substr(0, pos + 4), pos + 4);
 	file.rest = request.substr(pos + 4);
 	if(file.getMethod() == POST)
 	{
@@ -96,6 +99,7 @@ void setOnlyHeadre(FileDependency &file, std::string request)
 		if(pos != NPOS)
 		{
 			std::string boundary = file.getRequist().substr(pos + 9, file.getRequist().find("\r\n", pos) - (pos + 9));
+			boundary.insert(0, "--");
 			file.setBoundary(boundary);
 		}
 	}
@@ -106,86 +110,114 @@ void putInString(FileDependency &file)
 
 	if((begin = file.rest.find(file.getBoundary())) != NPOS)
 	{
-		size_t	end = file.rest.find_last_of("\r\n", begin) + 1;
+		size_t	end = file.rest.find_last_of("\r\n", begin);
+		if(end == NPOS)
+			end = 0;
+		else
+			end--;
+		std::cout << "***********" << file.rest.substr(0, end) << "*********" << std::endl;
 		file.setRequist(file.rest.substr(0, end));
 		file.setLenght(end);
 		file.rest.erase(0, end);
 		file.status = DEFAULT;
+		return ;
 	}
-	throw std::runtime_error("");
+	size_t	end = file.rest.find_last_of("\r\n", file.rest.size());
+	std::cout << "***********" << end << file.rest.size() << "*********" << std::endl;
+	std::cout << "***********" << (int)file.rest[end] << "*********" << std::endl;
+	if(end == NPOS)
+		end = 0;
+	else
+		end--;
+	for (size_t i = 0; i < file.rest.size(); i++)
+	{
+		std::cout << "**" << (int)file.rest[i] << "**" << std::endl;
+	}
+	
+	exit(1);
+	file.setRequist(file.rest.substr(0, end));
+	file.setLenght(end);
+	file.rest.erase(0, end);
 }
 void putInFile(FileDependency &file)
 {
+	// std::cout << "{" << file.rest << "}" << std::endl;
+	// exit(1);
 	size_t	begin;
-
 	if((begin = file.rest.find(file.getBoundary())) != NPOS)
 	{
 		size_t	end = file.rest.find_last_of("\r\n", begin);
 		if(end == NPOS)
 			end = 0;
 		else
-			end -= 1 ;
+			end--;
 		file.setLenght(end);
 		write(file.getFd(), file.rest.substr(0, end).c_str(), file.rest.substr(0, end).size());
 		close(file.getFd());
 		file.rest.erase(0, end);
 		file.status = DEFAULT;
-		throw std::runtime_error("");
+		return;
 	}
-	size_t	end = file.rest.find_last_of("\r\n") + 1;
+	size_t	end = file.rest.find_last_of("\r\n");
+	if(end == NPOS)
+		end = 0;
+	else
+		end--;
 	write(file.getFd(), file.rest.substr(0, end).c_str(), file.rest.substr(0, end).size());
 	file.setLenght(end);
 	file.rest.erase(0, end);
-	throw std::runtime_error("");
+	return;
 }
 
 void checkIfFile(FileDependency &file, size_t	&begin)
 {
-
+	std::cout << file.getRequist() << std::endl;
 	begin = file.rest.find_last_of("\r\n", begin);
 	if(begin == NPOS)
 		begin = 0;
 	else
-		begin += 2;
-	size_t	end = file.rest.find("\r\n\r\n", begin);
+		begin--;
+	size_t	end = file.rest.find("\r\n\r\n", begin + 4);
 	if(end == NPOS)
-		throw std::runtime_error("");
-	std::string tmp_string(file.rest.substr(begin,  (end + 4) - begin));
-	file.rest.erase(begin, (end + 4) - begin);
-	file.setLenght(((end + 4) - begin));
+		end = file.rest.size();
+	else
+		end += 4;
+	std::string tmp_string(file.rest.substr(begin,  end  - begin));
+	file.rest.erase(begin, end  - begin);
+	file.setLenght((end  - begin));
 	size_t	pos = tmp_string.find("filename=\"", begin);
 	if(pos != NPOS)
 	{
 		std::string filename(tmp_string.substr(pos + 10, tmp_string.find("\"", pos + 10) - (pos + 10)));
+		file.setFileName(filename);
 		int	fd = open(filename.c_str(), O_CREAT | O_RDWR | O_APPEND, 0777);
 		file.setFd(fd);
 		file.status = PUTINFILE;
-		throw std::runtime_error("");
+		return ;
+	}
+	file.setRequist(tmp_string);
+	if(file.getRequist().find(file.getBoundary() + "--") != NPOS)
+	{
+		exit(1);
+		file.setLenght(file.rest.size());
+		file.setRequist(file.rest);
+		file.rest.erase(0, file.rest.size());
+		return;
 	}
 	file.status = PUTINSTRING;
-	file.setRequist(tmp_string);
-	throw std::runtime_error("");
+	return;
 }
 
 void removePartOfupload(FileDependency &file, std::string &request)
 {
-	size_t		begin;
-
+	size_t	begin;
 	if(file.getBoundary().empty() == false)
 	{
-		file.rest = request;
 		if(file.status == PUTINSTRING)
 			putInString(file);
-		if(file.status == PUTINFILE)
+		else if(file.status == PUTINFILE)
 			putInFile(file);
-		if(file.rest.find("--" + file.getBoundary() + "--") != NPOS)
-		{
-			file.setLenght(file.rest.size());
-			file.setRequist(file.rest);
-			file.rest.erase(0, file.rest.size());
-			throw std::runtime_error("");
-		}
-		if(file.status == DEFAULT && (begin = file.rest.find(file.getBoundary()) != NPOS))
+		else if(file.status == DEFAULT && (begin = file.rest.find(file.getBoundary()) != NPOS))
 			checkIfFile(file, begin);
 	}
 	else
@@ -195,7 +227,7 @@ void removePartOfupload(FileDependency &file, std::string &request)
 	}
 }
 
-std::string readRequist(FileDependency &file)
+void	readRequist(FileDependency &file)
 {
 	ssize_t		bytes;
 	String		boundary;
@@ -204,24 +236,36 @@ std::string readRequist(FileDependency &file)
 	bytes = 0;
 	memset(buffer, 0, READ_NUMBER);
 	bytes = recv(file.getFdPoll().fd, buffer, READ_NUMBER - 1, 0);
-
-	if(bytes > 0 || file.rest.empty() == false)
+	if(bytes == 0 && file.status == PUTINFILE)
+	{
+		file.setContenlenght(file.getLenght());
+		file.rest.clear();
+	}
+	else if(bytes > 0)
 	{
 		if(bytes < 0)
 			bytes = 0;
 		std::string request (buffer, (size_t)bytes);
-		request.insert(0, file.rest);
-		if(file.getMethod() == -1)
-			methodSerch(file, request);
-		else if(file.getRequist().empty() == true)
-			setOnlyHeadre(file, request);
-		else if(file.getMethod() == POST)
-			removePartOfupload(file, request);
+		// std::cout << "[" << request << "]" << std::endl;
+		file.rest = request;
+		while (!file.rest.empty())
+		{
+			if(file.getMethod() == -1)
+				methodSerch(file, request);
+			else if(file.getRequist().empty() == true)
+				setOnlyHeadre(file, request);
+			else if(file.getMethod() == POST)
+				removePartOfupload(file, request);		
+		}
+		// std::cout << file.getRequist() << std::endl;
+		// exit(1);
+		
 	}
+
 	if(file.getLenght() != file.getContenlenght() || !file.rest.empty() || file.getRequist().empty())
 		throw std::runtime_error("");
 	std::cout << file.getRequist() << std::endl;
-	return "HTTP/1.1 200 OK\r\n\r\n <h1> hello </h1>";
+	return ;
 }
 void ManageServers::handler(std::vector<FileDependency> &working, std::vector<FileDependency> &master, size_t i)
 {
@@ -237,18 +281,18 @@ void ManageServers::handler(std::vector<FileDependency> &working, std::vector<Fi
 			*/
 			fcntl(newfd, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
 			FileDependency tmp;
-			tmp.setFdPoll(newfd, POLLOUT | POLL_IN);
+			tmp.setFdPoll(newfd, POLLIN);
 			master.push_back(tmp);
 			return;
 		}
 	}
-	std::string respond;
-	try{respond = readRequist(master[i]);}
-	catch(std::runtime_error){return ;};
-	write(working[i].getFdPoll().fd, respond.c_str(), respond.size());
-	std::cout << "hiiiii" << std::endl;
-	close(working[i].getFdPoll().fd);
-	erase(master,i);
+	std::cout << "test : " << master[i].getFdPoll().fd << std::endl;
+	try{readRequist(master[i]);}
+	catch(std::runtime_error){ return ;};
+	std::cout << master[i].getRequist() << std::endl;
+	master[i].respond = "HTTP/1.1 200 OK\r\n\r\n <h1> hello </h1>";
+	master[i].setFdPoll(POLLOUT);
+
 }
 void ManageServers::acceptConection()
 {
@@ -256,7 +300,7 @@ void ManageServers::acceptConection()
 	for (size_t i = 0; i < fdSockets.size(); i++)
 	{
 		FileDependency tmp;
-		tmp.setFdPoll(fdSockets[i], POLL_IN);
+		tmp.setFdPoll(fdSockets[i], POLLIN);
 		master.push_back(tmp);
 	}
 	while (true)
@@ -277,13 +321,22 @@ void ManageServers::acceptConection()
 			throw std::runtime_error("poll : poll was failed");
 		for (size_t i = 0; i < working.size(); i++)
 		{
-			if(working[i].getFdPoll().revents & POLLIN || working[i].getFdPoll().revents & POLLOUT)
+			// std::cout << "revents : " << working[i].getFdPoll().revents << " : " <<  working[i].getFdPoll().fd << std::endl;
+			if(working[i].getFdPoll().revents & POLLIN)
 			{
 				try{handler(working, master, i);}
 				catch(std::runtime_error &e){std::cout << e.what() << std::endl;}
 			}
+			if(working[i].getFdPoll().revents & POLLOUT)
+			{
+				// exit(1);
+				write(working[i].getFdPoll().fd, working[i].respond.c_str(),  working[i].respond.size());
+				std::cout << "hiiiii" << std::endl;
+				close(working[i].getFdPoll().fd);
+				erase(master,i);
+			}
+			// std::cout << "test" << std::endl;
 		}
-		
 	}
 	
 }
