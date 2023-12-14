@@ -14,6 +14,7 @@
 #define FILEDEPANDENCY_HPP
 #include<iostream>
 #include<poll.h>
+#include<cstdio>
 
 #define PUTINFILE 1
 #define DEFAULT 0
@@ -25,6 +26,7 @@ private:
 
 	std::string	request;
 	std::string	boundary;
+	std::string	filename;
 	size_t		lenght;
 	size_t		contenlenght;
 	int			fd;
@@ -37,7 +39,9 @@ public:
 	~FileDependency();
 
 	void			setFdPoll(const pollfd &);
+	void			setFileName(const std::string &);
 	void			setFdPoll(const int &, const short &);
+	void			setFdPoll(const short &);
 	// void			setRequist(const std::string &, const size_t &);
 	void			setRequist(const std::string &);
 	void 			setMethod(const int &);
@@ -46,15 +50,17 @@ public:
 	void			setBoundary(const std::string	&);
 	void			setFd(const int &);
 
+	const std::string&	getFileName() const;
 	const std::string&	getRequist() const;
 	const std::string&	getBoundary() const;
-	const pollfd&		getFdPoll() const;
+	pollfd&		getFdPoll() ;
 	const size_t &		getLenght() const;
 	const size_t &		getContenlenght() const;
 	const int &			getMethod() const;
 	const int &			getFd() const;
 	
 	int			status;
+	std::string	respond;
 	std::string	rest;
 };
 
