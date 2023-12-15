@@ -5,18 +5,9 @@ ManageServers::ManageServers(ServerData	srvers)
 	this->servers = srvers;
 }
 
-void ManageServers::runAllServers()
+
+void ManageServers::initSockets(std::vector<int> &allport)
 {
-	std::vector <ServerModel> allservers =  servers.getAllServers();
-	std::vector<int> allport;
-	for (size_t i = 0; i < allservers.size(); i++)
-	{
-		std::vector <Data> ports = allservers[i].getData("listen");
-		for (size_t j = 0; j < ports.size(); j++)
-		{
-			allport.push_back(static_cast<int>(strtol(ports[j].getValue().c_str(),NULL, 10)));
-		}
-	}
 	for(size_t i = 0; i < allport.size();i++)
 	{
 		int fd;
@@ -28,18 +19,38 @@ void ManageServers::runAllServers()
 		catch(std::runtime_error &e){std::cout << e.what() << std::endl;continue;}
 		fdSockets.push_back(fd);
 	}
-	if(fdSockets.empty())
-	{
-		int fd;
-		try{
-			fd = Server::setSocket();
-			Server::bindSocket(fd, 80);
-			Server::listenPort(fd);
-		}
-		catch(std::runtime_error &e){std::cout << e.what() << std::endl;return;}
-		fdSockets.push_back(fd);
+}
+void ManageServers::initSocketPort80()
+{
+	int fd;
+	try{
+		fd = Server::setSocket();
+		Server::bindSocket(fd, 80);
+		Server::listenPort(fd);
 	}
-	
+	catch(std::runtime_error &e){std::cout << e.what() << std::endl;return;}
+	fdSockets.push_back(fd);
+}
+std::vector<int> ManageServers::getAllPorts() const
+{
+	std::vector< int >	allport;
+	std::vector < ServerModel > allservers = servers.getAllServers();
+	for (size_t i = 0; i < allservers.size( ); i++)
+	{
+		std::vector <Data> ports = allservers[i].getData("listen");
+		for (size_t j = 0; j < ports.size(); j++)
+		{
+			allport.push_back(static_cast<int>(strtol(ports[j].getValue().c_str(),NULL, 10)));
+		}
+	}
+	return allport;
+}
+void	ManageServers::runAllServers()
+{
+	std::vector< int >	allport = getAllPorts();
+	initSockets(allport);
+	if (fdSockets.empty( ))
+		initSocketPort80( );
 }
 void erase(std::vector<FileDependency> & struct_fdsS, size_t j)
 {
@@ -110,47 +121,30 @@ void putInString(FileDependency &file)
 
 	if((begin = file.rest.find(file.getBoundary())) != NPOS)
 	{
-		size_t	end = file.rest.find_last_of("\r\n", begin);
+		size_t	end = file.rest.rfind("\r\n", begin);
 		if(end == NPOS)
 			end = 0;
-		else
-			end--;
-		std::cout << "***********" << file.rest.substr(0, end) << "*********" << std::endl;
 		file.setRequist(file.rest.substr(0, end));
 		file.setLenght(end);
 		file.rest.erase(0, end);
 		file.status = DEFAULT;
 		return ;
 	}
-	size_t	end = file.rest.find_last_of("\r\n", file.rest.size());
-	std::cout << "***********" << end << file.rest.size() << "*********" << std::endl;
-	std::cout << "***********" << (int)file.rest[end] << "*********" << std::endl;
-	if(end == NPOS)
-		end = 0;
-	else
-		end--;
-	for (size_t i = 0; i < file.rest.size(); i++)
-	{
-		std::cout << "**" << (int)file.rest[i] << "**" << std::endl;
-	}
-	
-	exit(1);
+	size_t	end = file.rest.rfind("\r\n");
+	if(end == NPOS || end == 0)
+		throw std::runtime_error("");
 	file.setRequist(file.rest.substr(0, end));
 	file.setLenght(end);
 	file.rest.erase(0, end);
 }
 void putInFile(FileDependency &file)
 {
-	// std::cout << "{" << file.rest << "}" << std::endl;
-	// exit(1);
 	size_t	begin;
 	if((begin = file.rest.find(file.getBoundary())) != NPOS)
 	{
-		size_t	end = file.rest.find_last_of("\r\n", begin);
+		size_t	end = file.rest.rfind("\r\n", begin);
 		if(end == NPOS)
 			end = 0;
-		else
-			end--;
 		file.setLenght(end);
 		write(file.getFd(), file.rest.substr(0, end).c_str(), file.rest.substr(0, end).size());
 		close(file.getFd());
@@ -158,11 +152,9 @@ void putInFile(FileDependency &file)
 		file.status = DEFAULT;
 		return;
 	}
-	size_t	end = file.rest.find_last_of("\r\n");
-	if(end == NPOS)
-		end = 0;
-	else
-		end--;
+	size_t	end = file.rest.rfind("\r\n");
+	if(end == NPOS || end == 0)
+		throw std::runtime_error("");
 	write(file.getFd(), file.rest.substr(0, end).c_str(), file.rest.substr(0, end).size());
 	file.setLenght(end);
 	file.rest.erase(0, end);
@@ -171,13 +163,10 @@ void putInFile(FileDependency &file)
 
 void checkIfFile(FileDependency &file, size_t	&begin)
 {
-	std::cout << file.getRequist() << std::endl;
-	begin = file.rest.find_last_of("\r\n", begin);
+	begin = file.rest.rfind("\r\n", begin);
 	if(begin == NPOS)
 		begin = 0;
-	else
-		begin--;
-	size_t	end = file.rest.find("\r\n\r\n", begin + 4);
+	size_t	end = file.rest.find("\r\n\r\n", begin + 2);
 	if(end == NPOS)
 		end = file.rest.size();
 	else
@@ -198,7 +187,6 @@ void checkIfFile(FileDependency &file, size_t	&begin)
 	file.setRequist(tmp_string);
 	if(file.getRequist().find(file.getBoundary() + "--") != NPOS)
 	{
-		exit(1);
 		file.setLenght(file.rest.size());
 		file.setRequist(file.rest);
 		file.rest.erase(0, file.rest.size());
@@ -246,8 +234,9 @@ void	readRequist(FileDependency &file)
 		if(bytes < 0)
 			bytes = 0;
 		std::string request (buffer, (size_t)bytes);
-		// std::cout << "[" << request << "]" << std::endl;
+		request.insert(0, file.rest);
 		file.rest = request;
+
 		while (!file.rest.empty())
 		{
 			if(file.getMethod() == -1)
@@ -257,9 +246,6 @@ void	readRequist(FileDependency &file)
 			else if(file.getMethod() == POST)
 				removePartOfupload(file, request);		
 		}
-		// std::cout << file.getRequist() << std::endl;
-		// exit(1);
-		
 	}
 
 	if(file.getLenght() != file.getContenlenght() || !file.rest.empty() || file.getRequist().empty())
@@ -286,7 +272,6 @@ void ManageServers::handler(std::vector<FileDependency> &working, std::vector<Fi
 			return;
 		}
 	}
-	std::cout << "test : " << master[i].getFdPoll().fd << std::endl;
 	try{readRequist(master[i]);}
 	catch(std::runtime_error){ return ;};
 	std::cout << master[i].getRequist() << std::endl;
@@ -294,9 +279,54 @@ void ManageServers::handler(std::vector<FileDependency> &working, std::vector<Fi
 	master[i].setFdPoll(POLLOUT);
 
 }
-void ManageServers::acceptConection()
+std::vector<FileDependency>	ManageServers::ifSocketsAreReady(std::vector<FileDependency> &master)
+{
+	std::vector<FileDependency> working = master;
+	std::vector<pollfd> pworking;
+	for (size_t i = 0; i < working.size(); i++)
+		pworking.push_back(working[i].getFdPoll());
+	int pint = poll(&pworking[0], static_cast<nfds_t>(pworking.size()), 6000);
+	for (size_t i = 0; i < pworking.size(); i++)
+		working[i].setFdPoll(pworking[i]);
+	if(pint == 0)
+		throw ManageServers::PollException("Server reloaded");
+	if(pint < 0)
+		throw std::runtime_error("poll : poll was failed");
+	return working;
+}
+
+void	ManageServers::readyToRead(std::vector<FileDependency>	&working, std::vector<FileDependency> &master, size_t i)
+{
+	try{handler(working, master, i);}
+	catch(std::runtime_error &e){std::cout << e.what() << std::endl;}
+}
+void	ManageServers::socketHaveEvent(std::vector<FileDependency>	&working, std::vector<FileDependency> &master)
+{
+	for (size_t i = 0; i < working.size(); i++)
+	{
+		if(working[i].getFdPoll().revents & POLLIN)
+			readyToRead(working, master, i);
+
+		if(working[i].getFdPoll().revents & POLLOUT)
+		{
+			size_t send_lenght = 2000;
+			if(send_lenght > working[i].respond.size())
+				send_lenght = working[i].respond.size();
+			write(working[i].getFdPoll().fd, working[i].respond.c_str(),  send_lenght);
+			working[i].respond.erase(0, send_lenght);
+			if(working[i].respond.empty() == true)
+			{
+				close(working[i].getFdPoll().fd);
+				erase(master,i);
+			}
+		}
+	}
+}
+void	ManageServers::acceptConection()
 {
 	std::vector<FileDependency> master;
+	std::vector<FileDependency>	working;
+
 	for (size_t i = 0; i < fdSockets.size(); i++)
 	{
 		FileDependency tmp;
@@ -305,38 +335,16 @@ void ManageServers::acceptConection()
 	}
 	while (true)
 	{
-		std::vector<FileDependency> working = master;
-		std::vector<pollfd> pworking;
-		for (size_t i = 0; i < working.size(); i++)
-			pworking.push_back(working[i].getFdPoll());
-		int pint = poll(&pworking[0], static_cast<nfds_t>(pworking.size()), 6000);
-		for (size_t i = 0; i < pworking.size(); i++)
-			working[i].setFdPoll(pworking[i]);
-		if(pint == 0)
+		try{
+			working = ifSocketsAreReady(master);
+		}
+		catch(const ManageServers::PollException& e)
 		{
-			Logger::info(std::cout, "Server ", "reload");
+			Logger::warn(std::cout, e.what(), "");
 			continue;
 		}
-		if(pint < 0)
-			throw std::runtime_error("poll : poll was failed");
-		for (size_t i = 0; i < working.size(); i++)
-		{
-			// std::cout << "revents : " << working[i].getFdPoll().revents << " : " <<  working[i].getFdPoll().fd << std::endl;
-			if(working[i].getFdPoll().revents & POLLIN)
-			{
-				try{handler(working, master, i);}
-				catch(std::runtime_error &e){std::cout << e.what() << std::endl;}
-			}
-			if(working[i].getFdPoll().revents & POLLOUT)
-			{
-				// exit(1);
-				write(working[i].getFdPoll().fd, working[i].respond.c_str(),  working[i].respond.size());
-				std::cout << "hiiiii" << std::endl;
-				close(working[i].getFdPoll().fd);
-				erase(master,i);
-			}
-			// std::cout << "test" << std::endl;
-		}
+		socketHaveEvent(working, master);
+
 	}
 	
 }
