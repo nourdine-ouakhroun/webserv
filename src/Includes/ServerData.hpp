@@ -22,7 +22,7 @@ class ServerData
 		void	displayServers( void );
 		std::vector<ServerModel>	getServersByServerName(const String& serverName);
 		std::vector<ServerModel>	getServersByPort(const unsigned short& port);
-		const std::vector<ServerModel>&	getAllServers();
+		const std::vector<ServerModel>&	getAllServers() const;
 		const ServerModel&	getDefaultServer( void );
 
 };
