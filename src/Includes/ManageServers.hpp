@@ -16,6 +16,7 @@
 #include"FileDependency.hpp"
 #include<poll.h>
 #include<fstream>
+#include<chrono>
 
 #define NPOS  std::string::npos 
 #define GET 0
@@ -34,10 +35,27 @@ private:
 public:
 	ManageServers(ServerData	srvers);
 	~ManageServers();
+	class PollException : std::exception
+	{
+		std::string exception_msg;
 
-	void	runAllServers();
-	void	acceptConection();
+		public :
+			PollException();
+			PollException(const std::string &);
+			const char * what() const throw();
+			~PollException() throw();
+	};
+
+	void	runAllServers(void);
+	void	initSockets(std::vector<int> &);
+	void	initSocketPort80(void);
+	void	acceptConection(void);
 	void	handler(std::vector<FileDependency>&, std::vector<FileDependency> &, size_t);
+	void	socketHaveEvent(std::vector<FileDependency>	&, std::vector<FileDependency> &);
+	void	readyToRead(std::vector<FileDependency>	&working, std::vector<FileDependency> &master, size_t i);
+
+	std::vector<int>	getAllPorts() const;
+	std::vector<FileDependency>		ifSocketsAreReady(std::vector<FileDependency> &);
 };
 
 #endif
