@@ -73,7 +73,7 @@ std::vector<ServerModel>	ServerData::getServersByPort(const unsigned short& port
 	return (serv);
 }
 
-const std::vector<ServerModel>&	ServerData::getAllServers()
+const std::vector<ServerModel>&	ServerData::getAllServers() const
 {
 	return (servers);
 }
