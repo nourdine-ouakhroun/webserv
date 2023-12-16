@@ -4,9 +4,11 @@
 SocketDependencies::SocketDependencies(/* args */)
 {
     contenlenght = 0;
+	ischunked = 0;
     lenght = -1;
 	method = -1;
 	status = 0;
+
 }
 // SocketDependencies::SocketDependencies(const SocketDependencies&	socket)
 // {
