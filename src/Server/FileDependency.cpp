@@ -4,7 +4,7 @@
 FileDependency::FileDependency(/* args */)
 {
     contenlenght = 0;
-    lenght = 0;
+    lenght = -1;
 	method = -1;
 	status = 0;
 }
@@ -77,20 +77,24 @@ const std::string &FileDependency::getBoundary() const
 {
 	return this->boundary;
 }
-const size_t& FileDependency::getContenlenght() const
+const ssize_t& FileDependency::getContenlenght() const
 {
 	return this->contenlenght;
 }
-const size_t & FileDependency::getLenght() const
+const ssize_t & FileDependency::getLenght() const
 {
 	return this->lenght;
 }
+void	FileDependency::appendLenght(const size_t & lenght)
+{
+	this->lenght += (ssize_t)lenght;
 
+}
 void FileDependency::setLenght(const size_t & lenght)
 {
-	this->lenght += lenght;
+	this->lenght = (ssize_t)lenght;
 }
-void FileDependency::setContenlenght(const size_t & contenlenght)
+void FileDependency::setContenlenght(const ssize_t & contenlenght)
 {
 	this->contenlenght = contenlenght;
 }
