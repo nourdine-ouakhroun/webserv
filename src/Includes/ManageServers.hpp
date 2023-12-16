@@ -32,21 +32,33 @@ class	ManageServers
 private:
 	ServerData	servers;
 	std::vector<int> fdSockets;
+	std::vector<FileDependency> master;
+	std::vector<FileDependency> working;
 public:
 
 	ManageServers(ServerData	srvers);
 	~ManageServers();
 
+	void					setRespond(const std::string & respond, size_t index);
+	void					setWorkingSockets(const std::vector<FileDependency> &);
+	std::string&			getRespond(size_t index);
+	std::vector<int>		getAllPorts() const;
+	const FileDependency&	getWorkingSocket(size_t index) const ;
+	const std::string& 		getRequest(size_t) const ;
+
 	void	runAllServers(void);
 	void	initSockets(std::vector<int> &);
 	void	initSocketPort80(void);
 	void	acceptConection(void);
-	void	handler(std::vector<FileDependency>&, std::vector<FileDependency> &, size_t);
-	void	socketHaveEvent(std::vector<FileDependency>	&, std::vector<FileDependency> &);
-	void	readyToRead(std::vector<FileDependency>	&working, std::vector<FileDependency> &master, size_t i);
+	void	readyToRead(size_t);
+	void	readyToWrite(size_t);
+	void	erase(size_t j);
+	size_t	WorkingSocketsSize() const ;
+	short	WorkingRevents(size_t) const ;
 
-	std::vector<int>	getAllPorts() const;
-	std::vector<FileDependency>		isSocketsAreReady(std::vector<FileDependency> &);
+
+	std::vector<FileDependency>			isSocketsAreReady();
+	const std::vector<FileDependency>&	getMasterSockets() const ;
 
 	class PollException : std::exception
 	{

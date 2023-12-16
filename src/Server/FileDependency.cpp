@@ -68,7 +68,7 @@ void FileDependency::setFdPoll(const pollfd &poll_struct)
 	this->fdpoll = poll_struct;
 }
 
-pollfd &FileDependency::getFdPoll()
+const pollfd &FileDependency::getFdPoll() const
 {
     return this->fdpoll;
 }
