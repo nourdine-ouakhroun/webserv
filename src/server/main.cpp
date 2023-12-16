@@ -38,7 +38,7 @@ int main(int ac, char **av)
 	ManageServers Manageservers(serv);
 
 	Manageservers.runAllServers();
-	Manageservers.acceptConection();
+	Manageservers.setMasterSockets();
 	while (true)
 	{
 		try{
