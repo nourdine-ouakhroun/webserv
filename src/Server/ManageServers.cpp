@@ -52,15 +52,66 @@ void	ManageServers::runAllServers()
 	if (fdSockets.empty( ))
 		initSocketPort80( );
 }
-void erase(std::vector<FileDependency> & struct_fdsS, size_t j)
+
+void ManageServers::setWorkingSockets(const std::vector<FileDependency> & working) 
+{
+	this->working = working;
+}
+size_t ManageServers::WorkingSocketsSize() const 
+{
+	return this->working.size();
+}
+const FileDependency & ManageServers::getWorkingSocket(size_t index) const 
+{
+	return this->working[index];
+}
+const std::vector<FileDependency> & ManageServers::getMasterSockets() const 
+{
+	return this->master;
+}
+const std::string & ManageServers::getRequest(size_t index) const
+{
+	return this->master[index].getRequist();
+}
+std::string & ManageServers::getRespond(size_t index)
+{
+	return this->master[index].respond;
+}
+void	ManageServers::readyToWrite(size_t index)
+{
+		size_t send_lenght = 2000;
+	if(send_lenght > working[index].respond.size())
+		send_lenght =  working[index].respond.size();
+	ssize_t write_value = write(working[index].getFdPoll().fd,  master[index].respond.c_str(),  send_lenght);
+	if(write_value > 0)
+	{
+		master[index].respond.erase(0,send_lenght);
+		if(master[index].respond.empty() == true)
+		{
+			close(working[index].getFdPoll().fd);
+			erase(index);
+		}
+	}
+}
+
+void	ManageServers::setRespond(const std::string & respond, size_t index)
+{
+	this->master[index].respond = respond;
+}
+short ManageServers::WorkingRevents(size_t index) const 
+{
+	return this->working[index].getFdPoll().revents;
+}
+
+void ManageServers::erase(size_t index)
 {
 	std::vector<FileDependency> returnFds;
-	for (size_t i = 0; i < struct_fdsS.size(); i++)
+	for (size_t i = 0; i < this->master.size(); i++)
 	{
-		if(i != j)
-			returnFds.push_back(struct_fdsS[i]);
+		if(i != index)
+			returnFds.push_back(this->master[i]);
 	}
-	struct_fdsS = returnFds;
+	this->master = returnFds;
 }
 
 int headerMethod(String line)
@@ -248,13 +299,11 @@ void	readRequist(FileDependency &file)
 				removePartOfupload(file, request);		
 		}
 	}
-
 	if(file.getLenght() != file.getContenlenght() || !file.rest.empty())
 		throw std::runtime_error("");
-	std::cout << file.getRequist() << std::endl;
 	return ;
 }
-void ManageServers::handler(std::vector<FileDependency> &working, std::vector<FileDependency> &master, size_t i)
+void ManageServers::readyToRead(size_t i)
 {
 	for (size_t j = 0; j < fdSockets.size(); j++)
 	{
@@ -273,14 +322,11 @@ void ManageServers::handler(std::vector<FileDependency> &working, std::vector<Fi
 			return;
 		}
 	}
-	try{readRequist(master[i]);}
-	catch(std::runtime_error){ return ;};
-	std::cout << master[i].getRequist() << std::endl;
-	master[i].respond = "HTTP/1.1 200 OK\r\n\r\n <h1> hello </h1>";
+	readRequist(master[i]);
 	master[i].setFdPoll(POLLOUT);
 
 }
-std::vector<FileDependency>	ManageServers::isSocketsAreReady(std::vector<FileDependency> &master)
+std::vector<FileDependency>	ManageServers::isSocketsAreReady()
 {
 	std::vector<FileDependency> working = master;
 	std::vector<pollfd> pworking;
@@ -296,56 +342,15 @@ std::vector<FileDependency>	ManageServers::isSocketsAreReady(std::vector<FileDep
 	return working;
 }
 
-void	ManageServers::readyToRead(std::vector<FileDependency>	&working, std::vector<FileDependency> &master, size_t i)
-{
-	try{handler(working, master, i);}
-	catch(std::runtime_error &e){std::cout << e.what() << std::endl;}
-}
-void	ManageServers::socketHaveEvent(std::vector<FileDependency>	&working, std::vector<FileDependency> &master)
-{
-	for (size_t i = 0; i < working.size(); i++)
-	{
-		if(working[i].getFdPoll().revents & POLLIN)
-			readyToRead(working, master, i);
-		else if(working[i].getFdPoll().revents & POLLOUT)
-		{
-			size_t send_lenght = 2000;
-			if(send_lenght > working[i].respond.size())
-				send_lenght = working[i].respond.size();
-			write(working[i].getFdPoll().fd, working[i].respond.c_str(),  send_lenght);
-			working[i].respond.erase(0, send_lenght);
-			if(working[i].respond.empty() == true)
-			{
-				close(working[i].getFdPoll().fd);
-				erase(master,i);
-			}
-		}
-	}
-}
+
 void	ManageServers::acceptConection()
 {
-	std::vector<FileDependency> master;
-	std::vector<FileDependency>	working;
-
 	for (size_t i = 0; i < fdSockets.size(); i++)
 	{
 		FileDependency tmp;
 		tmp.setFdPoll(fdSockets[i], POLLIN);
 		master.push_back(tmp);
 	}
-	while (true)
-	{
-		try{
-			working = isSocketsAreReady(master);
-		}
-		catch(const ManageServers::PollException& e)
-		{
-			Logger::warn(std::cout, e.what(), "");
-			continue;
-		}
-		socketHaveEvent(working, master);
-	}
-	
 }
 ManageServers::~ManageServers()
 {
