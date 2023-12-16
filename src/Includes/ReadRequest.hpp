@@ -23,16 +23,17 @@ public:
     ReadRequest(SocketDependencies&);
     ~ReadRequest();
 
-    void	    methodSerch();
+    void	    methodSerch(std::string &Requist);
     void        postUtils();
     int         headerMethod(String);
-    void	    setOnlyHeadre();
+    void	    setOnlyHeadre(std::string &Requist);
     void	    putInString();
     void	    putInFile();
     void        removeBoundary(std::string &,size_t	&);
     void	    removePartOfupload();
     void        checkReqeust();
     void	    checkIfFile(size_t	&);
+    void        handelChunked(std::string &Requist);
     void        Requist();
 };
 
