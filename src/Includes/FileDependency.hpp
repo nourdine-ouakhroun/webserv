@@ -53,7 +53,7 @@ public:
 	const std::string&	getFileName() const;
 	const std::string&	getRequist() const;
 	const std::string&	getBoundary() const;
-	pollfd&		getFdPoll() ;
+	const pollfd&		getFdPoll() const;
 	const ssize_t &		getLenght() const;
 	const ssize_t &		getContenlenght() const;
 	const int &			getMethod() const;
