@@ -105,7 +105,7 @@ void setOnlyHeadre(FileDependency &file, std::string request)
 		if(pos == NPOS)
 			return ;
 		long lenght = strtol(file.getRequist().substr(pos + 16).c_str(), NULL, 10);
-		file.setContenlenght(static_cast<size_t>(lenght));
+		file.setContenlenght(static_cast<ssize_t>(lenght));
 		pos = file.getRequist().find("boundary=");
 		if(pos != NPOS)
 		{
@@ -114,6 +114,7 @@ void setOnlyHeadre(FileDependency &file, std::string request)
 			file.setBoundary(boundary);
 		}
 	}
+	file.setLenght(0);
 }
 void putInString(FileDependency &file)
 {
@@ -125,7 +126,7 @@ void putInString(FileDependency &file)
 		if(end == NPOS)
 			end = 0;
 		file.setRequist(file.rest.substr(0, end));
-		file.setLenght(end);
+		file.appendLenght(end);
 		file.rest.erase(0, end);
 		file.status = DEFAULT;
 		return ;
@@ -134,7 +135,7 @@ void putInString(FileDependency &file)
 	if(end == NPOS || end == 0)
 		throw std::runtime_error("");
 	file.setRequist(file.rest.substr(0, end));
-	file.setLenght(end);
+	file.appendLenght(end);
 	file.rest.erase(0, end);
 }
 void putInFile(FileDependency &file)
@@ -145,7 +146,7 @@ void putInFile(FileDependency &file)
 		size_t	end = file.rest.rfind("\r\n", begin);
 		if(end == NPOS)
 			end = 0;
-		file.setLenght(end);
+		file.appendLenght(end);
 		write(file.getFd(), file.rest.substr(0, end).c_str(), file.rest.substr(0, end).size());
 		close(file.getFd());
 		file.rest.erase(0, end);
@@ -156,7 +157,7 @@ void putInFile(FileDependency &file)
 	if(end == NPOS || end == 0)
 		throw std::runtime_error("");
 	write(file.getFd(), file.rest.substr(0, end).c_str(), file.rest.substr(0, end).size());
-	file.setLenght(end);
+	file.appendLenght(end);
 	file.rest.erase(0, end);
 	return;
 }
@@ -173,7 +174,7 @@ void checkIfFile(FileDependency &file, size_t	&begin)
 		end += 4;
 	std::string tmp_string(file.rest.substr(begin,  end  - begin));
 	file.rest.erase(begin, end  - begin);
-	file.setLenght((end  - begin));
+	file.appendLenght((end  - begin));
 	size_t	pos = tmp_string.find("filename=\"", begin);
 	if(pos != NPOS)
 	{
@@ -187,7 +188,7 @@ void checkIfFile(FileDependency &file, size_t	&begin)
 	file.setRequist(tmp_string);
 	if(file.getRequist().find(file.getBoundary() + "--") != NPOS)
 	{
-		file.setLenght(file.rest.size());
+		file.appendLenght(file.rest.size());
 		file.setRequist(file.rest);
 		file.rest.erase(0, file.rest.size());
 		return;
@@ -211,7 +212,7 @@ void removePartOfupload(FileDependency &file, std::string &request)
 	else
 	{
 		file.setRequist(request);
-		file.setLenght(request.size());
+		file.appendLenght(request.size());
 	}
 }
 
@@ -224,7 +225,7 @@ void	readRequist(FileDependency &file)
 	bytes = 0;
 	memset(buffer, 0, READ_NUMBER);
 	bytes = recv(file.getFdPoll().fd, buffer, READ_NUMBER - 1, 0);
-	if(bytes == 0 && file.status == PUTINFILE)
+	if(bytes == 0)
 	{
 		file.setContenlenght(file.getLenght());
 		file.rest.clear();
@@ -248,7 +249,7 @@ void	readRequist(FileDependency &file)
 		}
 	}
 
-	if(file.getLenght() != file.getContenlenght() || !file.rest.empty() || file.getRequist().empty())
+	if(file.getLenght() != file.getContenlenght() || !file.rest.empty())
 		throw std::runtime_error("");
 	std::cout << file.getRequist() << std::endl;
 	return ;
@@ -279,7 +280,7 @@ void ManageServers::handler(std::vector<FileDependency> &working, std::vector<Fi
 	master[i].setFdPoll(POLLOUT);
 
 }
-std::vector<FileDependency>	ManageServers::ifSocketsAreReady(std::vector<FileDependency> &master)
+std::vector<FileDependency>	ManageServers::isSocketsAreReady(std::vector<FileDependency> &master)
 {
 	std::vector<FileDependency> working = master;
 	std::vector<pollfd> pworking;
@@ -306,8 +307,7 @@ void	ManageServers::socketHaveEvent(std::vector<FileDependency>	&working, std::v
 	{
 		if(working[i].getFdPoll().revents & POLLIN)
 			readyToRead(working, master, i);
-
-		if(working[i].getFdPoll().revents & POLLOUT)
+		else if(working[i].getFdPoll().revents & POLLOUT)
 		{
 			size_t send_lenght = 2000;
 			if(send_lenght > working[i].respond.size())
@@ -336,7 +336,7 @@ void	ManageServers::acceptConection()
 	while (true)
 	{
 		try{
-			working = ifSocketsAreReady(master);
+			working = isSocketsAreReady(master);
 		}
 		catch(const ManageServers::PollException& e)
 		{
@@ -344,7 +344,6 @@ void	ManageServers::acceptConection()
 			continue;
 		}
 		socketHaveEvent(working, master);
-
 	}
 	
 }
