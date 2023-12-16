@@ -15,9 +15,10 @@
 #include<iostream>
 #include<poll.h>
 #include<cstdio>
+#include<algorithm>
 
-#define PUTINFILE 1
 #define DEFAULT 0
+#define PUTINFILE 1
 #define PUTINSTRING 2
 
 class   SocketDependencies
@@ -59,10 +60,11 @@ class   SocketDependencies
 		const int &			getMethod() const;
 		const int &			getFd() const;
 
-		void			appendLenght(const size_t &);
-
+		void		appendLenght(const size_t &);
+		bool		ischunked;
 		int			status;
 		std::string	respond;
+    	std::string chunked_rest;
 		std::string	rest;
 };
 

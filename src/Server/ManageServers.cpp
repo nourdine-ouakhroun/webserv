@@ -57,6 +57,7 @@ void	ManageServers::initSockets(std::vector<int>&	allport)
 		fdSockets.push_back(fd);
 	}
 }
+
 void	ManageServers::initSocketPort80(void)
 {
 	int	fd;
@@ -72,6 +73,7 @@ void	ManageServers::initSocketPort80(void)
 	}
 	fdSockets.push_back(fd);
 }
+
 std::vector<int>	ManageServers::getAllPorts(void) const
 {
 	std::vector<int>			allport;
@@ -86,6 +88,7 @@ std::vector<int>	ManageServers::getAllPorts(void) const
 	}
 	return allport;
 }
+
 void	ManageServers::runAllServers(void)
 {
 	std::vector< int >	allport = getAllPorts();
@@ -116,6 +119,7 @@ void	ManageServers::setRespond(const std::string & respond, size_t index)
 {
 	this->master[index].respond = respond;
 }
+
 short	ManageServers::WorkingRevents(size_t index) const 
 {
 	return this->working[index].getFdPoll().revents;
@@ -145,6 +149,7 @@ void ManageServers::acceptConection(size_t index)
 	tmp.setFdPoll(newfd, POLLIN);
 	master.push_back(tmp);
 }
+
 void ManageServers::readyToRead(size_t i)
 {
 	for (size_t j = 0; j < fdSockets.size(); j++)
@@ -159,6 +164,7 @@ void ManageServers::readyToRead(size_t i)
 	readrequest.Requist();
 	master[i].setFdPoll(POLLOUT);
 }
+
 std::vector<SocketDependencies>	ManageServers::isSocketsAreReady(void)
 {
 	std::vector<SocketDependencies> working = master;
@@ -174,7 +180,6 @@ std::vector<SocketDependencies>	ManageServers::isSocketsAreReady(void)
 		throw std::runtime_error("poll : poll was failed");
 	return working;
 }
-
 
 void	ManageServers::setMasterSockets(void)
 {
