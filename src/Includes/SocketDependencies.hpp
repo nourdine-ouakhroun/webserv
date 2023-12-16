@@ -20,10 +20,8 @@
 #define DEFAULT 0
 #define PUTINSTRING 2
 
-class   FileDependency
+class   SocketDependencies
 {
-private:
-
 	std::string	request;
 	std::string	boundary;
 	std::string	filename;
@@ -33,36 +31,39 @@ private:
 	int 		method;
 	pollfd		fdpoll;
 
-public:
+	public:
 
-	FileDependency();
-	~FileDependency();
+		SocketDependencies();
+		~SocketDependencies();
+		// SocketDependencies(const SocketDependencies&);
 
-	void			setFdPoll(const pollfd &);
-	void			setFileName(const std::string &);
-	void			setFdPoll(const int &, const short &);
-	void			setFdPoll(const short &);
-	// void			setRequist(const std::string &, const size_t &);
-	void			setRequist(const std::string &);
-	void 			setMethod(const int &);
-	void			setLenght(const size_t &);
-	void			setContenlenght(const ssize_t &);
-	void			setBoundary(const std::string	&);
-	void			setFd(const int &);
-
-	const std::string&	getFileName() const;
-	const std::string&	getRequist() const;
-	const std::string&	getBoundary() const;
-	const pollfd&		getFdPoll() const;
-	const ssize_t &		getLenght() const;
-	const ssize_t &		getContenlenght() const;
-	const int &			getMethod() const;
-	const int &			getFd() const;
+		// SocketDependencies &operator=(const SocketDependencies&);
 	
-	void			appendLenght(const size_t &);
-	int			status;
-	std::string	respond;
-	std::string	rest;
+		void			setFdPoll(const pollfd &);
+		void			setFileName(const std::string &);
+		void			setFdPoll(const int &, const short &);
+		void			setFdPoll(const short &);
+		void			setRequist(const std::string &);
+		void 			setMethod(const int &);
+		void			setLenght(const size_t &);
+		void			setContenlenght(const ssize_t &);
+		void			setBoundary(const std::string	&);
+		void			setFd(const int &);
+
+		const std::string&	getFileName() const;
+		const std::string&	getRequist() const;
+		const std::string&	getBoundary() const;
+		const pollfd&		getFdPoll() const;
+		const ssize_t &		getLenght() const;
+		const ssize_t &		getContenlenght() const;
+		const int &			getMethod() const;
+		const int &			getFd() const;
+
+		void			appendLenght(const size_t &);
+
+		int			status;
+		std::string	respond;
+		std::string	rest;
 };
 
 #endif
