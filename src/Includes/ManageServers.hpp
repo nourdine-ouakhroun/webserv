@@ -12,38 +12,30 @@
 
 #ifndef MANAGESERVERS
 #define MANAGESERVERS
-#include"Server.hpp"
-#include"FileDependency.hpp"
+#include"ReadRequest.hpp"
 #include<poll.h>
 #include<fstream>
 #include<chrono>
 
-#define NPOS  std::string::npos 
-#define GET 0
-#define POST 1
-#define DELET 2
-
-#ifndef READ_NUMBER
-#define READ_NUMBER 2025
-#endif
 typedef struct sockaddr_in S_address;
+
 class	ManageServers
 {
-private:
-	ServerData	servers;
-	std::vector<int> fdSockets;
-	std::vector<FileDependency> master;
-	std::vector<FileDependency> working;
+	std::vector<SocketDependencies>	master;
+	std::vector<SocketDependencies>	working;
+	std::vector<int>			fdSockets;
+	ServerData					servers;
 public:
 
 	ManageServers(ServerData	srvers);
 	~ManageServers();
 
-	void					setRespond(const std::string & respond, size_t index);
-	void					setWorkingSockets(const std::vector<FileDependency> &);
-	std::string&			getRespond(size_t index);
-	std::vector<int>		getAllPorts() const;
-	const FileDependency&	getWorkingSocket(size_t index) const ;
+	void					setRespond(const std::string &, size_t);
+	void					setWorkingSockets(const std::vector<SocketDependencies> &);
+	void					setMasterSockets();
+	std::string&			getRespond(size_t);
+	std::vector<int>		getAllPorts(void) const;
+	const SocketDependencies&	getWorkingSocket(size_t) const ;
 	const std::string& 		getRequest(size_t) const ;
 
 	void	runAllServers(void);
@@ -52,13 +44,14 @@ public:
 	void	acceptConection(void);
 	void	readyToRead(size_t);
 	void	readyToWrite(size_t);
-	void	erase(size_t j);
-	size_t	WorkingSocketsSize() const ;
+	void	erase(size_t );
+	size_t	WorkingSocketsSize(void) const ;
 	short	WorkingRevents(size_t) const ;
+	void	acceptConection(size_t);
 
 
-	std::vector<FileDependency>			isSocketsAreReady();
-	const std::vector<FileDependency>&	getMasterSockets() const ;
+	std::vector<SocketDependencies>			isSocketsAreReady(void);
+	const std::vector<SocketDependencies>&	getMasterSockets(void) const ;
 
 	class PollException : std::exception
 	{
