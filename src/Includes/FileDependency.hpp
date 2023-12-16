@@ -27,8 +27,8 @@ private:
 	std::string	request;
 	std::string	boundary;
 	std::string	filename;
-	size_t		lenght;
-	size_t		contenlenght;
+	ssize_t		lenght;
+	ssize_t		contenlenght;
 	int			fd;
 	int 		method;
 	pollfd		fdpoll;
@@ -46,7 +46,7 @@ public:
 	void			setRequist(const std::string &);
 	void 			setMethod(const int &);
 	void			setLenght(const size_t &);
-	void			setContenlenght(const size_t &);
+	void			setContenlenght(const ssize_t &);
 	void			setBoundary(const std::string	&);
 	void			setFd(const int &);
 
@@ -54,11 +54,12 @@ public:
 	const std::string&	getRequist() const;
 	const std::string&	getBoundary() const;
 	pollfd&		getFdPoll() ;
-	const size_t &		getLenght() const;
-	const size_t &		getContenlenght() const;
+	const ssize_t &		getLenght() const;
+	const ssize_t &		getContenlenght() const;
 	const int &			getMethod() const;
 	const int &			getFd() const;
 	
+	void			appendLenght(const size_t &);
 	int			status;
 	std::string	respond;
 	std::string	rest;
