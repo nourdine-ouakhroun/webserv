@@ -3,7 +3,7 @@
 
 #include "Parser.hpp"
 #include "ServerException.hpp"
-#include <algorithm>    // std::find
+#include <algorithm>
 
 
 #define	ERROR_404	"<h1 style=\"text-align: center;\">404 Page not found.</h1>"
@@ -11,8 +11,9 @@
 
 class ServerData
 {
-	std::vector<ServerModel> servers;
-
+	private :
+		std::vector<ServerModel> servers;
+		// unsigned short	getPort(String	value);
 	public :
 		ServerData( void );
 		ServerData(const std::vector<ServerModel>&);
@@ -20,10 +21,12 @@ class ServerData
 		ServerData&	operator=(const ServerData&);
 		void	setServerData(const std::vector<ServerModel>&);
 		void	displayServers( void );
-		std::vector<ServerModel>	getServersByServerName(const String& serverName);
-		std::vector<ServerModel>	getServersByPort(const unsigned short& port);
+		static std::vector<ServerModel>	getServersByServerName(const std::vector<ServerModel>& servers, const String& serverName);
+		static std::vector<ServerModel>	getServersByPort(const std::vector<ServerModel>& servers, const unsigned short& port);
+		static const ServerModel&	getDefaultServer(const std::vector<ServerModel>& servers);
 		const std::vector<ServerModel>&	getAllServers();
-		const ServerModel&	getDefaultServer( void );
+
+		static std::vector<ServerModel>	getServer(ServerData& servers, String strHost);
 
 };
 

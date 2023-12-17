@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+<head>
 <style>
 input[type=text], input[type=file],  select {
       width: 100%;
@@ -32,15 +33,13 @@ div {
   padding: 20px;
 }
 </style>
-<!-- <head>
-  <link rel="icon" type="image/x-icon" href="https://www.svgrepo.com/show/69341/apple-logo.svg">
-</head> -->
+</html>
 <body>
 
 <h3>Simple Form</h3>
 
 <div>
-  <form  action="/Users/mzeroual/Desktop/cursus/webserv/afficherInfo.py" method="post" enctype="multipart/form-data">                                    <!-- multipart/form-data with (boundray) key -->
+  <form method="post" enctype="multipart/form-data">                                    <!-- multipart/form-data with (boundray) key -->
                                                                                              <!-- application/x-www-form-urlencoded without (boundray) key -->
     <label for="fname">First Name</label>
     <input type="text" id="fname" name="firstname" placeholder="Your name..">
@@ -56,13 +55,6 @@ div {
       <option value="usa">Usa</option>
     </select>
     <input type="submit" value="Submit">
-    <!-- submet -->
-  <!-- </form>
-  <form action="/Users/mzeroual/Desktop/cursus/webserv/afficherInfo.py" method="post" enctype="application/x-www-form-urlencoded">
-  <label for="cv">Your CV</label>
-  <input type="file" name="filename" con>
-  <input type="submit" value="Upload">
-  </form> -->
 </div>
 
 </body>

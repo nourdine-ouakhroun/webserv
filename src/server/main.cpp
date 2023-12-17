@@ -6,12 +6,13 @@
 /*   By: mzeroual <mzeroual@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/27 16:41:57 by nouakhro          #+#    #+#             */
-/*   Updated: 2023/12/07 22:11:29 by mzeroual         ###   ########.fr       */
+/*   Updated: 2023/12/14 11:50:09 by mzeroual         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 
 #include"ManageServers.hpp"
+#include <signal.h>
 
 int main(int ac, char **av)
 {
@@ -26,8 +27,8 @@ int main(int ac, char **av)
 	ManageServers Manageservers(serv);
 	Manageservers.runAllServers();
 	Manageservers.acceptConection();
-}
 
+}
 
 
 

@@ -26,11 +26,11 @@ SRCS	= src/Parser/Parser.cpp \
 #		src/Utils/Select.cpp
 
 TEMPLATES =	src/Templates/*.tpp
-HEADERS	=	src/Includes/*.hpp
+HEADERS	=	src/Includes/*.hpp src/Request/*.hpp
 
 
 CPP	=	c++
-CPPFLAGS	=	-Wall -Wextra -Werror -std=c++98 -Wconversion -O3 -I./src/Includes #-fsanitize=address
+CPPFLAGS	=	-Wall -Wextra -Werror -std=c++98  -O3 -I ./src/Includes -Wconversion #-fsanitize=address
 
 BIN		=	bin
 
