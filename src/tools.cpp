@@ -20,36 +20,36 @@ String	readFile(const String& path)
 	return (content);
 }
 
-unsigned short	getPort(String	value)
-{
-	unsigned short port = 80;
-	String::size_type pos = value.find_last_of(':');
-	if (pos != String::npos)
-		port = (unsigned short)std::strtol(value.substr(pos + 1).c_str(), NULL, 10);
-	return port;
-}
+// unsigned short	getPort(String	value)
+// {
+// 	unsigned short port = 80;
+// 	String::size_type pos = value.find_last_of(':');
+// 	if (pos != String::npos)
+// 		port = (unsigned short)std::strtol(value.substr(pos + 1).c_str(), NULL, 10);
+// 	return port;
+// }
 
-std::vector<ServerModel>	getServer(ServerData& servers, std::vector<Data> header)
-{
-	GlobalModel model(header);
-	std::vector<ServerModel>	servModel;
-	String strHost(model.getData("Host").at(0).getValue());
-	std::vector<String> str = strHost.split(':');
-	if (str.empty() == false)
-	{
-		servModel = servers.getServersByServerName(str.at(0));
-		if (servModel.empty() == false)
-			return (servModel);
-	}
-	long host = std::strtol(strHost.c_str(), NULL, 10);
-	if (host != 0)
-		servModel = servers.getServersByPort(getPort(model.getData("Host").at(0).getValue()));
-	else
-		servModel = servers.getServersByServerName(model.getData("Host").at(0).getValue());
-	if (servModel.empty() == true)
-		servModel.push_back(servers.getDefaultServer());
-	return (servModel);
-}
+// std::vector<ServerModel>	getServer(ServerData& servers, std::vector<Data> header)
+// {
+// 	GlobalModel model(header);
+// 	std::vector<ServerModel>	servModel;
+// 	String strHost(model.getData("Host").at(0).getValue());
+// 	std::vector<String> str = strHost.split(':');
+// 	if (str.empty() == false)
+// 	{
+// 		servModel = servers.getServersByServerName(str.at(0));
+// 		if (servModel.empty() == false)
+// 			return (servModel);
+// 	}
+// 	long host = std::strtol(strHost.c_str(), NULL, 10);
+// 	if (host != 0)
+// 		servModel = servers.getServersByPort(getPort(model.getData("Host").at(0).getValue()));
+// 	else
+// 		servModel = servers.getServersByServerName(model.getData("Host").at(0).getValue());
+// 	if (servModel.empty() == true)
+// 		servModel.push_back(servers.getDefaultServer());
+// 	return (servModel);
+// }
 
 
 // std::vector<int>	openAllPorts(const std::vector<ServerModel>& serversInfo, Server& server)

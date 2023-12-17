@@ -26,6 +26,8 @@ private:
     maps        _header;
     std::string _body;
 
+    maps mimeType;
+
 public:
     Response( void );
     ~Response( void );
@@ -53,6 +55,14 @@ public:
     // bool    isFormed(Request req);
     // bool    isMatched( const Request &req, std::vector<ServerModel> serv);
 
+
+    void checkPathname( const Request &req, const std::string& path );
+
+
+    void    send( void );
+
+	void setMimeType( void );
+    std::string getMimeType( const std::string &key ) const;
 
 };
 
