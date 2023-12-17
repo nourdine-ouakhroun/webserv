@@ -1,6 +1,8 @@
 #include "Response.hpp"
 #include "ManageServers.hpp"
 
+
+
 std::string readFile(int fd)
 {
     std::string		request;
@@ -23,6 +25,7 @@ std::string readFile(int fd)
 
 Response::Response( void ) : statusCode(200), msg("OK")
 {
+	setMimeType();
 }
 
 Response::~Response( void )
@@ -196,3 +199,44 @@ void	Response::makeBodyResponse( void )
 //     return (1);
 // }
 
+std::string Response::getMimeType( const std::string &key) const
+{
+	// std::cout << key << std::endl;
+    for (maps::const_iterator it = this->mimeType.begin(); it != this->mimeType.end(); it++)
+	{
+		if (it->first == key)
+			return (it->second);
+	}
+	return ("");
+}
+
+
+void Response::checkPathname( const Request &req, const std::string& path )
+{
+	if (req.getPathname() == path)
+	{
+		
+	}
+}
+
+void Response::send( void ) {
+	// (void)res;
+}
+
+void Response::setMimeType( void )
+{
+    this->mimeType[".csv"] = "text/csv";
+    this->mimeType[".doc"] = "application/msword";
+    this->mimeType[".css"] = "text/css";
+    this->mimeType[".gif"] = "image/gif";
+    this->mimeType[".html"] = "text/html";
+    this->mimeType[".ico"] = "image/vnd.microsoft.icon";
+    this->mimeType[".js"] = "text/javascript";
+    this->mimeType[".mp3"] = "audio/mpeg";
+    this->mimeType[".mp4"] = "video/mp4";
+    this->mimeType[".mpeg"] = "video/mpeg";
+    this->mimeType[".jpg"] = "image/jpeg";
+    this->mimeType[".woff"] = "font/woff";
+    this->mimeType[".png"] = "image/png";
+
+}
