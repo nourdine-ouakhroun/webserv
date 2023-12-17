@@ -1,7 +1,49 @@
 #include "ManageServers.hpp"
 #include "../Request/Request.hpp"
 #include "FileDepandenc.hpp"
+#include <sys/stat.h>
 // #include "../Request/StatusCode.hpp"
+#define READ_SIZE 1000
+std::string	readF(const std::string& path)
+{
+	std::string  content;
+	char	buffer[READ_SIZE + 1];
+
+	int fd = open(path.c_str(), O_RDONLY);
+
+	if (fd < 0)
+		return (content);
+	int i = 0;
+	while (1)
+	{
+		i++;
+		ssize_t r = read(fd, buffer, READ_SIZE);
+		if (r <= 0)
+			break ;
+		buffer[r] = 0;
+		content.append(buffer, (u_long)r);
+		// std::cout << r << " " << i<< std::endl;
+		// std::cout << content.length() << std::endl;
+	}
+	close(fd);
+	return (content);
+}
+
+
+
+
+std::string extention(const std::string &path)
+{
+	size_t pos = 0;
+	// std::cout << "path = " << path << "\n";
+	if ((pos = path.rfind(".")) != std::string::npos) {
+		// std::cout << pos << " " << path.length() << std::endl;
+		// std::cout << "extention = " << path.substr(pos, path.length() - pos) << "\n";
+
+		return (path.substr(pos, path.length() - pos));
+	}
+	return ("");
+}
 
 std::string	readRequest(int clientFd)
 {
@@ -75,65 +117,6 @@ void erase(std::vector<FileDepandenc> & struct_fdsS, size_t j)
 	struct_fdsS = returnFds;
 }
 
-// std::string readRequist(FileDepandenc &file)
-// {
-// 	/**
-// 	 * @attention chof rah 3ndk hadchi comantaih caml yak 
-// 	 * had function khdm fwst nha dakchi li knti dayr nta
-// 	 * ana khlini tanfini lik dik requist ok zwin ylh rah dinmk mongooooool mkhli liya session ma9lti liya chno ndir fiha wach nzid lik chi 7aja wach n9s lik chi7aja mongoooooooooooooool 
-// 	*/
-// 	ssize_t		bytes;
-// 	String	boundary;
-// 	bytes = 0;
-// 	char		req[2025];
-
-// 	memset(req, 0, 2025);
-// 	bytes = recv(file.fdpoll.fd, req, 2024, 0);
-// 	if(bytes <= 0)
-// 		throw std::runtime_error("");
-// 	return req;
-// 	std::cout << bytes << std::endl;
-// 	// try {
-// 	// 	Request request;
-// 	// 	request.parseRequest(req);
-// 	// 	std::cout << request.getPathname() << std::endl;
-// 	// 	std::cout << request.header("Host") << std::endl;
-
-// 	// 	StatusCode status;
-// 	// 	Response res;
-// 	// 	if(!status.isFormed(request))
-// 	// 	{
-// 	// 		res.addRequestLine(status.getVersion(), std::to_string(status.getStatusCode()), status.getMsg());
-// 	// 		res.addHeader("Server" , "webserv");
-// 	// 		res.addBlankLine();
-// 	// 		res.addBody(status.getMsg());
-// 	// 	}
-// 	// 	else
-// 	// 	{
-// 	// 		if (!status.isMatched(request.getPathname()))
-// 	// 		{
-				
-// 	// 		}
-
-// 	// 		res.addRequestLine(status.getVersion(), std::to_string(status.getStatusCode()), status.getMsg());
-// 	// 		res.addHeader("Server" , "webserv");
-// 	// 		res.addBlankLine();
-// 	// 		res.addBody(status.getMsg());
-// 	// 	}
-
-// 	// 	// std::string ResponseBody;
-// 	// 	// ResponseBody = readHtml("/Users/mzeroual/Desktop/webserv/src/Request/formulaire.html");
-// 	// 	// write(clientFd, res.getResponse().c_str(), res.getResponse().length());
-// 	// 	// close(clientFd);
-// 	// 	return res.getResponse();
-// 	// }
-// 	// catch(...)
-// 	// 	{
-// 	// 		std::cerr << "error here " << std::endl;
-// 	// 	}
-// 	return "HTTP/1.1 200 OK \r\n\r\nhello";
-// }
-
 void ManageServers::handler(std::vector<FileDepandenc> &working, std::vector<FileDepandenc> &master, size_t i)
 {
 	
@@ -173,66 +156,179 @@ void ManageServers::handler(std::vector<FileDepandenc> &working, std::vector<Fil
 
 
 		Request req;
+		std::string content;
 		// std::cout << request << std::endl;
 		req.parseRequest(request);
-		// std::cout << req.header("Accept").substr(0, req.header("Accept").find(",")) << std::endl;
-		// std::cout << req.header("User-Agent") << std::endl;
-		// std::cout << req.header("Connection") << std::endl;
+		
 		Response res;
+		try {
+			req.isFormed(res);
+			// req.isMatched(res);
+			// req.isRedirected(res);
+			// req.isAllowed(res);
+			// req.whichMethode(res); // GET POST DELETE
+			res.send();
+		}
+		catch (...) {
+			res.send();
+		}
+
+		// if (req.getMethode() == "GET") {
+		// 	std::string path = req.getPathname();
+		// 	std::cout << "|" << path << "|" << std::endl;
+		// 	struct stat  s;
+		// 	if (stat(path.c_str(), &s) == 0 && s.st_mode & S_IFDIR )
+		// 	{
+		// 		std::cout << "==> isDerctory <==" << std::endl;
+		// 	}
+		// 	else
+		// 	{
+		// 		std::cout << "==> isfile <==" << std::endl;
+		// 	}
+		// }
+		// else if (req.getMethode() == "POST") {
+
+		// }
+		// else if (req.getMethode() == "DELETE") {
+
+		// }
+
+		// res.
+
+		// maps s = req.getBody();
+		// for (maps::iterator i = s.begin(); i != s.end(); i++)
+		// {
+		// 	std::cerr << i->first << " " << i->second << std::endl ;
+		// }
+		
+		// std::cerr << req.getQuery() << std::endl;
+
 		res.setHeader("server", "dokoko");
-		res.setHeader("Content-Type", req.header("Accept").substr(0, req.header("Accept").find(",")));
-		std::cout << "pathname = " << req.getPathname() << std::endl;
+		res.setHeader("Content-Type", res.getMimeType(extention(req.getPathname())) );
+		std::string a = req.header("Host");
+		// std::cout << "|" << a << "|" << std::endl << std::flush;
+
+		// std::cout << "Host " <<  req.header("Host") << "\n";
+		std::string	host;
+		int			port = 80;
+		std::vector<std::string> h = split(a, ":");
+		for (size_t i = 0; i < h.size(); i++)
+		{
+			if (i == 0)
+				host = h[i];
+			else
+				port = std::stoi(h[i]);
+		}
+
+		// std::cout << h[0].size() << " " << h[].size() << std::endl;
+		// if (!h.empty() && h.size() >= 2) {
+		// 	if (!h[0].empty())
+		// 		std::cout << "1 - |" << h[0] << "|\n" << std::flush;
+		// 	if (!h[1].empty()) 
+		// 		std::cout << "2 - |" << h[1] << "|\n" << std::flush;
+		// }
+
+		// if (!h.empty())
+		// {
+		// 	std::cout << h[0].empty() << " " << h[1].empty() << std::endl;
+		// 	if (!h[0].empty())
+		// 		host = h[0];
+		// 	if (!h[1].empty())
+		// 		port = std::stoi(h[1]);
+		// }
+		// std::cout << host << " " << port << std::endl;
+
 		if (req.getPathname() == "/")
-			res.setBody(readFile("/Users/mzeroual/Desktop/webserv/src/Request/webTestGetmethode/index.html"));
+		{
+			res.setHeader("Content-Type", res.getMimeType(".html"));
+			content = readF("/Users/mzeroual/Desktop/webserv/src/Request/web/index.html");
+
+		}
 		else
-			res.setBody(readFile("/Users/mzeroual/Desktop/webserv/src/Request/webTestGetmethode" + req.getPathname()));
-		// res.setHeader("Content-Length", std::to_string(res.getResponse().size()));
+			content = readF("/Users/mzeroual/Desktop/webserv/src/Request/web/" + req.getPathname());
+
+
+		if (!content.empty())
+			res.setBody(content);
 		res.makeHeaderResponse();
 		res.makeBodyResponse();
-		std::cout << req.getQuery() << std::endl;
-		// std::cout << res.getResponse();
-
-		// // status.
-		// Response res;
 		
-		// // if(!status.isFormed(req) || !status.isMatched(req, servers.getAllServers()))
-		// if(!status.isMatched(req, servers.getAllServers()))
+		// std::cout << "==>" << "/Users/mzeroual/Desktop/webserv/src/Request/web/" + req.getPathname() << "\n" << res.getResponse() << "<=="  << std::endl;
+		std::string response = res.getResponse();
+		// std::cerr << response << std::endl;
+		// write(working[i].fdpoll.fd, response.c_str(), response.length());
+		// size_t countwrite = 0;
+		// ssize_t byteSend = 0;
+		size_t len = response.length();
+		size_t len1 = len;
+		
+		// int ii = -1;
+		while (len)
+		{
+			if (len < READ_SIZE) {
+				while(len)
+				{
+					if (write(working[i].fdpoll.fd, response.c_str() + len1-len, 1) == -1)
+					{
+						// std::cerr << "write failed!" << std::endl;
+						if (read(working[i].fdpoll.fd, 0, 1) <= 0)
+							return ;
+						continue;
+					}
+					len--;
+				}
+			}
+			else {
+				if (write(working[i].fdpoll.fd, response.c_str() + len1-len, READ_SIZE) == -1)
+				{
+					if (read(working[i].fdpoll.fd, 0, 1) <= 0)
+						return ;
+					// std::cerr << "write failed!" << std::endl;
+					continue;
+				}
+				len -= READ_SIZE;
+			}
+		}
+
+		// ssize_t s = send(working[i].fdpoll.fd, response.c_str() + c, READ_SIZE, 0);
+		// if (s == -1)
 		// {
-		// 	res.addRequestLine(status.getVersion(), std::to_string(status.getStatusCode()), status.getMsg());
-		// 	res.addHeader("Server" , "webserv");
-		// 	res.addBlankLine();
-		// 	res.addBody(status.getMsg());
+		// 	close(working[i].fdpoll.fd);
+		// 	return ;
 		// }
-		// else
+		// else if (s && s != READ_SIZE)
+		// 	break ;
+		// c += READ_SIZE;
+
+
+		// while (len1 > 0)
 		// {
-		// 	// std::cout << "here --" << std::endl;
-		// 	// if ()
-		// 	// {
-		// 	// 	res.addRequestLine(status.getVersion(), std::to_string(status.getStatusCode()), status.getMsg());
-		// 	// 	res.addHeader("Server" , "webserv");
-		// 	// 	res.addBlankLine();
-		// 	// 	res.addBody(status.getMsg());
+		// 	ii++;
+		// 	byteSend = write(working[i].fdpoll.fd, response.c_str() + countwrite, READ_SIZE);
+		// 	if (byteSend == -1) {
+		// 		std::cout << "write error " << ii << std::endl;
+		// 		break ;
+		// 	}
+		// 	// if (countwrite == len) {
+		// 	// 	// std::cout << "0" << "\n";
+		// 	// 	break ;
 		// 	// }
-
-		// 	res.addRequestLine(status.getVersion(), std::to_string(status.getStatusCode()), status.getMsg());
-		// 	res.addHeader("Server", "webserv");
-		// 	std::cout << req.getPathname() << std::endl << std::flush;
-		// 	std::cout << req.extention(req.getPathname()) << std::endl << std::flush;
-		// 	std::cout << res.getMimeType(req.extention(req.getPathname())) << std::endl << std::flush;
-		// 	std::string MIMEType = res.getMimeType(req.extention(req.getPathname()));
-		// 	if (!MIMEType.empty())
-		// 		res.addHeader("Content-Type", MIMEType);
-		// 	// res.addHeader("Content-Length" , req.header(std::to_string(status.getBody().length()));
-		// 	res.addBlankLine();
-		// 	res.addBody(status.getBody());
+		// 	// else {
+		// 	// countwrite += (size_t)byteSend;
+		// 	countwrite += READ_SIZE;
+		// 	// if (countwrite >= response.length())
+		// 		// break;
+		// 	len1 -= READ_SIZE;
+		// 	std::cout << len1 - READ_SIZE << std::endl;
+		// 	// std::cout << countwrite << " " << byteSend << " "  << READ_SIZE << std::endl;
+		// 	// std::cerr << byteSend << " "  << READ_SIZE << std::endl;
 		// }
+		// std::cout << "----------------------------------------" <<  std::endl;
 
 
-		// std::string respond;
-		// respond = "HTTP/1.1 200 OK\r\n\r\nOK";
-		std::cout << write(working[i].fdpoll.fd, res.getResponse().c_str(), res.getResponse().size()) << " | " << res.getResponse().size() << std::endl;
+		// write(working[i].fdpoll.fd, res.getResponse().c_str(), res.getResponse().size());
 		close(working[i].fdpoll.fd);
-		erase(master,i);
+		erase(master, i);
 	}
 }
 
@@ -258,8 +354,9 @@ void ManageServers::acceptConection()
 		}
 
 		// pworking
-		
+		// [8080, 80 , 555]
 		int pint = poll(&pworking[0], static_cast<nfds_t>(pworking.size()), 6000);
+
 		for (size_t i = 0; i < pworking.size(); i++)
 		{
 			working[i].fdpoll = pworking[i];
@@ -272,10 +369,12 @@ void ManageServers::acceptConection()
 		if(pint < 0)
 			throw std::runtime_error("poll : poll was filed");
 		for (size_t i = 0; i < working.size(); i++)
-		{
+		{ 
 			try{handler(working, master, i);}
 			catch(std::runtime_error &e){std::cout << e.what() << std::endl;}
+			signal(SIGPIPE, SIG_IGN);
 		}
+
 		
 	}
 	

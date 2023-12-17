@@ -11,7 +11,8 @@ std::vector<std::string> split(std::string line, std::string sep)
 		std::string l = line.substr(0, pos);
 		if (!l.empty())
 			sp.push_back(l);
-		line = line.substr(pos + sep.length(), line.length());
+		pos += sep.length();
+		line.erase(0, pos);
 	}
 	sp.push_back(line.substr(0, line.length()));
 	return (sp);
@@ -86,6 +87,7 @@ void Request::parseHeader( std::string reqHeader )
 	size_t								newlinePos = 0;
 	size_t								pos = 0;
 
+	this->_header.clear();
 	while ((newlinePos = reqHeader.find("\n")) != std::string::npos)
 	{
 		line = reqHeader.substr(0, newlinePos);
@@ -114,10 +116,10 @@ void Request::parseBody( std::string reqBody )
 {
 	std::string key;
 	std::string value;
-
-	if (this->getMethod() == "POST" && this->header("Content-Type") == "application/x-www-form-urlencoded")
+	this->_body.clear();
+	if (this->getMethode() == "POST" && this->header("Content-Type") == "application/x-www-form-urlencoded")
 		this->query = reqBody;
-	else if (this->getMethod() == "POST" && this->header("Content-Type") == "multipart/form-data")
+	else if (this->getMethode() == "POST" && this->header("Content-Type") == "multipart/form-data")
 	{
 		std::string bondray = this->header("boundary");
 		if (!bondray.empty())
@@ -146,7 +148,7 @@ void Request::parseBody( std::string reqBody )
 	}
 }
 
-void Request::parseUrl()
+void Request::parseUrl( void )
 {
     std::string pathname;
     size_t pos = 0;
@@ -178,7 +180,7 @@ std::string Request::body(const std::string &key) const
 	return ("");
 }
 
-const std::string &Request::getMethod() const
+const std::string &Request::getMethode() const
 {
     return (this->method);
 }
@@ -235,4 +237,22 @@ std::string Request::extention( const std::string &path) const
 	if (pos != std::string::npos)
 		extention = path.substr(pos, path.length());
 	return (extention);
+}
+
+
+// check request with config file
+void Request::isFormed(Response &res) {
+	(void)res;
+}
+void Request::isMatched(Response &res) {
+	(void)res;
+}
+void Request::isRedirected(Response &res) {
+	(void)res;
+}
+void Request::isAllowed(Response &res) {
+	(void)res;
+}
+void Request::whichMethode(Response &res) {
+	(void)res;
 }
