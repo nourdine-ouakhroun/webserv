@@ -66,6 +66,7 @@ class   SocketDependencies
 		std::string	respond;
     	std::string chunked_rest;
 		std::string	rest;
+		size_t hex_valeu;
 };
 
 #endif
