@@ -23,13 +23,15 @@ int	Server::createNewSocket(unsigned short port)
 	socketData.sin_port = htons(port);
 	socketData.sin_family = AF_INET;
 	socketData.sin_addr.s_addr = INADDR_ANY;
+	// socketData.sin_addr.s_addr = convertStringToBinary(String("10.11.3.7"));
+	std::cout << "socketData.sin_addr.s_addr : " << socketData.sin_addr.s_addr << std::endl;
 	if (bind(nSocket, (struct sockaddr *)&socketData, socketLen) < 0 || listen(nSocket, 5) < 0)
 	{
 		close(nSocket);
 		nSocket = -1;
 		return (-1);
 	}
-	fds.push_fd(nSocket);
+	fds.push_fd(nSocket, socketData);
 	return (nSocket);
 }
 
@@ -45,7 +47,7 @@ Server::Server(const unsigned short &_port)
 	int status = setsockopt(socketFd, SOL_SOCKET ,SO_REUSEADDR , &opt, sizeof(int));
 	if(status < 0)
 	{
-       		std::cerr << "Couldn't set options" << std::endl;
+		Logger::error(std::cerr, "Couldn't set options", "");
 		throw (ServerException("setsockopt faild."));
 	}
 	bzero(&socketData, socketLen);
@@ -55,9 +57,10 @@ Server::Server(const unsigned short &_port)
 	if (bind(socketFd, (struct sockaddr *)&socketData, socketLen) < 0 || listen(socketFd, 5) < 0)
 	{
 		close(socketFd);
+		Logger::error(std::cerr, "Couldn't bind address to socket.", "");
 		throw (ServerException("bind faild."));
 	}
-	fds.push_fd(socketFd);
+	fds.push_fd(socketFd, socketData);
 }
 
 Server::Server(const Server& copy)
@@ -82,13 +85,9 @@ Server&	Server::operator=(const Server& target)
 	return (*this);
 }
 
-int 	Server::accept(int targetSocket)
+int 	Server::accept(int targetSocket, struct sockaddr* clientAddress)
 {
-	int newSocket = (int)::accept(
-						targetSocket,
-						(struct sockaddr *)&socketData, 
-						(socklen_t *)&socketLen
-					);
+	int newSocket = (int)::accept(targetSocket, clientAddress, (socklen_t *)&socketLen);
 	if (newSocket < 0)
 		return (errorNumber);
 	fcntl(newSocket, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
@@ -99,7 +98,6 @@ String	Server::recieve(int socket)
 {
 	String	buffer;
 	char	tmp[100];
-
 	while (1)
 	{
 		bzero(tmp, 100);
@@ -117,15 +115,19 @@ ssize_t	Server::send(int socket, String&	response)
 {
 	ssize_t	totalBytes = 0;
 	size_t responseLength = response.length();
-    while (1)
-    {
-        ssize_t	nBit = ::send(socket, response.c_str() + totalBytes, responseLength - (size_t)totalBytes, 0);
-		std::cout << "nBit : " << nBit << std::endl;
-        if (nBit < 0)
-                return (-1);
-        totalBytes += nBit;
-        if (totalBytes == (ssize_t)response.length())
-                return (-1);
-    }
-    return (totalBytes);
+	while (1)
+	{
+		ssize_t	nBit = ::send(socket, response.c_str() + totalBytes, responseLength - (size_t)totalBytes, 0);
+		if (nBit < 0)
+		{
+			if (totalBytes == (ssize_t)response.length())
+				return (totalBytes);
+			return (-1);
+		}
+		totalBytes += nBit;
+		if (totalBytes == (ssize_t)response.length())
+			return (totalBytes);
+		// usleep(100);
+	}
+	return (totalBytes);
 }
