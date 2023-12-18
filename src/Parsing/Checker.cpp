@@ -74,6 +74,9 @@ void    Checker::checkValues( void )
 {
     for (size_t i = 0; i < servers.size(); i++)
     {
+        std::vector<Data> listens = servers.at(i).getData("listen");
+        if (listens.empty() == true)
+            servers[i].addData(Data("lsten", "80"));
         std::vector<Data> data = servers.at(i).getAllData();
         if (data.empty() == false)
             for (size_t j = 0; j < data.size(); j++)

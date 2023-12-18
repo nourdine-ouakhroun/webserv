@@ -22,7 +22,10 @@ Poll::~Poll( void )
 Poll&   Poll::operator=(const Poll& target)
 {
     if (this != &target)
+    {
         fds = target.fds;
+        clientInfo = target.clientInfo;
+    }
     return (*this);
 }
 
@@ -46,24 +49,32 @@ int		Poll::waitingRequest( void )
 	return (poll(&fds[0], (nfds_t)fds.size(), 5000));
 }
 
-void    Poll::push_fd(int fd)
+void    Poll::push_fd(int fd, struct sockaddr_in _clientInfo)
 {
     struct pollfd pfd;
     pfd.fd = fd;
     pfd.events = POLLIN | POLLOUT;
     fds.push_back(pfd);
+    clientInfo.push_back(_clientInfo);
 }
 
 void    Poll::erase_fd(int fd)
 {
-    std::vector<struct pollfd>::iterator begin = fds.begin();
-    while (begin < fds.end())
+    for (size_t i = 0; i < fds.size(); i++)
     {
-        if (begin->fd == fd)
+        if (fds.at(i).fd == fd)
         {
-            fds.erase(begin);
+            fds.erase(fds.begin() + (long)i);
+            clientInfo.erase(clientInfo.begin() + (long)i);
             return ;
         }
-        begin++;
     }
+}
+
+struct sockaddr_in  Poll::getClientInfo(int fd)
+{
+    for (size_t i = 0; i < fds.size(); i++)
+        if (fds.at(i).fd == fd)
+            return (clientInfo.at(i));
+    throw (std::exception());
 }
