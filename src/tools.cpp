@@ -30,35 +30,6 @@ unsigned short	getPort(String	value)
 	return port;
 }
 
-std::vector<ServerPattern>	getServer(ServerData& servers, std::vector<Data> header)
-{
-	GeneralPattern model(header);
-	std::vector<ServerPattern>	servModel;
-	// String strHost(model.getData("Host").at(0).getValue());
-	String strHost;
-    if (model.getData("Host").empty() == true)
-            return (servModel);
-    strHost = model.getData("Host").at(0).getValue();
-	if (strHost.empty())
-		return (servers.getServersByServerName("\"\""));
-	std::vector<String> str = strHost.split(':');
-	if (str.empty() == false)
-	{
-		servModel = servers.getServersByServerName(str.at(0));
-		if (servModel.empty() == false)
-			return (servModel);
-	}
-	long host = std::strtol(strHost.c_str(), NULL, 10);
-	if (host != 0)
-		servModel = servers.getServersByPort(getPort(model.getData("Host").at(0).getValue()));
-	else
-		servModel = servers.getServersByServerName(model.getData("Host").at(0).getValue());
-	if (servModel.empty() == true)
-		servModel.push_back(servers.getDefaultServer());
-	return (servModel);
-}
-
-
 std::vector<int>	openAllPorts(const std::vector<ServerPattern>& serversInfo, Server& server)
 {
 	std::vector<int> ports;
