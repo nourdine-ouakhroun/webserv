@@ -3,6 +3,7 @@
 
 #include"SocketDependencies.hpp"
 #include"Server.hpp"
+#include <cstdio>
 
 #define NPOS  std::string::npos 
 #define GET 0

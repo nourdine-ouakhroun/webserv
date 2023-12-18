@@ -15,6 +15,7 @@ void ReadRequest::checkReqeust()
 {
 	
 }
+static int j;
 void	ReadRequest::Requist()
 {
 	ssize_t		bytes;
@@ -26,6 +27,8 @@ void	ReadRequest::Requist()
 	bytes = recv(socket.getFdPoll().fd, buffer, READ_NUMBER - 1, 0);
 	if(bytes == 0)
 	{
+		if(socket.status == PUTINFILE)
+			std::remove(socket.getFileName().c_str());
 		socket.setContenlenght(socket.getLenght());
 		socket.rest.clear();
 	}
@@ -39,18 +42,21 @@ void	ReadRequest::Requist()
 		if(socket.getRequist().empty() == true)
 			setOnlyHeadre(request);
 		if(socket.ischunked == true)
-		{
-			socket.chunked_rest.insert(0, request);
 			handelChunked(request);
-		}
 		request.insert(0, socket.rest);
 		socket.rest = request;
+		// if(j >= 1)
+		// {
+		// 	exit(1);
+		// }
+		j++;
 		while (!socket.rest.empty())
 		{
 			if(socket.getMethod() == POST)
 				removePartOfupload();
 		}
 	}
+	std::cout << socket.getLenght() << " : " << socket.getContenlenght() << std::endl;
 	if(socket.getLenght() != socket.getContenlenght() || !socket.rest.empty())
 		throw std::runtime_error("");
 	return ;
@@ -63,48 +69,47 @@ int	HexToDecimal(std::string hex)
     stream >> std::hex >> decimal;
     return decimal;
 }
-// static int j;
+static int l;
 void	ReadRequest::handelChunked(std::string &Requist)
 {
-	
-	// std::cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl;
-	// j++;
-
-	// std::cout << "*************" << socket.chunked_rest  << "*************" << std::endl;
 	std::string tmpRequest;
-	while (!socket.chunked_rest.empty())
+	// std::cout << "////////////befor : " << Requist << "////////////" << std::endl;
+	// std::ofstream fileB("/Users/nouakhro/Desktop/subjects/webserv/befor", std::fstream::app);
+	// fileB << Requist << std::endl;
+	// exit(1);
+	while (!Requist.empty())
 	{
-		size_t pos = socket.chunked_rest.find("\r\n");
-		if(pos == NPOS)
+		if(socket.hex_valeu == 0)
 		{
-			tmpRequest.append(socket.chunked_rest);
-			socket.chunked_rest.erase(0, socket.chunked_rest.size());
+			size_t pos = Requist.find("\r\n");
+			if(pos == NPOS)
+			{
+				tmpRequest.append(Requist);
+				Requist.erase(0, Requist.size());
+				socket.hex_valeu = 0;
+				break;
+			}
+			std::string hex = Requist.substr(0, pos);
+			socket.hex_valeu = (size_t)HexToDecimal(hex);
+			Requist.erase(0, pos + 2);
+		}
+		if(socket.hex_valeu > Requist.size())
+		{
+			tmpRequest.append(Requist);
+			socket.hex_valeu -= Requist.size();
+			Requist.erase(0, Requist.size());
 			break;
 		}
-		std::string hex = socket.chunked_rest.substr(0, pos);
-		size_t nextHexPos = (size_t)HexToDecimal(hex);
-		std::cout << hex << std::endl;
-		if(nextHexPos > socket.chunked_rest.size())
-		{
-
-			socket.chunked_rest = socket.chunked_rest;
-			socket.chunked_rest.erase(0, socket.chunked_rest.size());
-			break;
-		}
-		socket.chunked_rest.erase(0, pos + 2);
-		tmpRequest.append(socket.chunked_rest.substr(0, nextHexPos));
-		socket.chunked_rest.erase(0, nextHexPos + 2);
+		tmpRequest.append(Requist.substr(0, socket.hex_valeu));
+		Requist.erase(0, socket.hex_valeu + 2);
+		socket.hex_valeu = 0;
 	}
-	// if(j > 0)
-	// {
-	// 	// exit(1);
-	// }
-	// if(j > 1)
-	// {
-		std::cout << "*************" << tmpRequest  << "*************" << std::endl;
-		// exit(1);
-	// }
 	Requist = tmpRequest;
+	// std::ofstream fileA("/Users/nouakhro/Desktop/subjects/webserv/after", std::fstream::app);
+	// fileA << Requist << std::endl;
+	// if(l >= 35)
+	// 	exit(1);
+	l++;
 }
 
 void	ReadRequest::removePartOfupload()
@@ -117,7 +122,7 @@ void	ReadRequest::removePartOfupload()
 			putInString();
 		else if(socket.status == PUTINFILE)
 			putInFile();
-		else if(socket.status == DEFAULT && (begin = socket.rest.find(socket.getBoundary()) != NPOS))
+		else if(socket.status == DEFAULT && (begin = socket.rest.find(socket.getBoundary())) != NPOS)
 			checkIfFile(begin);
 	}
 	else
@@ -126,11 +131,20 @@ void	ReadRequest::removePartOfupload()
 		socket.appendLenght(socket.rest.size());
 	}
 }
-static int i;
+// static int i;
 void	ReadRequest::checkIfFile(size_t	&begin)
 {
 	std::string tmp_string;
-    removeBoundary(tmp_string, begin);
+	try
+	{
+    	removeBoundary(tmp_string, begin);
+	}
+	catch(const std::string& e)
+	{
+		std::cerr << e << '\n';
+		return;
+	}
+	
 	size_t	pos = tmp_string.find("filename=\"", begin);
 	if(pos != NPOS)
 	{
@@ -142,30 +156,27 @@ void	ReadRequest::checkIfFile(size_t	&begin)
 		return ;
 	}
 	socket.setRequist(tmp_string);
-	if(i >= 12)
-	{
-		// std::cout << "\n\n\n\n\n\n\n$$$$$$$$$$$$$$$$ after " << socket.getRequist() << "$$$$$$$$$$$$$$" << std::endl;
-		// exit(1);
-	}
-	if(socket.getRequist().find(socket.getBoundary() + "--") != NPOS)
-	{
-		socket.appendLenght(socket.rest.size());
-		socket.setRequist(socket.rest);
-		socket.rest.erase(0, socket.rest.size());
-		return;
-	}
 	socket.status = PUTINSTRING;
 	return;
 }
 
 void    ReadRequest::removeBoundary(std::string & tmp_string, size_t	&begin)
 {
+	std::cout << socket.rest << std::endl;
+	if(socket.rest.find(socket.getBoundary() + "--") == begin)
+	{
+		socket.appendLenght(socket.rest.size());
+		socket.setRequist(socket.rest);
+		socket.rest.erase(0, socket.rest.size());
+		exit(1);
+		throw "end of string";
+	}
 	begin = socket.rest.rfind("\r\n", begin);
 	if(begin == NPOS)
 		begin = 0;
 	size_t	end = socket.rest.find("\r\n\r\n", begin + 2);
 	if(end == NPOS)
-		end = socket.rest.size();
+		throw std::runtime_error("");
 	else
 		end += 4;
 	tmp_string = socket.rest.substr(begin,  end  - begin);
@@ -202,11 +213,6 @@ void	ReadRequest::putInString()
 
 	if((begin = socket.rest.find(socket.getBoundary())) != NPOS)
 	{
-		if(i >= 11)
-		{
-			std::cout << "\n\n\n\n\n\n\n*************" << socket.rest << "*************" << std::endl;
-			exit(1);
-		}
 		size_t	end = socket.rest.rfind("\r\n", begin);
 		if(end == NPOS)
 			end = 0;
@@ -214,14 +220,6 @@ void	ReadRequest::putInString()
 		socket.appendLenght(end);
 		socket.rest.erase(0, end);
 		socket.status = DEFAULT;
-		if(i >= 12)
-		{
-			// std::cout << "\n\n\n\n\n\n\n*************" << socket.getRequist() << "*************" << std::endl;
-			// std::cout  << socket.rest.size();
-			// std::cout << "\n\n\n\n\n\n\n*************" << socket.rest << "*************" << std::endl;
-			exit(1);
-		}
-		i++;
 		return ;
 	}
 	size_t	end = socket.rest.rfind("\r\n");
@@ -230,14 +228,6 @@ void	ReadRequest::putInString()
 	socket.setRequist(socket.rest.substr(0, end));
 	socket.appendLenght(end);
 	socket.rest.erase(0, end);
-	if(i >= 12)
-	{
-		// std::cout << "\n\n\n\n\n\n\n*************" << socket.getRequist() << "*************" << std::endl;
-		// std::cout  << socket.rest.size();
-		// std::cout << "\n\n\n\n\n\n\n*************" << socket.rest << "*************" << std::endl;
-		exit(1);
-	}
-	i++;
 }
 
 void	ReadRequest::setOnlyHeadre(std::string &Requist)
