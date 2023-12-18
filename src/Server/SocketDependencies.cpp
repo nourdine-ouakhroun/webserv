@@ -8,7 +8,7 @@ SocketDependencies::SocketDependencies(/* args */)
     lenght = -1;
 	method = -1;
 	status = 0;
-
+	hex_valeu = 0;
 }
 // SocketDependencies::SocketDependencies(const SocketDependencies&	socket)
 // {
