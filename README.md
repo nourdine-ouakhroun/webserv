@@ -121,3 +121,8 @@ See also the list of [contributors](https://github.com/kylelobo/The-Documentatio
 - Hat tip to anyone whose code was used
 - Inspiration
 - References
+
+
+## 🔗 RESOURSES <a name = "resourses">
+
+- <a href="https://www.digitalocean.com/community/tutorials/understanding-nginx-server-and-location-block-selection-algorithms"> understanding nginx server and location block selection algorithms </a>

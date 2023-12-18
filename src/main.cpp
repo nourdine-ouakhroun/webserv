@@ -1,6 +1,16 @@
 #include "webserver.h"
 
 
+unsigned int convertStringToBinary(String str)
+{
+	unsigned int res = 0;
+	std::vector<String> strs = str.split('.');
+	for (size_t i = 0; i < strs.size(); i++)
+		res += (unsigned int)strtol(strs[i].c_str(), NULL, 10) << i * 8;
+	return (res);
+}
+
+
 void	handleLogges(GeneralPattern& server)
 {
 	static int stdout_fd;
@@ -113,10 +123,9 @@ ResponseHeader	to_do(GeneralPattern& targetInfo, String path)
 		handleLogges(targetInfo);
 		return (autoIndexing(targetInfo, path));
 	}
-	catch (std::exception&){
-
+	catch (std::exception&)
+	{
 	}
-
 	std::vector<Data>	data = targetInfo.getData("root");
 	file = getRootPath(data.at(0).getValue(), path);
 	if (targetInfo.getData("alias").empty() == false)
@@ -151,20 +160,14 @@ ResponseHeader	to_do(GeneralPattern& targetInfo, String path)
 	return (getErrorPage(targetInfo.getData("error_page"), "404", "Not Found"));
 }
 
-ResponseHeader	handler(ServerData& servers, GeneralPattern &model)
+ResponseHeader	handler(ServerPattern& server, GeneralPattern &model, int readyFd)
 {
-	std::vector<ServerPattern>	servModel;
 	ResponseHeader	responseHeader;
-
-	servModel = getServer(servers, model.getAllData());
-	if (servModel.empty() == true)
-		servModel = servers.getAllServers();
+	(void)readyFd;
 	String method = model.getData("Method").begin()->getValue();
 	String path(method.split()[1]);
 	path.trim(" \t\r\n");
-	ServerPattern server = servModel.at(0);
-	if (server.empty())
-		return (getErrorPage(server.getData("error_page"), "400", "Bad Request"));
+	String strHost = model.getData("Host").at(0).getValue();
 	handleLogges(server);
 	// Logger::success(std::cout, "REQUEST ==> ", method);
 	std::vector<Data> roots = server.getData("root");
@@ -176,10 +179,10 @@ ResponseHeader	handler(ServerData& servers, GeneralPattern &model)
 	responseHeader.fileName(root);
 		return (responseHeader);
 	}
-	if (*(path.end() - 1) != '/')
+	if (path.back() != '/')
 		return (responseHeader.status("301 Moved Permanently").location(path + "/"));
 	path.rightTrim("/");
-	LocationPattern	loca = ServerPattern::getLocationByPath(servModel.at(0).getLocation(), path);
+	LocationPattern	loca = ServerPattern::getLocationByPath(server.getLocation(), path);
 	std::vector<Data> returns = loca.getData("return");
 	if (returns.empty() == false)
 	{
@@ -206,16 +209,18 @@ ResponseHeader	handler(ServerData& servers, GeneralPattern &model)
 	return (to_do(target, loca.getPath()));
 }
 
+
 bool	requestHandler(const std::vector<int>& port, Server& server, ServerData& serv, int readyFd)
 {
+	struct sockaddr_in clientSocket;
 	if (readyFd < 0)
 		return (true);
 	if (find(port.begin(), port.end(), readyFd) != port.end())
 	{
-		int newClient = server.accept(readyFd);
+		int newClient = server.accept(readyFd, (struct sockaddr *)&clientSocket);
 		if (newClient < 0)
 			return (false);
-		server.fds.push_fd(newClient);
+		server.fds.push_fd(newClient, clientSocket);
 	}
 	else
 	{
@@ -227,7 +232,19 @@ bool	requestHandler(const std::vector<int>& port, Server& server, ServerData& se
 		ResponseHeader response;
 		try
 		{
-			response = handler(serv, model);
+			String strHost = model.getData("Host").at(0).getValue();
+			struct sockaddr_in	clientInfo_in = server.fds.getClientInfo(readyFd);
+			// struct sockaddr*	clientInfo = (struct sockaddr*)&clientInfo_in;
+			std::cout << "================> " << clientInfo_in.sin_addr.s_addr << " IP ADDRESS : " << convertStringToBinary(String("10.11.3.7")) << " <======================" << std::endl;
+			std::vector<ServerPattern> servModel = ServerData::getServer(serv, readyFd, strHost);
+			if (servModel.empty() == true)
+				servModel = serv.getAllServers();
+
+			ServerPattern servPattern = servModel.at(0);
+			if (servModel.empty())
+				response = getErrorPage(servPattern.getData("error_page"), "400", "Bad Request");
+
+			response = handler(servPattern, model, readyFd);
 			String filename = response.getFileName();
 			if (filename.empty() == false)
 			{
@@ -240,7 +257,6 @@ bool	requestHandler(const std::vector<int>& port, Server& server, ServerData& se
 					std::ostringstream oss;
 					oss << str->size();
 					response.contentLength(oss.str());
-					// std::cout << accept.at(0).getValue().split(':').at(0) << std::endl;
 					if (accept.at(0).getValue().split(':').at(0).contains("image") == true)
 						response.contentType("*/*");
 					response.connection("close");
@@ -254,25 +270,18 @@ bool	requestHandler(const std::vector<int>& port, Server& server, ServerData& se
 			response.status("500 Internal Server Error").body(new String("500 Internal Server Error"));
 		}
 		String *resStr = response.toString();
-		// static int nlog;
-		// std::cout << ++nlog << " ";
-		// Logger::success(std::cout, "Response ==> ", resStr->substr(0, resStr->find('\r')));
+		static int nlog;
+		std::cout << ++nlog << " ";
+		Logger::success(std::cout, "Response ==> ", resStr->substr(0, resStr->find('\r')));
 		// ssize_t resStrlen = (ssize_t)resStr->length();
-		// while (1)
+		// ssize_t sender = server.send(readyFd, *resStr);
+		server.send(readyFd, *resStr);
+		// if (sender == resStrlen)
 		// {
-			ssize_t sender = server.send(readyFd, *resStr);
-			// std::cout << "resStrlen : " << resStrlen << std::endl;
-			std::cout << "sender : " << sender << std::endl;
-		// 	if (sender == resStrlen || sender == -1)
-		// 		break ;
+		close(readyFd);
+		server.fds.erase_fd(readyFd);
 		// }
 		delete resStr;
-		String method(model.getData("Method").begin()->getValue().split()[0]);
-		if (!method.compare("GET"))
-		{
-			close(readyFd);
-			server.fds.erase_fd(readyFd);
-		}
 	}
 	return (true);
 }
@@ -286,7 +295,14 @@ void	runServerByPoll(ServerData& serv, Server& server, std::vector<int> port)
 		if (pollReturn < 0)
 			break ;
 		if (pollReturn == 0)
+		{
+			// for(size_t i = 0; i < server.fds.fdsSize(); i++)
+			// {
+			// 	close(server.fds.fds[i].fd);
+			// 	server.fds.erase_fd(server.fds.fds[i].fd);
+			// }
 			continue ;
+		}
 		for (int i = 0; i < (int)tmpPoll.fdsSize(); i++)
 			requestHandler(port, server, serv, tmpPoll.getReadyFd(i));
 	}
@@ -315,7 +331,7 @@ void	start(Parser& parser)
 	}
 }
 
- int	main(int ac, char **av)
+int	main(int ac, char **av)
 {
 	if (ac < 2)
 	{
@@ -331,7 +347,7 @@ void	start(Parser& parser)
 	}
 	catch (ParsingException& e)
 	{
-		Logger::error(std::cerr, e.what(), "");
+		Logger::error(std::cerr, e.what(), "afdsfasdf");
 	}
 	return (0);
 }

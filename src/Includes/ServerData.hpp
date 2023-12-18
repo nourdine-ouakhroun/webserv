@@ -11,8 +11,9 @@
 
 class ServerData
 {
-	std::vector<ServerPattern> servers;
-
+	private :
+		std::vector<ServerPattern> servers;
+		// unsigned short	getPort(String	value);
 	public :
 		ServerData( void );
 		ServerData(const std::vector<ServerPattern>&);
@@ -20,10 +21,12 @@ class ServerData
 		ServerData&	operator=(const ServerData&);
 		void	setServerData(const std::vector<ServerPattern>&);
 		void	displayServers( void );
-		std::vector<ServerPattern>	getServersByServerName(const String& serverName);
-		std::vector<ServerPattern>	getServersByPort(const unsigned short& port);
+		static std::vector<ServerPattern>	getServersByServerName(const std::vector<ServerPattern>& servers, const String& serverName);
+		static std::vector<ServerPattern>	getServersByPort(const std::vector<ServerPattern>& servers, const unsigned short& port);
+		static const ServerPattern&	getDefaultServer(const std::vector<ServerPattern>& servers);
 		const std::vector<ServerPattern>&	getAllServers();
-		const ServerPattern&	getDefaultServer( void );
+
+		static std::vector<ServerPattern>	getServer(ServerData& servers, int port, String strHost);
 
 };
 

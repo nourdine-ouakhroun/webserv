@@ -1,7 +1,6 @@
 #ifndef	SERVER_HPP
 #define SERVER_HPP
 
-#include <netinet/in.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <cstring>
@@ -29,7 +28,7 @@ class Server
 		Server&	operator=(const Server& target);
 		int		createNewSocket(unsigned short port);
 		int		getAvailabeFD( void );
-		int		accept(int targetSocket);
+		int 	accept(int targetSocket, struct sockaddr* clientAddress);
 		String	recieve(int socket);
 		ssize_t	send(int socket, String &response);
 		Poll	getFds( void ) const
@@ -42,6 +41,6 @@ String	readFile(const String& path);
 unsigned short	getPort(String	value);
 std::vector<ServerPattern>	getServer(ServerData& servers, std::vector<Data> header);
 std::vector<int>	openAllPorts(const std::vector<ServerPattern>& serversInfo, Server& server);
-
+unsigned int convertStringToBinary(String str);
 
 #endif
