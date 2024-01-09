@@ -5,7 +5,7 @@ Server::Server( void )
 	socketLen = sizeof(socketData);
 }
 
-int	Server::createNewSocket(unsigned short port)
+int	Server::createNewSocket(String ip, unsigned short port)
 {
 	int opt = 1;
 	int nSocket = socket(AF_INET, SOCK_STREAM, 0);
@@ -22,24 +22,23 @@ int	Server::createNewSocket(unsigned short port)
 	bzero(&socketData, socketLen);
 	socketData.sin_port = htons(port);
 	socketData.sin_family = AF_INET;
-	socketData.sin_addr.s_addr = INADDR_ANY;
-	// socketData.sin_addr.s_addr = convertStringToBinary(String("10.11.3.7"));
+	socketData.sin_addr.s_addr = convertStringToBinary(ip);
 	std::cout << "socketData.sin_addr.s_addr : " << socketData.sin_addr.s_addr << std::endl;
 	if (bind(nSocket, (struct sockaddr *)&socketData, socketLen) < 0 || listen(nSocket, 5) < 0)
 	{
 		close(nSocket);
 		nSocket = -1;
+		exit(1);
 		return (-1);
 	}
 	fds.push_fd(nSocket, socketData);
 	return (nSocket);
 }
 
-Server::Server(const unsigned short &_port)
+Server::Server(String _ip, const unsigned short _port)
 {
 	int opt = 1;
 	socketLen = sizeof(socketData);
-	port = _port;
 	int socketFd = socket(AF_INET, SOCK_STREAM, 0);
 	if (socketFd < 0)
 		throw (ServerException("socket faild."));
@@ -51,9 +50,9 @@ Server::Server(const unsigned short &_port)
 		throw (ServerException("setsockopt faild."));
 	}
 	bzero(&socketData, socketLen);
-	socketData.sin_port = htons(port);
+	socketData.sin_port = htons(_port);
 	socketData.sin_family = AF_INET;
-	socketData.sin_addr.s_addr = INADDR_ANY;
+	socketData.sin_addr.s_addr = convertStringToBinary(_ip);
 	if (bind(socketFd, (struct sockaddr *)&socketData, socketLen) < 0 || listen(socketFd, 5) < 0)
 	{
 		close(socketFd);
@@ -80,7 +79,6 @@ Server&	Server::operator=(const Server& target)
 		fds = target.fds;
 		socketData = target.socketData;
 		socketLen = target.socketLen;
-		port = target.port;
 	}
 	return (*this);
 }
@@ -127,7 +125,6 @@ ssize_t	Server::send(int socket, String&	response)
 		totalBytes += nBit;
 		if (totalBytes == (ssize_t)response.length())
 			return (totalBytes);
-		// usleep(100);
 	}
 	return (totalBytes);
 }

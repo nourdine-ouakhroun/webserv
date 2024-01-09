@@ -26,33 +26,6 @@ String*  getContentFile(String file)
     return (content);
 }
 
-String	getRootPath(String	root, String path)
-{
-	String file(root);
-	file.append(path).append((file.end() - 1)[0] == '/' ? "" : "/");
-	return (file);
-}
-
-String	getAliasPath(String	aliasPath)
-{
-	aliasPath.rightTrim("/");
-	return (aliasPath.append("/"));
-}
-
-String	tryFiles(const std::vector<String>& files, const String& path)
-{
-	String value;
-	for (size_t i = 0; i < files.size() - 1; i++)
-	{
-		String tmp(files.at(i));
-		String::size_type pos = tmp.find("$uri");
-		if (pos != String::npos)
-			tmp.replace(pos, 4, path);
-		if (checkFile(tmp) == true)
-			return (tmp);
-	}
-	return (value);
-}
 
 String	getFileContent(const std::vector<String>& indexes, const String& path)
 {
