@@ -14,6 +14,10 @@ String	getAliasPath(String	aliasPath);
 String	tryFiles(const std::vector<String>& files, const String& path);
 String	getFileContent(const std::vector<String>& indexes, const String& path);
 String	getDirectoryContent(const String& dirname, String path);
+void	handleLogges(GeneralPattern& server);
+ResponseHeader	errorPage(std::vector<Data> errorPages, String errorNumber, String message);
+ResponseHeader	autoIndexing(GeneralPattern& loca, const String& dir, String	path);
+ResponseHeader	returnDirective(const std::vector<Data> &returns, ResponseHeader &responseHeader);
 
 bool	checkFile(String file);
 

@@ -28,3 +28,8 @@ void	Data::printData(const Data& data, String& str)
 {
 	std::cout << str << "Key	==>	" << data.getKey() << "	| Value	==>	" << data.getValue() << std::endl;
 }
+
+void	Data::printData(const Data& data, const String& str)
+{
+	std::cout << str << "Key	==>	" << data.getKey() << "	| Value	==>	" << data.getValue() << std::endl;
+}

@@ -33,22 +33,26 @@ unsigned short	getPort(String	value)
 std::vector<int>	openAllPorts(const std::vector<ServerPattern>& serversInfo, Server& server)
 {
 	std::vector<int> ports;
+	std::vector<String> tmpInfo;
 	int newSocket;
 	for (size_t i = 0; i < serversInfo.size(); i++)
 	{
 		std::vector<Data> data = serversInfo[i].getData("listen");
-		if (data.empty() == true)
-			data.push_back(Data("listen", "80"));
 		for (size_t i = 0; i < data.size(); i++)
 		{
-			unsigned short port = (unsigned short)strtol(data[i].getValue().c_str(), NULL, 10);
-			newSocket = server.createNewSocket(port);
+			if (std::find(tmpInfo.begin(), tmpInfo.end(), data[i].getValue()) != tmpInfo.end())
+				continue ;
+			tmpInfo.push_back(data[i].getValue());
+			std::vector<String> listen = data[i].getValue().split(':');
+			unsigned short port = (unsigned short)strtol(listen[1].c_str(), NULL, 10);
+			newSocket = server.createNewSocket(listen[0], port);
 			if (newSocket == -1)
 				continue ;
 			Logger::info(std::cout, "Listen to port : ", port);
 			ports.push_back(newSocket);
 		}
 	}
+	tmpInfo.clear();
 	if (ports.empty() == true)
 		throw (ServerException("Invalid Ports."));
 	return (ports);

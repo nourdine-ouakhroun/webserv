@@ -266,6 +266,7 @@ Parser::Parser(const String& _fileName) : fileName(_fileName)
 	splitContentIntoServers();	// Split File Content into vector of vector of String.
 	getFinalResualt();	// convert vector of vector String into vector of ServerModel.
 	checkServerKeys(); // check is there is unknow Keys.
+	checkingInfos();
 }
 
 /**
@@ -657,6 +658,9 @@ std::vector<Data>	Parser::parseHeader(const String& header)
 	return (vec);
 }
 
+/**
+ * @brief	Check All Location Keys is valid or not.
+*/
 void    Parser::checkLocationKeys(const std::vector<LocationPattern>& loca, const std::vector<String>& keys)
 {
     for (size_t i = 0; i < loca.size(); i++)
@@ -673,6 +677,7 @@ void    Parser::checkLocationKeys(const std::vector<LocationPattern>& loca, cons
             checkLocationKeys(loca.at(i).getInnerLocation(), keys);  
     }
 }
+
 /**
  * @brief	Check All Keys inside File config is exists.
 */
@@ -693,6 +698,35 @@ void	Parser::checkServerKeys( void )
 		}
 		checkLocationKeys(servers.at(i).getLocation(), keys);
 	}
+}
+
+void    Parser::checkingInfos( void )
+{
+    for (size_t i = 0; i < servers.size(); i++)
+    {
+        std::vector<Data> data = servers.at(i).getData("listen");
+		if (data.empty())
+		{
+			servers.at(i).addData(Data("listen", "0.0.0.0:80"));
+			continue;
+		}
+        for (size_t j = 0; j < data.size(); j++)
+        {
+            String characters(".0123456789:");
+            String value(data.at(j).getValue());
+            for (size_t z = 0; z < value.size(); z++)
+                if (std::find(characters.begin(), characters.end(), value.at(z)) == characters.end())
+                    throw (ParsingException("check Failed : invalid character in listen."));
+            std::vector<String> strs = value.split(':');
+            if (strs.size() == 1)
+            {
+                if (strs.at(0).find('.') == String::npos)
+                    servers.at(i).updateData(Data("listen", "0.0.0.0:" + strs[0]), j);
+                else
+                    servers.at(i).updateData(Data("listen", strs[0] + ":80"), j);
+            }
+        }
+    }
 }
 
 /**
