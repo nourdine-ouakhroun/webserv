@@ -24,6 +24,11 @@ void	ServerData::setServerData(const std::vector<ServerPattern>& serversData)
 	servers = serversData;
 }
 
+const std::vector<ServerPattern>&	ServerData::getAllServers()
+{
+	return (servers);
+}
+
 void	ServerData::displayServers( void )
 {
 	std::vector<ServerPattern>::iterator	iterBegin = servers.begin();
@@ -54,6 +59,8 @@ std::vector<ServerPattern>	ServerData::getServersByServerName(const std::vector<
 		}
 		iterBegin++;
 	}
+	if (serv.empty())
+		return (servers);
 	return (serv);
 }
 
@@ -66,16 +73,14 @@ std::vector<ServerPattern>	ServerData::getServersByPort(const std::vector<Server
 	{
 		std::vector<Data> value = iterBegin->getData("listen");
 		for (size_t i = 0; i < value.size(); i++)
-			if (value.empty() == false && (unsigned short)std::strtol(value[i].getValue().c_str(), NULL, 10) == port)
+		{
+			std::vector<String> values = value[i].getValue().split(':');
+			if (values.size() && (unsigned short)std::strtol(values[values.size() - 1].c_str(), NULL, 10) == port)
 				serv.push_back(*iterBegin);
+		}
 		iterBegin++;
 	}
 	return (serv);
-}
-
-const std::vector<ServerPattern>&	ServerData::getAllServers()
-{
-	return (servers);
 }
 
 const ServerPattern&	ServerData::getDefaultServer(const std::vector<ServerPattern>& servers)

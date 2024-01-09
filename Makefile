@@ -3,6 +3,7 @@ NAME		=	webserv
 
 SRCS		=	src/main.cpp \
 				src/tools.cpp \
+				src/DirectiveBehavior.cpp \
 				src/configurationTools.cpp \
 				src/Parsing/Parser.cpp \
 				src/Parsing/Checker.cpp \
@@ -49,5 +50,8 @@ fclean		:	clean
 
 re		: fclean all
 
-run		:	all
+cclean 	:
+	bash ~/Cleaner_42.sh
+
+run		:	cclean	all
 	./webserv configurations/default.conf

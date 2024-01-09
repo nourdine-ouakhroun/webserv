@@ -18,6 +18,7 @@ class Data
 		String	getValue( void ) const;
 		
 		static	void	printData(const Data& data, String&);
+		static	void	printData(const Data& data, const String&);
 };
 
 #endif

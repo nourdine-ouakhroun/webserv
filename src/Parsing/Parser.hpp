@@ -47,6 +47,7 @@ class Parser
 		String	readFile( void );
 		void	checkServerKeys( void );
 		void	checkLocationKeys(const std::vector<LocationPattern>& loca, const std::vector<String>& keys);
+		void	checkingInfos( void );
 };
 
 #endif

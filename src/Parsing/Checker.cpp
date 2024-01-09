@@ -115,6 +115,7 @@ void    Checker::checkBooleanValues(String key)
     }
 }
 
+
 void    Checker::fullCheck( void )
 {
     if (servers.empty() == true)
