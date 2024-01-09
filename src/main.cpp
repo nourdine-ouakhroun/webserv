@@ -76,31 +76,23 @@ ResponseHeader	handler(ServerPattern& server, GeneralPattern &model, int readyFd
 {
 	ResponseHeader	responseHeader;
 	(void)readyFd;
-	String method = model.getData("Method").begin()->getValue();
+	String method = model.getData("Method").front().getValue();
 	String path(method.split()[1]);
 	path.trim(" \t\r\n");
-	String strHost = model.getData("Host").at(0).getValue();
+	String strHost = model.getData("Host").front().getValue();
 	handleLogges(server);
 
 	// std::cout << "model.getData(\"Host\")[0].getValue() : " << model.getData("Host")[0].getValue() << std::endl;
 
 	std::vector<Data> roots = server.getData("root");
 	String root;
-	if (roots.empty())
-	{
-		root = getRootPath(roots.at(0).getValue(), path);
-		if (server.getData("alias").empty() == false)
-			root = getAliasPath(server.getData("alias").at(0).getValue());
-	}
+	if (roots.empty() == false)
+		root = roots.front().getValue();
 
 	{
-
 		// check is url is a file.
 		if (root.empty() == false && server.checkIsDirectory(root.append(path)) == 0)
-		{
-			std::cout << "hello world" << std::endl;
 			return (responseHeader.fileName(root));
-		}
 	}
 
 	{
@@ -154,7 +146,7 @@ bool	requestHandler(const std::vector<int>& port, Server& server, ServerData& se
 		String header = server.recieve(readyFd);
 		if (header.empty() == true)
 			return (true);
-		std::cout << header << std::endl;
+		// std::cout << header << std::endl;
 		GeneralPattern model(Parser::parseHeader(header));
 		ResponseHeader response;
 		try
