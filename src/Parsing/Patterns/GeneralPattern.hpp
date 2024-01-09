@@ -13,8 +13,10 @@ class GeneralPattern
 		GeneralPattern(std::vector<Data> _data);
 		GeneralPattern(const GeneralPattern& copy);
 		virtual						~GeneralPattern( void ) throw();
-		GeneralPattern&			operator=(const GeneralPattern& target);
+		GeneralPattern&				operator=(const GeneralPattern& target);
 
+		GeneralPattern&				setData(const std::vector<Data> &data);
+		void						updateData(const Data& _data, size_t pos);
 		void						addData(const Data& _data);
 		std::vector<Data>			getData(const String& key) const;
 		const std::vector<Data>&	getAllData( void ) const;
@@ -22,6 +24,7 @@ class GeneralPattern
 		virtual bool				empty( void ) const;
 		virtual	String				getPath( void ) const;
 		virtual	void				execute( void ) const;
+		static	void				printGeneralPattern(const GeneralPattern&, const String&);
 		static	void				printGeneralPattern(const GeneralPattern&, String&);
 };
 

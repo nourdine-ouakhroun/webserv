@@ -126,3 +126,5 @@ See also the list of [contributors](https://github.com/kylelobo/The-Documentatio
 ## 🔗 RESOURSES <a name = "resourses">
 
 - <a href="https://www.digitalocean.com/community/tutorials/understanding-nginx-server-and-location-block-selection-algorithms"> understanding nginx server and location block selection algorithms </a>
+
+- <a href="http://nginx.org/en/docs/http/request_processing.html#:~:text=In%20this%20configuration%20nginx%20tests,default%20server%20for%20this%20port."> How nginx processes a request </a>

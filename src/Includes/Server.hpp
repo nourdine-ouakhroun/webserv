@@ -15,18 +15,17 @@ class Server
 {
 	struct	sockaddr_in	socketData;
 	socklen_t	socketLen;
-	unsigned short	port;
 	static const int errorNumber = -202;
 
 
 	public :
 		Poll	fds;
 		Server( void );
-		Server(const unsigned short &_port);
+		Server(String _ip, const unsigned short _port);
 		Server(const Server& copy);
 		~Server( void ) throw();
 		Server&	operator=(const Server& target);
-		int		createNewSocket(unsigned short port);
+		int		createNewSocket(String ip, unsigned short port);
 		int		getAvailabeFD( void );
 		int 	accept(int targetSocket, struct sockaddr* clientAddress);
 		String	recieve(int socket);
@@ -40,7 +39,7 @@ class Server
 String	readFile(const String& path);
 unsigned short	getPort(String	value);
 std::vector<ServerPattern>	getServer(ServerData& servers, std::vector<Data> header);
-std::vector<int>	openAllPorts(const std::vector<ServerPattern>& serversInfo, Server& server);
 unsigned int convertStringToBinary(String str);
+std::vector<int>	openAllPorts(const std::vector<ServerPattern>& serversInfo, Server& server);
 
 #endif

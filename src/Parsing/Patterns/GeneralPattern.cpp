@@ -22,9 +22,13 @@ GeneralPattern::~GeneralPattern( void )  throw()
 GeneralPattern&	GeneralPattern::operator=(const GeneralPattern& target)
 {
 	if (this != &target)
-	{
-		data = target.data;
-	}
+		setData(target.data);
+	return (*this);
+}
+
+GeneralPattern	&GeneralPattern::setData(const std::vector<Data> &data)
+{
+	this->data = data;
 	return (*this);
 }
 
@@ -89,6 +93,23 @@ void	GeneralPattern::printGeneralPattern(const GeneralPattern& model, String &st
 	}
 }
 
+void	GeneralPattern::printGeneralPattern(const GeneralPattern& model, const String &str)
+{
+	std::vector<Data>::const_iterator	ibegin = model.getAllData().begin();
+	std::vector<Data>::const_iterator	iend = model.getAllData().end();
+	while (ibegin < iend)
+	{
+		Data::printData(*ibegin, str);
+		ibegin++;
+	}
+}
+
 void	GeneralPattern::execute( void ) const
 {
+}
+
+void	GeneralPattern::updateData(const Data& _data, size_t pos)
+{
+	data[pos] = _data;
+	_data.printData(data[pos], "\t");
 }

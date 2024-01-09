@@ -20,7 +20,6 @@ class Checker
         void        checkLocationValues(const std::vector<LocationPattern>& loca, String key);
         void        checkBooleanValues(String key);
 
-
 };
 
 
