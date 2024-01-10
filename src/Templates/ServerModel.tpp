@@ -1,8 +1,8 @@
-#ifndef SERVERMODEL_TPP
-#define SERVERMODEL_TPP
+#ifndef ServerPattern_TPP
+#define ServerPattern_TPP
 
 template <typename T>
-bool	ServerModel::findLocationByPath(std::vector<Location> locations, const String& rootPath,
+bool	ServerPattern::findLocationByPath(std::vector<Location> locations, const String& rootPath,
 						const String& srcPath, void (*to_do) (const Location&, T&), T& value)
 {
 	static std::vector<Location> tmplocations;
@@ -21,7 +21,7 @@ bool	ServerModel::findLocationByPath(std::vector<Location> locations, const Stri
 			String root;
 			if (roots.empty() == false)
 				root = roots.at(0).getValue();
-			if (root.empty() == false && ServerModel::checkIsDirectory(root.append(srcPath)) == 0)
+			if (root.empty() == false && ServerPattern::checkIsDirectory(root.append(srcPath)) == 0)
 			{
 				value.append(readFile(root));
 				return (true);

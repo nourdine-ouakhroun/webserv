@@ -11,6 +11,7 @@ class Data
 	String value;
 
 	public :
+		Data(){}
 		Data(const String& _key, const String& _value);
 		void	setKey(const String& Key);
 		void	setValue(const String& Value);

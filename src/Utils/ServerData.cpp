@@ -24,7 +24,7 @@ void	ServerData::setServerData(const std::vector<ServerPattern>& serversData)
 	servers = serversData;
 }
 
-const std::vector<ServerPattern>&	ServerData::getAllServers()
+const std::vector<ServerPattern>&	ServerData::getAllServers() const
 {
 	return (servers);
 }

@@ -23,6 +23,9 @@ class String : public std::string
 		bool	contains(const String& str) const;
 		bool	equal(const String& value) const;
 		static String	convertVectorToString(const std::vector<String>& strings, unsigned int begin/* = 0*/, unsigned int len/* = 1*/, char separator/* = 0*/);
+		size_t memStringSearchLast(std::string sstring, size_t lentgh);
+		size_t memStringSearch(std::string sstring, size_t lentgh);
+		String memSubstr(size_t begin, size_t end);
 };
 
 

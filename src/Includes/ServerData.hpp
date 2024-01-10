@@ -24,7 +24,7 @@ class ServerData
 		static std::vector<ServerPattern>	getServersByServerName(const std::vector<ServerPattern>& servers, const String& serverName);
 		static std::vector<ServerPattern>	getServersByIpAndPort(const std::vector<ServerPattern>& servers, String strHost);
 		static const ServerPattern&	getDefaultServer(const std::vector<ServerPattern>& servers);
-		const std::vector<ServerPattern>&	getAllServers();
+		const std::vector<ServerPattern>&	getAllServers() const;
 
 		static std::vector<ServerPattern>	getServer(ServerData& servers, int port, String strHost);
 

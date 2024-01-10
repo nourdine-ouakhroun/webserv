@@ -32,7 +32,7 @@ class Parser
 		const	std::vector<ServerPattern>&	getServers( void ) const;
 		static std::vector<Data>	parseHeader(const String& header);
 		
-		void	printServerModel(const ServerPattern& server);
+		void	printServerPattern(const ServerPattern& server);
 	
 	private :
 		Data	extractDataFromString(String& line);
