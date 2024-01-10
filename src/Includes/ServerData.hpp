@@ -22,7 +22,7 @@ class ServerData
 		void	setServerData(const std::vector<ServerPattern>&);
 		void	displayServers( void );
 		static std::vector<ServerPattern>	getServersByServerName(const std::vector<ServerPattern>& servers, const String& serverName);
-		static std::vector<ServerPattern>	getServersByPort(const std::vector<ServerPattern>& servers, const unsigned short& port);
+		static std::vector<ServerPattern>	getServersByIpAndPort(const std::vector<ServerPattern>& servers, String strHost);
 		static const ServerPattern&	getDefaultServer(const std::vector<ServerPattern>& servers);
 		const std::vector<ServerPattern>&	getAllServers();
 
