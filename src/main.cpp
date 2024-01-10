@@ -146,7 +146,7 @@ bool	requestHandler(const std::vector<int>& port, Server& server, ServerData& se
 		String header = server.recieve(readyFd);
 		if (header.empty() == true)
 			return (true);
-		// std::cout << header << std::endl;
+		std::cout << header << std::endl;
 		GeneralPattern model(Parser::parseHeader(header));
 		ResponseHeader response;
 		try

@@ -15,7 +15,7 @@ SRCS		=	src/main.cpp \
 				src/Exception/ParsingException.cpp \
 				src/Utils/ServerData.cpp \
 				src/Exception/ServerException.cpp \
-				src/Server/Server.cpp \
+				src/ES-Server/Server.cpp \
 				src/Utils/Poll.cpp \
 				src/Utils/ResponseHeader.cpp \
 #				src/Utils/Select.cpp
