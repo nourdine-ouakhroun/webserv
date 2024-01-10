@@ -264,7 +264,7 @@ Parser::Parser(const String& _fileName) : fileName(_fileName)
 	getFileContent(); // Reading Content From File and put it in File Content String.
 	checkSyntax(); // Checking syntax error and throwing an Exception when error exists.
 	splitContentIntoServers();	// Split File Content into vector of vector of String.
-	getFinalResualt();	// convert vector of vector String into vector of ServerModel.
+	getFinalResualt();	// convert vector of vector String into vector of ServerPattern.
 	checkServerKeys(); // check is there is unknow Keys.
 	checkingInfos();
 }
@@ -549,7 +549,7 @@ LocationPattern	Parser::getLocations(std::vector<String>::iterator& begin, const
 }
 
 /**
- * @brief	Separate between Location and Data, and store it in ServerModel.
+ * @brief	Separate between Location and Data, and store it in ServerPattern.
  * @param	content The Server Part.
 */
 void	Parser::parsingFile(std::vector<String> content)
@@ -594,7 +594,7 @@ void	Parser::getFinalResualt( void )
  * @brief	Prant Server Model Infos.
  * @param	server	Server to print
 */
-void	Parser::printServerModel(const ServerPattern& server)
+void	Parser::printServerPattern(const ServerPattern& server)
 {
 	std::vector<LocationPattern>::const_iterator b = server.getLocation().begin();
 	std::vector<LocationPattern>::const_iterator e = server.getLocation().end();

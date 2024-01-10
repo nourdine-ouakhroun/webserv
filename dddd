@@ -1,0 +1,3909 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <map>
+#include <algorithm>
+#include<cmath>
+
+using namespace std;
+class entity
+{
+    public :
+        entity(int x,int y, int id)
+        {
+            this->x = x;
+            this->y = y;
+            this->id = id;
+        }
+        int x;
+        int y;
+        int id;
+        int dest;
+};
+class Enemy : public entity
+{
+    public :
+        Enemy(int x,int y, int id, int near_base, int health, int target, int shield_life) : entity(x, y,  id){
+            this->near_base = near_base;
+            this->health = health;
+            this->terget = target;
+            this->shield_life = shield_life;
+
+        }
+        int shield_life;
+        int near_base;
+        int terget;
+        int health;
+};
+class Heros : public entity
+{
+    public :
+        int shield_life;
+        int is_controlled;
+        multimap<int, Enemy> dest;
+        multimap<int, Enemy> helth;
+        multimap<int, Enemy> desth;
+        multimap<int, Heros> herosc;
+        multimap<int, Heros> herosh;
+        Heros(int x,int y, int id, int shield_life ,int is_controlled) : entity(x, y,  id){
+            this->shield_life = shield_life;
+        }
+        ~Heros(){}
+};
+/**
+ * Auto-generated code below aims at helping you parse
+ * the standard input according to the problem statement.
+ **/
+int main()
+{
+    int base_x; // The corner of the map representing your base
+    int base_y;
+    cin >> base_x >> base_y; cin.ignore();
+    int heroes_per_player; // Always 3
+    cin >> heroes_per_player; cin.ignore();
+
+
+    // game loop
+    while (1) {
+        int mana1;
+        vector <Enemy> enemy;
+        vector <Heros> heros;
+        for (int i = 0; i < 2; i++) {
+            int health; // Each player's base health
+            int mana; // Ignore in the first league; Spend ten mana to cast a spell
+            cin >> health >> mana; cin.ignore();
+            if(i == 0)
+                mana1 = mana;
+        }
+        int entity_count; // Amount of heros and monsters you can see
+        cin >> entity_count; cin.ignore();
+        for (int i = 0; i < entity_count; i++) {
+            int id; // Unique identifier
+            int type; // 0=monster, 1=your hero, 2=opponent hero
+            int x; // Position of this entity
+            int y;
+            int shield_life; // Ignore for this league; Count down until shield spell fades
+            int is_controlled; // Ignore for this league; Equals 1 when this entity is under a control spell
+            int health; // Remaining health of this monster
+            int vx; // Trajectory of this monster
+            int vy;
+            int near_base; // 0=monster with no target yet, 1=monster targeting a base
+            int threat_for; // Given this monster's trajectory, is it a threat to 1=your base, 2=your opponent's base, 0=neither
+            cin >> id >> type >> x >> y >> shield_life >> is_controlled >> health >> vx >> vy >> near_base >> threat_for; cin.ignore();
+            if( type == 1 )
+            {
+                Heros h(x, y, id, shield_life, is_controlled);
+                heros.push_back(h);
+            }
+            else if( type == 0 )
+            {
+                Enemy e(x, y, id, near_base, health, threat_for, shield_life);
+                if(heros.size())
+                {
+                    for(size_t j = 0; j < heros.size();j++)
+                    {
+                        int dest = ;
+                        heros[j].dest.insert(pair<int, Enemy>(dest, e));
+                        heros[j].helth.insert(pair<int, Enemy>(health, e));
+                        dest = sqrt(pow((heros[j].x - e.x), 2) + pow((heros[j].y - e.y), 2));
+                        heros[j].desth.insert(pair<int, Enemy>( , e));
+                    }
+                }
+                enemy.push_back(e);
+            }
+            else
+            {
+                int dest;
+                Heros h(x, y, id, shield_life, is_controlled);
+                for(size_t j = 0; j < heros.size();j++)
+                {
+                    dest = sqrt(pow((base_x - h.x), 2) + pow((base_y - h.y), 2));
+                    heros[j].herosc.insert(pair<int, Heros>(dest, h));
+                }
+            }
+        }
+        for (int i = 0; i < heroes_per_player; i++) {
+            if(enemy.size())
+            {
+                if(i == 1)
+                {
+                    int dest1;
+                    int dest2;
+                    multimap<int, Heros>::iterator ithe = heros[i].herosc.begin();
+                    multimap<int, Enemy>::iterator itd = heros[i].desth.begin();
+                    multimap<int, Enemy>::iterator it = heros[i].dest.begin();
+                    dest1 = sqrt(pow((heros[i].x - ithe->second.x), 2) + pow((heros[i].y - ithe->second.y), 2));
+                    int dest;
+                    dest = sqrt(pow((heros[i].x - it->second.x), 2) + pow((heros[i].y - it->second.y), 2));
+                    dest2 = sqrt(pow((heros[i].x - ithe->second.x), 2) + pow((heros[i].y - ithe->second.y), 2));
+                    size_t j = 0;
+                    for(size_t index = 0; index < 10;index++ )
+                    {
+                        if(it->first < 6000 && it->second.terget == 1)
+                            j++;
+                        if(it == heros[i].dest.end())
+                        {
+                            break;
+                        }
+                        it++;
+                    }
+                    it = heros[i].dest.begin();
+                    if(mana1 < 30)
+                        cout << "MOVE " << it->second.x  << " " << it->second.y << endl;
+                    else if(heros[i].herosc.size() && dest2 < 1000)
+                    {
+                        if(base_x == 0)
+                            cout << "SPELL WIND " << base_x + 17000 <<  " " << base_y + 8000 << endl;
+                        else
+                            cout << "SPELL WIND " << base_x - 17000 <<  " " << base_y - 8000 << endl;
+                    }
+                    else if(heros[i].herosc.size() && dest2 < 2000)
+                    {
+                        if(base_x == 0)
+                            cout << "SPELL CONTROL "  << ithe->second.id << " "<< base_x + 17000 <<  " " << base_y + 8000 << endl;
+                        else
+                            cout << "SPELL CONTROL "  << ithe->second.id << " "<< base_x - 17000 <<  " " << base_y - 8000 << endl;
+                    }
+                    else if(it->first < 4000 && it->second.terget == 1 && it->second.shield_life)
+                        cout << "MOVE " << it->second.x  << " " << it->second.y << endl;
+                    else if(heros[i].herosc.size() && dest2 > 3000 && ithe->first < 9000)
+                            cout << "MOVE " << ithe->second.x  << " " << ithe->second.y << endl;
+                    else if(j >= 8)
+                    {
+                        if ( heros[i].herosc.size() && dest1 < 2000 && !heros[i].shield_life ){
+                            cout << "SPELL SHIELD " << heros[i].id << endl;
+                        }
+                        else if( it->first < 2000 )
+                        {
+                            if(it->first < 1000)
+                            {
+                                if(dest > 1000)
+                                    cout << "MOVE " << it->second.x  << " " << it->second.y << endl;
+                                else
+                                {
+                                    if(mana1 > 2)
+                                    {
+                                        if(base_x == 0)
+                                            cout << "SPELL WIND " << base_x + 17000 <<  " " << base_y + 8000 << endl;
+                                        else
+                                            cout << "SPELL WIND " << base_x - 17000 <<  " " << base_y - 8000 << endl;
+                                    }
+                                    else
+                                        cout << "MOVE " << it->second.x  << " " << it->second.y << endl;
+                                }
+
+                            }
+                            else if(dest < 1000)
+                            {
+                                if(mana1 && it->second.health > 10)
+                                {
+                                    if(base_x == 0)
+                                        cout << "SPELL WIND " << base_x + 17000 <<  " " << base_y + 8000 << endl;
+                                    else
+                                        cout << "SPELL WIND " << base_x - 17000 <<  " " << base_y - 8000 << endl;
+                                }
+                                else
+                                    cout << "MOVE " << it->second.x  << " " << it->second.y << endl;
+                            }
+                            else
+                                cout << "MOVE " << it->second.x  << " " << it->second.y << endl;
+
+                        }
+                        else if(it->first < 6000)
+                            cout << "MOVE " << it->second.x  << " " << it->second.y << endl;
+                        else
+                        {
+                            if(base_x == 0)
+                                cout << "MOVE " << base_x + 100  << " " << base_y + 100 << endl;
+                            else
+                                cout << "MOVE " << base_x - 100  << " " << base_y - 100 << endl;
+                        }
+                    }
+                    else
+                    {
+                        it = heros[i].dest.upper_bound(7000);
+                        if(it != heros[i].dest.end())
+                        {
+                            dest = sqrt(pow((heros[i].x - it->second.x), 2) + pow((heros[i].y - it->second.y), 2));
+                            if(it->first > 9000 && dest > 3000)
+                            {
+                                dest = sqrt(pow((base_x - itd->second.x), 2) + pow((base_y - itd->second.y), 2));
+                                if(dest < 9000)
+                                    cout << "MOVE " << itd->second.x  << " " << itd->second.y << endl;
+                                else
+                                {
+                                    if(base_x == 0)
+                                        cout << "MOVE " << base_x + 7000  << " " << base_y + 4000 << endl;
+                                    else
+                                        cout << "MOVE " << base_x - 7000  << " " << base_y - 4000 << endl;
+                                }
+                            }
+                            else if(dest < 4000 && it->first < 9000)
+                            {
+                                dest = sqrt(pow((base_x - itd->second.x), 2) + pow((base_y - itd->second.y), 2));
+                                if(dest < 8000 && dest > 3000)
+                                    cout << "MOVE " << itd->second.x  << " " << itd->second.y << endl;
+                                else
+                                    cout << "MOVE " << it->second.x  << " " << it->second.y << endl;
+                            }
+                            else
+                            {
+                                if(base_x == 0)
+                                    cout << "MOVE " << base_x + 7000  << " " << base_y + 3000 << endl;
+                                else
+                                    cout << "MOVE " << base_x - 5000  << " " << base_y - 3000 << endl;
+                            }
+                        }
+                        else if(it == heros[i].dest.end())
+                        {
+                            it--;
+                            if(it->first > 4000)
+                            {
+                                dest = sqrt(pow((heros[i].x - itd->second.x), 2) + pow((heros[i].y - itd->second.y), 2));
+                                if(dest < 4000)
+                                    cout << "MOVE " << itd->second.x  << " " << itd->second.y << endl;
+                                else
+                                    cout << "MOVE " << it->second.x  << " " << it->second.y << endl;
+                            }
+                            else
+                            {
+                                if(base_x == 0)
+                                    cout << "MOVE " << base_x + 5000  << " " << base_y + 3000 << endl;
+                                else
+                                    cout << "MOVE " << base_x - 5000  << " " << base_y - 3000 << endl;
+                            }
+
+                        }
+
+                    }
+
+                }
+                else if(i == 2)
+                {
+                    int dest1;
+                    multimap<int, Heros>::iterator ithe = heros[i].herosc.begin();
+                    dest1 = sqrt(pow((heros[i].x - ithe->second.x), 2) + pow((heros[i].y - ithe->second.y), 2));
+                    multimap<int, Enemy>::iterator it = heros[i].dest.begin();
+                    int dest;
+                    dest = sqrt(pow((heros[i].x - it->second.x), 2) + pow((heros[i].y - it->second.y), 2));
+                    if ( heros[i].herosc.size() && dest1 < 3000 && !heros[i].shield_life){
+                        cout << "SPELL SHIELD " << heros[i].id << endl;
+                    }
+                    else if( it->first < 2000 )
+                    {
+                        if(it->first < 1000)
+                        {
+                            if(dest > 1000)
+                                cout << "MOVE " << it->second.x  << " " << it->second.y << endl;
+                            else
+                            {
+                                if(mana1 > 2)
+                                {
+                                    if(base_x == 0)
+                                        cout << "SPELL WIND " << base_x + 17000 <<  " " << base_y + 8000 << endl;
+                                    else
+                                        cout << "SPELL WIND " << base_x - 17000 <<  " " << base_y - 8000 << endl;
+                                }
+                                else
+                                    cout << "MOVE " << it->second.x  << " " << it->second.y << endl;
+                            }
+
+                        }
+                        else if(dest < 1000)
+                        {
+                            if(mana1 && it->second.health > 10)
+                            {
+                                if(base_x == 0)
+                                    cout << "SPELL WIND " << base_x + 17000 <<  " " << base_y + 8000 << endl;
+                                else
+                                    cout << "SPELL WIND " << base_x - 17000 <<  " " << base_y - 8000 << endl;
+                            }
+                            else
+                                cout << "MOVE " << it->second.x  << " " << it->second.y << endl;
+                        }
+                        else
+                            cout << "MOVE " << it->second.x  << " " << it->second.y << endl;
+
+                    }
+                    else if(it->first < 6000)
+                        cout << "MOVE " << it->second.x  << " " << it->second.y << endl;
+                    else
+                        cout << "MOVE " << base_x + 100  << " " << base_y + 100 << endl;
+
+                }
+                else
+                    cout << "MOVE " << 17000  << " " << 8000 << endl;
+
+            }
+            else
+            {
+                if(i == 0)
+                    cout << "MOVE " << 8000  << " " << 1000 << endl;
+                else if(i == 2)
+                    cout << "MOVE " << base_x + 100  << " " << base_y + 100 << endl;
+                else
+                    cout << "MOVE " << 4000  << " " << 7000 << endl;
+
+            }
+            
+        }
+    }
+}
+                // if(my_drones[i].drone_x > 2000 && my_drones[i].drone_y < 2000)
+                // {
+                //     if(batry % 4 != 0)
+                //         cout << "MOVE " << 1999  << " " << 2001  << " 0" << endl;
+                //     else 
+                //         cout << "MOVE " << 1999  << " " << 2001  << " 1" << endl; 
+                // }
+                // else if(my_drones[i].drone_x < 2000 && my_drones[i].drone_y > 2000)
+                // {
+                //     if(batry % 4 != 0)
+                //         cout << "MOVE " << 2000  << " " << 8000  << " 0" << endl;
+                //     else 
+                //         cout << "MOVE " << 2000  << " " << 8000  << " 1" << endl; 
+                // }
+                // else if(my_drones[i].drone_x > 2000 && my_drones[i].drone_y < 8000)
+                // {
+                //     if(batry % 4 != 0)
+                //         cout << "MOVE " << 8000  << " " << 8000  << " 0" << endl; 
+                //     else 
+                //         cout << "MOVE " << 8000  << " " << 8000  << " 1" << endl; 
+                // }
+                // else if(my_drones[i].drone_x <=  8000 && my_drones[i].drone_y >= 8000)
+                // {
+                //     if(batry % 4 != 0)
+                //         cout << "MOVE " << my_drones[i].drone_x  << " " << 0  << " 0" << endl; 
+                //     else 
+                //         cout << "MOVE " << my_drones[i].drone_x  << " " << 0  << " 1" << endl; 
+                // }
+                // else
+                // {
+                //     if(batry % 4 != 0)
+                //         cout << "MOVE " << my_drones[i].drone_x  << " " << 0  << " 0" << endl; 
+                //     else 
+                //         cout << "MOVE " << my_drones[i].drone_x  << " " << 0  << " 1" << endl; 
+                // }
+
+                // if(my_drones[i].drone_x > 9000 && my_drones[i].drone_y >= 0)
+                // {
+                //     if(batry % 4 != 0)
+                //         cout << "MOVE " << 3000  << " " << 0  << " 0" << endl;
+                //     else 
+                //         cout << "MOVE " << 3000  << " " << 0  << " 1" << endl; 
+                // }
+                // else if(my_drones[i].drone_x < 5000 && my_drones[i].drone_y < 9000)
+                // {
+                //     if(batry % 4 != 0)
+                //         cout << "MOVE " << 2000  << " " << 9000  << " 0" << endl;
+                //     else 
+                //         cout << "MOVE " << 2000  << " " << 9000  << " 1" << endl; 
+                // }
+                // else if(my_drones[i].drone_x <= 8000 && my_drones[i].drone_y <= 9000)
+                // {
+                //     if(batry % 4 != 0)
+                //         cout << "MOVE " << 9000  << " " << 9000  << " 0" << endl; 
+                //     else 
+                //         cout << "MOVE " << 9000  << " " << 9000  << " 1" << endl; 
+                // }
+                // else if(my_drones[i].drone_x >= 8500 && my_drones[i].drone_y >= 8500)
+                // {
+                //     if(batry % 4 != 0)
+                //         cout << "MOVE " << 9000  << " " << 0  << " 0" << endl; 
+                //     else 
+                //         cout << "MOVE " << 9000  << " " << 0  << " 1" << endl; 
+                // }
+                // else
+                // {
+                //     if(batry % 4 != 0)
+                //         cout << "MOVE " << 9000  << " " << 0  << " 0" << endl; 
+                //     else 
+                //         cout << "MOVE " << 9000  << " " << 0  << " 1" << endl; 
+                // }
+
+
+
+
+
+                 int x;
+                int y;
+                multimap<int, string>::iterator it = radartmp.end();
+                for(multimap<int, string>::iterator it2 = radartmp.end();it2 != radartmp.begin();it2--)
+                {
+                    cerr << it2->second << " : " << it2->first << endl;
+                }
+                it--;
+                // cerr << it->second << endl;
+                if(scan_counttmp.size() >= 5)
+                {
+                    if(my_drones[i].drone_y == 0)
+                       scan_counttmp.clear();
+                    cout << "MOVE " << my_drones[i].drone_x  << " " << 0  << " 1" << endl;
+                }
+                else
+                {
+                    if(it->second == "BL")
+                    {
+                        x = 0;
+                        y = 9000;
+                    }
+                    else if(it->second == "TL")
+                    {
+                        x = 0;
+                        y = 0;
+                    }
+                    else if(it->second == "BR")
+                    {
+                        x = 9000;
+                        y = 9000;
+                    }
+                    else if(it->second == "TR")
+                    {
+                        x = 9000;
+                        y = 0; 
+                    }
+                    sort(my_drones[i].creatures.begin(), my_drones[i].creatures.end(), compar);
+                    vector<creature>::iterator it1 = my_drones[i].creatures.begin();
+                    for(;it1 != my_drones[i].creatures.end();it1++)
+                    {
+                        if(it1->scaned == false)
+                        {
+                            scan_count.push_back(it1->creature_id);
+                            scan_counttmp.push_back(it1->creature_id);
+                            break;
+                        }
+                    }
+                    if(it1 != my_drones[i].creatures.end())
+                    {
+                        if(batry % 4 != 0)
+                            cout << "MOVE " << it1->creature_x  << " " << it1->creature_y  << " 1" << endl; // MOVE <x> <y> <light (1|0)> | WAIT <light (1|0)>
+                        else
+                            cout << "MOVE " << it1->creature_x  << " " << it1->creature_y  << " 0" << endl; // MOVE <x> <y> <light (1|0)> | WAIT <light (1|0)>
+                    }
+                    else
+                    {
+                        if(batry % 4 != 0)
+                            cout << "MOVE " << x  << " " << y  << " 1" << endl; // MOVE <x> <y> <light (1|0)> | WAIT <light (1|0)>
+                        else
+                            cout << "MOVE " << x  << " " << y  << " 0" << endl; // MOVE <x> <y> <light (1|0)> | WAIT <light (1|0)>
+                    }
+                }
+            }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            #include <iostream>
+#include <string>
+#include <vector>
+#include <algorithm>
+#include <cmath>
+#include <map>
+
+using namespace std;
+// enum{TL, BL, BR, TR};
+// #define TL 0
+// #define BL 1
+// #define BR 2
+// #define TR 3
+/**
+ * Score points by scanning valuable fish faster than your opponent.
+ **/
+static int batry;
+struct creature
+{
+    int creature_id;
+    int creature_x;
+    int creature_y;
+    int creature_vx;
+    int creature_vy;
+    bool scaned = false;
+    int dest;
+};
+struct my_drone
+{
+    int drone_x;
+    int drone_y;
+    int emergency;
+    int battery;
+    vector<creature> creatures;
+};
+
+bool compar(creature it1,creature it2)
+{
+    return (it2.dest < it2.dest);
+}
+vector<int> scan_count;
+int main()
+{
+    cerr << "hello" << endl;
+    int creature_count;
+    cin >> creature_count; cin.ignore();
+    for (int i = 0; i < creature_count; i++) {
+        int creature_id;
+        int color;
+        int type;
+        cin >> creature_id >> color >> type; cin.ignore();
+    }
+    // cerr << creature_count << endl;
+
+    // game loop
+    while (1) {
+        map<int, my_drone> my_drones;
+    vector<int> scan_counttmp;
+        int my_score;
+        cin >> my_score; cin.ignore();
+        int foe_score;
+        cin >> foe_score; cin.ignore();
+        int my_scan_count;
+        cin >> my_scan_count; cin.ignore();
+        for (int i = 0; i < my_scan_count; i++) {
+            int creature_id;
+            cin >> creature_id; cin.ignore();
+            scan_count.push_back(creature_id);
+        }
+        // cerr << scan_count.size() << endl;
+        int foe_scan_count;
+        cin >> foe_scan_count; cin.ignore();
+        for (int i = 0; i < foe_scan_count; i++) {
+            int creature_id;
+            cin >> creature_id; cin.ignore();
+        }
+        int my_drone_count;
+        cin >> my_drone_count; cin.ignore();
+        for (int i = 0; i < my_drone_count; i++) {
+            int drone_id;
+            int drone_x;
+            int drone_y;
+            int emergency;
+            int battery;
+            cin >> drone_id >> drone_x >> drone_y >> emergency >> battery; cin.ignore();
+            my_drone tmp_struct;
+            tmp_struct.drone_x = drone_x;
+            tmp_struct.drone_y = drone_y;
+            tmp_struct.emergency = emergency;
+            tmp_struct.battery = battery;
+            my_drones[drone_id] = tmp_struct;
+        }
+        int foe_drone_count;
+        cin >> foe_drone_count; cin.ignore();
+        for (int i = 0; i < foe_drone_count; i++) {
+            int drone_id;
+            int drone_x;
+            int drone_y;
+            int emergency;
+            int battery;
+            cin >> drone_id >> drone_x >> drone_y >> emergency >> battery; cin.ignore();
+        }
+        int drone_scan_count;
+        cin >> drone_scan_count; cin.ignore();
+        for (int i = 0; i < drone_scan_count; i++) {
+            int drone_id;
+            int creature_id;
+            cin >> drone_id >> creature_id; cin.ignore();
+            if(drone_id == 0)
+            {
+                // cerr << creature_id << endl;
+                scan_count.push_back(1);
+            }
+        }
+        cerr << scan_count.size() << endl;
+        int visible_creature_count;
+        cin >> visible_creature_count; cin.ignore();
+        for (int i = 0; i < visible_creature_count; i++) {
+            int creature_id;
+            int creature_x;
+            int creature_y;
+            int creature_vx;
+            int creature_vy;
+            cin >> creature_id >> creature_x >> creature_y >> creature_vx >> creature_vy; cin.ignore();
+            // creature tmp_struct;
+            // tmp_struct.creature_vx = creature_vx;
+            // tmp_struct.creature_x = creature_x;
+            // tmp_struct.creature_y = creature_y;
+            // tmp_struct.creature_vy = creature_vy;
+            // tmp_struct.creature_id = creature_id;
+            // if(scan_count.empty() == false && find(scan_count.begin(), scan_count.end(), creature_id) != scan_count.end())
+            //     tmp_struct.scaned = true;
+            // for(int j = 0; j < my_drones.size(); j++)
+            // {
+            //     tmp_struct.dest = sqrt(pow((my_drones[j].drone_x - creature_x), 2) + pow((my_drones[j].drone_y - creature_y), 2));
+            //     // cerr << tmp_struct.dest << endl;
+            //     my_drones[j].creatures.push_back(tmp_struct);
+            // }
+        }
+        multimap<int, string> radartmp;
+        int radar_blip_count;
+        cin >> radar_blip_count; cin.ignore();
+        int rad[4]{0,0,0,0};
+        for (int i = 0; i < radar_blip_count; i++) {
+            int drone_id;
+            int creature_id;
+            string radar;
+            cin >> drone_id >> creature_id >> radar; cin.ignore();
+            
+            // if(radar == "BL" && find(scan_count.begin(), scan_count.end(), creature_id) != scan_count.end())
+            //     (rad[0])++;
+            // else if(radar == "TL" && find(scan_count.begin(), scan_count.end(), creature_id) != scan_count.end())
+            //     (rad[1])++;
+            // else if(radar == "BR" && find(scan_count.begin(), scan_count.end(), creature_id) != scan_count.end())
+            //     (rad[2])++;
+            // else if(radar == "TR" && find(scan_count.begin(), scan_count.end(), creature_id) != scan_count.end())
+            //     (rad[3])++;
+            // if(i + 1 == radar_blip_count && (rad[0] || rad[1] || rad[2] || rad[3]))
+            // {
+            //     radartmp.insert({rad[0], "BL"});
+            //     radartmp.insert({rad[1], "TL"});
+            //     radartmp.insert({rad[2], "BR"});
+            //     radartmp.insert({rad[3], "TR"});
+            // }
+            // if(radartmp.empty())
+            //     radartmp.insert({1, "BL"});
+            // cerr << radar  << " : " << creature_id << endl;
+        }
+
+        for (int i = 0; i < my_drone_count; i++) {
+            // if(scan_counttmp.size())
+            // {
+            //     if(my_drones[i].drone_y == 0)
+            //         scan_counttmp.clear();
+            //     cout << "MOVE " << my_drones[i].drone_x  << " " << 0  << " 1" << endl;
+            // }
+            // cerr << my_drones[i].drone_x << " : " << my_drones[i].drone_y << endl;
+            // if(my_drones[i].drone_x >= 8000 && my_drones[i].drone_y > 0)
+            //     cout << "MOVE " << my_drones[i].drone_x << " " << 0  << " 1" << endl;
+            // else if(my_drones[i].drone_x > 2000 && my_drones[i].drone_y < 2400)
+            //     cout << "MOVE " << 2000 << " " << 2400  << " 1" << endl; 
+            // else if(my_drones[i].drone_x <= 3000 && my_drones[i].drone_y <= 8000)
+            //     cout << "MOVE " << 2100 << " " << 8100  << " 1" << endl; 
+            // else if(my_drones[i].drone_x >= 2000 && my_drones[i].drone_y >= 8000)
+            //     cout << "MOVE " << 8000 << " " << 9000  << " 1" << endl;
+            cout << "WAIT 1" << endl;
+
+        }
+        batry++;
+    }
+}
+
+
+
+            // if(scan_counttmp.size())
+            // {
+            //     if(my_drones[i].drone_y == 0)
+            //         scan_counttmp.clear();
+            //     cout << "MOVE " << my_drones[i].drone_x  << " " << 0  << " 1" << endl;
+            // }
+            // // cerr << my_drones[i].drone_x << " : " << my_drones[i].drone_y << endl;
+            // if(my_drones[i].drone_x >= 8000 && my_drones[i].drone_y > 0)
+            //     cout << "MOVE " << my_drones[i].drone_x << " " << 0  << " 1" << endl;
+            // else if(my_drones[i].drone_x > 2000 && my_drones[i].drone_y < 2400)
+            //     cout << "MOVE " << 2000 << " " << 2400  << " 1" << endl; 
+            // else if(my_drones[i].drone_x <= 3000 && my_drones[i].drone_y <= 8000)
+            //     cout << "MOVE " << 2100 << " " << 8100  << " 1" << endl; 
+            // else if(my_drones[i].drone_x >= 2000 && my_drones[i].drone_y >= 8000)
+            //     cout << "MOVE " << 8000 << " " << 9000  << " 1" << endl;
+
+
+
+
+
+
+
+            #include <iostream>
+#include <string>
+#include <vector>
+#include <algorithm>
+#include <cmath>
+#include <map>
+
+using namespace std;
+// enum{TL, BL, BR, TR};
+// #define TL 0
+// #define BL 1
+// #define BR 2
+// #define TR 3
+/**
+ * Score points by scanning valuable fish faster than your opponent.
+ **/
+static int batry;
+struct creature
+{
+    int creature_id;
+    int creature_x;
+    int creature_y;
+    int creature_vx;
+    int creature_vy;
+    bool scaned = false;
+    int dest;
+};
+struct my_drone
+{
+    int drone_x;
+    int drone_y;
+    int emergency;
+    int battery;
+    vector<creature> creatures;
+};
+
+bool compar(creature it1,creature it2)
+{
+    return (it2.dest < it2.dest);
+}
+vector<int> scan_count;
+int main()
+{
+    // cerr << "hello" << endl;
+    int creature_count;
+    cin >> creature_count; cin.ignore();
+    for (int i = 0; i < creature_count; i++) {
+        int creature_id;
+        int color;
+        int type;
+        cin >> creature_id >> color >> type; cin.ignore();
+    }
+    // cerr << creature_count << endl;
+
+    // game loop
+    while (1) {
+        map<int, my_drone> my_drones;
+    vector<int> scan_counttmp;
+        int my_score;
+        cin >> my_score; cin.ignore();
+        int foe_score;
+        cin >> foe_score; cin.ignore();
+        int my_scan_count;
+        cin >> my_scan_count; cin.ignore();
+        for (int i = 0; i < my_scan_count; i++) {
+            int creature_id;
+            cin >> creature_id; cin.ignore();
+            scan_count.push_back(creature_id);
+        }
+        // cerr << scan_count.size() << endl;
+        int foe_scan_count;
+        cin >> foe_scan_count; cin.ignore();
+        for (int i = 0; i < foe_scan_count; i++) {
+            int creature_id;
+            cin >> creature_id; cin.ignore();
+        }
+        int my_drone_count;
+        cin >> my_drone_count; cin.ignore();
+        for (int i = 0; i < my_drone_count; i++) {
+            int drone_id;
+            int drone_x;
+            int drone_y;
+            int emergency;
+            int battery;
+            cin >> drone_id >> drone_x >> drone_y >> emergency >> battery; cin.ignore();
+            my_drone tmp_struct;
+            tmp_struct.drone_x = drone_x;
+            tmp_struct.drone_y = drone_y;
+            tmp_struct.emergency = emergency;
+            tmp_struct.battery = battery;
+            my_drones[i] = tmp_struct;
+        }
+        int foe_drone_count;
+        cin >> foe_drone_count; cin.ignore();
+        for (int i = 0; i < foe_drone_count; i++) {
+            int drone_id;
+            int drone_x;
+            int drone_y;
+            int emergency;
+            int battery;
+            cin >> drone_id >> drone_x >> drone_y >> emergency >> battery; cin.ignore();
+        }
+        int drone_scan_count;
+        cin >> drone_scan_count; cin.ignore();
+        for (int i = 0; i < drone_scan_count; i++) {
+            int drone_id;
+            int creature_id;
+            cin >> drone_id >> creature_id; cin.ignore();
+            if(drone_id == 0)
+            {
+                // cerr << creature_id << endl;
+                scan_count.push_back(1);
+            }
+        }
+        cerr << scan_count.size() << endl;
+        int visible_creature_count;
+        cin >> visible_creature_count; cin.ignore();
+        cerr << visible_creature_count << endl;
+        for (int i = 0; i < visible_creature_count; i++) {
+            int creature_id;
+            int creature_x;
+            int creature_y;
+            int creature_vx;
+            int creature_vy;
+            cin >> creature_id >> creature_x >> creature_y >> creature_vx >> creature_vy; cin.ignore();
+            // creature tmp_struct;
+            // tmp_struct.creature_vx = creature_vx;
+            // tmp_struct.creature_x = creature_x;
+            // tmp_struct.creature_y = creature_y;
+            // tmp_struct.creature_vy = creature_vy;
+            // tmp_struct.creature_id = creature_id;
+            // if(scan_count.empty() == false && find(scan_count.begin(), scan_count.end(), creature_id) != scan_count.end())
+            //     tmp_struct.scaned = true;
+            // for(int j = 0; j < my_drones.size(); j++)
+            // {
+            //     tmp_struct.dest = sqrt(pow((my_drones[j].drone_x - creature_x), 2) + pow((my_drones[j].drone_y - creature_y), 2));
+            //     // cerr << tmp_struct.dest << endl;
+            //     my_drones[j].creatures.push_back(tmp_struct);
+            // }
+        }
+        multimap<int, string> radartmp;
+        int radar_blip_count;
+        cin >> radar_blip_count; cin.ignore();
+        int rad[4]{0,0,0,0};
+        for (int i = 0; i < radar_blip_count; i++) {
+            int drone_id;
+            int creature_id;
+            string radar;
+            cin >> drone_id >> creature_id >> radar; cin.ignore();
+            
+            // if(radar == "BL" && find(scan_count.begin(), scan_count.end(), creature_id) != scan_count.end())
+            //     (rad[0])++;
+            // else if(radar == "TL" && find(scan_count.begin(), scan_count.end(), creature_id) != scan_count.end())
+            //     (rad[1])++;
+            // else if(radar == "BR" && find(scan_count.begin(), scan_count.end(), creature_id) != scan_count.end())
+            //     (rad[2])++;
+            // else if(radar == "TR" && find(scan_count.begin(), scan_count.end(), creature_id) != scan_count.end())
+            //     (rad[3])++;
+            // if(i + 1 == radar_blip_count && (rad[0] || rad[1] || rad[2] || rad[3]))
+            // {
+            //     radartmp.insert({rad[0], "BL"});
+            //     radartmp.insert({rad[1], "TL"});
+            //     radartmp.insert({rad[2], "BR"});
+            //     radartmp.insert({rad[3], "TR"});
+            // }
+            // if(radartmp.empty())
+            //     radartmp.insert({1, "BL"});
+            // cerr << radar  << " : " << creature_id << endl;
+        }
+
+        for (int i = 0; i < my_drone_count; i++) {
+            cout << "WAIT 1" << endl;
+
+        }
+        batry++;
+    }
+}
+
+
+
+
+
+
+
+
+#include <iostream>
+#include <string>
+#include <vector>
+#include <algorithm>
+#include <map>
+#include <cmath>
+
+using namespace std;
+
+/**
+ * Score points by scanning valuable fish faster than your opponent.
+ **/
+struct creature{
+    public :
+    int creature_id;
+    int creature_x;
+    int creature_y;
+    int creature_vy;
+    int creature_vx;
+    int is_mouster = false;
+    string detected_palce;
+    multimap<string, int> radars;
+    creature(int creature_id, int creature_x, int creature_y, int creature_vx, int creature_vy){
+        this->creature_vx = creature_vx;
+        this->creature_id = creature_id;
+        this->creature_x = creature_x;
+        this->creature_y = creature_y;
+        this->creature_vy = creature_vy;
+    }
+};
+struct drone{
+    public :
+    int drone_id;
+    int drone_x;
+    int drone_y;
+    int emergency;
+    int battery;
+    string detected_palce;
+    multimap<string, int> radars;
+    multimap<int,creature> creatures;
+    drone(int drone_id, int drone_x, int drone_y, int emergency, int battery ){
+        this->battery = battery;
+        this->drone_id = drone_id;
+        this->drone_x = drone_x;
+        this->drone_y = drone_y;
+        this->emergency = emergency;
+    }
+};
+void nextXY(int &x, int &y, string radar)
+{
+    if(radar == "TL")
+        x = 0; y = 0;
+    if(radar == "TR")
+        x = 9000; y = 0;
+    if(radar == "BL")
+        x = 0; y = 9000;
+    if(radar == "BR")
+        x = 9000; y = 9000;
+}
+string rad(multimap<string, int> radars)
+{
+    multimap<string, int>::iterator it_radar = radars.begin();
+    string detected_palce_F;
+    string detected_palce = it_radar->first;
+    int radar = 0;
+    int counter = 0;
+    for(;it_radar != radars.end(); it_radar++)
+    {
+        if(detected_palce == it_radar->first && next(it_radar, 1) != radars.end())
+            counter++;
+        else
+        {
+            if(counter >= radar)
+            {
+                radar = counter;
+                detected_palce_F = detected_palce;
+            }
+            counter = 1;
+        }
+        detected_palce = it_radar->first;
+    }
+    return detected_palce_F;
+}
+int main()
+{
+    vector<int> mounsters;
+    int creature_count;
+    cin >> creature_count; cin.ignore();
+    for (int i = 0; i < creature_count; i++) {
+        int creature_id;
+        int color;
+        int type;
+        cin >> creature_id >> color >> type; cin.ignore();
+        if(type == -1)
+           mounsters.push_back(creature_id);
+    }
+
+    // game loop
+    while (1) {
+        vector<drone> m_drone;
+        vector<int> scaned;
+        int my_score;
+        cin >> my_score; cin.ignore();
+        int foe_score;
+        cin >> foe_score; cin.ignore();
+        int my_scan_count;
+        cin >> my_scan_count; cin.ignore();//nothing
+        for (int i = 0; i < my_scan_count; i++) {
+            int creature_id;
+            cin >> creature_id; cin.ignore();
+        }
+        int foe_scan_count;
+        cin >> foe_scan_count; cin.ignore();
+        for (int i = 0; i < foe_scan_count; i++) {
+            int creature_id;
+            cin >> creature_id; cin.ignore();
+        }
+        int my_drone_count;
+        cin >> my_drone_count; cin.ignore();
+        for (int i = 0; i < my_drone_count; i++) {
+            int drone_id;
+            int drone_x;
+            int drone_y;
+            int emergency;
+            int battery;
+            cin >> drone_id >> drone_x >> drone_y >> emergency >> battery; cin.ignore();
+            drone tmpD(drone_id, drone_x, drone_y, emergency, battery);
+            m_drone.push_back(tmpD);
+        }
+        // cerr << m_drone.size() << endl;
+        int foe_drone_count;
+        cin >> foe_drone_count; cin.ignore();
+        for (int i = 0; i < foe_drone_count; i++) {
+            int drone_id;
+            int drone_x;
+            int drone_y;
+            int emergency;
+            int battery;
+            cin >> drone_id >> drone_x >> drone_y >> emergency >> battery; cin.ignore();
+            // cerr << drone_id << " : " << drone_x << " : " << drone_y << " : " << emergency << " : " << battery << endl;
+
+        }
+        int drone_scan_count;
+        cin >> drone_scan_count; cin.ignore();
+        for (int i = 0; i < drone_scan_count; i++) {
+            int drone_id;
+            int creature_id;
+            cin >> drone_id >> creature_id; cin.ignore();
+            for(int j = 0; j < m_drone.size(); j++)
+            {
+                if(drone_id == m_drone[j].drone_id)
+                {
+                    // cerr << drone_id << " : " << creature_id << endl;
+                    scaned.push_back(creature_id);
+                    break;
+                }
+            }
+        }
+        int visible_creature_count;
+        cin >> visible_creature_count; cin.ignore();
+        cerr << "visible_creature_count : " << visible_creature_count  << endl;
+        for (int i = 0; i < visible_creature_count; i++) {
+            int creature_id;
+            int creature_x;
+            int creature_y;
+            int creature_vx;
+            int creature_vy;
+            cin >> creature_id >> creature_x >> creature_y >> creature_vx >> creature_vy; cin.ignore();
+            if(find(scaned.begin(), scaned.end(), creature_id) == scaned.end())
+            {
+                creature tmpD(creature_id, creature_x, creature_y, creature_vx, creature_vy);
+                if(find(mounsters.begin(), mounsters.end(), creature_id) != mounsters.end())
+                    tmpD.is_mouster = true;
+                for(int j = 0; j < m_drone.size(); j++)
+                {
+                    int dest = sqrt(pow((m_drone[j].drone_x - creature_x), 2) + pow((m_drone[j].drone_y - creature_y), 2));
+                    m_drone[j].creatures.insert({dest,tmpD});
+                }
+            }
+        }
+        int radar_blip_count;
+        cin >> radar_blip_count; cin.ignore();
+        for (int i = 0; i < radar_blip_count; i++) {
+            int drone_id;
+            int creature_id;
+            string radar;
+            cin >> drone_id >> creature_id >> radar; cin.ignore();
+            for(int j = 0; j < m_drone.size(); j++)
+            {
+                if(drone_id == m_drone[j].drone_id && find(scaned.begin(), scaned.end(), creature_id) == scaned.end())
+                    m_drone[j].radars.insert({radar, creature_id});
+            }
+        }
+        for (int i = 0; i < my_drone_count; i++) {
+            if(i == 0)
+            {
+                m_drone[i].detected_palce = rad(m_drone[i].radars);
+                int x, y;
+                nextXY(x ,y ,m_drone[i].detected_palce);
+                cout << "MOVE " << x << " " << y << " " << 1 << endl; // MOVE <x> <y> <light (1|0)> | WAIT <light (1|0)>
+                cerr << m_drone[i].detected_palce << " x : " << x << " y : " << y << endl;
+            }
+            else
+                cout << "WAIT 0" << endl; // MOVE <x> <y> <light (1|0)> | WAIT <light (1|0)>
+            // Write an action using cout. DON'T FORGET THE "<< endl"
+            // To debug: cerr << "Debug messages..." << endl;
+
+            // cout << "MOVE 0 0 0" << endl; // MOVE <x> <y> <light (1|0)> | WAIT <light (1|0)>
+        }
+    }
+}
+
+
+
+#include <iostream>
+#include <string>
+#include <vector>
+#include <algorithm>
+#include <map>
+#include <cmath>
+
+using namespace std;
+
+/**
+ * Score points by scanning valuable fish faster than your opponent.
+ **/
+struct creature{
+    public :
+    int creature_id;
+    int creature_x;
+    int creature_y;
+    int creature_vy;
+    int creature_vx;
+    string radar;
+    int is_mouster = false;
+    string detected_palce;
+    creature(int creature_id, int creature_x, int creature_y, int creature_vx, int creature_vy){
+        this->creature_vx = creature_vx;
+        this->creature_id = creature_id;
+        this->creature_x = creature_x;
+        this->creature_y = creature_y;
+        this->creature_vy = creature_vy;
+    }
+};
+struct drone{
+    public :
+    int drone_id;
+    int drone_x;
+    int drone_y;
+    int emergency;
+    int battery;
+    string detected_palce;
+    multimap<string, int> radars;
+    multimap<int,creature> creatures;
+    drone(int drone_id, int drone_x, int drone_y, int emergency, int battery ){
+        this->battery = battery;
+        this->drone_id = drone_id;
+        this->drone_x = drone_x;
+        this->drone_y = drone_y;
+        this->emergency = emergency;
+    }
+};
+void nextXY(int &x, int &y, string radar)
+{
+    // cerr << "next :" << radar << endl; 
+    if(radar == "TL")
+    {
+        x = 0; y = 0;
+    }
+    else if(radar == "TR")
+    {
+        x = 9000; y = 0;
+    }
+    else if(radar == "BL")
+    {
+        x = 0; y = 9000;
+    }
+    else if(radar == "BR")
+    {
+        x = 9000; y = 9000;
+    }
+}
+vector <multimap<int,creature> >creatures;
+string rad(multimap<string, int> radars)
+{
+    multimap<string, int>::iterator it_radar = radars.begin();
+    string detected_palce_F;
+    string detected_palce = it_radar->first;
+    int radar = 0;
+    int counter = 0;
+    for(;it_radar != radars.end(); it_radar++)
+    {
+        if(detected_palce == it_radar->first && next(it_radar, 1) != radars.end())
+            counter++;
+        else
+        {
+            if(counter >= radar)
+            {
+                radar = counter;
+                detected_palce_F = detected_palce;
+            }
+            counter = 1;
+        }
+        detected_palce = it_radar->first;
+    }
+    return detected_palce_F;
+}
+static unsigned int battry;
+int main()
+{
+    vector<int> mounsters;
+    int creature_count;
+    cin >> creature_count; cin.ignore();
+    for (int i = 0; i < creature_count; i++) {
+        int creature_id;
+        int color;
+        int type;
+        cin >> creature_id >> color >> type; cin.ignore();
+        if(type == -1)
+           mounsters.push_back(creature_id);
+    }
+
+    // game loop
+    while (1) {
+        vector<drone> m_drone;
+        vector<int> scaned;
+        int my_score;
+        cin >> my_score; cin.ignore();
+        // cerr << "hello1" << endl;
+        int foe_score;
+        cin >> foe_score; cin.ignore();
+        int my_scan_count;
+        cin >> my_scan_count; cin.ignore();//nothing
+        for (int i = 0; i < my_scan_count; i++) {
+            int creature_id;
+            cin >> creature_id; cin.ignore();
+        }
+        int foe_scan_count;
+        cin >> foe_scan_count; cin.ignore();
+        for (int i = 0; i < foe_scan_count; i++) {
+            int creature_id;
+            cin >> creature_id; cin.ignore();
+        }
+        int my_drone_count;
+        cin >> my_drone_count; cin.ignore();
+        for (int i = 0; i < my_drone_count; i++) {
+            int drone_id;
+            int drone_x;
+            int drone_y;
+            int emergency;
+            int battery;
+            cin >> drone_id >> drone_x >> drone_y >> emergency >> battery; cin.ignore();
+            drone tmpD(drone_id, drone_x, drone_y, emergency, battery);
+            if(creatures.empty() == false)
+                tmpD.creatures = creatures[i];
+            m_drone.push_back(tmpD);
+            cerr << drone_id << " : " << drone_x << " : " << drone_y << " : " << emergency << " : " << battery << endl;
+        }
+        int foe_drone_count;
+        cin >> foe_drone_count; cin.ignore();
+        for (int i = 0; i < foe_drone_count; i++) {
+            int drone_id;
+            int drone_x;
+            int drone_y;
+            int emergency;
+            int battery;
+            cin >> drone_id >> drone_x >> drone_y >> emergency >> battery; cin.ignore();
+            // cerr << drone_id << " : " << drone_x << " : " << drone_y << " : " << emergency << " : " << battery << endl;
+
+        }
+        int drone_scan_count;
+        cin >> drone_scan_count; cin.ignore();
+        for (int i = 0; i < drone_scan_count; i++) {
+            int drone_id;
+            int creature_id;
+            cin >> drone_id >> creature_id; cin.ignore();
+            for(int j = 0; j < m_drone.size(); j++)
+            {
+                if(drone_id == m_drone[j].drone_id)
+                {
+                    // cerr << drone_id << " : " << creature_id << endl;
+                    scaned.push_back(creature_id);
+                    break;
+                }
+            }
+        }
+        int visible_creature_count;
+        cin >> visible_creature_count; cin.ignore();
+        cerr << "visible_creature_count : " << visible_creature_count  << endl;
+        for (int i = 0; i < visible_creature_count; i++) {
+            int creature_id;
+            int creature_x;
+            int creature_y;
+            int creature_vx;
+            int creature_vy;
+            cin >> creature_id >> creature_x >> creature_y >> creature_vx >> creature_vy; cin.ignore();
+            // cerr  << "V" << creature_vx << " : " << creature_vy << endl;
+            creature tmpD(creature_id, creature_x, creature_y, creature_vx, creature_vy);
+            if(find(mounsters.begin(), mounsters.end(), creature_id) != mounsters.end())
+                tmpD.is_mouster = true;
+            if(find(scaned.begin(), scaned.end(), creature_id) == scaned.end())
+            {
+                cerr << "--id : " << creature_id << " : " << tmpD.is_mouster << endl;
+                for(int j = 0; j < m_drone.size(); j++)
+                {
+                    int dest = sqrt(pow((m_drone[j].drone_x - creature_x + creature_vx), 2) + pow((m_drone[j].drone_y - creature_y + creature_vy), 2));
+                    m_drone[j].creatures.insert({dest,tmpD});
+                    creatures.push_back(m_drone[j].creatures);
+                }
+            }
+        }
+        // cerr << "size 0 : " <<  m_drone[0].creatures.size() << endl;
+        // cerr << "size 1 : " <<  m_drone[1].creatures.size() << endl;
+
+        int radar_blip_count;
+        cin >> radar_blip_count; cin.ignore();
+        for (int i = 0; i < radar_blip_count; i++) {
+            int drone_id;
+            int creature_id;
+            string radar;
+            cin >> drone_id >> creature_id >> radar; cin.ignore();
+            for(int j = 0; j < m_drone.size(); j++)
+            {
+                if(m_drone[j].creatures.empty() == false)
+                {
+                    for(multimap<int,creature>::iterator it = m_drone[j].creatures.begin(); it != m_drone[j].creatures.end(); it++)
+                    {
+                        if(it->second.creature_id == creature_id)
+                        {
+                            it->second.radar = radar;
+                            // cerr << "radar" << it->second.radar << endl;
+                        }
+                    }
+                }
+                if(drone_id == m_drone[j].drone_id && find(scaned.begin(), scaned.end(), creature_id) == scaned.end())
+                    m_drone[j].radars.insert({radar, creature_id});
+            }
+        }
+        for (int i = 0; i < my_drone_count; i++) {
+            if(i == 0)
+            {
+            //     m_drone[i].detected_palce = rad(m_drone[i].radars);
+            //     int x, y;
+            //     nextXY(x ,y ,m_drone[i].detected_palce);
+            //     if(!m_drone[i].battery)
+            //         cout << "WAIT 0 Battry pleas charge" << endl; // MOVE <x> <y> <light (1|0)> | WAIT <light (1|0)>
+            //     else if(m_drone[i].creatures.size())
+            //     {
+            //         cerr << "i'am in" << endl;
+            //         for(multimap<int,creature>::iterator it_creaturs = m_drone[i].creatures.begin();it_creaturs != m_drone[i].creatures.end(); it_creaturs++)
+            //         {
+                            
+            //             cerr << "in for" << it_creaturs->second.creature_id << endl;
+            //             if(it_creaturs->second.is_mouster)
+            //             {
+            //                 if(it_creaturs->first < 2000)
+            //                 {
+            //                     cerr << "id : " << it_creaturs->second.creature_id << endl;
+            //                     cerr << "befor " << x << " " << y << endl; // MOVE <x> <y> <light (1|0)> | WAIT <light (1|0)>
+            //                     cerr << it_creaturs->second.radar << endl;
+            //                     if(it_creaturs->second.radar == "TL")
+            //                     {
+            //                         x = 1000;y = 1000; 
+            //                     }
+            //                     else if(it_creaturs->second.radar == "BL")
+            //                     {
+            //                         x = 1000;y = 1000; 
+            //                     }
+            //                     else if(it_creaturs->second.radar == "BR")
+            //                     {
+            //                         x = -1000;y = 1000; 
+            //                     }
+            //                     else if(it_creaturs->second.radar == "TR")
+            //                     {
+            //                         x = -1000;y = 1000; 
+            //                     }
+            //                     cerr << "after " << x << " " << y << endl; // MOVE <x> <y> <light (1|0)> | WAIT <light (1|0)>
+            //                     break;
+            //                 }
+            //                 else
+            //                 {
+            //                     creatures[i].erase(it_creaturs);
+            //                     if(creatures[i].empty())
+            //                     {
+            //                         creatures.erase(creatures.begin());
+            //                         y = 0;
+            //                         x = 0;
+            //                         break;
+            //                     }
+            //                 }
+            //             }
+            //         }
+            //         cout << "MOVE " << m_drone[i].drone_x + x << " " << m_drone[i].drone_y - y << " " << 1 << " mounster run" << endl; // MOVE <x> <y> <light (1|0)> | WAIT <light (1|0)>
+            //         cerr << "hi " <<  creatures[i].size() << endl;
+            //     }
+            //     else
+            //     {
+            //         if(battry % 4 != 0)
+            //             cout << "MOVE " << x << " " << y << " " << 0 << " SEARCHIIIIIIING" << endl; // MOVE <x> <y> <light (1|0)> | WAIT <light (1|0)>
+            //         else
+            //             cout << "MOVE " << x << " " << y << " " << 1 << " SEARCHIIIIIIING" << endl; // MOVE <x> <y> <light (1|0)> | WAIT <light (1|0)>
+            //     }
+            //     battry++;
+            //     // cerr << m_drone[i].detected_palce << " x : " << x << " y : " << y << endl;
+            }
+            else
+            {
+            //     // cout << "MOVE " << 0 << " " << 0 << " " << 0 << endl; // MOVE <x> <y> <light (1|0)> | WAIT <light (1|0)>
+                cout << "MOVE " << 0 << " " << 0 << " " << 0 << endl; // MOVE <x> <y> <light (1|0)> | WAIT <light (1|0)>
+            // }
+            // Write an action using cout. DON'T FORGET THE "<< endl"
+            // To debug: cerr << "Debug messages..." << endl;
+
+            // cout << "MOVE 0 0 0" << endl; // MOVE <x> <y> <light (1|0)> | WAIT <light (1|0)>
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+#include <iostream>
+#include <string>
+#include <vector>
+#include <algorithm>
+#include <map>
+#include <cmath>
+
+using namespace std;
+
+/**
+ * Score points by scanning valuable fish faster than your opponent.
+ **/
+struct creature{
+    public :
+    int creature_id;
+    int creature_x;
+    int creature_y;
+    int creature_vy;
+    int creature_vx;
+    string radar;
+    int is_mouster = false;
+    string detected_palce;
+    creature(int creature_id, int creature_x, int creature_y, int creature_vx, int creature_vy){
+        this->creature_vx = creature_vx;
+        this->creature_id = creature_id;
+        this->creature_x = creature_x;
+        this->creature_y = creature_y;
+        this->creature_vy = creature_vy;
+    }
+};
+struct drone{
+    public :
+    int drone_id;
+    int drone_x;
+    int drone_y;
+    int emergency;
+    int battery;
+    string detected_palce;
+    multimap<string, int> radars;
+    multimap<int,creature> creatures;
+    drone(int drone_id, int drone_x, int drone_y, int emergency, int battery ){
+        this->battery = battery;
+        this->drone_id = drone_id;
+        this->drone_x = drone_x;
+        this->drone_y = drone_y;
+        this->emergency = emergency;
+    }
+};
+void nextXY(int &x, int &y, string radar)
+{
+    // cerr << "next :" << radar << endl; 
+    if(radar == "TL")
+    {
+        x = 0; y = 0;
+    }
+    else if(radar == "TR")
+    {
+        x = 9000; y = 0;
+    }
+    else if(radar == "BL")
+    {
+        x = 0; y = 9000;
+    }
+    else if(radar == "BR")
+    {
+        x = 9000; y = 9000;
+    }
+}
+int status1;
+int status2;
+// vector <multimap<int,creature> >creatures;
+string rad(multimap<string, int> radars)
+{
+    multimap<string, int>::iterator it_radar = radars.begin();
+    string detected_palce_F;
+    string detected_palce = it_radar->first;
+    int radar = 0;
+    int counter = 0;
+    for(;it_radar != radars.end(); it_radar++)
+    {
+        if(detected_palce == it_radar->first && next(it_radar, 1) != radars.end())
+            counter++;
+        else
+        {
+            if(counter >= radar)
+            {
+                radar = counter;
+                detected_palce_F = detected_palce;
+            }
+            counter = 1;
+        }
+        detected_palce = it_radar->first;
+    }
+    return detected_palce_F;
+}
+static unsigned int battry;
+int main()
+{
+    vector<int> mounsters;
+    int creature_count;
+    cin >> creature_count; cin.ignore();
+    for (int i = 0; i < creature_count; i++) {
+        int creature_id;
+        int color;
+        int type;
+        cin >> creature_id >> color >> type; cin.ignore();
+        if(type == -1)
+           mounsters.push_back(creature_id);
+    }
+
+    // game loop
+    while (1) {
+        vector<drone> m_drone;
+        vector<int> scaned;
+        vector<int> my_drones;
+        int my_score;
+        cin >> my_score; cin.ignore();
+        int foe_score;
+        cin >> foe_score; cin.ignore();
+        int my_scan_count;
+        cin >> my_scan_count; cin.ignore();//nothing
+        for (int i = 0; i < my_scan_count; i++) {
+            int creature_id;
+            cin >> creature_id; cin.ignore();
+        }
+        // cerr << "my_scan_count : " << my_scan_count << endl;
+        int foe_scan_count;
+        cin >> foe_scan_count; cin.ignore();
+        for (int i = 0; i < foe_scan_count; i++) {
+            int creature_id;
+            cin >> creature_id; cin.ignore();
+        }
+        int my_drone_count;
+        cin >> my_drone_count; cin.ignore();
+        for (int i = 0; i < my_drone_count; i++) {
+            int drone_id;
+            int drone_x;
+            int drone_y;
+            int emergency;
+            int battery;
+            cin >> drone_id >> drone_x >> drone_y >> emergency >> battery; cin.ignore();
+            my_drones.push_back(drone_id);
+            drone tmpD(drone_id, drone_x, drone_y, emergency, battery);
+            m_drone.push_back(tmpD);
+            // cerr << drone_id << " : " << drone_x << " : " << drone_y << " : " << emergency << " : " << battery << endl;
+        }
+        int foe_drone_count;
+        cin >> foe_drone_count; cin.ignore();
+        for (int i = 0; i < foe_drone_count; i++) {
+            int drone_id;
+            int drone_x;
+            int drone_y;
+            int emergency;
+            int battery;
+            cin >> drone_id >> drone_x >> drone_y >> emergency >> battery; cin.ignore();
+        }
+        int drone_scan_count;
+        cin >> drone_scan_count; cin.ignore();
+        for (int i = 0; i < drone_scan_count; i++) {
+            int drone_id;
+            int creature_id;
+            cin >> drone_id >> creature_id; cin.ignore();
+            if(find(my_drones.begin(), my_drones.end(), drone_id) != my_drones.end())
+            {
+                cerr << "drone_id : " << drone_id <<  " creature_id :" << creature_id << endl;
+                scaned.push_back(creature_id);
+            }
+        }
+        int visible_creature_count;
+        cin >> visible_creature_count; cin.ignore();
+        cerr << "visible_creature_count : " << visible_creature_count  << endl;
+        for (int i = 0; i < visible_creature_count; i++) {
+            int creature_id;
+            int creature_x;
+            int creature_y;
+            int creature_vx;
+            int creature_vy;
+            cin >> creature_id >> creature_x >> creature_y >> creature_vx >> creature_vy; cin.ignore();
+            creature tmpD(creature_id, creature_x, creature_y, creature_vx, creature_vy);
+            if(find(scaned.begin(), scaned.end(), creature_id) == scaned.end())
+            {
+                if(find(mounsters.begin(), mounsters.end(), creature_id) != mounsters.end())
+                    tmpD.is_mouster = true;
+                for(int j = 0; j < m_drone.size(); j++)
+                {
+                    m_drone[j].creatures.insert({sqrt(pow((m_drone[j].drone_x - creature_x + creature_vx), 2) + pow((m_drone[j].drone_y - creature_y + creature_vy), 2)),tmpD});
+                }
+            }
+        }
+        // cerr << "size 0 : " <<  m_drone[0].creatures.size() << endl;
+        // cerr << "size 1 : " <<  m_drone[1].creatures.size() << endl;
+
+        int radar_blip_count;
+        cin >> radar_blip_count; cin.ignore();
+        for (int i = 0; i < radar_blip_count; i++) {
+            int drone_id;
+            int creature_id;
+            string radar;
+            cin >> drone_id >> creature_id >> radar; cin.ignore();
+            
+            // for(int j = 0; j < m_drone.size(); j++)
+            // {
+            //     if(m_drone[j].creatures.empty() == false)
+            //     {
+            //         for(multimap<int,creature>::iterator it = m_drone[j].creatures.begin(); it != m_drone[j].creatures.end(); it++)
+            //         {
+            //             if(it->second.creature_id == creature_id)
+            //             {
+            //                 it->second.radar = radar;
+            //                 // cerr << "radar" << it->second.radar << endl;
+            //             }
+            //         }
+            //     }
+            //     if(drone_id == m_drone[j].drone_id && find(scaned.begin(), scaned.end(), creature_id) == scaned.end())
+            //         m_drone[j].radars.insert({radar, creature_id});
+            // }
+        }
+        for (int i = 0; i < my_drone_count; i++) {
+
+            cout << "MOVE " << 0 << " " << 9000 << " 0" << endl;
+            // if(i == 0)
+            // {
+            //     int x = m_drone[i].drone_x;
+            //     int y = 9000;
+            //     if(status1)
+            //         y = 0;
+            //     for(multimap<int,creature>::iterator it_creaturs = m_drone[i].creatures.begin();it_creaturs != m_drone[i].creatures.end(); it_creaturs++)
+            //     {
+            //         if(it_creaturs->second.is_mouster)
+            //         {
+            //             cerr << it_creaturs->second.radar << " : " << it_creaturs->second.creature_id << endl;
+            //             if(it_creaturs->first < 1000)
+            //                 y = m_drone[i].drone_y;
+            //             if(it_creaturs->second.radar == "TL")
+            //                 x += 1000; 
+            //             else if(it_creaturs->second.radar == "TR")
+            //                 x -= 1000; 
+            //             else if(it_creaturs->second.radar == "BL")
+            //                 x += 1000; 
+            //             else if(it_creaturs->second.radar == "BR")
+            //                 x -= 1000;
+            //             break;
+            //             // {
+            //                 // x = -1000;y 1000; 
+            //             // }
+            //             // else if(it_creaturs->second.radar == "TR")
+            //             // {
+            //                 // x = -1000;y = 1000; 
+            //             // }
+            //             // status1 = 1;
+            //         }
+            //     }
+            //     if(status1)
+            //     {
+            //         if(m_drone[i].drone_y == 0)
+            //             status1 = 0;
+            //         cout << "MOVE " << x << " " << y << " 0" << endl;
+            //     }
+            //     else
+            //     {
+            //         if(m_drone[i].drone_y == 9000)
+            //             status1 = 1;
+            //         if(battry % 4 != 0)
+            //             cout << "MOVE " << x << " " << y << " 0" << endl;
+            //         else
+            //             cout << "MOVE " << x << " " << y <<" 1" << endl;
+            //     }
+            // }
+            // else
+            // {
+            //     for(multimap<int,creature>::iterator it_creaturs = m_drone[i].creatures.begin();it_creaturs != m_drone[i].creatures.end(); it_creaturs++)
+            //     {
+            //         if(it_creaturs->second.is_mouster)
+            //         {
+            //             if(it_creaturs->second.radar == "TL")
+            //                 m_drone[i].drone_x += 1000; 
+            //             else if(it_creaturs->second.radar == "TR")
+            //                 m_drone[i].drone_x -= 1000; 
+            //             status2 = 1;
+            //         }
+            //     }
+            //     if(status2)
+            //     {
+            //         if(m_drone[i].drone_y == 0)
+                    
+            //             status2 = 0;
+            //         cout << "MOVE " << m_drone[i].drone_x << " 0 0" << endl;
+            //     }
+            //     else
+            //     {
+            //         if(m_drone[i].drone_y == 9000)
+            //             status2 = 1;
+            //         if(battry % 4 != 0)
+            //             cout << "MOVE " << m_drone[i].drone_x << " 9000 0" << endl;
+            //         else
+            //             cout << "MOVE " << m_drone[i].drone_x << " 9000 1" << endl;
+            //     }
+            // }
+            // if(i == 0)
+            // {
+            //     m_drone[i].detected_palce = rad(m_drone[i].radars);
+            //     int x, y;
+            //     nextXY(x ,y ,m_drone[i].detected_palce);
+            //     if(!m_drone[i].battery)
+            //         cout << "WAIT 0 Battry pleas charge" << endl; // MOVE <x> <y> <light (1|0)> | WAIT <light (1|0)>
+            //     else if(m_drone[i].creatures.size())
+            //     {
+            //         cerr << "i'am in" << endl;
+            //         
+            //                 if(it_creaturs->first < 2000)
+            //                 {
+            //                     cerr << "id : " << it_creaturs->second.creature_id << endl;
+            //                     cerr << "befor " << x << " " << y << endl; // MOVE <x> <y> <light (1|0)> | WAIT <light (1|0)>
+            //                     cerr << it_creaturs->second.radar << endl;
+            //                     
+            //                     cerr << "after " << x << " " << y << endl; // MOVE <x> <y> <light (1|0)> | WAIT <light (1|0)>
+            //                     break;
+            //                 }
+            //                 else
+            //                 {
+            //                     creatures[i].erase(it_creaturs);
+            //                     if(creatures[i].empty())
+            //                     {
+            //                         creatures.erase(creatures.begin());
+            //                         y = 0;
+            //                         x = 0;
+            //                         break;
+            //                     }
+            //                 }
+            //             }
+            //         }
+            //         cout << "MOVE " << m_drone[i].drone_x + x << " " << m_drone[i].drone_y - y << " " << 1 << " mounster run" << endl; // MOVE <x> <y> <light (1|0)> | WAIT <light (1|0)>
+            //         cerr << "hi " <<  creatures[i].size() << endl;
+            //     }
+            //     else
+            //     {
+            //         if(battry % 4 != 0)
+            //             cout << "MOVE " << x << " " << y << " " << 0 << " SEARCHIIIIIIING" << endl; // MOVE <x> <y> <light (1|0)> | WAIT <light (1|0)>
+            //         else
+            //             cout << "MOVE " << x << " " << y << " " << 1 << " SEARCHIIIIIIING" << endl; // MOVE <x> <y> <light (1|0)> | WAIT <light (1|0)>
+            //     }
+            //     // cerr << m_drone[i].detected_palce << " x : " << x << " y : " << y << endl;
+            // }
+            // else
+            // {
+            //     // cout << "MOVE " << 0 << " " << 0 << " " << 0 << endl; // MOVE <x> <y> <light (1|0)> | WAIT <light (1|0)>
+            // }
+            // Write an action using cout. DON'T FORGET THE "<< endl"
+            // To debug: cerr << "Debug messages..." << endl;
+
+            // cout << "MOVE 0 0 0" << endl; // MOVE <x> <y> <light (1|0)> | WAIT <light (1|0)>
+        }
+            battry++;
+    }
+}
+
+
+
+
+#include <iostream>
+#include <string>
+#include <vector>
+#include <algorithm>
+#include <map>
+#include <cmath>
+
+using namespace std;
+
+/**
+ * Score points by scanning valuable fish faster than your opponent.
+ **/
+struct creature{
+    public :
+    int c_id;
+    int c_x;
+    int c_y;
+    int c_vy;
+    int c_vx;
+    string c_radar;
+    int is_mouster = false;
+    string detected_palce;
+    creature(int c_id, int c_x, int c_y, int c_vx, int c_vy){
+        this->c_vx = c_vx;
+        this->c_id = c_id;
+        this->c_x = c_x;
+        this->c_y = c_y;
+        this->c_vy = c_vy;
+    }
+};
+struct drone{
+    public :
+    int d_id;
+    int d_x;
+    int d_y;
+    int emergency;
+    int battery;
+    string detected_palce;
+    multimap<string, int> d_radars;
+    multimap<int,creature> my_drone_creatures;
+    drone(int d_id, int d_x, int d_y, int emergency, int battery ){
+        this->battery = battery;
+        this->d_id = d_id;
+        this->d_x = d_x;
+        this->d_y = d_y;
+        this->emergency = emergency;
+    }
+};
+int numbers[2];
+// vector <multimap<int,creature> >my_drone_creatures;
+string rad(multimap<string, int> radars)
+{
+    multimap<string, int>::iterator it_radar = radars.begin();
+    string detected_palce_F;
+    string detected_palce = it_radar->first;
+    int radar = 0;
+    int counter = 0;
+    for(;it_radar != radars.end(); it_radar++)
+    {
+        if(detected_palce == it_radar->first && next(it_radar, 1) != radars.end())
+            counter++;
+        else
+        {
+            if(counter >= radar)
+            {
+                radar = counter;
+                detected_palce_F = detected_palce;
+            }
+            counter = 1;
+        }
+        detected_palce = it_radar->first;
+    }
+    return detected_palce_F;
+}
+static unsigned int battry;
+int main()
+{
+    vector<int> mounsters;
+    int creature_count;
+    cin >> creature_count; cin.ignore();
+    for (int i = 0; i < creature_count; i++) {
+        int c_id;
+        int color;
+        int type;
+        cin >> c_id >> color >> type; cin.ignore();
+        if(type == -1)
+           mounsters.push_back(c_id);
+    }
+
+    // game loop
+    while (1) {
+        vector<drone> m_drone;
+        vector<int> scaned;
+        vector<int> my_drones;
+        int my_score;
+        cin >> my_score; cin.ignore();
+        int foe_score;
+        cin >> foe_score; cin.ignore();
+        int my_scan_count;
+        cin >> my_scan_count; cin.ignore();//nothing
+        for (int i = 0; i < my_scan_count; i++) {
+            int c_id;
+            cin >> c_id; cin.ignore();
+        }
+        // cerr << "my_scan_count : " << my_scan_count << endl;
+        int foe_scan_count;
+        cin >> foe_scan_count; cin.ignore();
+        for (int i = 0; i < foe_scan_count; i++) {
+            int c_id;
+            cin >> c_id; cin.ignore();
+        }
+        int my_d_count;
+        cin >> my_d_count; cin.ignore();
+        for (int i = 0; i < my_d_count; i++) {
+            int d_id;
+            int d_x;
+            int d_y;
+            int emergency;
+            int battery;
+            cin >> d_id >> d_x >> d_y >> emergency >> battery; cin.ignore();
+            my_drones.push_back(d_id);
+            drone tmpD(d_id, d_x, d_y, emergency, battery);
+            m_drone.push_back(tmpD);
+            // cerr << d_id << " : " << d_x << " : " << d_y << " : " << emergency << " : " << battery << endl;
+        }
+        int foe_d_count;
+        cin >> foe_d_count; cin.ignore();
+        for (int i = 0; i < foe_d_count; i++) {
+            int d_id;
+            int d_x;
+            int d_y;
+            int emergency;
+            int battery;
+            cin >> d_id >> d_x >> d_y >> emergency >> battery; cin.ignore();
+        }
+        int d_scan_count;
+        cin >> d_scan_count; cin.ignore();
+        for (int i = 0; i < d_scan_count; i++) {
+            int d_id;
+            int c_id;
+            cin >> d_id >> c_id; cin.ignore();
+            if(find(my_drones.begin(), my_drones.end(), d_id) != my_drones.end())
+            {
+                cerr << "d_id : " << d_id <<  " c_id :" << c_id << endl;
+                scaned.push_back(c_id);
+            }
+        }
+        int visible_creature_count;
+        cin >> visible_creature_count; cin.ignore();
+        cerr << "visible_creature_count : " << visible_creature_count  << endl;
+        for (int i = 0; i < visible_creature_count; i++) {
+            int c_id;
+            int c_x;
+            int c_y;
+            int c_vx;
+            int c_vy;
+            cin >> c_id >> c_x >> c_y >> c_vx >> c_vy; cin.ignore();
+            creature tmpD(c_id, c_x, c_y, c_vx, c_vy);
+            if(find(scaned.begin(), scaned.end(), c_id) == scaned.end())
+            {
+                if(find(mounsters.begin(), mounsters.end(), c_id) != mounsters.end())
+                    tmpD.is_mouster = true;
+                for(int j = 0; j < m_drone.size(); j++)
+                {
+                    m_drone[j].my_drone_creatures.insert({sqrt(pow((m_drone[j].d_x - c_x + c_vx), 2) + pow((m_drone[j].d_y - c_y + c_vy), 2)),tmpD});
+                }
+            }
+        }
+        // cerr << "size 0 : " <<  m_drone[0].my_drone_creatures.size() << endl;
+        // cerr << "size 1 : " <<  m_drone[1].my_drone_creatures.size() << endl;
+
+        int radar_blip_count;
+        cin >> radar_blip_count; cin.ignore();
+        for (int i = 0; i < radar_blip_count; i++) {
+            int d_id;
+            int c_id;
+            string radar;
+            cin >> d_id >> c_id >> radar; cin.ignore();
+
+            // for(int j = 0; j < m_drone.size(); j++)
+            // {
+            //     if(m_drone[j].my_drone_creatures.empty() == false)
+            //     {
+            //         for(multimap<int,creature>::iterator it = m_drone[j].my_drone_creatures.begin(); it != m_drone[j].my_drone_creatures.end(); it++)
+            //         {
+            //             if(it->second.c_id == c_id)
+            //             {
+            //                 it->second.radar = radar;
+            //                 // cerr << "radar" << it->second.radar << endl;
+            //             }
+            //         }
+            //     }
+            //     if(d_id == m_drone[j].d_id && find(scaned.begin(), scaned.end(), c_id) == scaned.end())
+            //         m_drone[j].radars.insert({radar, c_id});
+            // }
+        }
+        for (int i = 0; i < my_d_count; i++) {
+
+            cout << "MOVE " << 0 << " " << 9000 << " 0" << endl;
+            // if(i == 0)
+            // {
+            //     int x = m_drone[i].d_x;
+            //     int y = 9000;
+            //     if(status[i])
+            //         y = 0;
+            //     for(multimap<int,creature>::iterator it_creaturs = m_drone[i].my_drone_creatures.begin();it_creaturs != m_drone[i].my_drone_creatures.end(); it_creaturs++)
+            //     {
+            //         if(it_creaturs->second.is_mouster)
+            //         {
+            //             cerr << it_creaturs->second.radar << " : " << it_creaturs->second.c_id << endl;
+            //             if(it_creaturs->first < 1000)
+            //                 y = m_drone[i].d_y;
+            //             if(it_creaturs->second.radar == "TL")
+            //                 x += 1000; 
+            //             else if(it_creaturs->second.radar == "TR")
+            //                 x -= 1000; 
+            //             else if(it_creaturs->second.radar == "BL")
+            //                 x += 1000; 
+            //             else if(it_creaturs->second.radar == "BR")
+            //                 x -= 1000;
+            //             break;
+            //             // {
+            //                 // x = -1000;y 1000; 
+            //             // }
+            //             // else if(it_creaturs->second.radar == "TR")
+            //             // {
+            //                 // x = -1000;y = 1000; 
+            //             // }
+            //             // status[i] = 1;
+            //         }
+            //     }
+            //     if(status[i])
+            //     {
+            //         if(m_drone[i].d_y == 0)
+            //             status[i] = 0;
+            //         cout << "MOVE " << x << " " << y << " 0" << endl;
+            //     }
+            //     else
+            //     {
+            //         if(m_drone[i].d_y == 9000)
+            //             status[i] = 1;
+            //         if(battry % 4 != 0)
+            //             cout << "MOVE " << x << " " << y << " 0" << endl;
+            //         else
+            //             cout << "MOVE " << x << " " << y <<" 1" << endl;
+            //     }
+            // }
+            // else
+            // {
+            //     for(multimap<int,creature>::iterator it_creaturs = m_drone[i].my_drone_creatures.begin();it_creaturs != m_drone[i].my_drone_creatures.end(); it_creaturs++)
+            //     {
+            //         if(it_creaturs->second.is_mouster)
+            //         {
+            //             if(it_creaturs->second.radar == "TL")
+            //                 m_drone[i].d_x += 1000; 
+            //             else if(it_creaturs->second.radar == "TR")
+            //                 m_drone[i].d_x -= 1000; 
+            //             status[i] = 1;
+            //         }
+            //     }
+            //     if(status[i])
+            //     {
+            //         if(m_drone[i].d_y == 0)
+                    
+            //             status[i] = 0;
+            //         cout << "MOVE " << m_drone[i].d_x << " 0 0" << endl;
+            //     }
+            //     else
+            //     {
+            //         if(m_drone[i].d_y == 9000)
+            //             status[i] = 1;
+            //         if(battry % 4 != 0)
+            //             cout << "MOVE " << m_drone[i].d_x << " 9000 0" << endl;
+            //         else
+            //             cout << "MOVE " << m_drone[i].d_x << " 9000 1" << endl;
+            //     }
+            // }
+            // if(i == 0)
+            // {
+            //     m_drone[i].detected_palce = rad(m_drone[i].radars);
+            //     int x, y;
+            //     nextXY(x ,y ,m_drone[i].detected_palce);
+            //     if(!m_drone[i].battery)
+            //         cout << "WAIT 0 Battry pleas charge" << endl; // MOVE <x> <y> <light (1|0)> | WAIT <light (1|0)>
+            //     else if(m_drone[i].my_drone_creatures.size())
+            //     {
+            //         cerr << "i'am in" << endl;
+            //         
+            //                 if(it_creaturs->first < 2000)
+            //                 {
+            //                     cerr << "id : " << it_creaturs->second.c_id << endl;
+            //                     cerr << "befor " << x << " " << y << endl; // MOVE <x> <y> <light (1|0)> | WAIT <light (1|0)>
+            //                     cerr << it_creaturs->second.radar << endl;
+            //                     
+            //                     cerr << "after " << x << " " << y << endl; // MOVE <x> <y> <light (1|0)> | WAIT <light (1|0)>
+            //                     break;
+            //                 }
+            //                 else
+            //                 {
+            //                     my_drone_creatures[i].erase(it_creaturs);
+            //                     if(my_drone_creatures[i].empty())
+            //                     {
+            //                         my_drone_creatures.erase(my_drone_creatures.begin());
+            //                         y = 0;
+            //                         x = 0;
+            //                         break;
+            //                     }
+            //                 }
+            //             }
+            //         }
+            //         cout << "MOVE " << m_drone[i].d_x + x << " " << m_drone[i].d_y - y << " " << 1 << " mounster run" << endl; // MOVE <x> <y> <light (1|0)> | WAIT <light (1|0)>
+            //         cerr << "hi " <<  my_drone_creatures[i].size() << endl;
+            //     }
+            //     else
+            //     {
+            //         if(battry % 4 != 0)
+            //             cout << "MOVE " << x << " " << y << " " << 0 << " SEARCHIIIIIIING" << endl; // MOVE <x> <y> <light (1|0)> | WAIT <light (1|0)>
+            //         else
+            //             cout << "MOVE " << x << " " << y << " " << 1 << " SEARCHIIIIIIING" << endl; // MOVE <x> <y> <light (1|0)> | WAIT <light (1|0)>
+            //     }
+            //     // cerr << m_drone[i].detected_palce << " x : " << x << " y : " << y << endl;
+            // }
+            // else
+            // {
+            //     // cout << "MOVE " << 0 << " " << 0 << " " << 0 << endl; // MOVE <x> <y> <light (1|0)> | WAIT <light (1|0)>
+            // }
+            // Write an action using cout. DON'T FORGET THE "<< endl"
+            // To debug: cerr << "Debug messages..." << endl;
+
+            // cout << "MOVE 0 0 0" << endl; // MOVE <x> <y> <light (1|0)> | WAIT <light (1|0)>
+        }
+            battry++;
+    }
+}
+
+
+
+
+
+
+#include <iostream>
+#include <string>
+#include <vector>
+#include <algorithm>
+#include <map>
+#include <cmath>
+
+using namespace std;
+
+/**
+ * Score points by scanning valuable fish faster than your opponent.
+ **/
+struct creature{
+    public :
+    int c_id;
+    int c_x;
+    int c_y;
+    int c_vy;
+    int c_vx;
+    string c_radar;
+    int is_mouster = false;
+    string detected_palce;
+    creature(int c_id, int c_x, int c_y, int c_vx, int c_vy){
+        this->c_vx = c_vx;
+        this->c_id = c_id;
+        this->c_x = c_x;
+        this->c_y = c_y;
+        this->c_vy = c_vy;
+    }
+};
+struct drone{
+    public :
+    int d_id;
+    int d_x;
+    int d_y;
+    int emergency;
+    int battery;
+    string detected_palce;
+    multimap<string, int> d_radars;
+    multimap<int,creature> my_drone_creatures;
+    drone(int d_id, int d_x, int d_y, int emergency, int battery ){
+        this->battery = battery;
+        this->d_id = d_id;
+        this->d_x = d_x;
+        this->d_y = d_y;
+        this->emergency = emergency;
+    }
+};
+int sts[2];
+// vector <multimap<int,creature> >my_drone_creatures;
+string rad(multimap<string, int> radars)
+{
+    multimap<string, int>::iterator it_radar = radars.begin();
+    string detected_palce_F;
+    string detected_palce = it_radar->first;
+    int radar = 0;
+    int counter = 0;
+    for(;it_radar != radars.end(); it_radar++)
+    {
+        if(detected_palce == it_radar->first && next(it_radar, 1) != radars.end())
+            counter++;
+        else
+        {
+            if(counter >= radar)
+            {
+                radar = counter;
+                detected_palce_F = detected_palce;
+            }
+            counter = 1;
+        }
+        detected_palce = it_radar->first;
+    }
+    return detected_palce_F;
+}
+static unsigned int battry;
+int main()
+{
+    vector<int> mounsters;
+    int creature_count;
+    cin >> creature_count; cin.ignore();
+    for (int i = 0; i < creature_count; i++) {
+        int c_id;
+        int color;
+        int type;
+        cin >> c_id >> color >> type; cin.ignore();
+        if(type == -1)
+           mounsters.push_back(c_id);
+    }
+
+    // game loop
+    while (1) {
+        vector<drone> m_drone;
+        vector<int> scaned;
+        vector<int> my_drones;
+        int my_score;
+        cin >> my_score; cin.ignore();
+        int foe_score;
+        cin >> foe_score; cin.ignore();
+        int my_scan_count;
+        cin >> my_scan_count; cin.ignore();//nothing
+        for (int i = 0; i < my_scan_count; i++) {
+            int c_id;
+            cin >> c_id; cin.ignore();
+        }
+        // cerr << "my_scan_count : " << my_scan_count << endl;
+        int foe_scan_count;
+        cin >> foe_scan_count; cin.ignore();
+        for (int i = 0; i < foe_scan_count; i++) {
+            int c_id;
+            cin >> c_id; cin.ignore();
+        }
+        int my_d_count;
+        cin >> my_d_count; cin.ignore();
+        for (int i = 0; i < my_d_count; i++) {
+            int d_id;
+            int d_x;
+            int d_y;
+            int emergency;
+            int battery;
+            cin >> d_id >> d_x >> d_y >> emergency >> battery; cin.ignore();
+            my_drones.push_back(d_id);
+            drone tmpD(d_id, d_x, d_y, emergency, battery);
+            m_drone.push_back(tmpD);
+            // cerr << d_id << " : " << d_x << " : " << d_y << " : " << emergency << " : " << battery << endl;
+        }
+        int foe_d_count;
+        cin >> foe_d_count; cin.ignore();
+        for (int i = 0; i < foe_d_count; i++) {
+            int d_id;
+            int d_x;
+            int d_y;
+            int emergency;
+            int battery;
+            cin >> d_id >> d_x >> d_y >> emergency >> battery; cin.ignore();
+        }
+        int d_scan_count;
+        cin >> d_scan_count; cin.ignore();
+        for (int i = 0; i < d_scan_count; i++) {
+            int d_id;
+            int c_id;
+            cin >> d_id >> c_id; cin.ignore();
+            if(find(my_drones.begin(), my_drones.end(), d_id) != my_drones.end())
+            {
+                cerr << "d_id : " << d_id <<  " c_id :" << c_id << endl;
+                scaned.push_back(c_id);
+            }
+        }
+        int visible_creature_count;
+        cin >> visible_creature_count; cin.ignore();
+        cerr << "visible_creature_count : " << visible_creature_count  << endl;
+        for (int i = 0; i < visible_creature_count; i++) {
+            int c_id;
+            int c_x;
+            int c_y;
+            int c_vx;
+            int c_vy;
+            cin >> c_id >> c_x >> c_y >> c_vx >> c_vy; cin.ignore();
+            creature tmpD(c_id, c_x, c_y, c_vx, c_vy);
+            if(find(scaned.begin(), scaned.end(), c_id) == scaned.end())
+            {
+                if(find(mounsters.begin(), mounsters.end(), c_id) != mounsters.end())
+                    tmpD.is_mouster = true;
+                for(int j = 0; j < m_drone.size(); j++)
+                {
+                    m_drone[j].my_drone_creatures.insert({sqrt(pow((m_drone[j].d_x - c_x + c_vx), 2) + pow((m_drone[j].d_y - c_y + c_vy), 2)),tmpD});
+                }
+            }
+        }
+        int radar_blip_count;
+        cin >> radar_blip_count; cin.ignore();
+        for (int i = 0; i < radar_blip_count; i++) {
+            int d_id;
+            int c_id;
+            string radar;
+            cin >> d_id >> c_id >> radar; cin.ignore();
+            for(int j = 0; j < m_drone.size(); j++)
+            {
+                if(m_drone[j].my_drone_creatures.empty() == false)
+                {
+                    for(multimap<int,creature>::iterator it = m_drone[j].my_drone_creatures.begin(); it != m_drone[j].my_drone_creatures.end(); it++)
+                    {
+                        if(it->second.c_id == c_id)
+                        {
+                            it->second.c_radar = radar;
+                        }
+                    }
+                }
+                if(d_id == m_drone[j].d_id && find(scaned.begin(), scaned.end(), c_id) == scaned.end())
+                    m_drone[j].d_radars.insert({radar, c_id});
+            }
+        }
+        for (int i = 0; i < my_d_count; i++) {
+
+            cout << "MOVE " << 0 << " " << 9000 << " 0" << endl;
+            if(i == 0)
+            {
+                int x = m_drone[i].d_x;
+                int y = 9000;
+                if(sts[i])
+                    y = 0;
+                for(multimap<int,creature>::iterator it_creaturs = m_drone[i].my_drone_creatures.begin();it_creaturs != m_drone[i].my_drone_creatures.end(); it_creaturs++)
+                {
+                    if(it_creaturs->second.is_mouster)
+                    {
+                        cerr << it_creaturs->second.c_radar << " : " << it_creaturs->second.c_id << endl;
+                        if(it_creaturs->first < 1000)
+                            y = m_drone[i].d_y;
+                        if(it_creaturs->second.c_radar == "TL")
+                            x += 1000; 
+                        else if(it_creaturs->second.c_radar == "TR")
+                            x -= 1000; 
+                        else if(it_creaturs->second.c_radar == "BL")
+                            x += 1000; 
+                        else if(it_creaturs->second.c_radar == "BR")
+                            x -= 1000;
+                        break;
+                        // {
+                            // x = -1000;y 1000; 
+                        // }
+                        // else if(it_creaturs->second.radar == "TR")
+                        // {
+                            // x = -1000;y = 1000; 
+                        // }
+                        // sts[i] = 1;
+                    }
+                }
+                if(sts[i])
+                {
+                    if(m_drone[i].d_y == 0)
+                        sts[i] = 0;
+                    cout << "MOVE " << x << " " << y << " 0" << endl;
+                }
+                else
+                {
+                    if(m_drone[i].d_y == 9000)
+                        sts[i] = 1;
+                    if(battry % 4 != 0)
+                        cout << "MOVE " << x << " " << y << " 0" << endl;
+                    else
+                        cout << "MOVE " << x << " " << y <<" 1" << endl;
+                }
+            }
+            else
+            {
+                for(multimap<int,creature>::iterator it_creaturs = m_drone[i].my_drone_creatures.begin();it_creaturs != m_drone[i].my_drone_creatures.end(); it_creaturs++)
+                {
+                    if(it_creaturs->second.is_mouster)
+                    {
+                        if(it_creaturs->second.c_radar == "TL")
+                            m_drone[i].d_x += 1000; 
+                        else if(it_creaturs->second.c_radar == "TR")
+                            m_drone[i].d_x -= 1000; 
+                        sts[i] = 1;
+                    }
+                }
+                if(sts[i])
+                {
+                    if(m_drone[i].d_y == 0)
+                    
+                        sts[i] = 0;
+                    cout << "MOVE " << m_drone[i].d_x << " 0 0" << endl;
+                }
+                else
+                {
+                    if(m_drone[i].d_y == 9000)
+                        sts[i] = 1;
+                    if(battry % 4 != 0)
+                        cout << "MOVE " << m_drone[i].d_x << " 9000 0" << endl;
+                    else
+                        cout << "MOVE " << m_drone[i].d_x << " 9000 1" << endl;
+                }
+            }
+            // if(i == 0)
+            // {
+            //     m_drone[i].detected_palce = rad(m_drone[i].c_radars);
+            //     int x, y;
+            //     nextXY(x ,y ,m_drone[i].detected_palce);
+            //     if(!m_drone[i].battery)
+            //         cout << "WAIT 0 Battry pleas charge" << endl; // MOVE <x> <y> <light (1|0)> | WAIT <light (1|0)>
+            //     else if(m_drone[i].my_drone_creatures.size())
+            //     {
+            //         cerr << "i'am in" << endl;
+            //         
+            //                 if(it_creaturs->first < 2000)
+            //                 {
+            //                     cerr << "id : " << it_creaturs->second.c_id << endl;
+            //                     cerr << "befor " << x << " " << y << endl; // MOVE <x> <y> <light (1|0)> | WAIT <light (1|0)>
+            //                     cerr << it_creaturs->second.radar << endl;
+            //                     
+            //                     cerr << "after " << x << " " << y << endl; // MOVE <x> <y> <light (1|0)> | WAIT <light (1|0)>
+            //                     break;
+            //                 }
+            //                 else
+            //                 {
+            //                     my_drone_creatures[i].erase(it_creaturs);
+            //                     if(my_drone_creatures[i].empty())
+            //                     {
+            //                         my_drone_creatures.erase(my_drone_creatures.begin());
+            //                         y = 0;
+            //                         x = 0;
+            //                         break;
+            //                     }
+            //                 }
+            //             }
+            //         }
+            //         cout << "MOVE " << m_drone[i].d_x + x << " " << m_drone[i].d_y - y << " " << 1 << " mounster run" << endl; // MOVE <x> <y> <light (1|0)> | WAIT <light (1|0)>
+            //         cerr << "hi " <<  my_drone_creatures[i].size() << endl;
+            //     }
+            //     else
+            //     {
+            //         if(battry % 4 != 0)
+            //             cout << "MOVE " << x << " " << y << " " << 0 << " SEARCHIIIIIIING" << endl; // MOVE <x> <y> <light (1|0)> | WAIT <light (1|0)>
+            //         else
+            //             cout << "MOVE " << x << " " << y << " " << 1 << " SEARCHIIIIIIING" << endl; // MOVE <x> <y> <light (1|0)> | WAIT <light (1|0)>
+            //     }
+            //     // cerr << m_drone[i].detected_palce << " x : " << x << " y : " << y << endl;
+            // }
+            // else
+            // {
+            //     // cout << "MOVE " << 0 << " " << 0 << " " << 0 << endl; // MOVE <x> <y> <light (1|0)> | WAIT <light (1|0)>
+            // }
+            // Write an action using cout. DON'T FORGET THE "<< endl"
+            // To debug: cerr << "Debug messages..." << endl;
+
+            // cout << "MOVE 0 0 0" << endl; // MOVE <x> <y> <light (1|0)> | WAIT <light (1|0)>
+        }
+            battry++;
+    }
+}
+
+
+
+#include <iostream>
+#include <string>
+#include <vector>
+#include <algorithm>
+#include <map>
+#include <cmath>
+
+using namespace std;
+
+/**
+ * Score points by scanning valuable fish faster than your opponent.
+ **/
+struct creature{
+    public :
+    int c_id;
+    int c_x;
+    int c_y;
+    int c_vy;
+    int c_vx;
+    string c_radar;
+    int is_mouster = false;
+    string detected_palce;
+    creature(int c_id, int c_x, int c_y, int c_vx, int c_vy){
+        this->c_vx = c_vx;
+        this->c_id = c_id;
+        this->c_x = c_x;
+        this->c_y = c_y;
+        this->c_vy = c_vy;
+    }
+};
+struct drone{
+    public :
+    int d_id;
+    int d_x;
+    int d_y;
+    int emergency;
+    int battery;
+    string detected_palce;
+    multimap<string, int> d_radars;
+    multimap<int,creature> my_drone_creatures;
+    drone(int d_id, int d_x, int d_y, int emergency, int battery ){
+        this->battery = battery;
+        this->d_id = d_id;
+        this->d_x = d_x;
+        this->d_y = d_y;
+        this->emergency = emergency;
+    }
+};
+int sts[2];
+// vector <multimap<int,creature> >my_drone_creatures;
+string rad(multimap<string, int> radars)
+{
+    multimap<string, int>::iterator it_radar = radars.begin();
+    string detected_palce_F;
+    string detected_palce = it_radar->first;
+    int radar = 0;
+    int counter = 0;
+    for(;it_radar != radars.end(); it_radar++)
+    {
+        if(detected_palce == it_radar->first && next(it_radar, 1) != radars.end())
+            counter++;
+        else
+        {
+            if(counter >= radar)
+            {
+                radar = counter;
+                detected_palce_F = detected_palce;
+            }
+            counter = 1;
+        }
+        detected_palce = it_radar->first;
+    }
+    return detected_palce_F;
+}
+static unsigned int battry;
+int main()
+{
+    vector<int> mounsters;
+    int creature_count;
+    cin >> creature_count; cin.ignore();
+    for (int i = 0; i < creature_count; i++) {
+        int c_id;
+        int color;
+        int type;
+        cin >> c_id >> color >> type; cin.ignore();
+        if(type == -1)
+           mounsters.push_back(c_id);
+    }
+
+    // game loop
+    while (1) {
+        vector<drone> m_drone;
+        vector<int> scaned;
+        vector<int> my_drones;
+        int my_score;
+        cin >> my_score; cin.ignore();
+        int foe_score;
+        cin >> foe_score; cin.ignore();
+        int my_scan_count;
+        cin >> my_scan_count; cin.ignore();//nothing
+        for (int i = 0; i < my_scan_count; i++) {
+            int c_id;
+            cin >> c_id; cin.ignore();
+        }
+        // cerr << "my_scan_count : " << my_scan_count << endl;
+        int foe_scan_count;
+        cin >> foe_scan_count; cin.ignore();
+        for (int i = 0; i < foe_scan_count; i++) {
+            int c_id;
+            cin >> c_id; cin.ignore();
+        }
+        int my_d_count;
+        cin >> my_d_count; cin.ignore();
+        for (int i = 0; i < my_d_count; i++) {
+            int d_id;
+            int d_x;
+            int d_y;
+            int emergency;
+            int battery;
+            cin >> d_id >> d_x >> d_y >> emergency >> battery; cin.ignore();
+            my_drones.push_back(d_id);
+            drone tmpD(d_id, d_x, d_y, emergency, battery);
+            m_drone.push_back(tmpD);
+            // cerr << d_id << " : " << d_x << " : " << d_y << " : " << emergency << " : " << battery << endl;
+        }
+        int foe_d_count;
+        cin >> foe_d_count; cin.ignore();
+        for (int i = 0; i < foe_d_count; i++) {
+            int d_id;
+            int d_x;
+            int d_y;
+            int emergency;
+            int battery;
+            cin >> d_id >> d_x >> d_y >> emergency >> battery; cin.ignore();
+        }
+        int d_scan_count;
+        cin >> d_scan_count; cin.ignore();
+        for (int i = 0; i < d_scan_count; i++) {
+            int d_id;
+            int c_id;
+            cin >> d_id >> c_id; cin.ignore();
+                if(find(my_drones.begin(), my_drones.end(), d_id) != my_drones.end())
+                {
+                    cerr << "d_id : " << d_id <<  " c_id :" << c_id << endl;
+                    scaned.push_back(c_id);
+                }
+        }
+        int visible_creature_count;
+        cin >> visible_creature_count; cin.ignore();
+        cerr << "visible_creature_count : " << visible_creature_count  << endl;
+        for (int i = 0; i < visible_creature_count; i++) {
+            int c_id;
+            int c_x;
+            int c_y;
+            int c_vx;
+            int c_vy;
+            cin >> c_id >> c_x >> c_y >> c_vx >> c_vy; cin.ignore();
+            creature tmpD(c_id, c_x, c_y, c_vx, c_vy);
+            if(find(scaned.begin(), scaned.end(), c_id) == scaned.end())
+            {
+                if(find(mounsters.begin(), mounsters.end(), c_id) != mounsters.end())
+                    tmpD.is_mouster = true;
+                for(int j = 0; j < m_drone.size(); j++)
+                {
+                    m_drone[j].my_drone_creatures.insert({sqrt(pow((m_drone[j].d_x - c_x + c_vx), 2) + pow((m_drone[j].d_y - c_y + c_vy), 2)),tmpD});
+                }
+            }
+        }
+        int radar_blip_count;
+        cin >> radar_blip_count; cin.ignore();
+        for (int i = 0; i < radar_blip_count; i++) {
+            int d_id;
+            int c_id;
+            string radar;
+            cin >> d_id >> c_id >> radar; cin.ignore();
+            for(int j = 0; j < m_drone.size(); j++)
+            {
+                if(m_drone[j].my_drone_creatures.empty() == false)
+                {
+                    for(multimap<int,creature>::iterator it = m_drone[j].my_drone_creatures.begin(); it != m_drone[j].my_drone_creatures.end(); it++)
+                    {
+                        if(it->second.c_id == c_id)
+                        {
+                            it->second.c_radar = radar;
+                        }
+                    }
+                }
+                if(d_id == m_drone[j].d_id && find(scaned.begin(), scaned.end(), c_id) == scaned.end())
+                    m_drone[j].d_radars.insert({radar, c_id});
+            }
+        }
+        for (int i = 0; i < my_d_count; i++) {
+
+            cout << "MOVE " << 0 << " " << 9000 << " 0" << endl;
+            if(i == 0)
+            {
+                int x = m_drone[i].d_x;
+                int y = 9000;
+                if(sts[i])
+                    y = 0;
+                for(multimap<int,creature>::iterator it_creaturs = m_drone[i].my_drone_creatures.begin();it_creaturs != m_drone[i].my_drone_creatures.end(); it_creaturs++)
+                {
+                    if(it_creaturs->second.is_mouster)
+                    {
+                        cerr << it_creaturs->second.c_radar << " : " << it_creaturs->second.c_id << endl;
+                        if(it_creaturs->first < 1000)
+                            y = m_drone[i].d_y;
+                        if(it_creaturs->second.c_radar == "TL")
+                            x += 1000; 
+                        else if(it_creaturs->second.c_radar == "TR")
+                            x -= 1000; 
+                        else if(it_creaturs->second.c_radar == "BL")
+                            x += 1000; 
+                        else if(it_creaturs->second.c_radar == "BR")
+                            x -= 1000;
+                        break;
+                        // {
+                            // x = -1000;y 1000; 
+                        // }
+                        // else if(it_creaturs->second.radar == "TR")
+                        // {
+                            // x = -1000;y = 1000; 
+                        // }
+                        // sts[i] = 1;
+                    }
+                }
+                if(sts[i])
+                {
+                    if(m_drone[i].d_y == 0)
+                        sts[i] = 0;
+                    cout << "MOVE " << x << " " << y << " 0" << endl;
+                }
+                else
+                {
+                    if(m_drone[i].d_y == 9000)
+                        sts[i] = 1;
+                    if(battry % 4 != 0)
+                        cout << "MOVE " << x << " " << y << " 0" << endl;
+                    else
+                        cout << "MOVE " << x << " " << y <<" 1" << endl;
+                }
+            }
+            else
+            {
+                for(multimap<int,creature>::iterator it_creaturs = m_drone[i].my_drone_creatures.begin();it_creaturs != m_drone[i].my_drone_creatures.end(); it_creaturs++)
+                {
+                    if(it_creaturs->second.is_mouster)
+                    {
+                        if(it_creaturs->second.c_radar == "TL")
+                            m_drone[i].d_x += 1000; 
+                        else if(it_creaturs->second.c_radar == "TR")
+                            m_drone[i].d_x -= 1000; 
+                        sts[i] = 1;
+                    }
+                }
+                if(sts[i])
+                {
+                    if(m_drone[i].d_y == 0)
+                    
+                        sts[i] = 0;
+                    cout << "MOVE " << m_drone[i].d_x << " 0 0" << endl;
+                }
+                else
+                {
+                    if(m_drone[i].d_y == 9000)
+                        sts[i] = 1;
+                    if(battry % 4 != 0)
+                        cout << "MOVE " << m_drone[i].d_x << " 9000 0" << endl;
+                    else
+                        cout << "MOVE " << m_drone[i].d_x << " 9000 1" << endl;
+                }
+            }
+            // if(i == 0)
+            // {
+            //     m_drone[i].detected_palce = rad(m_drone[i].c_radars);
+            //     int x, y;
+            //     nextXY(x ,y ,m_drone[i].detected_palce);
+            //     if(!m_drone[i].battery)
+            //         cout << "WAIT 0 Battry pleas charge" << endl; // MOVE <x> <y> <light (1|0)> | WAIT <light (1|0)>
+            //     else if(m_drone[i].my_drone_creatures.size())
+            //     {
+            //         cerr << "i'am in" << endl;
+            //         
+            //                 if(it_creaturs->first < 2000)
+            //                 {
+            //                     cerr << "id : " << it_creaturs->second.c_id << endl;
+            //                     cerr << "befor " << x << " " << y << endl; // MOVE <x> <y> <light (1|0)> | WAIT <light (1|0)>
+            //                     cerr << it_creaturs->second.radar << endl;
+            //                     
+            //                     cerr << "after " << x << " " << y << endl; // MOVE <x> <y> <light (1|0)> | WAIT <light (1|0)>
+            //                     break;
+            //                 }
+            //                 else
+            //                 {
+            //                     my_drone_creatures[i].erase(it_creaturs);
+            //                     if(my_drone_creatures[i].empty())
+            //                     {
+            //                         my_drone_creatures.erase(my_drone_creatures.begin());
+            //                         y = 0;
+            //                         x = 0;
+            //                         break;
+            //                     }
+            //                 }
+            //             }
+            //         }
+            //         cout << "MOVE " << m_drone[i].d_x + x << " " << m_drone[i].d_y - y << " " << 1 << " mounster run" << endl; // MOVE <x> <y> <light (1|0)> | WAIT <light (1|0)>
+            //         cerr << "hi " <<  my_drone_creatures[i].size() << endl;
+            //     }
+            //     else
+            //     {
+            //         if(battry % 4 != 0)
+            //             cout << "MOVE " << x << " " << y << " " << 0 << " SEARCHIIIIIIING" << endl; // MOVE <x> <y> <light (1|0)> | WAIT <light (1|0)>
+            //         else
+            //             cout << "MOVE " << x << " " << y << " " << 1 << " SEARCHIIIIIIING" << endl; // MOVE <x> <y> <light (1|0)> | WAIT <light (1|0)>
+            //     }
+            //     // cerr << m_drone[i].detected_palce << " x : " << x << " y : " << y << endl;
+            // }
+            // else
+            // {
+            //     // cout << "MOVE " << 0 << " " << 0 << " " << 0 << endl; // MOVE <x> <y> <light (1|0)> | WAIT <light (1|0)>
+            // }
+            // Write an action using cout. DON'T FORGET THE "<< endl"
+            // To debug: cerr << "Debug messages..." << endl;
+
+            // cout << "MOVE 0 0 0" << endl; // MOVE <x> <y> <light (1|0)> | WAIT <light (1|0)>
+        }
+            battry++;
+    }
+}
+
+
+
+
+#include <iostream>
+#include <string>
+#include <vector>
+#include <algorithm>
+#include <map>
+#include <cmath>
+
+using namespace std;
+
+/**
+ * Score points by scanning valuable fish faster than your opponent.
+ **/
+struct creature{
+    public :
+    int c_id;
+    int c_x;
+    int c_y;
+    int c_vy;
+    int c_vx;
+    string c_radar;
+    int is_mouster = false;
+    string detected_palce;
+    creature(int c_id, int c_x, int c_y, int c_vx, int c_vy){
+        this->c_vx = c_vx;
+        this->c_id = c_id;
+        this->c_x = c_x;
+        this->c_y = c_y;
+        this->c_vy = c_vy;
+    }
+};
+struct drone{
+    public :
+    int d_id;
+    int d_x;
+    int d_y;
+    int emergency;
+    int battery;
+    string detected_palce;
+    multimap<string, int> d_radars;
+    multimap<int,creature> my_drone_creatures;
+    drone(int d_id, int d_x, int d_y, int emergency, int battery ){
+        this->battery = battery;
+        this->d_id = d_id;
+        this->d_x = d_x;
+        this->d_y = d_y;
+        this->emergency = emergency;
+    }
+};
+int s1;
+int s2;
+// static int sts[2]{0,0};
+
+string rad(multimap<string, int> radars)
+{
+    multimap<string, int>::iterator it_radar = radars.begin();
+    string detected_palce_F;
+    string detected_palce = it_radar->first;
+    int radar = 0;
+    int counter = 0;
+    for(;it_radar != radars.end(); it_radar++)
+    {
+        if(detected_palce == it_radar->first && next(it_radar, 1) != radars.end())
+            counter++;
+        else
+        {
+            if(counter >= radar)
+            {
+                radar = counter;
+                detected_palce_F = detected_palce;
+            }
+            counter = 1;
+        }
+        detected_palce = it_radar->first;
+    }
+    return detected_palce_F;
+}
+static unsigned int battry;
+/**
+ * Score points by scanning valuable fish faster than your opponent.
+ **/
+
+int main()
+{
+    vector<int> mountser;
+    int creature_count;
+    cin >> creature_count; cin.ignore();
+    for (int i = 0; i < creature_count; i++) {
+        int c_id;
+        int color;
+        int type;
+        cin >> c_id >> color >> type; cin.ignore();
+        if(type == -1)
+           mountser.push_back(c_id);
+    }
+
+    // game loop
+    while (1) {
+        vector<drone> m_drone;
+        vector<int> scaned;
+        vector<int> my_drones;
+        int my_score;
+        cin >> my_score; cin.ignore();
+        int foe_score;
+        cin >> foe_score; cin.ignore();
+        int my_scan_count;
+        cin >> my_scan_count; cin.ignore();
+        for (int i = 0; i < my_scan_count; i++) {
+            int creature_id;
+            cin >> creature_id; cin.ignore();
+        }
+        int foe_scan_count;
+        cin >> foe_scan_count; cin.ignore();
+        for (int i = 0; i < foe_scan_count; i++) {
+            int creature_id;
+            cin >> creature_id; cin.ignore();
+        }
+        int my_drone_count;
+        cin >> my_drone_count; cin.ignore();
+        for (int i = 0; i < my_drone_count; i++) {
+            int drone_id;
+            int drone_x;
+            int drone_y;
+            int emergency;
+            int battery;
+            cin >> drone_id >> drone_x >> drone_y >> emergency >> battery; cin.ignore();
+            my_drones.push_back(drone_id);
+            drone tmpD(drone_id, drone_x, drone_y, emergency, battery);
+            m_drone.push_back(tmpD);
+        }
+        int foe_drone_count;
+        cin >> foe_drone_count; cin.ignore();
+        for (int i = 0; i < foe_drone_count; i++) {
+            int drone_id;
+            int drone_x;
+            int drone_y;
+            int emergency;
+            int battery;
+            cin >> drone_id >> drone_x >> drone_y >> emergency >> battery; cin.ignore();
+        }
+        int drone_scan_count;
+        cin >> drone_scan_count; cin.ignore();
+        for (int i = 0; i < drone_scan_count; i++) {
+            int drone_id;
+            int creature_id;
+            cin >> drone_id >> creature_id; cin.ignore();
+            if(find(my_drones.begin(), my_drones.end(), drone_id) != my_drones.end())
+            {
+                cerr << "d_id : " << drone_id <<  " c_id :" << creature_id << endl;
+                scaned.push_back(creature_id);
+            }
+        }
+        int visible_creature_count;
+        cin >> visible_creature_count; cin.ignore();
+        cerr << "visible_creature_count : " << visible_creature_count  << endl;
+        for (int i = 0; i < visible_creature_count; i++) {
+            int creature_id;
+            int creature_x;
+            int creature_y;
+            int creature_vx;
+            int creature_vy;
+            cin >> creature_id >> creature_x >> creature_y >> creature_vx >> creature_vy; cin.ignore();
+            creature tmpD(creature_id, creature_x, creature_y, creature_vx, creature_vy);
+            if(find(scaned.begin(), scaned.end(), creature_id) == scaned.end())
+            {
+                if(find(mountser.begin(), mountser.end(), creature_id) != mountser.end())
+                    tmpD.is_mouster = true;
+                for(int j = 0; j < m_drone.size(); j++)
+                {
+                    m_drone[j].my_drone_creatures.insert({sqrt(pow((m_drone[j].d_x - creature_x + creature_vx), 2) + pow((m_drone[j].d_y - creature_y + creature_vy), 2)),tmpD});
+                }
+            }
+        }
+        int radar_blip_count;
+        cin >> radar_blip_count; cin.ignore();
+        for (int i = 0; i < radar_blip_count; i++) {
+            int drone_id;
+            int creature_id;
+            string radar;
+            cin >> drone_id >> creature_id >> radar; cin.ignore();
+            for(int j = 0; j < m_drone.size(); j++)
+            {
+                if(m_drone[j].my_drone_creatures.empty() == false)
+                {
+                    for(multimap<int,creature>::iterator it = m_drone[j].my_drone_creatures.begin(); it != m_drone[j].my_drone_creatures.end(); it++)
+                    {
+                        if(it->second.c_id == creature_id)
+                        {
+                            it->second.c_radar = radar;
+                        }
+                    }
+                }
+                if(drone_id == m_drone[j].d_id && find(scaned.begin(), scaned.end(), creature_id) == scaned.end())
+                    m_drone[j].d_radars.insert({radar, creature_id});
+            }
+        }
+        for (int i = 0; i < my_drone_count; i++) {
+            if(i == 0)
+            {
+                for(multimap<int,creature>::iterator it_creaturs = m_drone[i].my_drone_creatures.begin();it_creaturs != m_drone[i].my_drone_creatures.end(); it_creaturs++)
+                {
+                    if(it_creaturs->second.is_mouster)
+                    {
+                        if(it_creaturs->second.c_radar == "TL")
+                            m_drone[i].d_x += 1000; 
+                        else if(it_creaturs->second.c_radar == "TR")
+                            m_drone[i].d_x -= 1000; 
+                        s1 = 1;
+                    }
+                }
+                if(s1)
+                {
+                    if(m_drone[i].d_y == 0)
+                        s1 = 0;
+                    cout << "MOVE " << m_drone[i].d_x << " 0 0" << endl;
+                }
+                else
+                {
+                    if(m_drone[i].d_y == 9000)
+                        s1 = 1;
+                    if(battry % 4 != 0)
+                        cout << "MOVE " << m_drone[i].d_x << " 9000 0" << endl;
+                    else
+                        cout << "MOVE " << m_drone[i].d_x << " 9000 1" << endl;
+                }
+            }
+            else
+            {
+                for(multimap<int,creature>::iterator it_creaturs = m_drone[i].my_drone_creatures.begin();it_creaturs != m_drone[i].my_drone_creatures.end(); it_creaturs++)
+                {
+                    if(it_creaturs->second.is_mouster)
+                    {
+                        if(it_creaturs->second.c_radar == "TL")
+                            m_drone[i].d_x += 1000; 
+                        else if(it_creaturs->second.c_radar == "TR")
+                            m_drone[i].d_x -= 1000; 
+                        s2 = 1;
+                    }
+                }
+                if(s2)
+                {
+                    if(m_drone[i].d_y == 0)
+                        s2 = 0;
+                    cout << "MOVE " << m_drone[i].d_x << " 0 0" << endl;
+                }
+                else
+                {
+                    if(m_drone[i].d_y == 9000)
+                        s2 = 1;
+                    if(battry % 4 != 0)
+                        cout << "MOVE " << m_drone[i].d_x << " 9000 0" << endl;
+                    else
+                        cout << "MOVE " << m_drone[i].d_x << " 9000 1" << endl;
+                }
+            }
+            // Write an action using cout. DON'T FORGET THE "<< endl"
+            // To debug: cerr << "Debug messages..." << endl;
+
+            // cout << "WAIT 1" << endl; // MOVE <x> <y> <light (1|0)> | WAIT <light (1|0)>
+        }
+    }
+}
+
+
+
+
+
+
+#include <iostream>
+#include <string>
+#include <vector>
+#include <algorithm>
+#include <map>
+#include <cmath>
+
+using namespace std;
+
+/**
+ * Score points by scanning valuable fish faster than your opponent.
+ **/
+struct creature{
+    public :
+    int creature_id;
+    int creature_x;
+    int creature_y;
+    int creature_vy;
+    int creature_vx;
+    string radar;
+    int is_mouster = false;
+    string detected_palce;
+    creature(int creature_id, int creature_x, int creature_y, int creature_vx, int creature_vy){
+        this->creature_vx = creature_vx;
+        this->creature_id = creature_id;
+        this->creature_x = creature_x;
+        this->creature_y = creature_y;
+        this->creature_vy = creature_vy;
+    }
+};
+struct drone{
+    public :
+    int drone_id;
+    int drone_x;
+    int drone_y;
+    int emergency;
+    int battery;
+    string detected_palce;
+    multimap<string, int> radars;
+    multimap<int,creature> creatures;
+    drone(int drone_id, int drone_x, int drone_y, int emergency, int battery ){
+        this->battery = battery;
+        this->drone_id = drone_id;
+        this->drone_x = drone_x;
+        this->drone_y = drone_y;
+        this->emergency = emergency;
+    }
+};
+void nextXY(int &x, int &y, string radar)
+{
+    if(radar == "TL")
+    {
+        x = 0; y = 0;
+    }
+    else if(radar == "TR")
+    {
+        x = 9000; y = 0;
+    }
+    else if(radar == "BL")
+    {
+        x = 0; y = 9000;
+    }
+    else if(radar == "BR")
+    {
+        x = 9000; y = 9000;
+    }
+}
+int status1;
+int status2;
+string rad(multimap<string, int> radars)
+{
+    multimap<string, int>::iterator it_radar = radars.begin();
+    string detected_palce_F;
+    string detected_palce = it_radar->first;
+    int radar = 0;
+    int counter = 0;
+    for(;it_radar != radars.end(); it_radar++)
+    {
+        if(detected_palce == it_radar->first && next(it_radar, 1) != radars.end())
+            counter++;
+        else
+        {
+            if(counter >= radar)
+            {
+                radar = counter;
+                detected_palce_F = detected_palce;
+            }
+            counter = 1;
+        }
+        detected_palce = it_radar->first;
+    }
+    return detected_palce_F;
+}
+static unsigned int battry;
+int main()
+{
+    vector<int> mounsters;
+    int creature_count;
+    cin >> creature_count; cin.ignore();
+    for (int i = 0; i < creature_count; i++) {
+        int creature_id;
+        int color;
+        int type;
+        cin >> creature_id >> color >> type; cin.ignore();
+        if(type == -1)
+           mounsters.push_back(creature_id);
+    }
+
+    // game loop
+    while (1) {
+        vector<drone> m_drone;
+        vector<int> scaned;
+        vector<int> my_drones;
+        int my_score;
+        cin >> my_score; cin.ignore();
+        int foe_score;
+        cin >> foe_score; cin.ignore();
+        int my_scan_count;
+        cin >> my_scan_count; cin.ignore();//nothing
+        for (int i = 0; i < my_scan_count; i++) {
+            int creature_id;
+            cin >> creature_id; cin.ignore();
+        }
+        int foe_scan_count;
+        cin >> foe_scan_count; cin.ignore();
+        for (int i = 0; i < foe_scan_count; i++) {
+            int creature_id;
+            cin >> creature_id; cin.ignore();
+        }
+        int my_drone_count;
+        cin >> my_drone_count; cin.ignore();
+        for (int i = 0; i < my_drone_count; i++) {
+            int drone_id;
+            int drone_x;
+            int drone_y;
+            int emergency;
+            int battery;
+            cin >> drone_id >> drone_x >> drone_y >> emergency >> battery; cin.ignore();
+            drone tmpD(drone_id, drone_x, drone_y, emergency, battery);
+            m_drone.push_back(tmpD);
+            cerr << drone_id << " : " << drone_x << " : " << drone_y << " : " << emergency << " : " << battery << endl;
+        }
+        int foe_drone_count;
+        cin >> foe_drone_count; cin.ignore();
+        for (int i = 0; i < foe_drone_count; i++) {
+            int drone_id;
+            int drone_x;
+            int drone_y;
+            int emergency;
+            int battery;
+            cin >> drone_id >> drone_x >> drone_y >> emergency >> battery; cin.ignore();
+        }
+        int drone_scan_count;
+        cin >> drone_scan_count; cin.ignore();
+        for (int i = 0; i < drone_scan_count; i++) {
+            int drone_id;
+            int creature_id;
+            cin >> drone_id >> creature_id; cin.ignore();
+            if(find(my_drones.begin(), my_drones.end(), drone_id) != my_drones.end())
+            {
+                cerr << "d_id : " << drone_id <<  " c_id :" << creature_id << endl;
+                scaned.push_back(creature_id);
+            }
+        }
+        int visible_creature_count;
+        cin >> visible_creature_count; cin.ignore();
+        for (int i = 0; i < visible_creature_count; i++) {
+            int creature_id;
+            int creature_x;
+            int creature_y;
+            int creature_vx;
+            int creature_vy;
+            cin >> creature_id >> creature_x >> creature_y >> creature_vx >> creature_vy; cin.ignore();
+            creature tmpD(creature_id, creature_x, creature_y, creature_vx, creature_vy);
+            if(find(mounsters.begin(), mounsters.end(), creature_id) != mounsters.end())
+                tmpD.is_mouster = true;
+            if(find(scaned.begin(), scaned.end(), creature_id) == scaned.end())
+            {
+                for(int j = 0; j < m_drone.size(); j++)
+                {
+                    int dest = sqrt(pow((m_drone[j].drone_x - creature_x + creature_vx), 2) + pow((m_drone[j].drone_y - creature_y + creature_vy), 2));
+                    m_drone[j].creatures.insert({dest,tmpD});
+                }
+            }
+        }
+        int radar_blip_count;
+        cin >> radar_blip_count; cin.ignore();
+        for (int i = 0; i < radar_blip_count; i++) {
+            int drone_id;
+            int creature_id;
+            string radar;
+            cin >> drone_id >> creature_id >> radar; cin.ignore();
+            for(int j = 0; j < m_drone.size(); j++)
+            {
+                if(m_drone[j].creatures.empty() == false)
+                {
+                    for(multimap<int,creature>::iterator it = m_drone[j].creatures.begin(); it != m_drone[j].creatures.end(); it++)
+                    {
+                        if(it->second.creature_id == creature_id)
+                        {
+                            cerr << radar << " : " << creature_id << endl;
+                            it->second.radar = radar;
+                        }
+                    }
+                }
+                if(drone_id == m_drone[j].drone_id && find(scaned.begin(), scaned.end(), creature_id) == scaned.end())
+                    m_drone[j].radars.insert({radar, creature_id});
+            }
+        }
+        for (int i = 0; i < my_drone_count; i++) {
+            if(i == 0)
+            {
+                int x = m_drone[i].drone_x;
+                int y = 9000;
+                if(status1)
+                    y = 0;
+                for(multimap<int,creature>::iterator it_creaturs = m_drone[i].creatures.begin();it_creaturs != m_drone[i].creatures.end(); it_creaturs++)
+                {
+                    if(it_creaturs->second.is_mouster)
+                    {
+                        if(it_creaturs->second.is_mouster)
+                        {
+                            cerr << it_creaturs->second.radar << " : " << it_creaturs->second.creature_id << endl;
+                            if(it_creaturs->first < 2000)
+                                y = m_drone[i].drone_y;
+                            if(it_creaturs->second.radar == "TL")
+                            {
+                                x += 1000; 
+                                if(pow(m_drone[i].drone_y -  it_creaturs->second.creature_x, 2) < 1000)
+                                    y = m_drone[i].drone_y+500;
+                            }
+                            else if(it_creaturs->second.radar == "TR")
+                            {
+                                x -= 1000;
+                                if(pow(m_drone[i].drone_y -  it_creaturs->second.creature_x, 2) < 1000)
+                                    y = m_drone[i].drone_y+500;
+                            } 
+                            else if(it_creaturs->second.radar == "BL")
+                            {
+                                x += 1000; 
+                                if(pow(m_drone[i].drone_y -  it_creaturs->second.creature_x, 2) < 1000)
+                                    y = m_drone[i].drone_y-500;
+                            }
+                            else if(it_creaturs->second.radar == "BR")
+                            {
+                                if(pow(m_drone[i].drone_y -  it_creaturs->second.creature_x, 2) < 1000)
+                                    y = m_drone[i].drone_y-500;
+                                x -= 1000;
+                            }
+                            break;
+                        }
+                    }
+                }
+                if(status1)
+                {
+                        if(m_drone[i].drone_y == 0)
+                            status1 = 0;
+                        if(battry % 3 != 0 || m_drone[i].drone_y < 4500)
+                            cout << "MOVE " << x << " " << y << " 0" << endl;
+                        else
+                            cout << "MOVE " << x << " " << y <<" 1" << endl;
+                }
+                else
+                {
+                    if(m_drone[i].drone_y == 9000)
+                        status1 = 1;
+                    if(battry % 3 != 0 || m_drone[i].drone_y < 4500)
+                        cout << "MOVE " << x << " " << y << " 0" << endl;
+                    else
+                        cout << "MOVE " << x << " " << y <<" 1" << endl;
+                }
+            }
+            else
+            {
+                for(multimap<int,creature>::iterator it_creaturs = m_drone[i].creatures.begin();it_creaturs != m_drone[i].creatures.end(); it_creaturs++)
+                {
+                    if(it_creaturs->second.is_mouster)
+                    {
+                        
+                        status2 = 1;
+                    }
+                }
+                if(status2)
+                {
+                    if(m_drone[i].drone_y == 0)
+                        status2 = 0;
+                    cout << "MOVE " << m_drone[i].drone_x << " 0 0" << endl;
+                }
+                else
+                {
+                    if(m_drone[i].drone_y == 9000)
+                        status1 = 1;
+                    if(battry % 5 != 0)
+                        cout << "MOVE " << m_drone[i].drone_x << " 9000 0" << endl;
+                    else
+                        cout << "MOVE " << m_drone[i].drone_x << " 9000 1" << endl;
+                }
+            }
+        }
+        battry++;
+    }
+}
+
+
+        //     if(i == 0)
+        //     {
+        //         int x = m_drone[i].drone_x;
+        //         int y = 9000;
+        //         if(status1)
+        //             y = 0;
+        //         for(multimap<int,creature>::iterator it_creaturs = m_drone[i].creatures.begin();it_creaturs != m_drone[i].creatures.end(); it_creaturs++)
+        //         {
+        //             if(it_creaturs->second.is_mouster)
+        //             {
+        //                 if(it_creaturs->second.is_mouster)
+        //                 {
+        //                     // cerr << it_creaturs->second.radar << " : " << it_creaturs->second.creature_id << endl;
+        //                     if(it_creaturs->first < 2000)
+        //                         y = m_drone[i].drone_y;
+        //                     if(it_creaturs->second.radar == "TL")
+        //                     {
+        //                         x += 1000; 
+        //                         if(pow(m_drone[i].drone_y -  it_creaturs->second.creature_x, 2) < 1000)
+        //                             y = m_drone[i].drone_y+500;
+        //                     }
+        //                     else if(it_creaturs->second.radar == "TR")
+        //                     {
+        //                         x -= 1000;
+        //                         if(pow(m_drone[i].drone_y -  it_creaturs->second.creature_x, 2) < 1000)
+        //                             y = m_drone[i].drone_y+500;
+        //                     } 
+        //                     else if(it_creaturs->second.radar == "BL")
+        //                     {
+        //                         x += 1000; 
+        //                         if(pow(m_drone[i].drone_y -  it_creaturs->second.creature_x, 2) < 1000)
+        //                             y = m_drone[i].drone_y-500;
+        //                     }
+        //                     else if(it_creaturs->second.radar == "BR")
+        //                     {
+        //                         if(pow(m_drone[i].drone_y -  it_creaturs->second.creature_x, 2) < 1000)
+        //                             y = m_drone[i].drone_y-500;
+        //                         x -= 1000;
+        //                     }
+        //                     break;
+        //                 }
+        //             }
+        //         }
+        //         if(status1)
+        //         {
+        //             if(m_drone[i].drone_y == 0)
+        //                 status1 = 0;
+        //             if(battry % 3 != 0 || m_drone[i].drone_y < 4500)
+        //                 cout << "MOVE " << x << " " << y << " 0" << endl;
+        //             else
+        //                 cout << "MOVE " << x << " " << y <<" 1" << endl;
+        //         }
+        //         else
+        //         {
+        //             if(m_drone[i].drone_y == 9000)
+        //                 status1 = 1;
+        //             if(battry % 3 != 0 || m_drone[i].drone_y < 4500)
+        //                 cout << "MOVE " << x << " " << y << " 0" << endl;
+        //             else
+        //                 cout << "MOVE " << x << " " << y <<" 1" << endl;
+        //         }
+        //     }
+        //     else
+        //     {
+        //         for(multimap<int,creature>::iterator it_creaturs = m_drone[i].creatures.begin();it_creaturs != m_drone[i].creatures.end(); it_creaturs++)
+        //         {
+        //             if(it_creaturs->second.is_mouster)
+        //             {
+                        
+        //                 status2 = 1;
+        //             }
+        //         }
+        //         if(status2)
+        //         {
+        //             if(m_drone[i].drone_y == 0)
+        //                 status2 = 0;
+        //             cout << "MOVE " << m_drone[i].drone_x << " 0 0" << endl;
+        //         }
+        //         else
+        //         {
+        //             if(m_drone[i].drone_y == 9000)
+        //                 status1 = 1;
+        //             if(battry % 5 != 0)
+        //                 cout << "MOVE " << m_drone[i].drone_x << " 9000 0" << endl;
+        //             else
+        //                 cout << "MOVE " << m_drone[i].drone_x << " 9000 1" << endl;
+        //         }
+        //     }
+
+
+                    // if(find(my_drones.begin(), my_drones.end(), drone_id) != my_drones.end())
+            // {
+                // cerr << "d_id : " << drone_id <<  " c_id :" << creature_id << endl;
+            // }            // cerr << drone_id << " : " << drone_x << " : " << drone_y << " : " << emergency << " : " << battery << endl;
+string rad(multimap<string, int> radars)
+{
+    multimap<string, int>::iterator it_radar = radars.begin();
+    string detected_palce_F;
+    string detected_palce = it_radar->first;
+    int radar = 0;
+    int counter = 0;
+    for(;it_radar != radars.end(); it_radar++)
+    {
+        if(detected_palce == it_radar->first && next(it_radar, 1) != radars.end())
+            counter++;
+        else
+        {
+            if(counter >= radar)
+            {
+                radar = counter;
+                detected_palce_F = detected_palce;
+            }
+            counter = 1;
+        }
+        detected_palce = it_radar->first;
+    }
+    return detected_palce_F;
+}void nextXY(int &x, int &y, string radar)
+{
+    if(radar == "TL")
+    {
+        x = 0; y = 0;
+    }
+    else if(radar == "TR")
+    {
+        x = 9000; y = 0;
+    }
+    else if(radar == "BL")
+    {
+        x = 0; y = 9000;
+    }
+    else if(radar == "BR")
+    {
+        x = 9000; y = 9000;
+    }
+}
+int status1;
+int status2;
+
+
+
+#include <iostream>
+#include <string>
+#include <vector>
+#include <algorithm>
+#include <map>
+#include <cmath>
+
+using namespace std;
+
+/**
+ * Score points by scanning valuable fish faster than your opponent.
+ **/
+struct creature{
+    public :
+    int creature_id;
+    int creature_x;
+    int creature_y;
+    int creature_vy;
+    int creature_vx;
+    string radar;
+    int is_mouster = false;
+    string detected_palce;
+    creature(int creature_id, int creature_x, int creature_y, int creature_vx, int creature_vy){
+        this->creature_vx = creature_vx;
+        this->creature_id = creature_id;
+        this->creature_x = creature_x;
+        this->creature_y = creature_y;
+        this->creature_vy = creature_vy;
+    }
+};
+struct drone{
+    public :
+    int drone_id;
+    int drone_x;
+    int drone_y;
+    int emergency;
+    int battery;
+    string detected_palce;
+    multimap<string, int> radars;
+    multimap<int,creature> creatures;
+    drone(int drone_id, int drone_x, int drone_y, int emergency, int battery ){
+        this->battery = battery;
+        this->drone_id = drone_id;
+        this->drone_x = drone_x;
+        this->drone_y = drone_y;
+        this->emergency = emergency;
+    }
+};
+
+static unsigned int battry;
+int main()
+{
+    vector<int> mounsters;
+    int creature_count;
+    cin >> creature_count; cin.ignore();
+    cerr << creature_count << endl;
+    for (int i = 0; i < creature_count; i++) {
+        int creature_id;
+        int color;
+        int type;
+        cin >> creature_id >> color >> type; cin.ignore();
+        if(type == -1)
+           mounsters.push_back(creature_id);
+    }
+
+    // game loop
+    while (1) {
+        vector<drone> m_drone;
+        vector<int> scaned;
+        vector<int> my_drones;
+        int my_score;
+        cin >> my_score; cin.ignore();
+        int foe_score;
+        cin >> foe_score; cin.ignore();
+        int my_scan_count;
+        cin >> my_scan_count; cin.ignore();//nothing
+        for (int i = 0; i < my_scan_count; i++) {
+            int creature_id;
+            cin >> creature_id; cin.ignore();
+        }
+        int foe_scan_count;
+        cin >> foe_scan_count; cin.ignore();
+        for (int i = 0; i < foe_scan_count; i++) {
+            int creature_id;
+            cin >> creature_id; cin.ignore();
+        }
+        int my_drone_count;
+        cin >> my_drone_count; cin.ignore();
+        for (int i = 0; i < my_drone_count; i++) {
+            int drone_id;
+            int drone_x;
+            int drone_y;
+            int emergency;
+            int battery;
+            cin >> drone_id >> drone_x >> drone_y >> emergency >> battery; cin.ignore();
+            drone tmpD(drone_id, drone_x, drone_y, emergency, battery);
+            m_dro   ne.push_back(tmpD);
+            my_drones.push_back(drone_id);
+        }
+        int foe_drone_count;
+        cin >> foe_drone_count; cin.ignore();
+        for (int i = 0; i < foe_drone_count; i++) {
+            int drone_id;
+            int drone_x;
+            int drone_y;
+            int emergency;
+            int battery;
+            cin >> drone_id >> drone_x >> drone_y >> emergency >> battery; cin.ignore();
+        }
+        int drone_scan_count;
+        cin >> drone_scan_count; cin.ignore();
+        for (int i = 0; i < drone_scan_count; i++) {
+            int drone_id;
+            int creature_id;
+            cin >> drone_id >> creature_id; cin.ignore();
+            if(find(my_drones.begin(), my_drones.end(), drone_id) != my_drones.end())
+                scaned.push_back(creature_id);
+        }
+        int visible_creature_count;
+        cin >> visible_creature_count; cin.ignore();
+        for (int i = 0; i < visible_creature_count; i++) {
+            int creature_id;
+            int creature_x;
+            int creature_y;
+            int creature_vx;
+            int creature_vy;
+            cin >> creature_id >> creature_x >> creature_y >> creature_vx >> creature_vy; cin.ignore();
+            creature tmpD(creature_id, creature_x, creature_y, creature_vx, creature_vy);
+            if(find(scaned.begin(), scaned.end(), creature_id) == scaned.end())
+            {
+                if(find(mounsters.begin(), mounsters.end(), creature_id) != mounsters.end())
+                    tmpD.is_mouster = true;
+                for(int j = 0; j < m_drone.size(); j++)
+                {
+                    int dest = sqrt(pow((m_drone[j].drone_x - creature_x), 2) + pow((m_drone[j].drone_y - creature_y), 2));
+                    m_drone[j].creatures.insert({dest,tmpD});
+                }
+            }
+        }
+        int radar_blip_count;
+        cin >> radar_blip_count; cin.ignore();
+        cerr << radar_blip_count << endl;
+        for (int i = 0; i < radar_blip_count; i++) {
+            int drone_id;
+            int creature_id;
+            string radar;
+            cin >> drone_id >> creature_id >> radar; cin.ignore();
+            
+        }
+        for (int i = 0; i < my_drone_count; i++) {
+            cout << "WAIT 0" << endl;
+        }
+        battry++;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+#include <iostream>
+#include <string>
+#include <vector>
+#include <algorithm>
+#include <cmath>
+#include <map>
+
+using namespace std;
+
+
+
+
+int status;
+int status1;
+void process( drone drone , int &x, int &y)
+{
+    int rad[4] = {0,0,0,0};
+    multimap<int, creature>::iterator it_a = drone.aggressive.begin();
+    int counter = 0;
+    x = drone.drone_x;
+    y = 9000;
+    if(abs(drone.drone_x  - it_a->second.creature_x) < 2000 && (it_a->second.radar == "BR" || it_a->second.radar == "TR"))
+    {
+        x -= 500;
+    }
+    if(abs(drone.drone_y  - it_a->second.creature_y) < 2000 && (it_a->second.radar == "BR" || it_a->second.radar == "BL"))
+    {
+        y = drone.drone_y -  500;
+    }
+    if(abs(drone.drone_x  - it_a->second.creature_x) < 2000 && (it_a->second.radar == "BL" || it_a->second.radar == "TL"))
+    {
+        x += 500;
+    }
+    if(abs(drone.drone_y  - it_a->second.creature_y) < 2000 && (it_a->second.radar == "TR" || it_a->second.radar == "TL"))
+    {
+        y = drone.drone_y +  500;
+    }
+}
+static unsigned int battry;
+int main()
+{
+    vector <int> mounsters;
+    int creature_count;
+    cin >> creature_count; cin.ignore();
+    for (int i = 0; i < creature_count; i++) {
+        int creature_id;
+        int color;
+        int type;
+        cin >> creature_id >> color >> type; cin.ignore();
+        if(type == -1)
+            mounsters.push_back(creature_id);
+    }
+    // game loop
+    while (1) {
+        vector <drone> m_drone;
+        vector <int> scaned;
+        int my_score;
+        cin >> my_score; cin.ignore();
+        int foe_score;
+        cin >> foe_score; cin.ignore();
+        int my_scan_count;
+        cin >> my_scan_count; cin.ignore();
+        for (int i = 0; i < my_scan_count; i++) {//nothing
+            int creature_id;
+            cin >> creature_id; cin.ignore();
+        }
+        int foe_scan_count;
+        cin >> foe_scan_count; cin.ignore();
+        for (int i = 0; i < foe_scan_count; i++) {//nothing
+            int creature_id;
+            cin >> creature_id; cin.ignore();
+        }
+        int my_drone_count;
+        cin >> my_drone_count; cin.ignore();
+        for (int i = 0; i < my_drone_count; i++) {
+            int drone_id;
+            int drone_x;
+            int drone_y;
+            int emergency;
+            int battery;
+            cin >> drone_id >> drone_x >> drone_y >> emergency >> battery; cin.ignore();
+            drone tmp_d(drone_id, drone_x, drone_y, emergency, battery);
+            m_drone.push_back(tmp_d);
+        }
+        int foe_drone_count;
+        cin >> foe_drone_count; cin.ignore();
+        for (int i = 0; i < foe_drone_count; i++) {
+            int drone_id;
+            int drone_x;
+            int drone_y;
+            int emergency;
+            int battery;
+            cin >> drone_id >> drone_x >> drone_y >> emergency >> battery; cin.ignore();
+        }
+        int drone_scan_count;
+        cin >> drone_scan_count; cin.ignore();
+        for (int i = 0; i < drone_scan_count; i++) {
+            int drone_id;
+            int creature_id;
+            cin >> drone_id >> creature_id; cin.ignore();
+            if(m_drone[0].drone_id == drone_id || m_drone[1].drone_id == drone_id)
+                scaned.push_back(creature_id);
+        }
+        int visible_creature_count;
+        cin >> visible_creature_count; cin.ignore();
+        cerr << "visible_creature_count : " << visible_creature_count << endl;
+        for (int i = 0; i < visible_creature_count; i++) {
+            int creature_id;
+            int creature_x;
+            int creature_y;
+            int creature_vx;
+            int creature_vy;
+            cin >> creature_id >> creature_x >> creature_y >> creature_vx >> creature_vy; cin.ignore();
+            if(find(scaned.begin(), scaned.end(), creature_id) == scaned.end())
+            {
+                creature tmp_c(creature_id, creature_x, creature_y, creature_vx, creature_vy);
+                if(find(mounsters.begin(), mounsters.end(), creature_id) != mounsters.end())
+                {
+                    for(int j = 0; j < m_drone.size(); j++)
+                    {
+                        int dest = sqrt(pow((m_drone[j].drone_x - creature_x), 2) + pow((m_drone[j].drone_y - creature_y), 2));
+                        m_drone[j].aggressive.insert({dest,tmp_c});
+                    }
+                }
+                else
+                {
+                    for(int j = 0; j < m_drone.size(); j++)
+                    {
+                        int dest = sqrt(pow((m_drone[j].drone_x - creature_x), 2) + pow((m_drone[j].drone_y - creature_y), 2));
+                        m_drone[j].peaceful.insert({dest,tmp_c});
+                    }
+                }
+            }
+        }
+        int radar_blip_count;
+        cin >> radar_blip_count; cin.ignore();
+        for (int i = 0; i < radar_blip_count; i++) {
+            int drone_id;
+            int creature_id;
+            string radar;
+            cin >> drone_id >> creature_id >> radar; cin.ignore();
+            if(i < radar_blip_count / 2)
+            {
+                if(i >= (radar_blip_count / 2) - (creature_count - 12))
+                {
+                    for(int j = 0;j < m_drone[0].aggressive.size(); j++)
+                    {
+                        if(next(m_drone[0].aggressive.begin(), j)->second.creature_id == creature_id)
+                            next(m_drone[0].aggressive.begin(), j)->second.radar = radar;
+                    }
+                }
+            }
+            else
+            {
+                if(i >= (radar_blip_count) - (creature_count - 12))
+                {
+                    for(int j = 0;j < m_drone[1].aggressive.size(); j++)
+                    {
+                        if(next(m_drone[1].aggressive.begin(), j)->second.creature_id == creature_id)
+                            next(m_drone[1].aggressive.begin(), j)->second.radar = radar;
+                    }
+                }
+            }
+        }
+        for (int i = 0; i < my_drone_count; i++) {
+            if(i == 0)
+            {
+                int x = 0;
+                int y = 0;
+                if(m_drone[i].aggressive.empty() == false && m_drone[i].aggressive.begin()->first < 2000)
+                {
+                    process(m_drone[i], x ,y);
+                    cout << "MOVE " << x << " " << y << " 1" << endl;
+                }
+                else if(status)
+                {
+                    if(m_drone[i].drone_y == 0)
+                        status = 0;
+                    if(battry % 3 != 0 || m_drone[i].drone_y < 4000)
+                        cout << "MOVE " << m_drone[i].drone_x << " " << "0" << " 0" << endl;
+                    else
+                        cout << "MOVE " << m_drone[i].drone_x << " " << "0" << " 1" << endl;
+                }
+                else
+                {
+                    if(m_drone[i].drone_y >= 9000)
+                        status = 1;
+                    if(battry % 3 != 0 || m_drone[i].drone_y < 4000)
+                        cout << "MOVE " << m_drone[i].drone_x << " " << "9000" << " 0" << endl;
+                    else
+                        cout << "MOVE " << m_drone[i].drone_x << " " << "9000" << " 1" << endl;
+                }
+            }
+            else
+            {                
+                int x = 0;
+                int y = 0;
+                if(m_drone[i].aggressive.empty() == false && m_drone[i].aggressive.begin()->first < 2000)
+                {
+                    process(m_drone[i], x ,y);
+                    cout << "MOVE " << x << " " << y << " 1" << endl;
+                }
+                else if(status1)
+                {
+                    if(m_drone[i].drone_y == 0)
+                        status1 = 0;
+                    if(battry % 3 != 0 || m_drone[i].drone_y < 4000)
+                        cout << "MOVE " << m_drone[i].drone_x << " " << "0" << " 0" << endl;
+                    else
+                        cout << "MOVE " << m_drone[i].drone_x << " " << "0" << " 1" << endl;
+                }
+                else
+                {
+                    if(m_drone[i].drone_y >= 9000)
+                        status1 = 1;
+                    if(battry % 3 != 0 || m_drone[i].drone_y < 4000)
+                        cout << "MOVE " << m_drone[i].drone_x << " " << "9000" << " 0" << endl;
+                    else
+                        cout << "MOVE " << m_drone[i].drone_x << " " << "9000" << " 1" << endl;
+                }
+            }
+            // Write an action using cout. DON'T FORGET THE "<< endl"
+            // To debug: cerr << "Debug messages..." << endl;
+
+        }
+        battry++;
+    }
+}
