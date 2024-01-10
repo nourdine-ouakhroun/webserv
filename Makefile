@@ -1,11 +1,7 @@
 NAME		=	webserv
 
 
-SRCS		=	src/main.cpp \
-				src/tools.cpp \
-				src/DirectiveBehavior.cpp \
-				src/configurationTools.cpp \
-				src/Parsing/Parser.cpp \
+SRCS		=	src/Parsing/Parser.cpp \
 				src/Parsing/Checker.cpp \
 				src/Parsing/Data.cpp \
 				src/Parsing/Patterns/LocationPattern.cpp \
@@ -15,17 +11,24 @@ SRCS		=	src/main.cpp \
 				src/Exception/ParsingException.cpp \
 				src/Utils/ServerData.cpp \
 				src/Exception/ServerException.cpp \
-				src/ES-Server/Server.cpp \
 				src/Utils/Poll.cpp \
 				src/Utils/ResponseHeader.cpp \
-#				src/Utils/Select.cpp
+				src/Server/main.cpp\
+				src/Server/Server.cpp\
+				src/Server/ParssingRequist.cpp\
+				src/Server/Cgi.cpp\
+				src/Utils/Poll.cpp\
+				src/Server/ManageServers.cpp\
+				src/Server/SocketDependencies.cpp\
+				src/Exception/PollException.cpp\
+				src/Server/ReadRequest.cpp
 
-TEMPLATES	=	src/Templates/*.tpp
-HEADERS		=	src/Includes/*.hpp
+TEMPLATES =	src/Templates/*.tpp
+HEADERS	=	src/Includes/*.hpp
 
 
-CPP			=	c++
-CPPFLAGS	=	-Wall -Wextra -Werror -std=c++98 -Wconversion -O3 -I./src/Includes# -fsanitize=address
+CPP	=	c++
+CPPFLAGS	=	-Wall -Wextra -Werror -std=c++98 -Wconversion -O3 -I./src/Includes #-fsanitize=address
 
 BIN			=	bin
 
