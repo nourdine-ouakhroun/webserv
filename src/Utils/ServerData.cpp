@@ -64,20 +64,18 @@ std::vector<ServerPattern>	ServerData::getServersByServerName(const std::vector<
 	return (serv);
 }
 
-std::vector<ServerPattern>	ServerData::getServersByPort(const std::vector<ServerPattern>& servers, const unsigned short& port)
+std::vector<ServerPattern>	ServerData::getServersByIpAndPort(const std::vector<ServerPattern>& servers, String strHost)
 {
 	std::vector<ServerPattern>	serv;
 	std::vector<ServerPattern>::const_iterator iterBegin = servers.begin();
 	std::vector<ServerPattern>::const_iterator iterEnd = servers.end();
+
 	while (iterBegin < iterEnd)
 	{
 		std::vector<Data> value = iterBegin->getData("listen");
 		for (size_t i = 0; i < value.size(); i++)
-		{
-			std::vector<String> values = value[i].getValue().split(':');
-			if (values.size() && (unsigned short)std::strtol(values[values.size() - 1].c_str(), NULL, 10) == port)
+			if (!value[i].getValue().compare(strHost))
 				serv.push_back(*iterBegin);
-		}
 		iterBegin++;
 	}
 	return (serv);
@@ -120,7 +118,7 @@ std::vector<ServerPattern>	ServerData::getServer(ServerData& servers, int port, 
 		long host = std::strtol(str.back().c_str(), NULL, 10);
 		if (host != 0)
 		{
-			servModel = ServerData::getServersByPort(srvs, (unsigned short)host);
+			servModel = ServerData::getServersByIpAndPort(srvs, strHost);
 			servModel = ServerData::getServersByServerName(servModel, str.front());
 		}
 		else
