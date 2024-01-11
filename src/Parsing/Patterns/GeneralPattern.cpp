@@ -111,5 +111,5 @@ void	GeneralPattern::execute( void ) const
 void	GeneralPattern::updateData(const Data& _data, size_t pos)
 {
 	data[pos] = _data;
-	_data.printData(data[pos], "\t");
+	// _data.printData(data[pos], "\t");cclea
 }

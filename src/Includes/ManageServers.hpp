@@ -25,6 +25,9 @@ class	ManageServers
 	std::vector<SocketDependencies>	working;
 	std::vector<int>			fdSockets;
 	ServerData					servers;
+
+	// add All Ports to this class.
+	std::vector<String>			allport;
 public:
 
 	ManageServers(ServerData	srvers);
@@ -34,12 +37,12 @@ public:
 	void					setWorkingSockets(const std::vector<SocketDependencies> &);
 	void					setMasterSockets();
 	std::string&			getRespond(size_t);
-	std::vector<int>		getAllPorts(void) const;
+	std::vector<String>		getAllPorts(void) const;
 	const SocketDependencies&	getWorkingSocket(size_t) const ;
 	const std::string& 		getRequest(size_t) const ;
 
 	void	runAllServers(void);
-	void	initSockets(std::vector<int> &);
+	void	initSockets(std::vector<String> &);
 	void	initSocketPort80(void);
 	// void	acceptConection(void);
 	void	readyToRead(size_t);

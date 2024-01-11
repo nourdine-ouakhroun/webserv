@@ -28,7 +28,7 @@ class	Server
 	~Server();
 	public:
 
-	static void	bindSocket(int, int);
+	static void	bindSocket(int, const String &, int);
 	static int		setSocket();
 	static void	listenPort(int);
 };
