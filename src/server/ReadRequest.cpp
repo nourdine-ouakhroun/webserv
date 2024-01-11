@@ -22,6 +22,7 @@ void	ReadRequest::Requist()
 	String		boundary;
 	char		buffer[READ_NUMBER];
 
+	std::cout << socket.ipAndPort << std::endl;
 	bytes = 0;
 	memset(buffer, 0, READ_NUMBER);
 	bytes = recv(socket.getFdPoll().fd, buffer, READ_NUMBER - 1, 0);
