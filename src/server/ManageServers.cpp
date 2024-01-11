@@ -39,7 +39,7 @@ std::string&	ManageServers::getRespond(size_t index)
 	return this->master[index].respond;
 }
 
-void	ManageServers::initSockets(std::vector<int>&	allport)
+void	ManageServers::initSockets(std::vector<String>&	allport)
 {
 	for(size_t i = 0; i < allport.size();i++)
 	{
@@ -47,54 +47,75 @@ void	ManageServers::initSockets(std::vector<int>&	allport)
 		try
 		{
 			fd = Server::setSocket();
-			Server::bindSocket(fd, allport[i]);
+			std::vector<String> ipAndPort = allport[i].split(':');
+			Server::bindSocket(fd, ipAndPort.front(), static_cast<int>(strtol(ipAndPort.back().c_str(), NULL, 10)));
 			Server::listenPort(fd);
 		}
 		catch(std::runtime_error &e)
 		{
-			std::cout << e.what() << std::endl;continue;
+			std::cout << e.what() << std::endl;
+			continue;
 		}
 		fdSockets.push_back(fd);
 	}
 }
 
-void	ManageServers::initSocketPort80(void)
+// void	ManageServers::initSocketPort80(void)
+// {
+// 	int	fd;
+// 	try
+// 	{
+// 		fd = Server::setSocket();
+// 		Server::bindSocket(fd, 80);
+// 		Server::listenPort(fd);
+// 	}
+// 	catch(std::runtime_error &e)
+// 	{
+// 		std::cout << e.what() << std::endl;return;
+// 	}
+// 	fdSockets.push_back(fd);
+// }
+
+std::vector<String> removeDuplicatePorts(const std::vector<String>& allPorts)
 {
-	int	fd;
-	try
+	std::vector<String> uniquePorts;
+	std::vector<String>::const_iterator begin = allPorts.begin();
+	std::vector<String>::const_iterator end = allPorts.end();
+	while (begin != end)
 	{
-		fd = Server::setSocket();
-		Server::bindSocket(fd, 80);
-		Server::listenPort(fd);
+		if (std::find(begin + 1, end, *begin) == end)
+			uniquePorts.push_back(*begin);
+		begin++;
 	}
-	catch(std::runtime_error &e)
-	{
-		std::cout << e.what() << std::endl;return;
-	}
-	fdSockets.push_back(fd);
+	return (uniquePorts);
 }
 
-std::vector<int>	ManageServers::getAllPorts(void) const
+std::vector<String>	ManageServers::getAllPorts(void) const
 {
-	std::vector<int>			allport;
+	std::vector<String>			allport;
 	std::vector <ServerPattern>	allservers = servers.getAllServers();
 	for (size_t i = 0; i < allservers.size( ); i++)
 	{
 		std::vector <Data> ports = allservers[i].getData("listen");
 		for (size_t j = 0; j < ports.size(); j++)
 		{
-			allport.push_back(static_cast<int>(strtol(ports[j].getValue().c_str(),NULL, 10)));
+			allport.push_back(ports[j].getValue());
 		}
 	}
+	// std::cout << "allport.size() : " << allport.size() << std::endl;
+	allport = removeDuplicatePorts(allport);
 	return allport;
 }
 
 void	ManageServers::runAllServers(void)
 {
-	std::vector< int >	allport = getAllPorts();
+	/**
+	 * @attention put allport in ManageServers header.
+	*/
+	allport = getAllPorts();
 	initSockets(allport);
-	if (fdSockets.empty( ))
-		initSocketPort80( );
+	// if (fdSockets.empty( ))
+	// 	initSocketPort80( );
 }
 
 
@@ -146,6 +167,12 @@ void ManageServers::acceptConection(size_t index)
 	*/
 	fcntl(newfd, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
 	SocketDependencies tmp;
+
+	/**
+	 * @attention i add this attribute to save the ip and port number to SocketDependencies.
+	*/
+	tmp.ipAndPort = allport[index];
+
 	tmp.setFdPoll(newfd, POLLIN);
 	master.push_back(tmp);
 }
@@ -157,7 +184,7 @@ void ManageServers::readyToRead(size_t i)
 		if(working[i].getFdPoll().fd == fdSockets[j])
 		{
 			acceptConection(j);
-			return;
+			return ;
 		}
 	}
 	ReadRequest readrequest(master[i]);

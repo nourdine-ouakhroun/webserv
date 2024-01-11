@@ -105,17 +105,18 @@ const ServerPattern&	ServerData::getDefaultServer(const std::vector<ServerPatter
 	return (serv.front());
 }
 
-std::vector<ServerPattern>	ServerData::getServer(ServerData& servers, int port, String strHost)
+std::vector<ServerPattern>	ServerData::getServer(ServerData& servers,  const String& ClientAddress, String strHost)
 {
 	std::vector<ServerPattern>	servModel;
 	std::vector<ServerPattern>	srvs = servers.getAllServers();
-	if (strHost.empty())
-		return (ServerData::getServersByServerName(srvs, "\"\""));
+	// if (strHost.empty())
+	// 	return (ServerData::getServersByServerName(srvs, "\"\""));
+	(void)ClientAddress;
 	std::vector<String> str = strHost.split(':');
 	if (str.size() == 2)
 	{
-		(void)port;
 		long host = std::strtol(str.back().c_str(), NULL, 10);
+
 		if (host != 0)
 		{
 			servModel = ServerData::getServersByIpAndPort(srvs, strHost);

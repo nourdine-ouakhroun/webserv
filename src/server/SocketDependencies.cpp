@@ -74,6 +74,7 @@ const std::string & SocketDependencies::getRequist() const
 // {
 // 	this->request.append(request, this->request.size(), lenght);
 // }
+
 void SocketDependencies::setRequist(const std::string& request) 
 {
 	this->request.append(request);
