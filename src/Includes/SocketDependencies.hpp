@@ -16,6 +16,7 @@
 #include<poll.h>
 #include<cstdio>
 #include<algorithm>
+#include "webserver.h"
 
 #define DEFAULT 0
 #define PUTINFILE 1
@@ -34,12 +35,14 @@ class   SocketDependencies
 
 	public:
 
+		// I add this attribute to save ip and port number.
+		String		ipAndPort;
+
 		SocketDependencies();
 		~SocketDependencies();
 		// SocketDependencies(const SocketDependencies&);
 
 		// SocketDependencies &operator=(const SocketDependencies&);
-	
 		void			setFdPoll(const pollfd &);
 		void			setFileName(const std::string &);
 		void			setFdPoll(const int &, const short &);

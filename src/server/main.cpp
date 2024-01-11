@@ -12,6 +12,7 @@
 
 
 #include"ManageServers.hpp"
+
 void	socketHaveEvent(ManageServers &Manageservers)
 {
 	for (size_t i = 0; i < Manageservers.WorkingSocketsSize(); i++)
@@ -30,10 +31,23 @@ void	socketHaveEvent(ManageServers &Manageservers)
 			Manageservers.readyToWrite(i);
 	}
 }
+
 int main(int ac, char **av)
 {
 	static_cast<void>(ac);
+	
 	Parser parser(av[1]);
+	
+	try
+	{
+		Checker checker(parser.getServers());
+		checker.fullCheck();		
+	}
+	catch(const std::exception& e)
+	{
+		std::cerr << e.what() << '\n';
+	}
+
 	ServerData serv(parser.getServers());
 	ManageServers Manageservers(serv);
 
