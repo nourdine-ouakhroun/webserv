@@ -24,37 +24,10 @@ ResponseHeader	to_do(GeneralPattern& __unused targetInfo, __unused String path)
 
 	directive.handleLogges();
 
-
-	/**
-	 * @brief getRootPath : this function checks the root and alias exists and return it.
-	 * @name root and alias directives.
-	 * @details In Nginx, when you have both the root directive and the alias directive within the same location block, the alias directive takes precedence over the root directive.
-	 * 	1. alias
-	 * 	2. root
-	*/
 	root = directive.getRootPath();
 
-	
-	/**
-	 * @brief the priority for serving files is determined by the directives used in the configuration.
-	 * 	1. try_files
-	 * 	2. index
-	 * 	3. auto_index on
-	*/
 	if (!targetInfo.getData("try_files").empty())
-	{
-		try
-		{
-			fileName = directive.tryFiles();
-			if (!fileName.empty())
-				responseHeader.fileName(fileName);
-		}
-		catch (String &e)
-		{
-			responseHeader.status("301 Moved Permanently").location(e);
-		}
-		return (responseHeader);
-	}
+		return (directive.tryFiles());
 
 	fileName = directive.indexing();
 	if (!fileName.empty())
