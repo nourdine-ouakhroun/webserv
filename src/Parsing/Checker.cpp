@@ -10,7 +10,7 @@ Checker::~Checker( void )
     servers.clear();
 }
 
-Checker::Checker(const std::vector<ServerPattern>& _servers) : servers(_servers)
+Checker::Checker(const vector<ServerPattern>& _servers) : servers(_servers)
 {
 }
 
@@ -25,7 +25,7 @@ Checker& Checker::operator=(const Checker& target)
     return (*this);
 }
 
-void    Checker::checkLocation(const std::vector<LocationPattern>& loca, String key)
+void    Checker::checkLocation(const vector<LocationPattern>& loca, String key)
 {
     if (loca.empty() == true)
         return ;
@@ -35,7 +35,7 @@ void    Checker::checkLocation(const std::vector<LocationPattern>& loca, String 
             || loca.at(i).getData("server_name").empty() == false)
             throw (ParsingException("Check Faild."));
         
-        std::vector<Data> data = loca.at(i).getData(key);
+        vector<Data> data = loca.at(i).getData(key);
         if (data.size() > 1)
             throw (ParsingException("Check Faild."));
         if (loca.at(i).getInnerLocation().empty() == false)
@@ -43,13 +43,13 @@ void    Checker::checkLocation(const std::vector<LocationPattern>& loca, String 
     }
 }
 
-void    Checker::checkLocationValues(const std::vector<LocationPattern>& loca)
+void    Checker::checkLocationValues(const vector<LocationPattern>& loca)
 {
     if (loca.empty() == true)
         return ;
     for (size_t i = 0; i < loca.size(); i++)
     {
-        std::vector<Data> data = loca.at(i).getAllData();
+        vector<Data> data = loca.at(i).getAllData();
         if (data.empty() == false)
             for (size_t j = 0; j < data.size(); j++)
                 if (data.at(j).getValue().empty() == true)
@@ -63,7 +63,7 @@ void    Checker::checkDuplicate(String key)
 {
     for (size_t i = 0; i < servers.size(); i++)
     {
-        std::vector<Data> data = servers.at(i).getData(key);
+        vector<Data> data = servers.at(i).getData(key);
         if (data.size() > 1)
             throw (ParsingException("Check Faild."));
         checkLocation(servers.at(i).getLocation(), key);
@@ -74,10 +74,10 @@ void    Checker::checkValues( void )
 {
     for (size_t i = 0; i < servers.size(); i++)
     {
-        std::vector<Data> listens = servers.at(i).getData("listen");
+        vector<Data> listens = servers.at(i).getData("listen");
         if (listens.empty() == true)
             servers[i].addData(Data("lsten", "80"));
-        std::vector<Data> data = servers.at(i).getAllData();
+        vector<Data> data = servers.at(i).getAllData();
         if (data.empty() == false)
             for (size_t j = 0; j < data.size(); j++)
                 if (data.at(j).getValue().empty() == true)
@@ -86,18 +86,18 @@ void    Checker::checkValues( void )
     }
 }
 
-void    Checker::checkLocationValues(const std::vector<LocationPattern>& loca, String key)
+void    Checker::checkLocationValues(const vector<LocationPattern>& loca, String key)
 {
     if (loca.empty() == true)
         return ;
-    std::vector<String> booleanValues;
+    vector<String> booleanValues;
     booleanValues.push_back("on");
     booleanValues.push_back("off");
     for (size_t i = 0; i < loca.size(); i++)
     {
-        std::vector<Data> data = loca.at(i).getData(key);
+        vector<Data> data = loca.at(i).getData(key);
         if (data.size() > 1 || (data.size() == 1
-            && std::find(booleanValues.begin(), booleanValues.end(), data.at(0).getValue()) == booleanValues.end()))
+            && find(booleanValues.begin(), booleanValues.end(), data.at(0).getValue()) == booleanValues.end()))
             throw (ParsingException("Check Faild."));
         if (loca.at(i).getInnerLocation().empty() == false)
             checkLocationValues(loca.at(i).getInnerLocation(), key);  
@@ -108,7 +108,7 @@ void    Checker::checkBooleanValues(String key)
 {
     for (size_t i = 0; i < servers.size(); i++)
     {
-        std::vector<Data> data = servers.at(i).getData(key);
+        vector<Data> data = servers.at(i).getData(key);
         if (data.size() > 1)
             throw (ParsingException("Check Faild."));
         checkLocationValues(servers.at(i).getLocation(), key);

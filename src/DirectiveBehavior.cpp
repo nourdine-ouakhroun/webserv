@@ -1,5 +1,5 @@
 #include "webserver.h"
-
+#include <map>
 
 void	handleLogges(GeneralPattern& server)
 {
@@ -11,29 +11,29 @@ void	handleLogges(GeneralPattern& server)
 	*/
 	if (!stdout_fd && (stdout_fd = dup(STDOUT_FILENO)) == -1)
 	{
-		Logger::error(std::cerr , "dup() function failed.", "");
+		Logger::error(cerr , "dup() function failed.", "");
 		return ;
 	}
 	if (!stderr_fd && (stderr_fd = dup(STDERR_FILENO)) == -1)
 	{
-		Logger::error(std::cerr , "dup() function failed.", "");
+		Logger::error(cerr , "dup() function failed.", "");
 		return ;
 	}
 	if (dup2(stdout_fd, STDOUT_FILENO) == -1 || dup2(stderr_fd, STDERR_FILENO) == -1)
 	{
-		Logger::error(std::cerr , "dup2() function failed.", "");
+		Logger::error(cerr , "dup2() function failed.", "");
 		return ;
 	}
 
-	std::vector<Data> accessLog = server.getData("access_log");
-	std::vector<Data> errorLog = server.getData("error_log");
+	vector<Data> accessLog = server.getData("access_log");
+	vector<Data> errorLog = server.getData("error_log");
 	if (accessLog.empty() == false)
 	{
 		int file_fd = open(accessLog.at(0).getValue().c_str() , O_CREAT | O_APPEND | O_RDWR, 0777);
 		if (file_fd == -1 || dup2(file_fd, STDOUT_FILENO) == -1 || close(file_fd) == -1)
 		{
 			close(file_fd);
-			Logger::error(std::cerr , "failed to open access_log file : ", accessLog.at(0).getValue().c_str());
+			Logger::error(cerr , "failed to open access_log file : ", accessLog.at(0).getValue().c_str());
 			return ;
 		}
 		close(file_fd);
@@ -44,19 +44,19 @@ void	handleLogges(GeneralPattern& server)
 		if (file_fd == -1 || dup2(file_fd, STDERR_FILENO) == -1)
 		{
 			close(file_fd);
-			Logger::error(std::cerr , "failed to open error_log file : ", errorLog.at(0).getValue().c_str());
+			Logger::error(cerr , "failed to open error_log file : ", errorLog.at(0).getValue().c_str());
 			return ;
 		}
 		close(file_fd);
 	}
 }
 
-ResponseHeader	errorPage(std::vector<Data> errorPages, String errorNumber, String message)
+ResponseHeader	errorPage(vector<Data> errorPages, String errorNumber, String message)
 {
 	ResponseHeader responseHeader;
 	for (size_t i = 0; i < errorPages.size(); i++)
 	{
-		std::vector<String> numbers = errorPages.at(i).getValue().split();
+		vector<String> numbers = errorPages.at(i).getValue().split();
 		for (size_t i = 0; i < numbers.size() - 1; i++)
 			if (!numbers.at(i).compare(errorNumber))
 				return (responseHeader.status("302	Found").location(*(numbers.end() - 1)));
@@ -77,7 +77,7 @@ ResponseHeader	autoIndexing(GeneralPattern& loca, const String& dir, String	path
 	return (responseHeader.body(new String(str)));
 }
 
-String	tryFiles(const std::vector<String>& files, const String& path)
+String	tryFiles(const vector<String>& files, const String& path)
 {
 	String value;
 	for (size_t i = 0; i < files.size() - 1; i++)
@@ -105,14 +105,43 @@ String	getAliasPath(String	aliasPath)
 	return (aliasPath.append("/"));
 }
 
-ResponseHeader	returnDirective(const std::vector<Data> &returns, ResponseHeader &responseHeader)
+map<String, String> getStatusCode( void )
 {
-	std::vector<String> values = returns.at(0).getValue().split();
+	map<String, String> status;
+	status.insert(pair<String, String>("200", "200 OK"));
+	status.insert(pair<String, String>("301", "301 Moved Permanently"));
+	status.insert(pair<String, String>("302", "302 Found"));
+	status.insert(pair<String, String>("400", "400 Bad Request"));
+	status.insert(pair<String, String>("403", "403 Forbidden"));
+	status.insert(pair<String, String>("404", "404 Not Found"));
+	status.insert(pair<String, String>("413", "413 Content Too Large"));
+	status.insert(pair<String, String>("500", "500 Internal Server Error"));
+	status.insert(pair<String, String>("501", "501 Not Implemented"));
+	return (status);
+}
+
+ResponseHeader	returnDirective(const vector<Data> &returns, ResponseHeader &responseHeader)
+{
+	vector<String> values = returns.front().getValue().split();
+	static map<String, String> statuses;
+	if (statuses.empty())
+		statuses = getStatusCode();
 	/**
 	 * @attention status should be dynamic.
 	*/
-	responseHeader.status(values.at(0) + " Moved Permanently");
-	if (values.size() == 2)
-		responseHeader.location(values.at(1));
-	return (responseHeader);
+	String statusCode;
+	try
+	{
+		statusCode = statuses.at(values.front());
+		responseHeader.status(statusCode);
+		if (values.size() == 2)
+			responseHeader.location(values.back());
+		return (responseHeader);
+	}
+	catch(const std::exception& e)
+	{
+		statusCode = statuses["501"];
+		responseHeader.status(statusCode);
+		return (responseHeader);
+	}
 }

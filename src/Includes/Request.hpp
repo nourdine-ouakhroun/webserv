@@ -7,7 +7,7 @@
 class   Request
 {
     
-    std::map<String, String> header;
+    map<String, String> header;
     public :
         Request( void );
         Request(const String& _request);

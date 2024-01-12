@@ -10,19 +10,19 @@ String	readFile(const String& path);
 
 class	ServerPattern : public GeneralPattern
 {
-	std::vector<LocationPattern>	location;
+	vector<LocationPattern>	location;
 
 	public :
 		ServerPattern( void );
-		ServerPattern(const GeneralPattern&, const std::vector<LocationPattern>&);
+		ServerPattern(const GeneralPattern&, const vector<LocationPattern>&);
 		ServerPattern& operator=(const ServerPattern& target);
 		ServerPattern(const ServerPattern& copy);
 		~ServerPattern( void )	throw();
-		void	setLocation(std::vector<LocationPattern>& _location);
+		void	setLocation(vector<LocationPattern>& _location);
 		void	addLocation(LocationPattern _location);
-		static	LocationPattern	getLocationByPath(std::vector<LocationPattern> locations, const String& srcPath);
-		const std::vector<LocationPattern>&	getLocation( void ) const;
-		void	addDirectiveToLocation(std::vector<LocationPattern>&	servers, const String& key, const String& serverRoot);
+		static	LocationPattern	getLocationByPath(vector<LocationPattern> locations, const String& srcPath);
+		const vector<LocationPattern>&	getLocation( void ) const;
+		void	addDirectiveToLocation(vector<LocationPattern>&	servers, const String& key, const String& serverRoot);
 		void	addDirectives(const String& key);
 		static int	checkIsDirectory(const String& filename);
 

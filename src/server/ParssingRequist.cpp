@@ -16,11 +16,11 @@ Data ParssingRequist::SpliteEvryLine( String LineRequist)
 		_data.setValue(LineRequist.substr(Position + 2, LineRequist.size() - (Position + 2) - 1));
 	}
 	else
-		throw std::runtime_error("");
+		throw runtime_error("");
 
 	return(_data);
 }
-_requset ParssingRequist::setreq( std::vector<String> requses )
+_requset ParssingRequist::setreq( vector<String> requses )
 {
 	_requset _req;
 
@@ -48,11 +48,11 @@ _requset ParssingRequist::setreq( std::vector<String> requses )
 	}
 	return _req;
 }
-std::vector<String>	ParssingRequist::SplitBynewLine( String RequistContent )
+vector<String>	ParssingRequist::SplitBynewLine( String RequistContent )
 {
-	std::vector<String>	Content;
+	vector<String>	Content;
 	String					tockens;
-	std::istringstream			sstr(RequistContent);
+	istringstream			sstr(RequistContent);
 
 	while(getline(sstr, tockens, '\n'))
 	{
