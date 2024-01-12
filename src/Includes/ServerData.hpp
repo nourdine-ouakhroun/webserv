@@ -12,21 +12,21 @@
 class ServerData
 {
 	private :
-		std::vector<ServerPattern> servers;
+		vector<ServerPattern> servers;
 		// unsigned short	getPort(String	value);
 	public :
 		ServerData( void );
-		ServerData(const std::vector<ServerPattern>&);
+		ServerData(const vector<ServerPattern>&);
 		ServerData(const ServerData&);
 		ServerData&	operator=(const ServerData&);
-		void	setServerData(const std::vector<ServerPattern>&);
+		void	setServerData(const vector<ServerPattern>&);
 		void	displayServers( void );
-		static std::vector<ServerPattern>	getServersByServerName(const std::vector<ServerPattern>& servers, const String& serverName);
-		static std::vector<ServerPattern>	getServersByIpAndPort(const std::vector<ServerPattern>& servers, String strHost);
-		static const ServerPattern&	getDefaultServer(const std::vector<ServerPattern>& servers);
-		const std::vector<ServerPattern>&	getAllServers() const;
+		static vector<ServerPattern>	getServersByServerName(const vector<ServerPattern>& servers, const String& serverName);
+		static vector<ServerPattern>	getServersByIpAndPort(const vector<ServerPattern>& servers, String strHost);
+		static const ServerPattern&	getDefaultServer(const vector<ServerPattern>& servers);
+		const vector<ServerPattern>&	getAllServers() const;
 
-		static std::vector<ServerPattern>	getServer(ServerData& servers, const String& ClientAddress, String strHost);
+		static vector<ServerPattern>	getServer(ServerData& servers, const String& ClientAddress, String strHost);
 
 };
 

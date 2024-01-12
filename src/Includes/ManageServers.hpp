@@ -21,28 +21,28 @@ typedef struct sockaddr_in S_address;
 
 class	ManageServers
 {
-	std::vector<SocketDependencies>	master;
-	std::vector<SocketDependencies>	working;
-	std::vector<int>			fdSockets;
+	vector<SocketDependencies>	master;
+	vector<SocketDependencies>	working;
+	vector<int>			fdSockets;
 	ServerData					servers;
 
 	// add All Ports to this class.
-	std::vector<String>			allport;
+	vector<String>			allport;
 public:
 
 	ManageServers(ServerData	srvers);
 	~ManageServers();
 
-	void					setRespond(const std::string &, size_t);
-	void					setWorkingSockets(const std::vector<SocketDependencies> &);
+	void					setRespond(const string &, size_t);
+	void					setWorkingSockets(const vector<SocketDependencies> &);
 	void					setMasterSockets();
-	std::string&			getRespond(size_t);
-	std::vector<String>		getAllPorts(void) const;
+	string&			getRespond(size_t);
+	vector<String>		getAllPorts(void) const;
 	const SocketDependencies&	getWorkingSocket(size_t) const ;
-	const std::string& 		getRequest(size_t) const ;
+	const string& 		getRequest(size_t) const ;
 
 	void	runAllServers(void);
-	void	initSockets(std::vector<String> &);
+	void	initSockets(vector<String> &);
 	void	initSocketPort80(void);
 	// void	acceptConection(void);
 	SocketDependencies	readyToRead(size_t);
@@ -53,16 +53,16 @@ public:
 	void	acceptConection(size_t);
 
 
-	std::vector<SocketDependencies>			isSocketsAreReady(void);
-	const std::vector<SocketDependencies>&	getMasterSockets(void) const ;
+	vector<SocketDependencies>			isSocketsAreReady(void);
+	const vector<SocketDependencies>&	getMasterSockets(void) const ;
 
-	class PollException : std::exception
+	class PollException : exception
 	{
-		std::string exception_msg;
+		string exception_msg;
 
 		public :
 			PollException();
-			PollException(const std::string &);
+			PollException(const string &);
 			const char * what() const throw();
 			~PollException() throw();
 	};

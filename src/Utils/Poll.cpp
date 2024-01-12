@@ -5,7 +5,7 @@ Poll::Poll( void )
 
 }
 
-Poll::Poll(const std::vector<struct pollfd>& _fds) : fds(_fds)
+Poll::Poll(const vector<struct pollfd>& _fds) : fds(_fds)
 {
 }
 
@@ -31,9 +31,9 @@ Poll&   Poll::operator=(const Poll& target)
 
 int    Poll::getReadyFd(int idx)
 {
-    if (fds[(std::vector<int>::size_type)idx].revents & POLLIN \
-        || fds[(std::vector<int>::size_type)idx].revents & POLLOUT)
-        return (fds[(std::vector<int>::size_type)idx].fd);
+    if (fds[(vector<int>::size_type)idx].revents & POLLIN \
+        || fds[(vector<int>::size_type)idx].revents & POLLOUT)
+        return (fds[(vector<int>::size_type)idx].fd);
     return (-1);
 }
 
@@ -76,5 +76,5 @@ struct sockaddr_in  Poll::getClientInfo(int fd)
     for (size_t i = 0; i < fds.size(); i++)
         if (fds.at(i).fd == fd)
             return (clientInfo.at(i));
-    throw (std::exception());
+    throw (exception());
 }
