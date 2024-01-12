@@ -21,7 +21,10 @@ SRCS		=	src/Parsing/Parser.cpp \
 				src/Server/ManageServers.cpp\
 				src/Server/SocketDependencies.cpp\
 				src/Exception/PollException.cpp\
-				src/Server/ReadRequest.cpp
+				src/Server/ReadRequest.cpp \
+				src/configurationTools.cpp \
+				src/tools.cpp \
+				src/Utils/Directives.cpp
 
 TEMPLATES =	src/Templates/*.tpp
 HEADERS	=	src/Includes/*.hpp

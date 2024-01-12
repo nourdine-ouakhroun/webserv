@@ -9,7 +9,7 @@ ManageServers::~ManageServers(void)
 {
 }
 
-void	ManageServers::setWorkingSockets(const std::vector<SocketDependencies> & working) 
+void	ManageServers::setWorkingSockets(const vector<SocketDependencies> & working) 
 {
 	this->working = working;
 }
@@ -24,22 +24,22 @@ const SocketDependencies&	ManageServers::getWorkingSocket(size_t index) const
 	return this->working[index];
 }
 
-const std::vector<SocketDependencies>&	ManageServers::getMasterSockets(void) const 
+const vector<SocketDependencies>&	ManageServers::getMasterSockets(void) const 
 {
 	return this->master;
 }
 
-const std::string&	ManageServers::getRequest(size_t index) const
+const string&	ManageServers::getRequest(size_t index) const
 {
 	return this->master[index].getRequist();
 }
 
-std::string&	ManageServers::getRespond(size_t index)
+string&	ManageServers::getRespond(size_t index)
 {
 	return this->master[index].respond;
 }
 
-void	ManageServers::initSockets(std::vector<String>&	allport)
+void	ManageServers::initSockets(vector<String>&	allport)
 {
 	for(size_t i = 0; i < allport.size();i++)
 	{
@@ -47,14 +47,14 @@ void	ManageServers::initSockets(std::vector<String>&	allport)
 		try
 		{
 			fd = Server::setSocket();
-			std::vector<String> ipAndPort = allport[i].split(':');
+			vector<String> ipAndPort = allport[i].split(':');
 			Server::bindSocket(fd, ipAndPort.front(), static_cast<int>(strtol(ipAndPort.back().c_str(), NULL, 10)));
 			Server::listenPort(fd);
 		}
-		catch(std::runtime_error &e)
+		catch(runtime_error &e)
 		{
-			std::cout << e.what() << std::endl;
-			continue;
+			Logger::error(cerr, "source > ", e.what());
+			exit(0);
 		}
 		fdSockets.push_back(fd);
 	}
@@ -69,40 +69,40 @@ void	ManageServers::initSockets(std::vector<String>&	allport)
 // 		Server::bindSocket(fd, 80);
 // 		Server::listenPort(fd);
 // 	}
-// 	catch(std::runtime_error &e)
+// 	catch(runtime_error &e)
 // 	{
-// 		std::cout << e.what() << std::endl;return;
+// 		cout << e.what() << endl;return;
 // 	}
 // 	fdSockets.push_back(fd);
 // }
 
-std::vector<String> removeDuplicatePorts(const std::vector<String>& allPorts)
+vector<String> removeDuplicatePorts(const vector<String>& allPorts)
 {
-	std::vector<String> uniquePorts;
-	std::vector<String>::const_iterator begin = allPorts.begin();
-	std::vector<String>::const_iterator end = allPorts.end();
+	vector<String> uniquePorts;
+	vector<String>::const_iterator begin = allPorts.begin();
+	vector<String>::const_iterator end = allPorts.end();
 	while (begin != end)
 	{
-		if (std::find(begin + 1, end, *begin) == end)
+		if (find(begin + 1, end, *begin) == end)
 			uniquePorts.push_back(*begin);
 		begin++;
 	}
 	return (uniquePorts);
 }
 
-std::vector<String>	ManageServers::getAllPorts(void) const
+vector<String>	ManageServers::getAllPorts(void) const
 {
-	std::vector<String>			allport;
-	std::vector <ServerPattern>	allservers = servers.getAllServers();
+	vector<String>			allport;
+	vector <ServerPattern>	allservers = servers.getAllServers();
 	for (size_t i = 0; i < allservers.size( ); i++)
 	{
-		std::vector <Data> ports = allservers[i].getData("listen");
+		vector <Data> ports = allservers[i].getData("listen");
 		for (size_t j = 0; j < ports.size(); j++)
 		{
 			allport.push_back(ports[j].getValue());
 		}
 	}
-	// std::cout << "allport.size() : " << allport.size() << std::endl;
+	// cout << "allport.size() : " << allport.size() << endl;
 	allport = removeDuplicatePorts(allport);
 	return allport;
 }
@@ -136,7 +136,7 @@ void	ManageServers::readyToWrite(size_t index)
 	}
 }
 
-void	ManageServers::setRespond(const std::string & respond, size_t index)
+void	ManageServers::setRespond(const string & respond, size_t index)
 {
 	this->master[index].respond = respond;
 }
@@ -148,7 +148,7 @@ short	ManageServers::WorkingRevents(size_t index) const
 
 void	ManageServers::erase(size_t index)
 {
-	std::vector<SocketDependencies> returnFds;
+	vector<SocketDependencies> returnFds;
 	for (size_t i = 0; i < this->master.size(); i++)
 	{
 		if(i != index)
@@ -166,7 +166,7 @@ void ManageServers::acceptConection(size_t index)
 
 	int newfd = accept(fdSockets[index], (struct sockaddr *)&clientSocket, &len);
 	if(newfd < 0)
-		throw std::runtime_error("accept : filed!");
+		throw runtime_error("accept : filed!");
 	/**
 	 * @todo check fcntl fhm chno katakhd mziaaaaan
 	*/
@@ -186,7 +186,7 @@ SocketDependencies ManageServers::readyToRead(size_t i)
 		if(working[i].getFdPoll().fd == fdSockets[j])
 		{
 			acceptConection(j);
-			throw std::runtime_error("accept new connection.");
+			throw runtime_error("accept new connection.");
 		}
 	}
 	ReadRequest readrequest(master[i]);
@@ -195,10 +195,10 @@ SocketDependencies ManageServers::readyToRead(size_t i)
 	return (master[i]);
 }
 
-std::vector<SocketDependencies>	ManageServers::isSocketsAreReady(void)
+vector<SocketDependencies>	ManageServers::isSocketsAreReady(void)
 {
-	std::vector<SocketDependencies> working = master;
-	std::vector<pollfd> pworking;
+	vector<SocketDependencies> working = master;
+	vector<pollfd> pworking;
 	for (size_t i = 0; i < working.size(); i++)
 		pworking.push_back(working[i].getFdPoll());
 	int pint = poll(&pworking[0], static_cast<nfds_t>(pworking.size()), 6000);
@@ -207,7 +207,7 @@ std::vector<SocketDependencies>	ManageServers::isSocketsAreReady(void)
 	if(pint == 0)
 		throw ManageServers::PollException("Server reloaded");
 	if(pint < 0)
-		throw std::runtime_error("poll : poll was failed");
+		throw runtime_error("poll : poll was failed");
 	return working;
 }
 

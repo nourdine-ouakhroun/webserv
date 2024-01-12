@@ -6,9 +6,9 @@
 #include <vector>
 
 struct _requset{
-	std::vector<String> requistLine;
-	std::map<String, std::vector<String> > header;
-	std::vector<String> body;
+	vector<String> requistLine;
+	map<String, vector<String> > header;
+	vector<String> body;
 };
 
 class ParssingRequist
@@ -17,9 +17,9 @@ class ParssingRequist
 
 		ParssingRequist( void );
 	public :
-		static _requset setreq( std::vector<String> );
+		static _requset setreq( vector<String> );
 		~ParssingRequist();
 		static Data	SpliteEvryLine( String );
-		static std::vector<String>	SplitBynewLine( String );
+		static vector<String>	SplitBynewLine( String );
 };
 #endif

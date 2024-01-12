@@ -6,19 +6,19 @@
 
 class	LocationPattern : public GeneralPattern
 {
-	std::vector<LocationPattern>	innerLocation;
+	vector<LocationPattern>	innerLocation;
 	String		path;
 
 	public :
 		LocationPattern( void );
-		LocationPattern(const GeneralPattern&, const String&, const std::vector<LocationPattern>&);
+		LocationPattern(const GeneralPattern&, const String&, const vector<LocationPattern>&);
 		LocationPattern(const LocationPattern& copy);
 		~LocationPattern( void ) throw();
 		LocationPattern& operator=(const LocationPattern& target);
 		void	setPath(const String& Path);
-		const std::vector<LocationPattern>&	getInnerLocation( void ) const;
-		std::vector<LocationPattern>&	getInnerLocation( void );
-		static	void	printAllLocations(const std::vector<LocationPattern>&, String&);
+		const vector<LocationPattern>&	getInnerLocation( void ) const;
+		vector<LocationPattern>&	getInnerLocation( void );
+		static	void	printAllLocations(const vector<LocationPattern>&, String&);
 		
 		bool			empty( void ) const;
 		String			getPath( void ) const;

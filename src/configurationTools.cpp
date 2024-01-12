@@ -3,9 +3,9 @@
 
 bool	checkFile(String file)
 {
-	std::fstream new_file;
+	fstream new_file;
     
-    new_file.open(file.c_str(), std::ios::in);
+    new_file.open(file.c_str(), ios::in);
 	if (new_file.is_open() == false)
     	return (false);
 	return (true);
@@ -13,21 +13,21 @@ bool	checkFile(String file)
 
 String*  getContentFile(String file)
 {
-    std::fstream new_file;
+    fstream new_file;
     
-    new_file.open(file.c_str(), std::ios::in);
+    new_file.open(file.c_str(), ios::in);
     if (new_file.is_open() == false)
         return (NULL);
     String  sa;
     String  *content = new String();
-    while (std::getline(new_file, sa))
+    while (getline(new_file, sa))
         content->append(sa + "\n");
     new_file.close();
     return (content);
 }
 
 
-String	getFileContent(const std::vector<String>& indexes, const String& path)
+String	getFileContent(const vector<String>& indexes, const String& path)
 {
 	String value;
 	for (size_t i = 0; i < indexes.size(); i++)

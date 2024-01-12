@@ -1,15 +1,15 @@
 #include"Cgi.hpp"
 
-Cgi::Cgi(std::string ScriptName, std::map<String, String> scripts)
+Cgi::Cgi(string ScriptName, map<String, String> scripts)
 {
 	PathScript = ScriptName;
 	MultCGI = scripts;
 }
-std::string Cgi::HandelScript(std::vector<String> argvs)
+string Cgi::HandelScript(vector<String> argvs)
 {
 	int			forkValeu = 0;
 	int			fd[2];
-	std::string	ext;
+	string	ext;
 
 	ext = this->PathScript.substr(PathScript.find_last_of('.'));
 	if(MultCGI[ext].size() == 0)
@@ -30,7 +30,7 @@ std::string Cgi::HandelScript(std::vector<String> argvs)
 		close(fd[0]);
 		if(execve(argv[0], (char *const *)argv, NULL) < 0)
 		{
-			std::cout << "execve filed" << std::endl;
+			cout << "execve filed" << endl;
 			exit(0);    
 		}
 	}

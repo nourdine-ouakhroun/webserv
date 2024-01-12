@@ -1,18 +1,18 @@
 #include "String.hpp"
 
-String::String( void ) : std::string()
+String::String( void ) : string()
 {
 }
 
-String::String(const char* str) : std::string(str)
+String::String(const char* str) : string(str)
 {
 }
 
-String::String(const std::string str) : std::string(str)
+String::String(const string str) : string(str)
 {
 }
 
-String::String(const String& str) : std::string(str)
+String::String(const String& str) : string(str)
 {
 }
 
@@ -22,7 +22,7 @@ String::~String( void )
 
 String& String::operator=(const String& str)
 {
-	std::string::operator=(str);
+	string::operator=(str);
 	return (*this);
 }
 
@@ -86,7 +86,7 @@ String&	String::trim(const String& characters)
 }
 
 
-std::vector<String> String::split( void )
+vector<String> String::split( void )
 {
 	String tmp(*this);
 	iterator	b = tmp.begin();
@@ -97,8 +97,8 @@ std::vector<String> String::split( void )
 			*b = ' ';
 		b++;
 	}
-	std::vector<String> vec;
-	std::istringstream str(tmp);
+	vector<String> vec;
+	istringstream str(tmp);
     String s;
     while (getline(str, s, ' '))
 	{
@@ -109,10 +109,10 @@ std::vector<String> String::split( void )
 	return (vec);
 }
 
-std::vector<String> String::split(const char& separator)
+vector<String> String::split(const char& separator)
 {
-	std::vector<String> vec;
-	std::istringstream str(*this);
+	vector<String> vec;
+	istringstream str(*this);
     String s;
     while (getline(str, s, separator))
 	{
@@ -138,7 +138,7 @@ int	String::countRepeating(const char& c)
 }
 
 
-String	String::convertVectorToString(const std::vector<String>& strings, unsigned int begin = 0, unsigned int len = 1, char separator = 0)
+String	String::convertVectorToString(const vector<String>& strings, unsigned int begin = 0, unsigned int len = 1, char separator = 0)
 {
 	String dest;
 	
@@ -154,17 +154,17 @@ String	String::convertVectorToString(const std::vector<String>& strings, unsigne
 	return (dest);
 }
 
-size_t String::memStringSearchLast(std::string sstring, size_t lentgh)
+size_t String::memStringSearchLast(string sstring, size_t lentgh)
 {
-	std::cout << (*this) << std::endl;
+	cout << (*this) << endl;
 	
 	for (size_t i = lentgh - 1; i > 0; i--)
 	{
-		std::cout << "fffff" << i << " : " << lentgh <<  std::endl;
-		std::cout << (int)(*this)[i] << std::endl;
+		cout << "fffff" << i << " : " << lentgh <<  endl;
+		cout << (int)(*this)[i] << endl;
 		if(sstring[sstring.size() - 1] == (*this)[i])
 		{
-			std::cout << "**" << (int)sstring[sstring.size() - 1] << "**" << std::endl;
+			cout << "**" << (int)sstring[sstring.size() - 1] << "**" << endl;
 			size_t j = sstring.size() - 1;
 			for (; j > 0 && (*this)[i] == sstring[j]; j-- && i--);
 			if(j == 0)
@@ -182,7 +182,7 @@ String String::memSubstr(size_t begin, size_t end)
 	return dest;
 }
 
-size_t String::memStringSearch(std::string sstring, size_t lentgh)
+size_t String::memStringSearch(string sstring, size_t lentgh)
 {
 	for (size_t i = 0; i < lentgh; i++)
 	{
