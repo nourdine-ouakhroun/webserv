@@ -45,7 +45,7 @@ public:
 	void	initSockets(std::vector<String> &);
 	void	initSocketPort80(void);
 	// void	acceptConection(void);
-	void	readyToRead(size_t);
+	SocketDependencies	readyToRead(size_t);
 	void	readyToWrite(size_t);
 	void	erase(size_t );
 	size_t	WorkingSocketsSize(void) const ;

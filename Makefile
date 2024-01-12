@@ -56,5 +56,5 @@ re		: fclean all
 cclean 	:
 	bash ~/Cleaner_42.sh
 
-run		:	cclean	all
+run		:	all
 	./webserv configurations/default.conf
