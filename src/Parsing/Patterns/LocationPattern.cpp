@@ -4,7 +4,7 @@ LocationPattern::LocationPattern( void ) : GeneralPattern()
 {
 }
 
-LocationPattern::LocationPattern(const GeneralPattern& model, const String& Path, const std::vector<LocationPattern>& _innerLocation) :
+LocationPattern::LocationPattern(const GeneralPattern& model, const String& Path, const vector<LocationPattern>& _innerLocation) :
 	GeneralPattern(model),
 	innerLocation(_innerLocation),
 	path(Path)
@@ -43,23 +43,23 @@ String	LocationPattern::getPath( void ) const
 	return (path);
 }
 
-const std::vector<LocationPattern>&	LocationPattern::getInnerLocation( void ) const
+const vector<LocationPattern>&	LocationPattern::getInnerLocation( void ) const
 {
 	return (innerLocation);
 }
 
-std::vector<LocationPattern>&	LocationPattern::getInnerLocation( void )
+vector<LocationPattern>&	LocationPattern::getInnerLocation( void )
 {
 	return (innerLocation);
 }
 
-void	LocationPattern::printAllLocations(const std::vector<LocationPattern>& locations, String& str)
+void	LocationPattern::printAllLocations(const vector<LocationPattern>& locations, String& str)
 {
-	std::vector<LocationPattern>::const_iterator ibegin = locations.begin();
-	std::vector<LocationPattern>::const_iterator iend = locations.end();
+	vector<LocationPattern>::const_iterator ibegin = locations.begin();
+	vector<LocationPattern>::const_iterator iend = locations.end();
 	while (ibegin < iend)
 	{
-		std::cout << str << "PATH ==> " << ibegin->getPath() << std::endl;
+		cout << str << "PATH ==> " << ibegin->getPath() << endl;
 		str.append("\t");
 		printGeneralPattern(*ibegin, str);
 		if (ibegin->getInnerLocation().empty() == false)
@@ -82,5 +82,5 @@ bool	LocationPattern::empty( void ) const
 
 void	LocationPattern::execute( void ) const
 {
-	std::cout << "HELLO WORLD" << std::endl;
+	cout << "HELLO WORLD" << endl;
 }

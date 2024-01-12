@@ -41,7 +41,7 @@ SocketDependencies::~SocketDependencies()
 // 	this->requist.erase(_n, linght);
 // }
 
-// const std::string &SocketDependencies::getRequist() const 
+// const string &SocketDependencies::getRequist() const 
 // {
 // 	return requist;
 // }
@@ -57,25 +57,25 @@ void 			SocketDependencies::setMethod(const int & method)
 {
 	this->method = method;
 }
-void			SocketDependencies::setFileName(const std::string &filename)
+void			SocketDependencies::setFileName(const string &filename)
 {
 	this->filename = filename;
 }
-const std::string&	SocketDependencies::getFileName() const
+const string&	SocketDependencies::getFileName() const
 {
 	return filename;
 }
-const std::string & SocketDependencies::getRequist() const
+const string & SocketDependencies::getRequist() const
 {
 	return this->request;
 }
 
-// void SocketDependencies::setRequist(const std::string& request,const size_t& lenght) 
+// void SocketDependencies::setRequist(const string& request,const size_t& lenght) 
 // {
 // 	this->request.append(request, this->request.size(), lenght);
 // }
 
-void SocketDependencies::setRequist(const std::string& request) 
+void SocketDependencies::setRequist(const string& request) 
 {
 	this->request.append(request);
 }
@@ -98,7 +98,7 @@ const pollfd &SocketDependencies::getFdPoll() const
     return this->fdpoll;
 }
 
-const std::string &SocketDependencies::getBoundary() const
+const string &SocketDependencies::getBoundary() const
 {
 	return this->boundary;
 }
@@ -123,7 +123,7 @@ void SocketDependencies::setContenlenght(const ssize_t & contenlenght)
 {
 	this->contenlenght = contenlenght;
 }
-void SocketDependencies::setBoundary(const std::string &	boundary)
+void SocketDependencies::setBoundary(const string &	boundary)
 {
 	this->boundary = boundary;
 }

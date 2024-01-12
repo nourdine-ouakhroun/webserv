@@ -24,9 +24,9 @@
 
 class   SocketDependencies
 {
-	std::string	request;
-	std::string	boundary;
-	std::string	filename;
+	string	request;
+	string	boundary;
+	string	filename;
 	ssize_t		lenght;
 	ssize_t		contenlenght;
 	int			fd;
@@ -44,19 +44,19 @@ class   SocketDependencies
 
 		// SocketDependencies &operator=(const SocketDependencies&);
 		void			setFdPoll(const pollfd &);
-		void			setFileName(const std::string &);
+		void			setFileName(const string &);
 		void			setFdPoll(const int &, const short &);
 		void			setFdPoll(const short &);
-		void			setRequist(const std::string &);
+		void			setRequist(const string &);
 		void 			setMethod(const int &);
 		void			setLenght(const size_t &);
 		void			setContenlenght(const ssize_t &);
-		void			setBoundary(const std::string	&);
+		void			setBoundary(const string	&);
 		void			setFd(const int &);
 
-		const std::string&	getFileName() const;
-		const std::string&	getRequist() const;
-		const std::string&	getBoundary() const;
+		const string&	getFileName() const;
+		const string&	getRequist() const;
+		const string&	getBoundary() const;
 		const pollfd&		getFdPoll() const;
 		const ssize_t &		getLenght() const;
 		const ssize_t &		getContenlenght() const;
@@ -66,9 +66,9 @@ class   SocketDependencies
 		void		appendLenght(const size_t &);
 		bool		ischunked;
 		int			status;
-		std::string	respond;
-    	std::string chunked_rest;
-		std::string	rest;
+		string	respond;
+    	string chunked_rest;
+		string	rest;
 		size_t hex_valeu;
 };
 

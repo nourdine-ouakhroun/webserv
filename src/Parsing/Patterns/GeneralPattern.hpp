@@ -6,20 +6,20 @@
 
 class GeneralPattern
 {
-	std::vector<Data> data;
+	vector<Data> data;
 
 	public	:
 		GeneralPattern( void );
-		GeneralPattern(std::vector<Data> _data);
+		GeneralPattern(vector<Data> _data);
 		GeneralPattern(const GeneralPattern& copy);
 		virtual						~GeneralPattern( void ) throw();
 		GeneralPattern&				operator=(const GeneralPattern& target);
 
-		GeneralPattern&				setData(const std::vector<Data> &data);
+		GeneralPattern&				setData(const vector<Data> &data);
 		void						updateData(const Data& _data, size_t pos);
 		void						addData(const Data& _data);
-		std::vector<Data>			getData(const String& key) const;
-		const std::vector<Data>&	getAllData( void ) const;
+		vector<Data>			getData(const String& key) const;
+		const vector<Data>&	getAllData( void ) const;
 		bool						isExist(const Data& value);
 		virtual bool				empty( void ) const;
 		virtual	String				getPath( void ) const;
