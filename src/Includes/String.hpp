@@ -28,6 +28,7 @@ class String : public std::string
 		String memSubstr(size_t begin, size_t end);
 };
 
+unsigned int convertStringToBinary(String str);
 
 
 #endif

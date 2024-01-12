@@ -107,27 +107,16 @@ const ServerPattern&	ServerData::getDefaultServer(const std::vector<ServerPatter
 
 std::vector<ServerPattern>	ServerData::getServer(ServerData& servers,  const String& ClientAddress, String strHost)
 {
-	std::vector<ServerPattern>	servModel;
 	std::vector<ServerPattern>	srvs = servers.getAllServers();
-	// if (strHost.empty())
-	// 	return (ServerData::getServersByServerName(srvs, "\"\""));
-	(void)ClientAddress;
-	std::vector<String> str = strHost.split(':');
-	if (str.size() == 2)
+	srvs = ServerData::getServersByIpAndPort(srvs, ClientAddress);
+	if (strHost.empty())
+		strHost = "\"\"";
+	srvs = ServerData::getServersByServerName(srvs, strHost);
+	if (srvs.size() > 1)
 	{
-		long host = std::strtol(str.back().c_str(), NULL, 10);
-
-		if (host != 0)
-		{
-			servModel = ServerData::getServersByIpAndPort(srvs, strHost);
-			servModel = ServerData::getServersByServerName(servModel, str.front());
-		}
-		else
-			servModel = ServerData::getServersByServerName(srvs, str.front());
+		ServerPattern s = ServerData::getDefaultServer(srvs);
+		srvs.clear();
+		srvs.push_back(s);
 	}
-	else if (str.size() == 1)
-		servModel = ServerData::getServersByServerName(srvs, str.at(0));
-	if (servModel.empty() == true)
-		servModel.push_back(servers.getDefaultServer(srvs));
-	return (servModel);
+	return (srvs);
 }
