@@ -157,9 +157,14 @@ void	ManageServers::erase(size_t index)
 	this->master = returnFds;
 }
 
+#include <arpa/inet.h>
+
 void ManageServers::acceptConection(size_t index)
 {
-	int newfd = accept(fdSockets[index], NULL, NULL);
+	struct sockaddr_in clientSocket;
+	socklen_t len = sizeof(clientSocket);
+
+	int newfd = accept(fdSockets[index], (struct sockaddr *)&clientSocket, &len);
 	if(newfd < 0)
 		throw std::runtime_error("accept : filed!");
 	/**
@@ -168,28 +173,26 @@ void ManageServers::acceptConection(size_t index)
 	fcntl(newfd, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
 	SocketDependencies tmp;
 
-	/**
-	 * @attention i add this attribute to save the ip and port number to SocketDependencies.
-	*/
 	tmp.ipAndPort = allport[index];
 
 	tmp.setFdPoll(newfd, POLLIN);
 	master.push_back(tmp);
 }
 
-void ManageServers::readyToRead(size_t i)
+SocketDependencies ManageServers::readyToRead(size_t i)
 {
 	for (size_t j = 0; j < fdSockets.size(); j++)
 	{
 		if(working[i].getFdPoll().fd == fdSockets[j])
 		{
 			acceptConection(j);
-			return ;
+			throw std::runtime_error("accept new connection.");
 		}
 	}
 	ReadRequest readrequest(master[i]);
 	readrequest.Requist();
 	master[i].setFdPoll(POLLOUT);
+	return (master[i]);
 }
 
 std::vector<SocketDependencies>	ManageServers::isSocketsAreReady(void)

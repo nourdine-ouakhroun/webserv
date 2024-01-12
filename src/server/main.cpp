@@ -13,7 +13,7 @@
 
 #include"ManageServers.hpp"
 
-void	socketHaveEvent(ManageServers &Manageservers)
+void	socketHaveEvent(ManageServers &Manageservers, ServerData& serv)
 {
 	for (size_t i = 0; i < Manageservers.WorkingSocketsSize(); i++)
 	{
@@ -21,8 +21,13 @@ void	socketHaveEvent(ManageServers &Manageservers)
 		{
 			try
 			{
-				Manageservers.readyToRead(i);
+				SocketDependencies socket = Manageservers.readyToRead(i);
 				std::cout << Manageservers.getRequest(i) << std::endl;
+				GeneralPattern header(Parser::parseHeader(Manageservers.getRequest(i)));
+				std::cout << ">>>>> Ip Address: " << socket.ipAndPort << std::endl;
+				std::cout << ">>>>> Host: " << header.getData("Host").front().getValue() << std::endl;
+				std::vector<ServerPattern> server = ServerData::getServer(serv, socket.ipAndPort, header.getData("Host").front().getValue());
+				ServerPattern::printServerPatternInfo(server.front());
 				Manageservers.setRespond("HTTP/1.1 200 OK\r\n\r\n <h1> hello </h1>", i);
 			}
 			catch(std::runtime_error &e){}
@@ -57,7 +62,7 @@ int main(int ac, char **av)
 	{
 		try{
 			Manageservers.setWorkingSockets(Manageservers.isSocketsAreReady());
-			socketHaveEvent(Manageservers);
+			socketHaveEvent(Manageservers, serv);
 		}
 		catch(const ManageServers::PollException& e)
 		{
