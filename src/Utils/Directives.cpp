@@ -87,7 +87,7 @@ ResponseHeader	Directives::autoIndexing( void )
 	return (responseHeader.body(new String(str)));
 }
 
-String		Directives::tryFiles( void )
+ResponseHeader		Directives::tryFiles( void )
 {
 	String value;
 	vector<String> files = data.getData("try_files").front().getValue().split();
@@ -98,9 +98,9 @@ String		Directives::tryFiles( void )
 		if (pos != String::npos)
 			tmp.replace(pos, 4, path);
 		if (checkFile(tmp) == true)
-			return (tmp);
+			return (ResponseHeader().fileName(tmp));
 	}
-	throw (files.back());
+	return (ResponseHeader().status("301 Moved Permanently").location(files.back()));
 }
 
 String		Directives::indexing( void )
