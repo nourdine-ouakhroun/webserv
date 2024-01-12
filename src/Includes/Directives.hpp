@@ -14,8 +14,8 @@ class Directives
 		void			handleLogges( void );
 		ResponseHeader	errorPage(String errorNumber, String message);
 		ResponseHeader	autoIndexing( void );
+		ResponseHeader	tryFiles( void );
 		String			indexing( void );
-		String			tryFiles( void );
 		String			getRootPath( void );
 		String			getAliasPath( void );
 		ResponseHeader	returnDirective( void );
