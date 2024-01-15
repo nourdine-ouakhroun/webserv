@@ -6,20 +6,20 @@
 
 class	Location : public GlobalModel
 {
-	std::vector<Location>	innerLocation;
+	vector<Location>	innerLocation;
 	String		path;
 
 	public :
 		Location( void );
-		Location(const GlobalModel&, const String&, const std::vector<Location>&);
+		Location(const GlobalModel&, const String&, const vector<Location>&);
 		Location(const Location& copy);
 		~Location( void );
 		Location& operator=(const Location& target);
 		void	setPath(const String& Path);
 		const String&	getPath( void ) const;
-		const std::vector<Location>&	getInnerLocation( void ) const;
-		std::vector<Location>&	getInnerLocation( void );
-		static	void	printAllLocations(const std::vector<Location>&, String&);
+		const vector<Location>&	getInnerLocation( void ) const;
+		vector<Location>&	getInnerLocation( void );
+		static	void	printAllLocations(const vector<Location>&, String&);
 };
 
 #endif

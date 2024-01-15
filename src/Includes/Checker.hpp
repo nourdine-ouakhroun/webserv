@@ -5,18 +5,18 @@
 
 class Checker
 {
-    std::vector<ServerModel> servers;
+    vector<ServerModel> servers;
     Checker( void );
     public:
-        Checker(const std::vector<ServerModel>& servers);
+        Checker(const vector<ServerModel>& servers);
         Checker(const Checker& copy);
         ~Checker( void );
         Checker&    operator=(const Checker& target);
         void        fullCheck( void );
         void        checkDuplicate(String key);
-        void        checkLocation(const std::vector<Location>& loca, String key);
+        void        checkLocation(const vector<Location>& loca, String key);
         void        checkValues( void );
-        void        checkLocationValues(const std::vector<Location>& loca);
+        void        checkLocationValues(const vector<Location>& loca);
 
 
 };

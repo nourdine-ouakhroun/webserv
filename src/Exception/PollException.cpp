@@ -1,16 +1,16 @@
-#include"ManageServers.hpp"
-ManageServers::PollException::PollException()
+#include"Servers.hpp"
+Servers::PollException::PollException()
 {
     this->exception_msg = "POLL EXCEPTION";
 }
-ManageServers::PollException::PollException(const std::string &exception_msg)
+Servers::PollException::PollException(const string &exception_msg)
 {
     this->exception_msg = exception_msg;
 }
-const char *ManageServers::PollException::what() const throw()
+const char *Servers::PollException::what() const throw()
 {
     return this->exception_msg.c_str();
 }
-ManageServers::PollException::~PollException() throw()
+Servers::PollException::~PollException() throw()
 {
 }
