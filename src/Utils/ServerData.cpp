@@ -105,7 +105,7 @@ const ServerPattern&	ServerData::getDefaultServer(const vector<ServerPattern>& s
 	return (serv.front());
 }
 
-vector<ServerPattern>	ServerData::getServer(ServerData& servers,  const String& ClientAddress, String strHost)
+vector<ServerPattern>	ServerData::getServer(ServerData& servers, __unused const String& ClientAddress, String strHost)
 {
 	vector<ServerPattern>	srvs = servers.getAllServers();
 	srvs = ServerData::getServersByIpAndPort(srvs, ClientAddress);
