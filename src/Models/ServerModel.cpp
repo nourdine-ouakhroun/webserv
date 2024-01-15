@@ -4,9 +4,9 @@ ServerModel::ServerModel( void ) : GlobalModel()
 {
 }
 
-ServerModel::ServerModel(const GlobalModel& model, const std::vector<Location>& _location) : GlobalModel(model), location(_location)
+ServerModel::ServerModel(const GlobalModel& model, const vector<Location>& _location) : GlobalModel(model), location(_location)
 {
-	std::vector<Data> serverRoot = getData("root");
+	vector<Data> serverRoot = getData("root");
 	if (serverRoot.empty() == false)
 		addRootToLocation(location, serverRoot.at(0).getValue());
 }
@@ -27,22 +27,22 @@ ServerModel& ServerModel::operator=(const ServerModel& target)
 	{
 		GlobalModel::operator=(target);
 		location = target.location;
-		std::vector<Data> serverRoot = getData("root");
+		vector<Data> serverRoot = getData("root");
 		if (serverRoot.empty() == false)
 			addRootToLocation(location, serverRoot.at(0).getValue());
 	}
 	return (*this);
 }
 
-void	ServerModel::setLocation(std::vector<Location>& _location)
+void	ServerModel::setLocation(vector<Location>& _location)
 {
 	location = _location;
-	std::vector<Data> serverRoot = getData("root");
+	vector<Data> serverRoot = getData("root");
 	if (serverRoot.empty() == false)
 		addRootToLocation(location, serverRoot.at(0).getValue());
 }
 
-const std::vector<Location>&	ServerModel::getLocation( void ) const
+const vector<Location>&	ServerModel::getLocation( void ) const
 {
 	return (location);
 }
@@ -56,17 +56,17 @@ void	ServerModel::printServerModelInfo(const ServerModel& serverModel)
 {
 	String s("\t");
 	GlobalModel::printGlobalModel(serverModel, s);
-	std::cout << s << ">>>> Location Info <<<<\n";
+	cout << s << ">>>> Location Info <<<<\n";
 	Location::printAllLocations(serverModel.getLocation(), s);
 }
 
-Location	ServerModel::getLocationByPath(std::vector<Location> locations, const String& srcPath)
+Location	ServerModel::getLocationByPath(vector<Location> locations, const String& srcPath)
 {
-	static std::vector<Location> tmplocations;
+	static vector<Location> tmplocations;
 	if (tmplocations.empty() == true)
 		tmplocations = locations;
-	std::vector<Location>::iterator ibegin = locations.begin();
-	std::vector<Location>::iterator iend = locations.end();
+	vector<Location>::iterator ibegin = locations.begin();
+	vector<Location>::iterator iend = locations.end();
 	while (ibegin < iend)
 	{
 		String tmpPath(String(ibegin->getPath()).rightTrim("/"));
@@ -83,19 +83,19 @@ Location	ServerModel::getLocationByPath(std::vector<Location> locations, const S
 	return (Location());
 }
 
-void	ServerModel::addRootToLocation(std::vector<Location>&	servers, const String& serverRoot)
+void	ServerModel::addRootToLocation(vector<Location>&	servers, const String& serverRoot)
 {
 	if (servers.empty() == true)
 		return ;
 	for (size_t i = 0; i < servers.size(); i++)
 	{
 		String rootValue(serverRoot);
-		std::vector<Data> roots = servers.at(i).getData("root");
+		vector<Data> roots = servers.at(i).getData("root");
 		if (roots.empty() == true)
 			servers.at(i).addData(Data("root", rootValue));
 		else
 			rootValue = roots.at(0).getValue();
-		std::vector<Location>& innerLocation = servers.at(i).getInnerLocation();
+		vector<Location>& innerLocation = servers.at(i).getInnerLocation();
 		if (innerLocation.empty() == false)
 			addRootToLocation(innerLocation, rootValue);
 	}

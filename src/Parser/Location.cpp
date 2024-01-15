@@ -4,7 +4,7 @@ Location::Location( void ) : GlobalModel()
 {
 }
 
-Location::Location(const GlobalModel& model, const String& Path, const std::vector<Location>& _innerLocation) :
+Location::Location(const GlobalModel& model, const String& Path, const vector<Location>& _innerLocation) :
 	GlobalModel(model),
 	innerLocation(_innerLocation),
 	path(Path)
@@ -43,23 +43,23 @@ const String&	Location::getPath( void ) const
 	return (path);
 }
 
-const std::vector<Location>&	Location::getInnerLocation( void ) const
+const vector<Location>&	Location::getInnerLocation( void ) const
 {
 	return (innerLocation);
 }
 
-std::vector<Location>&	Location::getInnerLocation( void )
+vector<Location>&	Location::getInnerLocation( void )
 {
 	return (innerLocation);
 }
 
-void	Location::printAllLocations(const std::vector<Location>& locations, String& str)
+void	Location::printAllLocations(const vector<Location>& locations, String& str)
 {
-	std::vector<Location>::const_iterator ibegin = locations.begin();
-	std::vector<Location>::const_iterator iend = locations.end();
+	vector<Location>::const_iterator ibegin = locations.begin();
+	vector<Location>::const_iterator iend = locations.end();
 	while (ibegin < iend)
 	{
-		std::cout << str << "PATH ==> " << ibegin->getPath() << std::endl;
+		cout << str << "PATH ==> " << ibegin->getPath() << endl;
 		str.append("\t");
 		printGlobalModel(*ibegin, str);
 		if (ibegin->getInnerLocation().empty() == false)

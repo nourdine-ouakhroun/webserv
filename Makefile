@@ -12,12 +12,12 @@ SRCS	= src/Parser/Parser.cpp \
 		src/Utils/ServerData.cpp\
 		src/Server/main.cpp\
 		src/Server/Server.cpp\
-		src/Server/ParssingRequist.cpp\
+		src/Server/ParssingRequest.cpp\
 		src/Server/Cgi.cpp\
 		src/Utils/Poll.cpp\
 		src/tools.cpp\
-		src/Server/ManageServers.cpp\
-		src/Server/SocketDependencies.cpp\
+		src/Server/Servers.cpp\
+		src/Server/Socket.cpp\
 		src/Exception/PollException.cpp\
 		src/Server/ReadRequest.cpp
 #		src/Utils/Select.cpp

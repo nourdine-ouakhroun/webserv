@@ -1,10 +1,10 @@
 #ifndef	DATA_HPP
 #define DATA_HPP
-
 #include <iostream>
 #include "String.hpp"
 #include "Logger.hpp"
 
+using namespace std;
 class Data
 {
 	String	key;
