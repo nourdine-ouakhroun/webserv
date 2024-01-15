@@ -40,6 +40,31 @@ class   SocketDependencies
 
 		SocketDependencies();
 		~SocketDependencies();
+		// SocketDependencies(const SocketDependencies& target)
+		// {
+		// 	*this = target;
+		// }
+		// SocketDependencies& operator=(const SocketDependencies& target)
+		// {
+		// 	if (this != &target)
+		// 	{
+		// 		request = target.request;
+		// 		boundary = target.boundary;
+		// 		filename = target.filename;
+		// 		lenght = target.lenght;
+		// 		contenlenght = target.contenlenght;
+		// 		fd = target.fd;
+		// 		method = target.method;
+		// 		fdpoll = target.fdpoll;
+		// 		ischunked = target.ischunked;
+		// 		status = target.status;
+		// 		respond = target.respond;
+		// 		chunked_rest = target.chunked_rest;
+		// 		rest = target.rest;
+		// 		hex_valeu = target.hex_valeu;
+		// 	}
+		// 	return (*this);
+		// }
 		// SocketDependencies(const SocketDependencies&);
 
 		// SocketDependencies &operator=(const SocketDependencies&);
@@ -66,10 +91,10 @@ class   SocketDependencies
 		void		appendLenght(const size_t &);
 		bool		ischunked;
 		int			status;
-		string	respond;
-    	string chunked_rest;
-		string	rest;
-		size_t hex_valeu;
+		string		respond;
+    	string		chunked_rest;
+		string		rest;
+		size_t		hex_valeu;
 };
 
 #endif

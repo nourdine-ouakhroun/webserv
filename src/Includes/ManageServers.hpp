@@ -23,7 +23,7 @@ class	ManageServers
 {
 	vector<SocketDependencies>	master;
 	vector<SocketDependencies>	working;
-	vector<int>			fdSockets;
+	vector<int>					fdSockets;
 	ServerData					servers;
 
 	// add All Ports to this class.
@@ -31,9 +31,10 @@ class	ManageServers
 public:
 
 	ManageServers(ServerData	srvers);
+	// ManageServers(ServerData	srvers);
 	~ManageServers();
 
-	void					setRespond(const string &, size_t);
+	void					setRespond(const string& , size_t);
 	void					setWorkingSockets(const vector<SocketDependencies> &);
 	void					setMasterSockets();
 	string&			getRespond(size_t);
@@ -43,7 +44,7 @@ public:
 
 	void	runAllServers(void);
 	void	initSockets(vector<String> &);
-	void	initSocketPort80(void);
+	// void	initSocketPort80(void);
 	// void	acceptConection(void);
 	SocketDependencies	readyToRead(size_t);
 	void	readyToWrite(size_t);
