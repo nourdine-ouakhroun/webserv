@@ -34,7 +34,7 @@
 
 /**
  * @brief	AFTER GETFILECONTENT :
- * ~~~~~~~~~~~~~~~~~~~ std::vector<String> fileContent ~~~~~~~~~~~~~~~~~~~
+ * ~~~~~~~~~~~~~~~~~~~ vector<String> fileContent ~~~~~~~~~~~~~~~~~~~
  * [0] 	: "Server"
  * [1] 	: "{"
  * [2] 	: "listen	8080;"
@@ -110,7 +110,7 @@
 
 /**
  * @brief	AFTER SPLIT CONTENT INTO SERVERS
- * ~~~~~~~~~~ std::vector<std::vector<String> > serversContents ~~~~~~~~~~
+ * ~~~~~~~~~~ vector<vector<String> > serversContents ~~~~~~~~~~
  * INDEX: 0
  * [0][0] 	: "Server"
  * [0][1] 	: "{"
@@ -150,10 +150,10 @@
 
 /**
  * @brief	AFTER GET FINAL RESUALT :
- * ~~~~~~~~~~~~~~~~~~ std::vector<ServerModel> servers ~~~~~~~~~~~~~~~~~~~
+ * ~~~~~~~~~~~~~~~~~~ vector<ServerModel> servers ~~~~~~~~~~~~~~~~~~~
  * INDEX: 0
  * 		{
- * 			std::vector<Data> data :
+ * 			vector<Data> data :
  * 				.........................
  * 				|	Keys	|	Values	|
  * 				-------------------------
@@ -162,12 +162,12 @@
  * 				|error_page |...40x.html|
  * 				-------------------------
  * 
- * 			std::vector<Location> location :
+ * 			vector<Location> location :
  * 				INDEX: 0
  * 				{
  * 					String Path : "/"
  * 
- *	 				std::vector<Data> data :
+ *	 				vector<Data> data :
  * 						.........................
  * 						|	Keys	|	Values	|
  * 						-------------------------
@@ -175,13 +175,13 @@
  * 						|	index	| index.html|
  * 						-------------------------
  * 
- * 					std::vector<Location> location :
+ * 					vector<Location> location :
  * 						INDEX: 0
  * 						{
  * 							String Path :
  * 								"/world"
  * 	
- *	 						std::vector<Data> data :
+ *	 						vector<Data> data :
  * 								.........................
  * 								|	Keys	|	Values	|
  * 								-------------------------
@@ -189,7 +189,7 @@
  * 								|	index	| index.html|
  * 								-------------------------
  * 	
- * 							std::vector<Location> location :
+ * 							vector<Location> location :
  * 								empty.					
  * 						}
  * 					
@@ -197,7 +197,7 @@
  * 		}
  * INDEX: 1
  * 		{
- * 			std::vector<Data> data :
+ * 			vector<Data> data :
  * 				.........................
  * 				|	Keys	|	Values	|
  * 				-------------------------
@@ -206,12 +206,12 @@
  * 				|error_page |...40x.html|
  * 				-------------------------
  * 
- * 			std::vector<Location> location :
+ * 			vector<Location> location :
  * 				INDEX: 0
  * 				{
  * 					String Path : "/"
  * 
- *	 				std::vector<Data> data :
+ *	 				vector<Data> data :
  * 						.........................
  * 						|	Keys	|	Values	|
  * 						-------------------------
@@ -219,13 +219,13 @@
  * 						|	index	| index.html|
  * 						-------------------------
  * 
- * 					std::vector<Location> location :
+ * 					vector<Location> location :
  * 						INDEX: 0
  * 						{
  * 							String Path :
  * 								"/world"
  * 	
- *	 						std::vector<Data> data :
+ *	 						vector<Data> data :
  * 								.........................
  * 								|	Keys	|	Values	|
  * 								-------------------------
@@ -233,7 +233,7 @@
  * 								|	index	| index.html|
  * 								-------------------------
  * 	
- * 							std::vector<Location> location :
+ * 							vector<Location> location :
  * 								empty.					
  * 						}
  * 					
@@ -353,7 +353,7 @@ String	Parser::readFile()
 }
 
 /**
- * @brief	Read file content unsing std::ifstream and store it in vector container (fileContent).
+ * @brief	Read file content unsing ifstream and store it in vector container (fileContent).
  * @param	(none)
  * @return	(none)
  * @exception	throw ParsingException when failed to open file.
@@ -365,11 +365,11 @@ void	Parser::getFileContent( void )
 	String	str = readFile();
 	if (str.empty() == true)
 		throw (ParsingException("Empty File."));
-	std::istringstream outfile(str);
+	istringstream outfile(str);
 	// read data from file and store it in vector of String.
 	while (!outfile.eof())
 	{
-		std::getline(outfile, tmp, '\n'); // read line by line.
+		getline(outfile, tmp, '\n'); // read line by line.
 		tmp.trim(" \t");
 		if (tmp.size() == 0 || *tmp.begin() == '#')
 			continue ;
@@ -395,12 +395,12 @@ void	Parser::getFileContent( void )
 void	Parser::checkSyntax( void )
 {
 	int	openBrackets = 0;
-	std::vector<String> server;
+	vector<String> server;
 	bool	insideServer = false;
 	if (fileContent.empty() == true)
 		return ;
-	std::vector<String>::iterator iterBegin = fileContent.begin();
-	const std::vector<String>::iterator iterEnd = fileContent.end();
+	vector<String>::iterator iterBegin = fileContent.begin();
+	const vector<String>::iterator iterEnd = fileContent.end();
 	while (iterBegin < iterEnd)
 	{
 		// Counting Brackets.
@@ -449,10 +449,10 @@ void	Parser::checkSyntax( void )
  * @param	iterEnd		The End of File Content vector.
  * @return	new vector that's contains one Server Configuration.
 */
-std::vector<String>	Parser::getServerConfig(std::vector<String>::iterator& iterBegin, const std::vector<String>::iterator& iterEnd)
+vector<String>	Parser::getServerConfig(vector<String>::iterator& iterBegin, const vector<String>::iterator& iterEnd)
 {
 	int	openBrackets = 0; // Numebr of Brackets.
-	std::vector<String> server; // Return Value;
+	vector<String> server; // Return Value;
 	bool	insideServer = false;
 
 	while (iterBegin < iterEnd)
@@ -484,11 +484,11 @@ std::vector<String>	Parser::getServerConfig(std::vector<String>::iterator& iterB
 */
 void	Parser::splitContentIntoServers( void )
 {
-	std::vector<String>::iterator begin = fileContent.begin();
-	const std::vector<String>::iterator end = fileContent.end();
+	vector<String>::iterator begin = fileContent.begin();
+	const vector<String>::iterator end = fileContent.end();
 	while (begin < end)
 	{
-		std::vector<String> srv = getServerConfig(begin, end);
+		vector<String> srv = getServerConfig(begin, end);
 		if (srv.empty() == false)
 			serversContents.push_back(srv);
 		begin++;
@@ -507,10 +507,10 @@ void	Parser::splitContentIntoServers( void )
 */
 Data	Parser::extractDataFromString(String& line)
 {
-	std::vector<String> vec = line.split();
+	vector<String> vec = line.split();
 	String	key = vec.at(0).trim(" \t;");
 	String	value("");
-	for (std::vector<String>::size_type i = 1; i < vec.size(); i++)
+	for (vector<String>::size_type i = 1; i < vec.size(); i++)
 		value.append(" ").append(vec.at(i).trim(" \t;"));
 	return (Data(key, value.trim(" \t")));
 }
@@ -522,9 +522,9 @@ Data	Parser::extractDataFromString(String& line)
  * @return	new Location that extact from the config.
  * @exception	no-throw exception.
 */
-Location	Parser::getLocations(std::vector<String>::iterator& begin, const std::vector<String>::iterator& end, String	path)
+Location	Parser::getLocations(vector<String>::iterator& begin, const vector<String>::iterator& end, String	path)
 {
-	std::vector<Location> newLocation; // Return Value.
+	vector<Location> newLocation; // Return Value.
 	GlobalModel model; // For Data vector.
 	while (begin < end)
 	{
@@ -551,11 +551,11 @@ Location	Parser::getLocations(std::vector<String>::iterator& begin, const std::v
  * @brief	Separate between Location and Data, and store it in ServerModel.
  * @param	content The Server Part.
 */
-void	Parser::parsingFile(std::vector<String> content)
+void	Parser::parsingFile(vector<String> content)
 {
 	ServerModel server;
-	std::vector<String>::iterator iBegin = content.begin();
-	std::vector<String>::iterator iEnd = content.end();
+	vector<String>::iterator iBegin = content.begin();
+	vector<String>::iterator iEnd = content.end();
 	while (iBegin < iEnd)
 	{
 		if (iBegin->compare(0, 9, "location ")) // Data Part.
@@ -578,8 +578,8 @@ void	Parser::parsingFile(std::vector<String> content)
 */
 void	Parser::getFinalResualt( void )
 {
-	std::vector<std::vector<String> >::iterator begin = serversContents.begin();
-	std::vector<std::vector<String> >::iterator end = serversContents.end();
+	vector<vector<String> >::iterator begin = serversContents.begin();
+	vector<vector<String> >::iterator end = serversContents.end();
 	while (begin < end)
 	{
 		parsingFile(*begin);
@@ -595,8 +595,8 @@ void	Parser::getFinalResualt( void )
 */
 void	Parser::printServerModel(const ServerModel& server)
 {
-	std::vector<Location>::const_iterator b = server.getLocation().begin();
-	std::vector<Location>::const_iterator e = server.getLocation().end();
+	vector<Location>::const_iterator b = server.getLocation().begin();
+	vector<Location>::const_iterator e = server.getLocation().end();
 	while (b < e)
 	{
 		printLocations(*b);
@@ -616,16 +616,16 @@ void	Parser::printLocations(const Location& locs)
 	if (locs.getAllData().empty() == true)
 		return ;
 	// printing Path of Location.
-	std::cout << s << "Path : " << locs.getPath() << std::endl;
+	cout << s << "Path : " << locs.getPath() << endl;
 
 	// printing All data from GlobalModel (Key, Value).
-	std::vector<Data> vec = locs.getAllData();
-	for (std::vector<Location>::size_type i = 0; i < vec.size(); i++)
+	vector<Data> vec = locs.getAllData();
+	for (vector<Location>::size_type i = 0; i < vec.size(); i++)
 		Data::printData(vec.at(i), s);
 
 	// printing All Location from GlobalModel (Key, Value).
-	std::vector<Location> innerLoc = locs.getInnerLocation();
-	for (std::vector<Location>::size_type i = 0; i < innerLoc.size(); i++)
+	vector<Location> innerLoc = locs.getInnerLocation();
+	for (vector<Location>::size_type i = 0; i < innerLoc.size(); i++)
 	{
 		s.append("\t");
 		printLocations(innerLoc.at(i));
@@ -633,18 +633,18 @@ void	Parser::printLocations(const Location& locs)
 	}
 }
 
-std::vector<Data>	Parser::parseHeader(const String& header)
+vector<Data>	Parser::parseHeader(const String& header)
 {
-	std::vector<Data> vec;
-	std::istringstream	iss(header);
+	vector<Data> vec;
+	istringstream	iss(header);
 	String			tmp, key, value;
 	String			httpMethod;
-	std::getline(iss, httpMethod, '\n');
+	getline(iss, httpMethod, '\n');
 	vec.push_back(Data("Method", httpMethod.trim(" \t")));
 	unsigned long	pos = 0;
 	while (iss.eof() == false)
 	{
-		std::getline(iss, tmp, '\n');
+		getline(iss, tmp, '\n');
 		if (tmp.length() == 0 || tmp[0] == '\r')
 			continue ;
 		if ((pos = tmp.find_first_of(':')) != String::npos)
@@ -662,10 +662,10 @@ std::vector<Data>	Parser::parseHeader(const String& header)
 */
 void	Parser::checkKeys( void )
 {
-	std::vector<String> keys = String(KEYS).split(' ');
+	vector<String> keys = String(KEYS).split(' ');
 	for (unsigned int i = 0; i < (unsigned int)servers.size(); i++)
 	{
-		std::vector<Data> _data = servers.at((unsigned int)i).getAllData();
+		vector<Data> _data = servers.at((unsigned int)i).getAllData();
 		for (unsigned int j = 0; j < (unsigned int)_data.size(); j++)
 			if (find(keys.begin(), keys.end(), _data.at(j).getKey()) == keys.end())
 			{
@@ -682,7 +682,7 @@ void	Parser::checkKeys( void )
  * @return	constant refrance vector of vector of String.
  * @exception	no-throw exception.
 */
-const std::vector<std::vector<String> >&	Parser::getServersContents( void ) const
+const vector<vector<String> >&	Parser::getServersContents( void ) const
 {
 	return (serversContents);
 }
@@ -693,7 +693,7 @@ const std::vector<std::vector<String> >&	Parser::getServersContents( void ) cons
  * @return	constant refrance vector of Server Model.
  * @exception	no-throw exception.
 */
-const	std::vector<ServerModel>&	Parser::getServers( void ) const
+const	vector<ServerModel>&	Parser::getServers( void ) const
 {
 	return (servers);
 }

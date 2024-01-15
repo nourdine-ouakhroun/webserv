@@ -10,19 +10,19 @@
 String	readFile(const String& path);
 class	ServerModel : public GlobalModel
 {
-	std::vector<Location>	location;
+	vector<Location>	location;
 
 	public :
 		ServerModel( void );
-		ServerModel(const GlobalModel&, const std::vector<Location>&);
+		ServerModel(const GlobalModel&, const vector<Location>&);
 		ServerModel& operator=(const ServerModel& target);
 		ServerModel(const ServerModel& copy);
 		~ServerModel( void )	throw();
-		void	setLocation(std::vector<Location>& _location);
+		void	setLocation(vector<Location>& _location);
 		void	addLocation(Location _location);
-		static	Location	getLocationByPath(std::vector<Location> locations, const String& srcPath);
-		const std::vector<Location>&	getLocation( void ) const;
-		void	addRootToLocation(std::vector<Location>&	servers, const String& serverRoot);
+		static	Location	getLocationByPath(vector<Location> locations, const String& srcPath);
+		const vector<Location>&	getLocation( void ) const;
+		void	addRootToLocation(vector<Location>&	servers, const String& serverRoot);
 
 		static int	checkIsDirectory(String filename)
 		{
@@ -40,7 +40,7 @@ class	ServerModel : public GlobalModel
 		}
 
 		template <typename T>
-		static bool	findLocationByPath(std::vector<Location> locations, const String& rootPath,
+		static bool	findLocationByPath(vector<Location> locations, const String& rootPath,
 								const String& srcPath, void (*to_do) (const Location&, T&), T& value);
 
 		static	void	printServerModelInfo(const ServerModel& serverModel);

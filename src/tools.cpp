@@ -25,23 +25,23 @@ unsigned short	getPort(String	value)
 	unsigned short port = 80;
 	String::size_type pos = value.find_last_of(':');
 	if (pos != String::npos)
-		port = (unsigned short)std::strtol(value.substr(pos + 1).c_str(), NULL, 10);
+		port = (unsigned short)strtol(value.substr(pos + 1).c_str(), NULL, 10);
 	return port;
 }
 
-std::vector<ServerModel>	getServer(ServerData& servers, std::vector<Data> header)
+vector<ServerModel>	getServer(ServerData& servers, vector<Data> header)
 {
 	GlobalModel model(header);
-	std::vector<ServerModel>	servModel;
+	vector<ServerModel>	servModel;
 	String strHost(model.getData("Host").at(0).getValue());
-	std::vector<String> str = strHost.split(':');
+	vector<String> str = strHost.split(':');
 	if (str.empty() == false)
 	{
 		servModel = servers.getServersByServerName(str.at(0));
 		if (servModel.empty() == false)
 			return (servModel);
 	}
-	long host = std::strtol(strHost.c_str(), NULL, 10);
+	long host = strtol(strHost.c_str(), NULL, 10);
 	if (host != 0)
 		servModel = servers.getServersByPort(getPort(model.getData("Host").at(0).getValue()));
 	else
@@ -52,13 +52,13 @@ std::vector<ServerModel>	getServer(ServerData& servers, std::vector<Data> header
 }
 
 
-// std::vector<int>	openAllPorts(const std::vector<ServerModel>& serversInfo, Server& server)
+// vector<int>	openAllPorts(const vector<ServerModel>& serversInfo, Server& server)
 // {
-// 	std::vector<int> ports;
+// 	vector<int> ports;
 // 	int newSocket;
 // 	for (size_t i = 0; i < serversInfo.size(); i++)
 // 	{
-// 		std::vector<Data> data = serversInfo[i].getData("listen");
+// 		vector<Data> data = serversInfo[i].getData("listen");
 // 		if (data.empty() == true)
 // 			data.push_back(Data("listen", "80"));
 // 		for (size_t i = 0; i < data.size(); i++)
@@ -67,7 +67,7 @@ std::vector<ServerModel>	getServer(ServerData& servers, std::vector<Data> header
 // 			newSocket = server.createNewSocket(port);
 // 			if (newSocket == -1)
 // 				continue ;
-// 			Logger::info(std::cout, "Listen to port : ", port);
+// 			Logger::info(cout, "Listen to port : ", port);
 // 			ports.push_back(newSocket);
 // 		}
 // 	}

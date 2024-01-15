@@ -4,13 +4,13 @@
 #include <poll.h>
 #include <vector>
 #include <cstddef>
-
+using namespace std;
 class   Poll
 {
-    std::vector<struct pollfd> fds;
+    vector<struct pollfd> fds;
     public :
         Poll( void );
-        Poll(const std::vector<struct pollfd>& _fds);
+        Poll(const vector<struct pollfd>& _fds);
         Poll(const Poll& copy);
         ~Poll( void );
         Poll&   operator=(const Poll& target);
