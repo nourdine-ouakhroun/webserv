@@ -15,16 +15,16 @@ void ReadRequest::checkReqeust()
 {
 	
 }
-static int j;
+// static int j;
+
 void	ReadRequest::Requist()
 {
 	ssize_t		bytes;
 	String		boundary;
-	char		buffer[READ_NUMBER];
+	char		buffer[READ_NUMBER] = {0};
 
-	cout << socket.ipAndPort << endl;
 	bytes = 0;
-	memset(buffer, 0, READ_NUMBER);
+	// bzero(buffer, READ_NUMBER);
 	bytes = recv(socket.getFdPoll().fd, buffer, READ_NUMBER - 1, 0);
 	if(bytes == 0)
 	{
@@ -35,8 +35,8 @@ void	ReadRequest::Requist()
 	}
 	else if(bytes > 0)
 	{
-		if(bytes < 0)
-			bytes = 0;
+		// if(bytes < 0)
+		// 	bytes = 0;
 		string request (buffer, (size_t)bytes);
 		if(socket.getMethod() == -1)
 			methodSerch(request);
@@ -50,14 +50,13 @@ void	ReadRequest::Requist()
 		// {
 		// 	exit(1);
 		// }
-		j++;
+		// j++;
 		while (!socket.rest.empty())
 		{
 			if(socket.getMethod() == POST)
 				removePartOfupload();
 		}
 	}
-	cout << socket.getLenght() << " : " << socket.getContenlenght() << endl;
 	if(socket.getLenght() != socket.getContenlenght() || !socket.rest.empty())
 		throw runtime_error("");
 	return ;

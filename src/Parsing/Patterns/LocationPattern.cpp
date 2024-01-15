@@ -82,5 +82,4 @@ bool	LocationPattern::empty( void ) const
 
 void	LocationPattern::execute( void ) const
 {
-	cout << "HELLO WORLD" << endl;
 }

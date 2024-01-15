@@ -22,7 +22,7 @@ ResponseHeader	to_do(GeneralPattern& __unused targetInfo, __unused String path)
 	Directives directive(targetInfo, path);
 	ResponseHeader responseHeader;
 
-	directive.handleLogges();
+	// directive.handleLogges();
 
 	root = directive.getRootPath();
 
@@ -50,6 +50,8 @@ ResponseHeader	handler(ServerPattern& server, GeneralPattern __unused &model)
 	path.trim(" \t\r\n");
 
 	vector<Data> roots = server.getData("root");
+	// vector<Data> roots;
+	// roots.push_back(Data("root", "project/gamestore"));
 	String root;
 	if (roots.empty() == false)
 		root = roots.front().getValue();
@@ -59,6 +61,8 @@ ResponseHeader	handler(ServerPattern& server, GeneralPattern __unused &model)
 
 	if (path.back() != '/') // redirect the path that doesn't containt '/' in the end.
 		return (responseHeader.status("301 Moved Permanently").location(path + "/"));
+
+
 
 	path.rightTrim("/");
 
@@ -89,37 +93,44 @@ void	socketHaveEvent(ManageServers &Manageservers, ServerData& serv)
 			try
 			{
 				SocketDependencies socket = Manageservers.readyToRead(i);
-				cout << Manageservers.getRequest(i) << endl;
-				GeneralPattern header(Parser::parseHeader(Manageservers.getRequest(i)));
-				vector<ServerPattern> server = ServerData::getServer(serv, socket.ipAndPort, header.getData("Host").front().getValue());
-				ResponseHeader response = handler(server.front(), header);
-				String filename = response.getFileName();
-				if (filename.empty() == false)
-				{
-					String* str = getContentFile(filename);
-					if (!str)
-						throw (exception());
-					vector<Data> accept = header.getData("Accept");
-					if (accept.empty() == false)
-					{
-						ostringstream oss;
-						oss << str->size();
-						response.contentLength(oss.str());
-						if (accept.at(0).getValue().split(':').at(0).contains("image") == true)
-							response.contentType("*/*");
-						response.connection("close");
-					}
-					response.body(str);
-				}
-				String *str = response.toString();
-				Manageservers.setRespond(*str, i);
-				delete str;
-				// Manageservers.setRespond("HTTP/1.1 200 OK\r\n\r\n <h1> hello </h1>", i);
+				string request = socket.getRequist();
+				cout << request << endl;
+				(void)serv;
+				if (request.empty())
+					continue ;
+				// GeneralPattern header(Parser::parseHeader(Manageservers.getRequest(i)));
+				// vector<ServerPattern> server = ServerData::getServer(serv, socket.ipAndPort, header.getData("Host").front().getValue());
+				// ResponseHeader response = handler(server.front(), header);
+				// String filename = response.getFileName();
+				// if (filename.empty() == false)
+				// {
+				// 	String* str = getContentFile(filename);
+				// 	if (!str)
+				// 		throw (exception());
+				// 	vector<Data> accept = header.getData("Accept");
+				// 	if (accept.empty() == false)
+				// 	{
+				// 		ostringstream oss;
+				// 		oss << str->size();
+				// 		response.contentLength(oss.str());
+				// 		if (accept.at(0).getValue().split(':').at(0).contains("image") == true)
+				// 			response.contentType("*/*");
+				// 		response.connection("close");
+				// 	}
+				// 	response.body(str);
+				// }
+				// String *str = response.toString();
+				// Manageservers.setRespond(*str, i);
+				// delete str;
+				Manageservers.setRespond("HTTP/1.1 200 OK\r\n\r\n <h1> hello </h1>\0\0", i);
 			}
 			catch(runtime_error &e){}
 		}
 		else if(Manageservers.WorkingRevents(i) & POLLOUT)
+		{
+
 			Manageservers.readyToWrite(i);
+		}
 	}
 }
 
@@ -137,7 +148,6 @@ int main(int ac, char **av)
 	{
 		cerr << e.what() << '\n';
 	}
-
 	ServerData serv(parser.getServers());
 	ManageServers Manageservers(serv);
 	serv.displayServers();
@@ -156,7 +166,3 @@ int main(int ac, char **av)
 		}
 	}
 }
-
-
-
-

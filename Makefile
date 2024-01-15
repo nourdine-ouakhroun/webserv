@@ -31,7 +31,7 @@ HEADERS	=	src/Includes/*.hpp
 
 
 CPP	=	c++
-CPPFLAGS	=	-Wall -Wextra -Werror -std=c++98 -Wconversion -O3 -I./src/Includes #-fsanitize=address
+CPPFLAGS	=	-Wall -Wextra -Werror -std=c++98 -Wconversion -O3 -I./src/Includes -fsanitize=address
 
 BIN			=	bin
 
@@ -44,7 +44,7 @@ ${NAME}		: ${OBJS}
 	${CPP} ${CPPFLAGS} $^ -o $@
 	@echo "finish !!"
 
-${BIN}/%.o	:	src/%.cpp ${HEADERS} ${TEMPLATES}
+${BIN}/%.o	:	src/%.cpp ${HEADERS} ${TEMPLATES} Makefile
 	@mkdir -p $(dir $@)
 	${CPP} ${CPPFLAGS} -c $< -o $@
 

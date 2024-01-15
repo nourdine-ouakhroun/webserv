@@ -118,25 +118,7 @@ void	ManageServers::runAllServers(void)
 	// 	initSocketPort80( );
 }
 
-
-void	ManageServers::readyToWrite(size_t index)
-{
-	size_t send_lenght = 2000;
-	if(send_lenght > working[index].respond.size())
-		send_lenght =  working[index].respond.size();
-	ssize_t write_value = write(working[index].getFdPoll().fd,  master[index].respond.c_str(),  send_lenght);
-	if(write_value > 0)
-	{
-		master[index].respond.erase(0,send_lenght);
-		if(master[index].respond.empty() == true)
-		{
-			close(working[index].getFdPoll().fd);
-			erase(index);
-		}
-	}
-}
-
-void	ManageServers::setRespond(const string & respond, size_t index)
+void	ManageServers::setRespond(const string &respond, size_t index)
 {
 	this->master[index].respond = respond;
 }
@@ -157,8 +139,6 @@ void	ManageServers::erase(size_t index)
 	this->master = returnFds;
 }
 
-#include <arpa/inet.h>
-
 void ManageServers::acceptConection(size_t index)
 {
 	struct sockaddr_in clientSocket;
@@ -172,9 +152,7 @@ void ManageServers::acceptConection(size_t index)
 	*/
 	fcntl(newfd, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
 	SocketDependencies tmp;
-
 	tmp.ipAndPort = allport[index];
-
 	tmp.setFdPoll(newfd, POLLIN);
 	master.push_back(tmp);
 }
@@ -195,19 +173,42 @@ SocketDependencies ManageServers::readyToRead(size_t i)
 	return (master[i]);
 }
 
+void	ManageServers::readyToWrite(size_t index)
+{
+	size_t send_lenght = INT_MAX;
+	if(send_lenght > working[index].respond.size())
+		send_lenght =  working[index].respond.size();
+	ssize_t write_value = write(working[index].getFdPoll().fd,  master[index].respond.c_str(),  send_lenght);
+	if(write_value > 0)
+	{
+		master[index].respond.erase(0, send_lenght);
+		if(master[index].respond.empty() == true)
+		{
+			close(working[index].getFdPoll().fd);
+			erase(index);
+		}
+	}
+}
+
 vector<SocketDependencies>	ManageServers::isSocketsAreReady(void)
 {
 	vector<SocketDependencies> working = master;
 	vector<pollfd> pworking;
+
 	for (size_t i = 0; i < working.size(); i++)
 		pworking.push_back(working[i].getFdPoll());
+
 	int pint = poll(&pworking[0], static_cast<nfds_t>(pworking.size()), 6000);
+
 	for (size_t i = 0; i < pworking.size(); i++)
 		working[i].setFdPoll(pworking[i]);
+
 	if(pint == 0)
 		throw ManageServers::PollException("Server reloaded");
+
 	if(pint < 0)
 		throw runtime_error("poll : poll was failed");
+		
 	return working;
 }
 
