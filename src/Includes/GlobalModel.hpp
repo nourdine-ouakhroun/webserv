@@ -6,17 +6,17 @@
 
 class GlobalModel
 {
-	std::vector<Data> data;
+	vector<Data> data;
 
 	public	:
 		GlobalModel( void );
-		GlobalModel(std::vector<Data> _data);
+		GlobalModel(vector<Data> _data);
 		GlobalModel(const GlobalModel& copy);
 		virtual						~GlobalModel( void );
 		GlobalModel&				operator=(const GlobalModel& target);
 		void						addData(const Data& _data);
-		std::vector<Data>			getData(const String& key) const;
-		const std::vector<Data>&	getAllData( void ) const;
+		vector<Data>			getData(const String& key) const;
+		const vector<Data>&	getAllData( void ) const;
 		bool						isExist(const Data& value);
 		static	void				printGlobalModel(const GlobalModel&, String&);
 };

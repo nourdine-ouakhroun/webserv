@@ -11,23 +11,23 @@
 /* ************************************************************************** */
 
 
-#include"ManageServers.hpp"
-void	socketHaveEvent(ManageServers &Manageservers)
+#include"Servers.hpp"
+void	socketHaveEvent(Servers &servers, vector<pollfd> &poll_fd)
 {
-	for (size_t i = 0; i < Manageservers.WorkingSocketsSize(); i++)
+	for (size_t i = 0; i < servers.SocketsSize(); i++)
 	{
-		if(Manageservers.WorkingRevents(i) & POLLIN)
+		if(poll_fd[i].revents & POLLIN)
 		{
+			cout << "read " << "servers : " << servers.SocketsSize() << endl;
 			try
 			{
-				Manageservers.readyToRead(i);
-				std::cout << Manageservers.getRequest(i) << std::endl;
-				Manageservers.setRespond("HTTP/1.1 200 OK\r\n\r\n <h1> hello </h1>", i);
+				servers.readyToRead(i);
+				// cout << servers.getHeader(i) << endl;
 			}
-			catch(std::runtime_error &e){}
+			catch(runtime_error &e){}
 		}
-		else if(Manageservers.WorkingRevents(i) & POLLOUT)
-			Manageservers.readyToWrite(i);
+		else if(poll_fd[i].revents & POLLOUT)
+			servers.readyToWrite(i);
 	}
 }
 int main(int ac, char **av)
@@ -35,19 +35,21 @@ int main(int ac, char **av)
 	static_cast<void>(ac);
 	Parser parser(av[1]);
 	ServerData serv(parser.getServers());
-	ManageServers Manageservers(serv);
+	Servers servers(serv);
 
-	Manageservers.runAllServers();
-	Manageservers.setMasterSockets();
+	servers.runAllServers();
+	servers.setMasterSockets();
 	while (true)
 	{
 		try{
-			Manageservers.setWorkingSockets(Manageservers.isSocketsAreReady());
-			socketHaveEvent(Manageservers);
+			vector<pollfd> poll_fd;
+			servers.isSocketsAreReady(poll_fd);
+			socketHaveEvent(servers, poll_fd);
+			cout << "i'm done" << "Servers : " << servers.SocketsSize() << endl;
 		}
-		catch(const ManageServers::PollException& e)
+		catch(const Servers::PollException& e)
 		{
-			Logger::warn(std::cout, e.what(), "");
+			Logger::warn(cout, e.what(), "");
 			continue;
 		}
 	}

@@ -10,7 +10,7 @@ Checker::~Checker( void )
     servers.clear();
 }
 
-Checker::Checker(const std::vector<ServerModel>& _servers) : servers(_servers)
+Checker::Checker(const vector<ServerModel>& _servers) : servers(_servers)
 {
 }
 
@@ -25,13 +25,13 @@ Checker& Checker::operator=(const Checker& target)
     return (*this);
 }
 
-void    Checker::checkLocation(const std::vector<Location>& loca, String key)
+void    Checker::checkLocation(const vector<Location>& loca, String key)
 {
     if (loca.empty() == true)
         return ;
     for (size_t i = 0; i < loca.size(); i++)
     {
-        std::vector<Data> data = loca.at(i).getData(key);
+        vector<Data> data = loca.at(i).getData(key);
         if (data.size() > 1)
             throw (ParsingException("Check Faild."));
         if (loca.at(i).getInnerLocation().empty() == false)
@@ -39,13 +39,13 @@ void    Checker::checkLocation(const std::vector<Location>& loca, String key)
     }
 }
 
-void    Checker::checkLocationValues(const std::vector<Location>& loca)
+void    Checker::checkLocationValues(const vector<Location>& loca)
 {
     if (loca.empty() == true)
         return ;
     for (size_t i = 0; i < loca.size(); i++)
     {
-        std::vector<Data> data = loca.at(i).getAllData();
+        vector<Data> data = loca.at(i).getAllData();
         if (data.empty() == false)
             for (size_t j = 0; j < data.size(); j++)
                 if (data.at(j).getValue().empty() == true)
@@ -59,7 +59,7 @@ void    Checker::checkDuplicate(String key)
 {
     for (size_t i = 0; i < servers.size(); i++)
     {
-        std::vector<Data> data = servers.at(i).getData(key);
+        vector<Data> data = servers.at(i).getData(key);
         if (data.size() > 1)
             throw (ParsingException("Check Faild."));
         checkLocation(servers.at(i).getLocation(), key);
@@ -70,7 +70,7 @@ void    Checker::checkValues( void )
 {
     for (size_t i = 0; i < servers.size(); i++)
     {
-        std::vector<Data> data = servers.at(i).getAllData();
+        vector<Data> data = servers.at(i).getAllData();
         if (data.empty() == false)
             for (size_t j = 0; j < data.size(); j++)
                 if (data.at(j).getValue().empty() == true)

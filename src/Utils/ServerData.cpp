@@ -4,7 +4,7 @@ ServerData::ServerData( void )
 {
 }
 
-ServerData::ServerData(const std::vector<ServerModel>& _data) : servers(_data)
+ServerData::ServerData(const vector<ServerModel>& _data) : servers(_data)
 {
 }
 
@@ -19,36 +19,36 @@ ServerData&	ServerData::operator=(const ServerData& target)
 	return (*this);
 }
 
-void	ServerData::setServerData(const std::vector<ServerModel>& serversData)
+void	ServerData::setServerData(const vector<ServerModel>& serversData)
 {
 	servers = serversData;
 }
 
 void	ServerData::displayServers( void )
 {
-	std::vector<ServerModel>::iterator	iterBegin = servers.begin();
-	std::vector<ServerModel>::iterator	iterEnd = servers.end();
+	vector<ServerModel>::iterator	iterBegin = servers.begin();
+	vector<ServerModel>::iterator	iterEnd = servers.end();
 	int i = 0;
 	while (iterBegin < iterEnd)
 	{
-		std::cout << "\n===================== Server " << ++i << " Info =====================\n\n";
+		cout << "\n===================== Server " << ++i << " Info =====================\n\n";
 		ServerModel::printServerModelInfo(*iterBegin);
 		iterBegin++;
 	}
 }
 
-std::vector<ServerModel>	ServerData::getServersByServerName(const String& serverName)
+vector<ServerModel>	ServerData::getServersByServerName(const String& serverName)
 {
-	std::vector<ServerModel>	serv;
-	std::vector<ServerModel>::iterator iterBegin = servers.begin();
-	std::vector<ServerModel>::iterator iterEnd = servers.end();
+	vector<ServerModel>	serv;
+	vector<ServerModel>::iterator iterBegin = servers.begin();
+	vector<ServerModel>::iterator iterEnd = servers.end();
 	while (iterBegin < iterEnd)
 	{
-		std::vector<Data> value = iterBegin->getData("server_name");
+		vector<Data> value = iterBegin->getData("server_name");
 		for (int i = 0; i < (int)value.size(); i++)
 		{
-			String str = value.at((std::vector<Data>::size_type)i).getValue();
-			std::vector<String> values = str.split();
+			String str = value.at((vector<Data>::size_type)i).getValue();
+			vector<String> values = str.split();
 			if (find(values.begin(), values.end(), serverName) != values.end())
 				serv.push_back(*iterBegin);
 		}
@@ -57,39 +57,39 @@ std::vector<ServerModel>	ServerData::getServersByServerName(const String& server
 	return (serv);
 }
 
-std::vector<ServerModel>	ServerData::getServersByPort(const unsigned short& port)
+vector<ServerModel>	ServerData::getServersByPort(const unsigned short& port)
 {
-	std::vector<ServerModel>	serv;
-	std::vector<ServerModel>::iterator iterBegin = servers.begin();
-	std::vector<ServerModel>::iterator iterEnd = servers.end();
+	vector<ServerModel>	serv;
+	vector<ServerModel>::iterator iterBegin = servers.begin();
+	vector<ServerModel>::iterator iterEnd = servers.end();
 	while (iterBegin < iterEnd)
 	{
-		std::vector<Data> value = iterBegin->getData("listen");
+		vector<Data> value = iterBegin->getData("listen");
 		for (size_t i = 0; i < value.size(); i++)
-			if (value.empty() == false && (unsigned short)std::strtol(value[i].getValue().c_str(), NULL, 10) == port)
+			if (value.empty() == false && (unsigned short)strtol(value[i].getValue().c_str(), NULL, 10) == port)
 				serv.push_back(*iterBegin);
 		iterBegin++;
 	}
 	return (serv);
 }
 
-const std::vector<ServerModel>&	ServerData::getAllServers() const
+const vector<ServerModel>&	ServerData::getAllServers() const
 {
 	return (servers);
 }
 
 const ServerModel&	ServerData::getDefaultServer( void )
 {
-	std::vector<ServerModel>	serv;
-	std::vector<ServerModel>::iterator iterBegin = servers.begin();
-	std::vector<ServerModel>::iterator iterEnd = servers.end();
+	vector<ServerModel>	serv;
+	vector<ServerModel>::iterator iterBegin = servers.begin();
+	vector<ServerModel>::iterator iterEnd = servers.end();
 	while (iterBegin < iterEnd)
 	{
-		std::vector<Data> value = iterBegin->getData("listen");
+		vector<Data> value = iterBegin->getData("listen");
 		for (int i = 0; i < (int)value.size(); i++)
 		{
-			String str = value.at((std::vector<Data>::size_type)i).getValue();
-			std::vector<String> values = str.split();
+			String str = value.at((vector<Data>::size_type)i).getValue();
+			vector<String> values = str.split();
 			if (find(values.begin(), values.end(), "default_server") != values.end())
 				serv.push_back(*iterBegin);
 		}

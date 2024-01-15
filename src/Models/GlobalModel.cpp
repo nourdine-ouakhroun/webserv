@@ -5,7 +5,7 @@ GlobalModel::GlobalModel( void )
 
 }
 
-GlobalModel::GlobalModel(std::vector<Data> _data) : data(_data)
+GlobalModel::GlobalModel(vector<Data> _data) : data(_data)
 {
 }
 
@@ -33,11 +33,11 @@ void	GlobalModel::addData(const Data& _data)
 	data.push_back(_data);
 }
 
-std::vector<Data>	GlobalModel::getData(const String& key) const
+vector<Data>	GlobalModel::getData(const String& key) const
 {
-	std::vector<Data>	returnData;
-	std::vector<Data>::const_iterator	iterBegin = data.begin();
-	std::vector<Data>::const_iterator	iterEnd = data.end();
+	vector<Data>	returnData;
+	vector<Data>::const_iterator	iterBegin = data.begin();
+	vector<Data>::const_iterator	iterEnd = data.end();
 	while (iterBegin < iterEnd)
 	{
 		if (!iterBegin->getKey().compare(key))
@@ -47,7 +47,7 @@ std::vector<Data>	GlobalModel::getData(const String& key) const
 	return (returnData);
 }
 
-const std::vector<Data>&	GlobalModel::getAllData( void ) const
+const vector<Data>&	GlobalModel::getAllData( void ) const
 {
 	return (data);
 }
@@ -56,8 +56,8 @@ const std::vector<Data>&	GlobalModel::getAllData( void ) const
 
 bool	GlobalModel::isExist(const Data& value)
 {
-	std::vector<Data>::const_iterator	iterBegin = data.begin();
-	std::vector<Data>::const_iterator	iterEnd = data.end();
+	vector<Data>::const_iterator	iterBegin = data.begin();
+	vector<Data>::const_iterator	iterEnd = data.end();
 	while (iterBegin < iterEnd)
 	{
 		if (!iterBegin->getKey().compare(value.getKey()) \
@@ -72,8 +72,8 @@ bool	GlobalModel::isExist(const Data& value)
 
 void	GlobalModel::printGlobalModel(const GlobalModel& model, String &str)
 {
-	std::vector<Data>::const_iterator	ibegin = model.getAllData().begin();
-	std::vector<Data>::const_iterator	iend = model.getAllData().end();
+	vector<Data>::const_iterator	ibegin = model.getAllData().begin();
+	vector<Data>::const_iterator	iend = model.getAllData().end();
 	while (ibegin < iend)
 	{
 		Data::printData(*ibegin, str);

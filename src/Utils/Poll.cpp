@@ -5,7 +5,7 @@ Poll::Poll( void )
 
 }
 
-Poll::Poll(const std::vector<struct pollfd>& _fds) : fds(_fds)
+Poll::Poll(const vector<struct pollfd>& _fds) : fds(_fds)
 {
 }
 
@@ -28,9 +28,9 @@ Poll&   Poll::operator=(const Poll& target)
 
 int    Poll::getReadyFd(int idx)
 {
-    if (fds[(std::vector<int>::size_type)idx].revents & POLLIN \
-        || fds[(std::vector<int>::size_type)idx].revents & POLLOUT)
-        return (fds[(std::vector<int>::size_type)idx].fd);
+    if (fds[(vector<int>::size_type)idx].revents & POLLIN \
+        || fds[(vector<int>::size_type)idx].revents & POLLOUT)
+        return (fds[(vector<int>::size_type)idx].fd);
     return (-1);
 }
 
@@ -54,7 +54,7 @@ void    Poll::push_fd(int fd)
 
 void    Poll::erase_fd(int fd)
 {
-    std::vector<struct pollfd>::iterator begin = fds.begin();
+    vector<struct pollfd>::iterator begin = fds.begin();
     while (begin < fds.end())
     {
         if (begin->fd == fd)
