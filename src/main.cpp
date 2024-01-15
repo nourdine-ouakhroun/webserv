@@ -201,7 +201,7 @@ bool	requestHandler(const vector<int>& port, Server& server, ServerData& serv, i
 		close(readyFd);
 		server.fds.erase_fd(readyFd);
 		// }
-		delete resStr;
+		// delete resStr;
 	}
 	return (true);
 }

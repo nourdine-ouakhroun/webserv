@@ -141,5 +141,4 @@ bool	ServerPattern::empty( void ) const
 
 void	ServerPattern::execute( void ) const
 {
-	cout << "HELLO WORLD" << endl;
 }
