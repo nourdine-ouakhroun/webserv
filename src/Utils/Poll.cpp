@@ -60,12 +60,13 @@ void    Poll::push_fd(int fd, struct sockaddr_in _clientInfo)
 
 void    Poll::erase_fd(int fd)
 {
-    for (size_t i = 0; i < fds.size(); i++)
+    vector<struct pollfd>::iterator begin = fds.begin();
+    while (begin < fds.end())
     {
-        if (fds.at(i).fd == fd)
+        if (fds.at((unsigned int)fd).fd == fd)
         {
-            fds.erase(fds.begin() + (long)i);
-            clientInfo.erase(clientInfo.begin() + (long)i);
+            fds.erase(fds.begin() + (unsigned int)fd);
+            clientInfo.erase(clientInfo.begin() + (unsigned int)fd);
             return ;
         }
     }

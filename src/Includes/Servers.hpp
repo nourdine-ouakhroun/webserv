@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ManageServers.hpp                                  :+:      :+:    :+:   */
+/*   Servers.hpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: nouakhro <nouakhro@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -10,8 +10,8 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef MANAGESERVERS
-#define MANAGESERVERS
+#ifndef SERVERS_HPP
+#define SERVERS_HPP
 #include"ReadRequest.hpp"
 #include<poll.h>
 #include<fstream>
@@ -19,43 +19,39 @@
 
 typedef struct sockaddr_in S_address;
 
-class	ManageServers
+class	Servers
 {
-	vector<SocketDependencies>	master;
-	vector<SocketDependencies>	working;
-	vector<int>					fdSockets;
-	ServerData					servers;
+	vector<int>		fdSockets;
+	ServerData		servers;
+	vector<Socket>	master;
+	// vector<Socket>	working;
 
-	// add All Ports to this class.
-	vector<String>			allport;
 public:
+	vector<String>			allport;
 
-	ManageServers(ServerData	srvers);
-	// ManageServers(ServerData	srvers);
-	~ManageServers();
+	Servers(ServerData	srvers);
+	~Servers();
 
-	void					setRespond(const string& , size_t);
-	void					setWorkingSockets(const vector<SocketDependencies> &);
-	void					setMasterSockets();
-	string&			getRespond(size_t);
+	void			setRespond(const string &, size_t);
+	// void			setWorkingSockets(const vector<Socket> &);
+	void			setMasterSockets();
+	string			&getRespond(size_t);
 	vector<String>		getAllPorts(void) const;
-	const SocketDependencies&	getWorkingSocket(size_t) const ;
-	const string& 		getRequest(size_t) const ;
+	const Socket	&getSocket(size_t) const ;
+	const string 	&getHeader(size_t) const ;
 
 	void	runAllServers(void);
 	void	initSockets(vector<String> &);
-	// void	initSocketPort80(void);
-	// void	acceptConection(void);
-	SocketDependencies	readyToRead(size_t);
+	void	initSocketPort80(void);
+	void	readyToRead(size_t);
 	void	readyToWrite(size_t);
 	void	erase(size_t );
-	size_t	WorkingSocketsSize(void) const ;
-	short	WorkingRevents(size_t) const ;
+	size_t	SocketsSize(void) const ;
+	short	Revents(size_t) const ;
 	void	acceptConection(size_t);
 
-
-	vector<SocketDependencies>			isSocketsAreReady(void);
-	const vector<SocketDependencies>&	getMasterSockets(void) const ;
+	void 	isSocketsAreReady(vector<pollfd> &poll_fd);
+	const vector<Socket>&	getMasterSockets(void) const ;
 
 	class PollException : exception
 	{
