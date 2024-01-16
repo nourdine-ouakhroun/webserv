@@ -54,9 +54,6 @@ void	ReadRequest::Request()
 		if((size_t)socket.getContenlenght() == socket.getBody().size())
 			throw 1;
 	}
-	// cout << socket.getLenght() << " : " << socket.getContenlenght() << endl;
-	// if(socket.getLenght() != socket.getContenlenght() || !socket.rest.empty())
-	// 	throw runtime_error("");
 	return ;
 }
 
