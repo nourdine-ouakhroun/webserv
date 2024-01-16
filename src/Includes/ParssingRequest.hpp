@@ -1,24 +1,24 @@
-#ifndef PARSSINGREQUIST_HPP
-#define PARSSINGREQUIST_HPP
-#include"Server.hpp"
+#ifndef PARSSINGRequest_HPP
+#define PARSSINGRequest_HPP
+#include "Server.hpp"
 #include "webserver.h"
 #include <map>
 #include <vector>
 
 struct _requset{
-	vector<String> requistLine;
+	vector<String> RequestLine;
 	map<String, vector<String> > header;
 	vector<String> body;
 };
 
-class ParssingRequist
+class ParssingRequest
 {
 	private :
 
-		ParssingRequist( void );
+		ParssingRequest( void );
 	public :
 		static _requset setreq( vector<String> );
-		~ParssingRequist();
+		~ParssingRequest();
 		static Data	SpliteEvryLine( String );
 		static vector<String>	SplitBynewLine( String );
 };

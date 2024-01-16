@@ -11,126 +11,92 @@
 /* ************************************************************************** */
 
 
-#include"ManageServers.hpp"
-#include"Directives.hpp"
+#include"Servers.hpp"
 
+// ResponseHeader	to_do(GeneralPattern& __unused targetInfo, __unused String path)
+// {
+// 	String root;
+// 	String fileName;
+// 	Directives directive(targetInfo, path);
+// 	ResponseHeader responseHeader;
 
-ResponseHeader	to_do(GeneralPattern& __unused targetInfo, __unused String path)
-{
-	String root;
-	String fileName;
-	Directives directive(targetInfo, path);
-	ResponseHeader responseHeader;
+// 	// directive.handleLogges();
 
-	// directive.handleLogges();
+// 	root = directive.getRootPath();
 
-	root = directive.getRootPath();
+// 	if (!targetInfo.getData("try_files").empty())
+// 		return (directive.tryFiles());
 
-	if (!targetInfo.getData("try_files").empty())
-		return (directive.tryFiles());
+// 	fileName = directive.indexing();
+// 	if (!fileName.empty())
+// 		return (responseHeader.fileName(fileName));
 
-	fileName = directive.indexing();
-	if (!fileName.empty())
-		return (responseHeader.fileName(fileName));
+// 	if (!targetInfo.getData("return").empty())
+// 		return (directive.returnDirective());
 
-	if (!targetInfo.getData("return").empty())
-		return (directive.returnDirective());
+// 	if (targetInfo.isExist(Data("autoindex", "on")))
+// 		return (directive.autoIndexing());
 
-	if (targetInfo.isExist(Data("autoindex", "on")))
-		return (directive.autoIndexing());
+// 	return (directive.errorPage("404", "Not Found"));
+// }
 
-	return (directive.errorPage("404", "Not Found"));
-}
+// ResponseHeader	handler(ServerPattern& server, GeneralPattern __unused &model)
+// {
+// 	ResponseHeader	responseHeader;
+// 	String method = model.getData("Method").front().getValue();
+// 	String path(method.split()[1]);
+// 	path.trim(" \t\r\n");
 
-ResponseHeader	handler(ServerPattern& server, GeneralPattern __unused &model)
-{
-	ResponseHeader	responseHeader;
-	String method = model.getData("Method").front().getValue();
-	String path(method.split()[1]);
-	path.trim(" \t\r\n");
-
-	vector<Data> roots = server.getData("root");
-	// vector<Data> roots;
-	// roots.push_back(Data("root", "project/gamestore"));
-	String root;
-	if (roots.empty() == false)
-		root = roots.front().getValue();
+// 	vector<Data> roots = server.getData("root");
+// 	// vector<Data> roots;
+// 	// roots.push_back(Data("root", "project/gamestore"));
+// 	String root;
+// 	if (roots.empty() == false)
+// 		root = roots.front().getValue();
 	
-	if (server.checkIsDirectory(root.append(path)) == 0) // check is url is a file.
-		return (responseHeader.fileName(root));
+// 	if (server.checkIsDirectory(root.append(path)) == 0) // check is url is a file.
+// 		return (responseHeader.fileName(root));
 
-	if (path.back() != '/') // redirect the path that doesn't containt '/' in the end.
-		return (responseHeader.status("301 Moved Permanently").location(path + "/"));
-
-
-
-	path.rightTrim("/");
-
-	LocationPattern	loca = ServerPattern::getLocationByPath(server.getLocation(), path);
-	GeneralPattern target;
-
-	try
-	{
-		target = dynamic_cast<GeneralPattern&>(loca);
-		if (loca.getPath().empty() && path.equal("/"))
-			target = dynamic_cast<GeneralPattern&>(server);
-	}
-	catch(const exception& e)
-	{
-		cerr << e.what() << '\n';
-	}
-
-	return (to_do(target, loca.getPath()));
-}
+// 	if (path.back() != '/') // redirect the path that doesn't containt '/' in the end.
+// 		return (responseHeader.status("301 Moved Permanently").location(path + "/"));
 
 
-void	socketHaveEvent(ManageServers &Manageservers, ServerData& serv)
+
+// 	path.rightTrim("/");
+
+// 	LocationPattern	loca = ServerPattern::getLocationByPath(server.getLocation(), path);
+// 	GeneralPattern target;
+
+// 	try
+// 	{
+// 		target = dynamic_cast<GeneralPattern&>(loca);
+// 		if (loca.getPath().empty() && path.equal("/"))
+// 			target = dynamic_cast<GeneralPattern&>(server);
+// 	}
+// 	catch(const exception& e)
+// 	{
+// 		cerr << e.what() << '\n';
+// 	}
+
+// 	return (to_do(target, loca.getPath()));
+// }
+
+void	socketHaveEvent(Servers &servers, vector<pollfd> &poll_fd)
 {
-	for (size_t i = 0; i < Manageservers.WorkingSocketsSize(); i++)
+	for (size_t i = 0; i < poll_fd.size(); i++)
 	{
-		if(Manageservers.WorkingRevents(i) & POLLIN)
+		if(poll_fd[i].revents & POLLIN)
 		{
+			// cout << "read " << "servers : " << servers.SocketsSize() << endl;
 			try
 			{
-				SocketDependencies socket = Manageservers.readyToRead(i);
-				string request = socket.getRequist();
-				cout << request << endl;
-				(void)serv;
-				if (request.empty())
-					continue ;
-				// GeneralPattern header(Parser::parseHeader(Manageservers.getRequest(i)));
-				// vector<ServerPattern> server = ServerData::getServer(serv, socket.ipAndPort, header.getData("Host").front().getValue());
-				// ResponseHeader response = handler(server.front(), header);
-				// String filename = response.getFileName();
-				// if (filename.empty() == false)
-				// {
-				// 	String* str = getContentFile(filename);
-				// 	if (!str)
-				// 		throw (exception());
-				// 	vector<Data> accept = header.getData("Accept");
-				// 	if (accept.empty() == false)
-				// 	{
-				// 		ostringstream oss;
-				// 		oss << str->size();
-				// 		response.contentLength(oss.str());
-				// 		if (accept.at(0).getValue().split(':').at(0).contains("image") == true)
-				// 			response.contentType("*/*");
-				// 		response.connection("close");
-				// 	}
-				// 	response.body(str);
-				// }
-				// String *str = response.toString();
-				// Manageservers.setRespond(*str, i);
-				// delete str;
-				Manageservers.setRespond("HTTP/1.1 200 OK\r\n\r\n <h1> hello </h1>\0\0", i);
+				servers.readyToRead(i);
+				// cout << servers.getHeader(i) << endl;
 			}
 			catch(runtime_error &e){}
 		}
-		else if(Manageservers.WorkingRevents(i) & POLLOUT)
-		{
-
-			Manageservers.readyToWrite(i);
-		}
+		else if(poll_fd[i].revents & POLLOUT)
+			servers.readyToWrite(i);
 	}
 }
 
@@ -149,17 +115,19 @@ int main(int ac, char **av)
 		cerr << e.what() << '\n';
 	}
 	ServerData serv(parser.getServers());
-	ManageServers Manageservers(serv);
-	serv.displayServers();
-	Manageservers.runAllServers();
-	Manageservers.setMasterSockets();
+	Servers servers(serv);
+
+	servers.runAllServers();
+	servers.setMasterSockets();
 	while (true)
 	{
 		try{
-			Manageservers.setWorkingSockets(Manageservers.isSocketsAreReady());
-			socketHaveEvent(Manageservers, serv);
+			vector<pollfd> poll_fd;
+			servers.isSocketsAreReady(poll_fd);
+			socketHaveEvent(servers, poll_fd);
+			// cout << "i'm done" << "Servers : " << servers.SocketsSize() << endl;
 		}
-		catch(const ManageServers::PollException& e)
+		catch(const Servers::PollException& e)
 		{
 			Logger::warn(cout, e.what(), "");
 			continue;
