@@ -1,7 +1,7 @@
-#ifndef READREQUEST
-#define READREQUEST
+#ifndef readRequest
+#define readRequest
 
-#include"SocketDependencies.hpp"
+#include"Socket.hpp"
 #include"Server.hpp"
 #include <cstdio>
 
@@ -16,26 +16,26 @@
 
 class   ReadRequest
 {
-    SocketDependencies  &socket;
-    ReadRequest();
+        Socket	&socket;
+        ReadRequest();
 
-public:
+    public:
 
-    ReadRequest(SocketDependencies&);
-    ~ReadRequest();
+        ReadRequest(Socket&);
+        ~ReadRequest();
 
-    void	    methodSerch(string &Requist);
-    void        postUtils();
-    int         headerMethod(String);
-    void	    setOnlyHeadre(string &Requist);
-    void	    putInString();
-    void	    putInFile();
-    void        removeBoundary(string &,size_t	&);
-    void	    removePartOfupload();
-    void        checkReqeust();
-    void	    checkIfFile(size_t	&);
-    void        handelChunked(string &Requist);
-    void        Requist();
+        void	methodSerch(string &);
+        void	postUtils();
+        int		headerMethod(String);
+        void	setHeadre(string &);
+        void	putInString();
+        void	putInFile();
+        void	removeBoundary(string &,size_t	&);
+        void	removePartOfupload();
+        void	checkReqeust();
+        void	checkIfFile(size_t	&);
+        void	handelChunked(string &);
+        void	Request();
 };
 
 

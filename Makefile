@@ -15,23 +15,23 @@ SRCS		=	src/Parsing/Parser.cpp \
 				src/Utils/ResponseHeader.cpp \
 				src/Server/main.cpp\
 				src/Server/Server.cpp\
-				src/Server/ParssingRequist.cpp\
 				src/Server/Cgi.cpp\
-				src/Utils/Poll.cpp\
-				src/Server/ManageServers.cpp\
-				src/Server/SocketDependencies.cpp\
 				src/Exception/PollException.cpp\
 				src/Server/ReadRequest.cpp \
 				src/configurationTools.cpp \
 				src/tools.cpp \
-				src/Utils/Directives.cpp
+				src/Utils/Directives.cpp \
+				src/Server/ParssingRequest.cpp\
+				src/Server/Servers.cpp\
+				src/Server/Socket.cpp\
+
 
 TEMPLATES =	src/Templates/*.tpp
 HEADERS	=	src/Includes/*.hpp
 
 
 CPP	=	c++
-CPPFLAGS	=	-Wall -Wextra -Werror -std=c++98 -Wconversion -O3 -I./src/Includes -fsanitize=address
+CPPFLAGS	=	-Wall -Wextra -Werror -std=c++98 -Wconversion -O3 -I./src/Includes -fsanitize=address -g
 
 BIN			=	bin
 

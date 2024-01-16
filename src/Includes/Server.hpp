@@ -13,7 +13,6 @@
 #ifndef SERVER_HPP
 #define SERVER_HPP
 #include"ServerData.hpp"
-#include"Parser.hpp"
 #include"webserver.h"
 #include<sys/socket.h>
 #include <netinet/in.h>

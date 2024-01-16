@@ -6,7 +6,6 @@
 
 class   Request
 {
-    
     map<String, String> header;
     public :
         Request( void );
