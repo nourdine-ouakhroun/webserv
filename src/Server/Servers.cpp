@@ -173,7 +173,7 @@ void Servers::readyToRead(size_t i)
 	{
 		cout << "CHANGE" << endl;
 		master[i].respond = "HTTP/1.1 200 OK\r\n\r\n <h1> hello </h1>";
-		// cout << master[i].getBody() << endl;
+		cout << master[i].getBody() << endl;
 		// Change read permission to write permission;
 		master[i].setFdPoll(POLLOUT);
 	}
