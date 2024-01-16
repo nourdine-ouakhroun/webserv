@@ -35,10 +35,8 @@ void	ReadRequest::Request()
 		socket.setBody(request);
 		if(socket.is_chuncked == true)
 		{
-			// cout << "hihooooo" << endl;
 			while (true)
 			{
-				// cout << "[[[[[[[[[[[[[[" << socket.getBodyChange() << "]]]]]]]]]]]]]]" << "-----------> " << socket.hex_valeu << ", " << socket.getBodyChange().size() << endl;
 				if(socket.hex_valeu > socket.getBodyChange().size())
 					break;
 				size_t pos = socket.getBodyChange().find("\r\n", socket.hex_valeu);
@@ -50,21 +48,11 @@ void	ReadRequest::Request()
 				size_t decimal = static_cast<size_t>(strtol(hexa.c_str(), NULL, 16));
 				socket.hex_valeu += decimal;
 				if(decimal == 0)
-				{
-					cout << socket.getBodyChange() << endl;
-					exit(1);
 					throw 1;
-				}
-				if(request.find("@") != NPOS)
-				{
-					cout << request << "-----------> " << socket.hex_valeu << ", " << socket.getBodyChange().size() << endl;
-					exit(1);
-				}
-				// if(l == 6)
-				// 	exit(1);
-				// l++;
 			}
 		}
+		if((size_t)socket.getContenlenght() == socket.getBody().size())
+			throw 1;
 	}
 	// cout << socket.getLenght() << " : " << socket.getContenlenght() << endl;
 	// if(socket.getLenght() != socket.getContenlenght() || !socket.rest.empty())
