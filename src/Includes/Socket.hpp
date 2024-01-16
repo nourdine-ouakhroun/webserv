@@ -44,6 +44,7 @@ class   Socket
 		void	setBoundary(const string &	boundary);
 		void	setContenlenght(const ssize_t & contenlenght);
 
+		string & getBodyChange();
 		const string	&getBoundary() const;
 		const ssize_t	&getContenlenght() const;
 		const string 	&getBody() const;
