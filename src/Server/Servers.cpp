@@ -163,10 +163,10 @@ void Servers::readyToRead(size_t i)
 	try
 	{
 		// Read the request;
-		cout << "hi" << endl;
+		// cout << "hi" << endl;
 		ReadRequest read_request(master[i]);
 		read_request.Request();
-		cout << "done" << endl;
+		// cout << "done" << endl;
 
 	}
 	catch(int)
@@ -185,14 +185,14 @@ void Servers::isSocketsAreReady(vector<pollfd> &poll_fd)
 	for (size_t i = 0; i < master.size(); i++)
 	{
 		poll_fd.push_back(master[i].getFdPoll());
-		cout << "event : " <<  poll_fd[i].revents << endl;
+		// cout << "event : " <<  poll_fd[i].revents << endl;
 	}
-	cout << "size : " << poll_fd.size() << endl;
+	// cout << "size : " << poll_fd.size() << endl;
 	int pint = poll(&poll_fd[0], static_cast<nfds_t>(poll_fd.size()), 6000);
-	for (size_t i = 0; i < poll_fd.size(); i++)
-	{
-		cout << "event : " <<  poll_fd[i].revents << endl;
-	}
+	// for (size_t i = 0; i < poll_fd.size(); i++)
+	// {
+		// cout << "event : " <<  poll_fd[i].revents << endl;
+	// }
 	if(pint == 0)
 		throw Servers::PollException("Server reloaded");
 	if(pint < 0)
