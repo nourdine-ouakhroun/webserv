@@ -16,6 +16,7 @@ void ReadRequest::checkReqeust()
 	
 }
 
+			// int l = 0;
 void	ReadRequest::Request()
 {
 	ssize_t		bytes;
@@ -25,55 +26,45 @@ void	ReadRequest::Request()
 	bytes = 0;
 	memset(buffer, 0, READ_NUMBER);
 	bytes = recv(socket.getFdPoll().fd, buffer, READ_NUMBER - 1, 0);
-	cout << "bytes : " << bytes << endl;
+	// cout << "bytes : " << bytes << endl;
 	if(bytes > 0)
 	{
 		string request (buffer, (size_t)bytes);
-		socket.respond.append(request);
-		cout << socket.respond.size() << ", " << request.size() << " , " << bytes << endl;
-		if(request.find("@") != NPOS)
+		if(socket.getHeader().empty() == true)
+			setHeadre(request);
+		socket.setBody(request);
+		if(socket.is_chuncked == true)
 		{
-			cout << request << endl;
-			exit(1);
+			// cout << "hihooooo" << endl;
+			while (true)
+			{
+				// cout << "[[[[[[[[[[[[[[" << socket.getBodyChange() << "]]]]]]]]]]]]]]" << "-----------> " << socket.hex_valeu << ", " << socket.getBodyChange().size() << endl;
+				if(socket.hex_valeu > socket.getBodyChange().size())
+					break;
+				size_t pos = socket.getBodyChange().find("\r\n", socket.hex_valeu);
+				if(pos == NPOS)
+					break;
+				pos += 2;
+				string hexa = socket.getBodyChange().substr(socket.hex_valeu, pos);
+				socket.getBodyChange().erase(socket.hex_valeu - 2, pos - (socket.hex_valeu - 2));
+				size_t decimal = static_cast<size_t>(strtol(hexa.c_str(), NULL, 16));
+				socket.hex_valeu += decimal;
+				if(decimal == 0)
+				{
+					cout << socket.getBodyChange() << endl;
+					exit(1);
+					throw 1;
+				}
+				if(request.find("@") != NPOS)
+				{
+					cout << request << "-----------> " << socket.hex_valeu << ", " << socket.getBodyChange().size() << endl;
+					exit(1);
+				}
+				// if(l == 6)
+				// 	exit(1);
+				// l++;
+			}
 		}
-		// cout << "[========>[" << request << "]<========]" << endl;
-		// cout << "BBBBBBBBBBBB[[[[[[" << request << "]]]]]]]]" << endl << endl <<endl;
-		// if(socket.getHeader().empty() == true)
-		// 	setHeadre(request);
-		// if(socket.is_chuncked == true)
-		// {
-		// 	while (true)
-		// 	{
-		// 		if(socket.hex_valeu > request.size())
-		// 		{
-		// 			socket.hex_valeu -= request.size();
-		// 			break;
-		// 		}
-		// 		request.erase(socket.hex_valeu, 2);
-		// 		size_t pos = request.find("\r\n", socket.hex_valeu);
-		// 		if(pos == NPOS)
-		// 			break;
-		// 		pos += 2;
-		// 		string hexa = request.substr(socket.hex_valeu, pos);
-		// 		request.erase(socket.hex_valeu, pos - socket.hex_valeu);
-		// 		size_t decimal = static_cast<size_t>(strtol(hexa.c_str(), NULL, 16));
-		// 		socket.hex_valeu += decimal;
-		// 		if(decimal == 0)
-		// 		{
-		// 			socket.setBody(request);
-		// 			throw 1;
-		// 		}
-		// 	}
-		// }
-		// if()
-		// cout << socket.getHeader() << endl;
-		// exit(1);
-		// cout << socket.getBody().size() << " , " << (size_t)socket.getContenlenght() << endl;
-		// if(socket.getBody().size() == (size_t)socket.getContenlenght() || socket.getBody().rfind(socket.getBoundary() + "--") != NPOS)
-		// {
-		// 	cout << socket.getBody() << endl;
-		// 	exit(1);
-		// }
 	}
 	// cout << socket.getLenght() << " : " << socket.getContenlenght() << endl;
 	// if(socket.getLenght() != socket.getContenlenght() || !socket.rest.empty())
@@ -260,6 +251,7 @@ void	ReadRequest::setHeadre(string &Request)
 	pos = socket.getHeader().find("chunked");
 	if(pos != NPOS)
 	{
+		socket.hex_valeu = 2;
 		socket.is_chuncked = true;
 		Request = Request.substr(Request.find("\r\n\r\n") + 2);
 		return;

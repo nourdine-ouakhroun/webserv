@@ -14,11 +14,11 @@
 #include"Servers.hpp"
 void	socketHaveEvent(Servers &servers, vector<pollfd> &poll_fd)
 {
-	for (size_t i = 0; i < servers.SocketsSize(); i++)
+	for (size_t i = 0; i < poll_fd.size(); i++)
 	{
 		if(poll_fd[i].revents & POLLIN)
 		{
-			cout << "read " << "servers : " << servers.SocketsSize() << endl;
+			// cout << "read " << "servers : " << servers.SocketsSize() << endl;
 			try
 			{
 				servers.readyToRead(i);
@@ -45,7 +45,7 @@ int main(int ac, char **av)
 			vector<pollfd> poll_fd;
 			servers.isSocketsAreReady(poll_fd);
 			socketHaveEvent(servers, poll_fd);
-			cout << "i'm done" << "Servers : " << servers.SocketsSize() << endl;
+			// cout << "i'm done" << "Servers : " << servers.SocketsSize() << endl;
 		}
 		catch(const Servers::PollException& e)
 		{

@@ -74,7 +74,10 @@ const string & Socket::getBody() const
 {
 	return this->body;
 }
-
+string & Socket::getBodyChange()
+{
+	return this->body;
+}
 // void Socket::setHeader(const string& request,const size_t& lenght) 
 // {
 // 	this->request.append(request, this->request.size(), lenght);
