@@ -43,8 +43,8 @@ public:
 	void	initSockets(vector<int> &);
 	void	initSocketPort80(void);
 	void	readyToRead(size_t);
-	void	readyToWrite(size_t);
-	void	erase(size_t );
+	void	readyToWrite(size_t &index, vector<pollfd> &poll_fd);
+
 	size_t	SocketsSize(void) const ;
 	short	Revents(size_t) const ;
 	void	acceptConection(size_t);
@@ -64,5 +64,15 @@ public:
 	};
 
 };
-
+template<typename T>
+void	erase(size_t index, T& var)
+{
+	T returnFds;
+	for (size_t i = 0; i < var.size(); i++)
+	{
+		if(i != index)
+			returnFds.push_back(var[i]);
+	}
+	var = returnFds;
+}
 #endif
