@@ -19,6 +19,7 @@ void	Server::bindSocket(int fd, const String &ip, int port)
 	if(bind(fd, (const sockaddr*)&socket_info, sizeof(socket_info)) == -1)
 	{
 		close(fd);
+		exit(1);
 		throw runtime_error("bind : can't Bind this Port");
 	}
 }

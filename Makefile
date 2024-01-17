@@ -1,8 +1,7 @@
 NAME		=	webserv
 
-
-SRCS		=	src/Parsing/Parser.cpp \
-				src/Parsing/Checker.cpp \
+SRCS		=	src/Parsing/Checker.cpp \
+				src/Parsing/Parser.cpp \
 				src/Parsing/Data.cpp \
 				src/Parsing/Patterns/LocationPattern.cpp \
 				src/Parsing/Patterns/GeneralPattern.cpp \
@@ -13,17 +12,17 @@ SRCS		=	src/Parsing/Parser.cpp \
 				src/Exception/ServerException.cpp \
 				src/Utils/Poll.cpp \
 				src/Utils/ResponseHeader.cpp \
-				src/Server/main.cpp\
-				src/Server/Server.cpp\
-				src/Server/Cgi.cpp\
-				src/Exception/PollException.cpp\
+				src/Server/main.cpp \
+				src/Server/Server.cpp \
+				src/Server/Cgi.cpp \
+				src/Exception/PollException.cpp \
 				src/Server/ReadRequest.cpp \
 				src/configurationTools.cpp \
 				src/tools.cpp \
 				src/Utils/Directives.cpp \
 				src/Server/ParssingRequest.cpp\
-				src/Server/Servers.cpp\
-				src/Server/Socket.cpp\
+				src/Server/Servers.cpp \
+				src/Server/Socket.cpp
 
 
 TEMPLATES =	src/Templates/*.tpp

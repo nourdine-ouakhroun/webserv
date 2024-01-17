@@ -43,7 +43,7 @@ public:
 	void	runAllServers(void);
 	void	initSockets(vector<String> &);
 	void	initSocketPort80(void);
-	void	readyToRead(size_t);
+	void	readyToRead(size_t,vector<pollfd> &);
 	void	readyToWrite(size_t);
 	void	erase(size_t );
 	size_t	SocketsSize(void) const ;
