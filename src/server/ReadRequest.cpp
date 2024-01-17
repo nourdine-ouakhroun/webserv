@@ -48,18 +48,20 @@ void	ReadRequest::Request()
 				size_t decimal = static_cast<size_t>(strtol(hexa.c_str(), NULL, 16));
 				socket.hex_valeu += decimal;
 				if(decimal == 0)
-					throw 1;
+					throw 200;
 			}
 		}
 		cout << "hello 44 " << endl;
 		if((size_t)socket.getContenlenght() == socket.getBody().size())
-			throw 1;
+			throw 200;
 	}
 	return ;
 }
 
 void	ReadRequest::setHeadre(string &Request)
 {
+	// cout << Request << endl;
+	// exit(1);
 	size_t	pos = Request.find("\r\n\r\n");
 	if(pos == NPOS)
 		throw runtime_error("");
@@ -67,12 +69,7 @@ void	ReadRequest::setHeadre(string &Request)
 	pos = socket.getHeader().find("\r\n");
 	socket.setMethod(headerMethod(socket.getHeader().substr(0, pos)));
 	if(socket.getMethod() != POST)
-	{
-		socket.respond = "HTTP/1.1 200 OK\r\n\r\n <h1> hello </h1>";
-		throw 1;
-	}
-	pos = Request.find("boundary=") + 9;
-	socket.setBoundary("--" + Request.substr(pos, Request.find("\r\n", pos) - pos));
+		throw 200;
 	pos = socket.getHeader().find("chunked");
 	if(pos != NPOS)
 	{

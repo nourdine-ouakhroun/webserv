@@ -3,20 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Form</title>
+    <title>Chunked Transfer Encoding Example</title>
 </head>
 <body>
-    <form action="/cgi-bin/process_data.py" method="post" enctype="multipart/form-data">
-        <label for="first_name">First Name:</label>
-        <input type="text" name="first_name" required><br>
 
-        <label for="last_name">Last Name:</label>
-        <input type="text" name="last_name" required><br>
+<form id="myForm">
+    <label for="data">Enter Data:</label>
+    <textarea id="data" name="data" rows="4" cols="50"></textarea>
+    <br>
+    <input type="button" value="Submit" onclick="postData()">
+</form>
 
-        <label for="file_upload">Upload File:</label>
-        <input type="file" name="file_upload" accept=".txt, .csv"><br>
+<script>
+async function postData() {
+    var formData = new FormData(document.getElementById("myForm"));
+    var data = JSON.stringify(Object.fromEntries(formData.entries()));
 
-        <input type="submit" value="Submit">
-    </form>
+    var headers = new Headers();
+    headers.append('Content-Type', 'text/plain;charset=UTF-8');
+
+    try {
+        var response = await fetch('http://10.12.4.7', {
+            method: 'POST',
+            headers: headers,
+            body: data,
+        });
+
+        console.log(`Response status: ${response.status}`);
+        console.log(`Response body: ${await response.text()}`);
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+</script>
+
 </body>
 </html>
+    

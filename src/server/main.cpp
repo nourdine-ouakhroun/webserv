@@ -88,16 +88,14 @@ void	socketHaveEvent(Servers &servers, vector<pollfd> &poll_fd)
 	{
 		if(poll_fd[i].revents & POLLIN)
 		{
-			cout << "read " << "servers : " << servers.SocketsSize() << endl;
 			try
 			{
 				servers.readyToRead(i, poll_fd);
-				cout << servers.getHeader(i) << endl;
 			}
 			catch(runtime_error &e){}
 		}
 		else if(poll_fd[i].revents & POLLOUT)
-			servers.readyToWrite(i);
+			servers.readyToWrite(i, poll_fd);
 	}
 }
 
