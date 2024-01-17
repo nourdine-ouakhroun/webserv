@@ -169,16 +169,20 @@ void Servers::acceptConection(size_t index)
 	master.push_back(tmp);
 }
 
-void Servers::readyToRead(size_t i)
+void Servers::readyToRead(size_t i, vector<pollfd> &poll_fd)
 {
+	cout << "hello world >>>>>>>>" << endl;
 	for (size_t j = 0; j < fdSockets.size(); j++)
 	{
-		if(master[i].getFdPoll().fd == fdSockets[j])
+		// cout << "hello world ------------- = " << master[i].getBody() << endl;
+		cout << "hello world /////////////" << endl;
+		if(poll_fd[i].fd == fdSockets[j])
 		{
 			acceptConection(j);
 			return;
 		}
 	}
+
 	try
 	{
 		// Read the request;
@@ -191,6 +195,7 @@ void Servers::readyToRead(size_t i)
 	catch(int)
 	{
 		cout << "CHANGE" << endl;
+		cout << "hello world +++++++++++++" << endl;
 		master[i].respond = "HTTP/1.1 200 OK\r\n\r\n <h1> hello </h1>";
 		cout << master[i].getBody() << endl;
 		// Change read permission to write permission;
