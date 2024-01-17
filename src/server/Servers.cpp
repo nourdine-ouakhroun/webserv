@@ -117,8 +117,9 @@ void	Servers::runAllServers(void)
 }
 
 
-void	Servers::readyToWrite(size_t index)
+void	Servers::readyToWrite(size_t &index, vector<pollfd> &poll_fd)
 {
+	cout << "index : " << index << " master : " << master.size() << endl;
 	size_t send_lenght = 2000;
 	if(send_lenght > master[index].respond.size())
 		send_lenght =  master[index].respond.size();
@@ -129,7 +130,10 @@ void	Servers::readyToWrite(size_t index)
 		if(master[index].respond.empty() == true)
 		{
 			close(master[index].getFdPoll().fd);
-			erase(index);
+			cout << "erase : " << index << endl;
+			erase(index, master);
+			erase(index, poll_fd);
+			index--;
 		}
 	}
 }
@@ -144,16 +148,6 @@ short	Servers::Revents(size_t index) const
 	return this->master[index].getFdPoll().revents;
 }
 
-void	Servers::erase(size_t index)
-{
-	vector<Socket> returnFds;
-	for (size_t i = 0; i < this->master.size(); i++)
-	{
-		if(i != index)
-			returnFds.push_back(this->master[i]);
-	}
-	this->master = returnFds;
-}
 
 void Servers::acceptConection(size_t index)
 {
@@ -171,7 +165,7 @@ void Servers::acceptConection(size_t index)
 
 void Servers::readyToRead(size_t i, vector<pollfd> &poll_fd)
 {
-	cout << "hello world >>>>>>>>" << endl;
+	cout << " i : " << i << " size : " << master.size() << endl;
 	for (size_t j = 0; j < fdSockets.size(); j++)
 	{
 		// cout << "hello world ------------- = " << master[i].getBody() << endl;
@@ -186,17 +180,15 @@ void Servers::readyToRead(size_t i, vector<pollfd> &poll_fd)
 	try
 	{
 		// Read the request;
-		// cout << "hi" << endl;
 		ReadRequest read_request(master[i]);
 		read_request.Request();
-		// cout << "done" << endl;
-
 	}
 	catch(int)
 	{
-		cout << "CHANGE" << endl;
-		cout << "hello world +++++++++++++" << endl;
+		// GeneralPattern model = Parser::parseHeader(master[i].getHeader());
+		// handler()
 		master[i].respond = "HTTP/1.1 200 OK\r\n\r\n <h1> hello </h1>";
+		cout << " /////////////////// " << endl;
 		cout << master[i].getBody() << endl;
 		// Change read permission to write permission;
 		master[i].setFdPoll(POLLOUT);
@@ -209,14 +201,9 @@ void Servers::isSocketsAreReady(vector<pollfd> &poll_fd)
 	for (size_t i = 0; i < master.size(); i++)
 	{
 		poll_fd.push_back(master[i].getFdPoll());
-		// cout << "event : " <<  poll_fd[i].revents << endl;
 	}
-	// cout << "size : " << poll_fd.size() << endl;
 	int pint = poll(&poll_fd[0], static_cast<nfds_t>(poll_fd.size()), 6000);
-	// for (size_t i = 0; i < poll_fd.size(); i++)
-	// {
-		// cout << "event : " <<  poll_fd[i].revents << endl;
-	// }
+	cout << "poll_fd.size() : " << poll_fd.size() << ", "<<  master.size() << endl;
 	if(pint == 0)
 		throw Servers::PollException("Server reloaded");
 	if(pint < 0)
