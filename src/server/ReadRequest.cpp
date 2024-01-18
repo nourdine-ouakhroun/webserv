@@ -24,9 +24,7 @@ void	ReadRequest::Request()
 
 	bytes = 0;
 	// bzero(buffer, READ_NUMBER);
-	cout << "hello 222222 " << endl;
 	bytes = recv(socket.getFdPoll().fd, buffer, READ_NUMBER - 1, 0);
-	cout << "hello 3 " << endl;
 	if(bytes > 0)
 	{
 		string request (buffer, (size_t)bytes);
@@ -51,7 +49,6 @@ void	ReadRequest::Request()
 					throw 200;
 			}
 		}
-		cout << "hello 44 " << endl;
 		if((size_t)socket.getContenlenght() == socket.getBody().size())
 			throw 200;
 	}
@@ -60,8 +57,6 @@ void	ReadRequest::Request()
 
 void	ReadRequest::setHeadre(string &Request)
 {
-	// cout << Request << endl;
-	// exit(1);
 	size_t	pos = Request.find("\r\n\r\n");
 	if(pos == NPOS)
 		throw runtime_error("");

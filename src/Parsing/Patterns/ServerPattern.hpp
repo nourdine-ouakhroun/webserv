@@ -11,7 +11,6 @@ String	readFile(const String& path);
 class	ServerPattern : public GeneralPattern
 {
 	vector<LocationPattern>	location;
-
 	public :
 		ServerPattern( void );
 		ServerPattern(const GeneralPattern&, const vector<LocationPattern>&);
@@ -21,7 +20,7 @@ class	ServerPattern : public GeneralPattern
 		void	setLocation(vector<LocationPattern>& _location);
 		void	addLocation(LocationPattern _location);
 		static	LocationPattern	getLocationByPath(vector<LocationPattern> locations, const String& srcPath);
-		const vector<LocationPattern>&	getLocation( void ) const;
+		const	vector<LocationPattern>&	getLocations( void ) const;
 		void	addDirectiveToLocation(vector<LocationPattern>&	servers, const String& key, const String& serverRoot);
 		void	addDirectives(const String& key);
 		static int	checkIsDirectory(const String& filename);
@@ -30,7 +29,9 @@ class	ServerPattern : public GeneralPattern
 
 		bool			empty( void ) const;
 		void	execute( void ) const;
+		static void    getAllLocationPath(const vector<LocationPattern>& lcts, vector<String> &paths);
 
 };
+
 
 #endif

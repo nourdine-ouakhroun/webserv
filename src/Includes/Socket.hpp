@@ -16,6 +16,7 @@
 #include<poll.h>
 #include<cstdio>
 #include<algorithm>
+#include "webserver.h"
 using namespace std;
 #define DEFAULT 0
 #define PUTINFILE 1
@@ -31,6 +32,7 @@ class   Socket
 	pollfd		fdpoll;
 
 	public:
+		String		ipAndPort;
 
 		Socket();
 		~Socket();

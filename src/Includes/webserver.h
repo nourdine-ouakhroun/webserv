@@ -23,6 +23,6 @@ ResponseHeader	returnDirective(const vector<Data> &returns, ResponseHeader &resp
 bool	checkFile(String file);
 
 ResponseHeader	handler(ServerPattern& server, GeneralPattern __unused &model);
-ResponseHeader	to_do(GeneralPattern& __unused targetInfo, __unused String path);
+ResponseHeader	to_do(GeneralPattern& __unused targetInfo, __unused String path, String&);
 
 #endif
