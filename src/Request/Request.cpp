@@ -180,6 +180,8 @@ std::string Request::body(const std::string &key) const
 	return ("");
 }
 
+
+
 const std::string &Request::getMethode() const
 {
     return (this->method);
@@ -241,8 +243,17 @@ std::string Request::extention( const std::string &path) const
 
 
 // check request with config file
-void Request::isFormed(Response &res) {
+void Request::isFormed(ServerModel srv, Response &res) {
 	(void)res;
+	(void)srv;
+	if (!header("Transfer-Encoding").empty() && header("Transfer-Encoding") != "chunked")
+		throw 500;
+	else if (header("Transfer-Encoding").empty() && header("Content-Length").empty() && getMethode() == "Post")
+		throw 400;
+	else if (getPathname().length() > 2048)
+		throw 414;
+	else if (!srv.getData("client_max_body_size").empty() && std::atoi(header("Content-Lengt").c_str()) > (int)(std::atoi(srv.getData("client_max_body_size")[0].getValue().c_str()) / 100))
+		throw 413;
 }
 void Request::isMatched(Response &res) {
 	(void)res;
@@ -255,4 +266,79 @@ void Request::isAllowed(Response &res) {
 }
 void Request::whichMethode(Response &res) {
 	(void)res;
+}
+
+
+// Server Check
+std::string Request::getRootFromLocation(ServerModel server) {
+	std::string			pathName = getPathname();
+	std::vector<Data>	vRoot;
+	static std::string	root;
+	// bool				isFound = false;
+
+
+
+
+	Location location = server.getLocationByPath(server.getLocation(), pathName);
+
+	if (!location.getPath().empty()) {
+		vRoot = location.getData("root");
+		if (!vRoot.empty())
+			root = vRoot[0].getValue() + pathName;
+	}
+	else {
+
+		return(root + pathName);
+	}
+	return (root);
+}
+
+std::string Request::checkServer(const ServerModel &server)
+{
+	bool isFound = false;
+	std::string path = getPathname();
+	std::string root;
+	std::string fullPath;
+	// struct stat s;
+
+	std::cout << "request-Path = |" << path << "|" << std::endl;
+
+	Location location = server.getLocationByPath(server.getLocation(), path);
+	if (!location.getPath().empty()) {
+		std::vector<Data> vRoot = location.getData("root");
+		if (!vRoot.empty()) {
+			root = vRoot[0].getValue();
+
+			if (isDirectory(root + getPathname()) && (root + getPathname()).back() != '/' )
+				throw 301;
+		}
+		std::vector<Data> vIndex = location.getData("index");
+		if (!vIndex.empty())
+		{
+			for (size_t i = 0; (i < vIndex.size() && !isFound); i++)
+			{
+				std::vector<std::string> filename = split(vIndex[i].getValue(), " ");
+				for (size_t j = 0; (j < filename.size() && !isFound); j++)
+				{
+					if (access((root + path + filename[j]).c_str(), O_RDONLY) != -1) {
+						fullPath = root + path + filename[j];
+						isFound = true;
+					}
+					else {
+						std::cout << "File-Not-Found >>" << root + filename[j]  << std::endl;
+					}
+				}
+			}
+		}
+		std::cout << "full-Path = |" << fullPath << "|" << std::endl;
+	}
+	return (fullPath);
+}
+
+int Request::isDirectory(const std::string& path)
+{
+	struct stat statbuf;
+	if (stat(path.c_str(), &statbuf) != 0)
+		return 0;
+	return S_ISDIR(statbuf.st_mode);
 }

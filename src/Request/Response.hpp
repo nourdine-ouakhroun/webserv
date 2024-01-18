@@ -12,6 +12,7 @@
 #include "ServerModel.hpp"
 
 typedef std::map<std::string, std::string> maps;
+
 #define VERSION "HTTP/1.1 "
 #define ENDLINE "\r\n"
 

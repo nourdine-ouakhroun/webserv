@@ -201,13 +201,13 @@ void	Response::makeBodyResponse( void )
 
 std::string Response::getMimeType( const std::string &key) const
 {
-	// std::cout << key << std::endl;
-    for (maps::const_iterator it = this->mimeType.begin(); it != this->mimeType.end(); it++)
-	{
-		if (it->first == key)
-			return (it->second);
+	try {
+		std::string ret = mimeType.at(key);
+		return (ret);
 	}
-	return ("");
+	catch(...){
+		return ("text/plain");
+	}
 }
 
 
@@ -236,7 +236,8 @@ void Response::setMimeType( void )
     this->mimeType[".mp4"] = "video/mp4";
     this->mimeType[".mpeg"] = "video/mpeg";
     this->mimeType[".jpg"] = "image/jpeg";
-    this->mimeType[".woff"] = "font/woff";
     this->mimeType[".png"] = "image/png";
-
+    this->mimeType[".woff"] = "font/woff";
+    this->mimeType[".woff2"] = "font/woff2";
+    this->mimeType[".ttf"] = "font/ttf";
 }
