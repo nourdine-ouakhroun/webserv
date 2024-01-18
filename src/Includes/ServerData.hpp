@@ -1,7 +1,7 @@
 #ifndef	SERVERDATA_HPP
 #define	SERVERDATA_HPP
 
-#include "Parser.hpp"
+#include "../Parsing/Parser.hpp"
 #include "ServerException.hpp"
 #include <algorithm>
 
@@ -12,21 +12,21 @@
 class ServerData
 {
 	private :
-		std::vector<ServerModel> servers;
+		vector<ServerPattern> servers;
 		// unsigned short	getPort(String	value);
 	public :
 		ServerData( void );
-		ServerData(const std::vector<ServerModel>&);
+		ServerData(const vector<ServerPattern>&);
 		ServerData(const ServerData&);
 		ServerData&	operator=(const ServerData&);
-		void	setServerData(const std::vector<ServerModel>&);
+		void	setServerData(const vector<ServerPattern>&);
 		void	displayServers( void );
-		static std::vector<ServerModel>	getServersByServerName(const std::vector<ServerModel>& servers, const String& serverName);
-		static std::vector<ServerModel>	getServersByPort(const std::vector<ServerModel>& servers, const unsigned short& port);
-		static const ServerModel&	getDefaultServer(const std::vector<ServerModel>& servers);
-		const std::vector<ServerModel>&	getAllServers();
+		static vector<ServerPattern>	getServersByServerName(const vector<ServerPattern>& servers, const String& serverName);
+		static vector<ServerPattern>	getServersByIpAndPort(const vector<ServerPattern>& servers, String strHost);
+		static const ServerPattern&	getDefaultServer(const vector<ServerPattern>& servers);
+		const vector<ServerPattern>&	getAllServers() const;
 
-		static std::vector<ServerModel>	getServer(ServerData& servers, String strHost);
+		static vector<ServerPattern>	getServer(ServerData& servers, const String& ClientAddress, String strHost);
 
 };
 
