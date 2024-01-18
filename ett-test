@@ -1,9 +1,0 @@
-#!/bin/bash
-
-while true; do
-    # Make the HTTP request using curl
-    curl -I http://10.11.2.4:80
-    
-    # Sleep for 1 second before the next iteration
-    sleep 0.01
-done
