@@ -2,7 +2,9 @@
 #include "../Request/Request.hpp"
 #include "FileDepandenc.hpp"
 #include <sys/stat.h>
+
 // #include "../Request/StatusCode.hpp"
+
 #define READ_SIZE 1000
 std::string	readF(const std::string& path)
 {
@@ -155,178 +157,84 @@ void ManageServers::handler(std::vector<FileDepandenc> &working, std::vector<Fil
 		}
 
 
-		Request req;
-		std::string content;
-		// std::cout << request << std::endl;
+		Request		req;
+		Response	res;
 		req.parseRequest(request);
-		
-		Response res;
+
+		// std::cout << request << std::endl;
+		// std::cout << req.getPathname() << std::endl;
+
+
+
+		// std::string content;
+		std::string	fileToServe;
 		try {
-			req.isFormed(res);
-			// req.isMatched(res);
-			// req.isRedirected(res);
-			// req.isAllowed(res);
-			// req.whichMethode(res); // GET POST DELETE
-			res.send();
+			
+			ServerModel	server = ServerData::getServer(this->servers, req.header("Host"))[0];
+			fileToServe = req.checkServer(server);
+
+			res.setBody(readF(fileToServe));
 		}
-		catch (...) {
-			res.send();
-		}
-
-		// if (req.getMethode() == "GET") {
-		// 	std::string path = req.getPathname();
-		// 	std::cout << "|" << path << "|" << std::endl;
-		// 	struct stat  s;
-		// 	if (stat(path.c_str(), &s) == 0 && s.st_mode & S_IFDIR )
-		// 	{
-		// 		std::cout << "==> isDerctory <==" << std::endl;
-		// 	}
-		// 	else
-		// 	{
-		// 		std::cout << "==> isfile <==" << std::endl;
-		// 	}
-		// }
-		// else if (req.getMethode() == "POST") {
-
-		// }
-		// else if (req.getMethode() == "DELETE") {
-
-		// }
-
-		// res.
-
-		// maps s = req.getBody();
-		// for (maps::iterator i = s.begin(); i != s.end(); i++)
-		// {
-		// 	std::cerr << i->first << " " << i->second << std::endl ;
-		// }
-		
-		// std::cerr << req.getQuery() << std::endl;
-
-		res.setHeader("server", "dokoko");
-		res.setHeader("Content-Type", res.getMimeType(extention(req.getPathname())) );
-		std::string a = req.header("Host");
-		// std::cout << "|" << a << "|" << std::endl << std::flush;
-
-		// std::cout << "Host " <<  req.header("Host") << "\n";
-		std::string	host;
-		int			port = 80;
-		std::vector<std::string> h = split(a, ":");
-		for (size_t i = 0; i < h.size(); i++)
-		{
-			if (i == 0)
-				host = h[i];
-			else
-				port = std::stoi(h[i]);
+		catch (int status) {
+			if (status == 404) {
+				res.setStatusCode(status);
+				res.setMsg("Not Found");
+				res.setBody("<h1>Page Not Found</h1>");
+				// std::cout << "Not found" << std::endl;
+			}
+			else if (status == 403) {
+				res.setStatusCode(status);
+				res.setMsg("Page Is Forbidden");
+				res.setBody("<h1>Page Is Forbidden</h1>");
+				// forbident
+			}
+			else if (status == 500) {
+				res.setStatusCode(status);
+				res.setMsg("Not Implamented");
+				res.setBody("<h1>Not Implamented</h1>");
+			}
+			else if (status == 400) {
+				res.setStatusCode(status);
+				res.setMsg("Bad Request");
+				res.setBody("<h1>Bad Request</h1>");
+			}
+			else if (status == 414) {
+				res.setStatusCode(status);
+				res.setMsg("Request-Uri Too Longe");
+				res.setBody("<h1>Request-Uri Too Longe<h1>");
+			}
+			else if (status == 413) {
+				res.setStatusCode(status);
+				res.setMsg("Request Entity Too Longe");
+				res.setBody("<h1>Request Entity Too Longe<h1>");
+			}
+			else if (status == 301) {
+				res.setStatusCode(status);
+				res.setMsg("Move Permanently");
+				res.setHeader("location", req.getPathname() + "/");
+				// res.setBody("<h1>Request Entity Too Longe<h1>");
+			}
+			// std::cout << status << "Error not found" << std::endl;
+			// make Response With Status Code 
+			// catch Exepction and make Response Error.
+			// res.send(); // Send Response
 		}
 
-		// std::cout << h[0].size() << " " << h[].size() << std::endl;
-		// if (!h.empty() && h.size() >= 2) {
-		// 	if (!h[0].empty())
-		// 		std::cout << "1 - |" << h[0] << "|\n" << std::flush;
-		// 	if (!h[1].empty()) 
-		// 		std::cout << "2 - |" << h[1] << "|\n" << std::flush;
-		// }
+		std::ifstream fileStream(fileToServe, std::ifstream::ate | std::ifstream::binary);
+		std::string	contentLength = std::to_string(fileStream.tellg());
+		fileStream.close();
 
-		// if (!h.empty())
-		// {
-		// 	std::cout << h[0].empty() << " " << h[1].empty() << std::endl;
-		// 	if (!h[0].empty())
-		// 		host = h[0];
-		// 	if (!h[1].empty())
-		// 		port = std::stoi(h[1]);
-		// }
-		// std::cout << host << " " << port << std::endl;
-
-		if (req.getPathname() == "/")
-		{
-			res.setHeader("Content-Type", res.getMimeType(".html"));
-			content = readF("/Users/mzeroual/Desktop/webserv/src/Request/web/index.html");
-
-		}
-		else
-			content = readF("/Users/mzeroual/Desktop/webserv/src/Request/web/" + req.getPathname());
-
-
-		if (!content.empty())
-			res.setBody(content);
+		res.setHeader("server", "nginx-v2");
+		res.setHeader("Content-Type", res.getMimeType(extention(fileToServe)) );
+		res.setHeader("Content-Length", contentLength);
 		res.makeHeaderResponse();
 		res.makeBodyResponse();
-		
-		// std::cout << "==>" << "/Users/mzeroual/Desktop/webserv/src/Request/web/" + req.getPathname() << "\n" << res.getResponse() << "<=="  << std::endl;
+
 		std::string response = res.getResponse();
-		// std::cerr << response << std::endl;
-		// write(working[i].fdpoll.fd, response.c_str(), response.length());
-		// size_t countwrite = 0;
-		// ssize_t byteSend = 0;
-		size_t len = response.length();
-		size_t len1 = len;
+		ssize_t sendByte = 0;
+		sendByte = write(working[i].fdpoll.fd, response.c_str(), response.length());
+		response.erase(0, (size_t)sendByte);
 		
-		// int ii = -1;
-		while (len)
-		{
-			if (len < READ_SIZE) {
-				while(len)
-				{
-					if (write(working[i].fdpoll.fd, response.c_str() + len1-len, 1) == -1)
-					{
-						// std::cerr << "write failed!" << std::endl;
-						if (read(working[i].fdpoll.fd, 0, 1) <= 0)
-							return ;
-						continue;
-					}
-					len--;
-				}
-			}
-			else {
-				if (write(working[i].fdpoll.fd, response.c_str() + len1-len, READ_SIZE) == -1)
-				{
-					if (read(working[i].fdpoll.fd, 0, 1) <= 0)
-						return ;
-					// std::cerr << "write failed!" << std::endl;
-					continue;
-				}
-				len -= READ_SIZE;
-			}
-		}
-
-		// ssize_t s = send(working[i].fdpoll.fd, response.c_str() + c, READ_SIZE, 0);
-		// if (s == -1)
-		// {
-		// 	close(working[i].fdpoll.fd);
-		// 	return ;
-		// }
-		// else if (s && s != READ_SIZE)
-		// 	break ;
-		// c += READ_SIZE;
-
-
-		// while (len1 > 0)
-		// {
-		// 	ii++;
-		// 	byteSend = write(working[i].fdpoll.fd, response.c_str() + countwrite, READ_SIZE);
-		// 	if (byteSend == -1) {
-		// 		std::cout << "write error " << ii << std::endl;
-		// 		break ;
-		// 	}
-		// 	// if (countwrite == len) {
-		// 	// 	// std::cout << "0" << "\n";
-		// 	// 	break ;
-		// 	// }
-		// 	// else {
-		// 	// countwrite += (size_t)byteSend;
-		// 	countwrite += READ_SIZE;
-		// 	// if (countwrite >= response.length())
-		// 		// break;
-		// 	len1 -= READ_SIZE;
-		// 	std::cout << len1 - READ_SIZE << std::endl;
-		// 	// std::cout << countwrite << " " << byteSend << " "  << READ_SIZE << std::endl;
-		// 	// std::cerr << byteSend << " "  << READ_SIZE << std::endl;
-		// }
-		// std::cout << "----------------------------------------" <<  std::endl;
-
-
-		// write(working[i].fdpoll.fd, res.getResponse().c_str(), res.getResponse().size());
 		close(working[i].fdpoll.fd);
 		erase(master, i);
 	}

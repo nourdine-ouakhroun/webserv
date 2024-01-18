@@ -20,7 +20,7 @@ class	ServerModel : public GlobalModel
 		~ServerModel( void )	throw();
 		void	setLocation(std::vector<Location>& _location);
 		void	addLocation(Location _location);
-		static	Location	getLocationByPath(std::vector<Location> locations, const String& srcPath);
+		static	Location	getLocationByPath(std::vector<Location> locations, String srcPath);
 		const std::vector<Location>&	getLocation( void ) const;
 		void	addRootToLocation(std::vector<Location>&	servers, const String& serverRoot);
 

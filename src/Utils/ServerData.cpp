@@ -117,8 +117,8 @@ std::vector<ServerModel>	ServerData::getServer(ServerData& servers, String strHo
 			servModel = ServerData::getServersByPort(srvs, (unsigned short)host);
 			servModel = ServerData::getServersByServerName(servModel, str.front());
 		}
-		else
-			servModel = ServerData::getServersByServerName(srvs, str.front());
+		// else
+		// 	servModel = ServerData::getServersByServerName(srvs, str.front());
 	}
 	else if (str.size() == 1)
 		servModel = ServerData::getServersByServerName(srvs, str.at(0));
