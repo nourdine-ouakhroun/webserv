@@ -61,7 +61,7 @@ void	ServerPattern::setLocation(vector<LocationPattern>& _location)
 	addDirectives("autoindex");
 }
 
-const vector<LocationPattern>&	ServerPattern::getLocation( void ) const
+const vector<LocationPattern>&	ServerPattern::getLocations( void ) const
 {
 	return (location);
 }
@@ -76,7 +76,7 @@ void	ServerPattern::printServerPatternInfo(const ServerPattern& serverPattern)
 	String s("\t");
 	GeneralPattern::printGeneralPattern(serverPattern, s);
 	cout << s << ">>>> Location Info <<<<\n";
-	LocationPattern::printAllLocations(serverPattern.getLocation(), s);
+	LocationPattern::printAllLocations(serverPattern.getLocations(), s);
 }
 
 LocationPattern	ServerPattern::getLocationByPath(vector<LocationPattern> locations, const String& srcPath)
@@ -141,4 +141,15 @@ bool	ServerPattern::empty( void ) const
 
 void	ServerPattern::execute( void ) const
 {
+}
+
+void    ServerPattern::getAllLocationPath(const vector<LocationPattern>& lcts, vector<String>& paths)
+{
+	if (lcts.empty())
+		return ;
+    for (size_t i = 0; i < lcts.size(); i++)
+    {
+		paths.push_back(lcts[i].getPath());
+		getAllLocationPath(lcts[i].getInnerLocation(), paths);
+    }
 }

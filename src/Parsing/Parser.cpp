@@ -568,7 +568,6 @@ void	Parser::parsingFile(vector<String> content)
 		{
 			String _path = extractDataFromString(*iBegin).getValue();
 			server.addLocation(getLocations(++iBegin, iEnd, _path.trim(" \t")));
-			String str("");
 		}
 	}
 	servers.push_back(server);
@@ -596,8 +595,8 @@ void	Parser::getFinalResualt( void )
 */
 void	Parser::printServerPattern(const ServerPattern& server)
 {
-	vector<LocationPattern>::const_iterator b = server.getLocation().begin();
-	vector<LocationPattern>::const_iterator e = server.getLocation().end();
+	vector<LocationPattern>::const_iterator b = server.getLocations().begin();
+	vector<LocationPattern>::const_iterator e = server.getLocations().end();
 	while (b < e)
 	{
 		printLocations(*b);
@@ -696,7 +695,7 @@ void	Parser::checkServerKeys( void )
 				throw (ParsingException(message));
 			}
 		}
-		checkLocationKeys(servers.at(i).getLocation(), keys);
+		checkLocationKeys(servers.at(i).getLocations(), keys);
 	}
 }
 
