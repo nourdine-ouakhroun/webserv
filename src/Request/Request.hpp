@@ -47,16 +47,16 @@ class Request
 
         // checkserver
 
-        std::string checkServer(const ServerModel &server);
+        std::string checkServer(const ServerPattern &server);
 
-        void isFormed(ServerModel srv, Response &res);
+        void isFormed(ServerPattern srv, Response &res);
         void isMatched(Response &res);
         void isRedirected(Response &res);
         void isAllowed(Response &res);
         void whichMethode(Response &res);
 
         // Server check
-        std::string getRootFromLocation(ServerModel server);
+        std::string getRootFromLocation(ServerPattern server);
         int isDirectory(const std::string& path);
 };
 // std::std::string	readRequest(FileDepandenc &file);
