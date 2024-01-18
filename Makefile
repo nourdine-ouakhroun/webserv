@@ -49,7 +49,7 @@ ${BIN}/%.o	:	src/%.cpp ${HEADERS} Makefile
 	${CPP} ${CPPFLAGS} -c $< -o $@
 
 clean		:
-	rm -rf ${OBJS}
+	rm -rf ${BIN}
 
 fclean		:	clean
 	rm -rf ${NAME}
