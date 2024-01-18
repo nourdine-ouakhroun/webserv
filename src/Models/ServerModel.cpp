@@ -60,8 +60,10 @@ void	ServerModel::printServerModelInfo(const ServerModel& serverModel)
 	Location::printAllLocations(serverModel.getLocation(), s);
 }
 
-Location	ServerModel::getLocationByPath(std::vector<Location> locations, const String& srcPath)
+Location	ServerModel::getLocationByPath(std::vector<Location> locations, String srcPath)
 {
+	if (srcPath.back() == '/')
+		srcPath.pop_back();
 	static std::vector<Location> tmplocations;
 	if (tmplocations.empty() == true)
 		tmplocations = locations;
