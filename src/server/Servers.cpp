@@ -126,6 +126,8 @@ void	Servers::readyToWrite(size_t &index, vector<pollfd> &poll_fd)
 		master[index].respond.erase(0,send_lenght);
 		if(master[index].respond.empty() == true)
 		{
+			cout << "master[" << index << "].getFdPoll().fd : " << master[index].getFdPoll().fd << endl;
+			cout << "poll_fd[" << index << "].fd : " << poll_fd[index].fd << endl;
 			close(master[index].getFdPoll().fd);
 			erase(index, master);
 			erase(index, poll_fd);
@@ -162,7 +164,7 @@ void Servers::acceptConection(size_t index)
 
 void	getResponse(ServerData &servers, Socket& socket)
 {
-	cout << socket.getHeader() << endl;
+	// cout << socket.getHeader() << endl;
 	GeneralPattern header(Parser::parseHeader(socket.getHeader()));
 	vector<ServerPattern> server = ServerData::getServer(servers, socket.ipAndPort, header.getData("Host").front().getValue());
 	ResponseHeader response = handler(server.front(), header);

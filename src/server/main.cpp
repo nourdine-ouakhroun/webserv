@@ -100,7 +100,7 @@ ResponseHeader	handler(ServerPattern& server, GeneralPattern &model)
 	vector<String>::iterator it = max_element(newPaths.begin(), newPaths.end());
 	if (it == newPaths.end())
 		return (responseHeader);
-	cout << "Larget string : " << *it << endl;
+
 	LocationPattern	loca = ServerPattern::getLocationByPath(server.getLocations(), *it);
 	GeneralPattern target;
 
