@@ -6,15 +6,15 @@
 #include <unistd.h>
 class   Cgi{
     private :
-        std::map<String, String> MultCGI;
-        std::string PathScript;
+        map<String, String> MultCGI;
+        string PathScript;
         Cgi();
 
     public :
-        Cgi( std::string ,std::map<String, String>);
-        void setCgi( std::string key , std::string valeu);
+        Cgi( string ,map<String, String>);
+        void setCgi( string key , string valeu);
         ~Cgi();
-        std::string HandelScript(std::vector<String>);
+        string HandelScript(vector<String>);
 
 };
 

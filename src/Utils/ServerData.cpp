@@ -4,7 +4,7 @@ ServerData::ServerData( void )
 {
 }
 
-ServerData::ServerData(const std::vector<ServerModel>& _data) : servers(_data)
+ServerData::ServerData(const vector<ServerPattern>& _data) : servers(_data)
 {
 }
 
@@ -19,77 +19,80 @@ ServerData&	ServerData::operator=(const ServerData& target)
 	return (*this);
 }
 
-void	ServerData::setServerData(const std::vector<ServerModel>& serversData)
+void	ServerData::setServerData(const vector<ServerPattern>& serversData)
 {
 	servers = serversData;
 }
 
+const vector<ServerPattern>&	ServerData::getAllServers() const
+{
+	return (servers);
+}
+
 void	ServerData::displayServers( void )
 {
-	std::vector<ServerModel>::iterator	iterBegin = servers.begin();
-	std::vector<ServerModel>::iterator	iterEnd = servers.end();
+	vector<ServerPattern>::iterator	iterBegin = servers.begin();
+	vector<ServerPattern>::iterator	iterEnd = servers.end();
 	int i = 0;
 	while (iterBegin < iterEnd)
 	{
-		std::cout << "\n===================== Server " << ++i << " Info =====================\n\n";
-		ServerModel::printServerModelInfo(*iterBegin);
+		cout << "\n===================== Server " << ++i << " Info =====================\n\n";
+		ServerPattern::printServerPatternInfo(*iterBegin);
 		iterBegin++;
 	}
 }
 
-std::vector<ServerModel>	ServerData::getServersByServerName(const std::vector<ServerModel>& servers, const String& serverName)
+vector<ServerPattern>	ServerData::getServersByServerName(const vector<ServerPattern>& servers, const String& serverName)
 {
-	std::vector<ServerModel>	serv;
-	std::vector<ServerModel>::const_iterator iterBegin = servers.begin();
-	std::vector<ServerModel>::const_iterator iterEnd = servers.end();
+	vector<ServerPattern>	serv;
+	vector<ServerPattern>::const_iterator iterBegin = servers.begin();
+	vector<ServerPattern>::const_iterator iterEnd = servers.end();
 	while (iterBegin < iterEnd)
 	{
-		std::vector<Data> value = iterBegin->getData("server_name");
+		vector<Data> value = iterBegin->getData("server_name");
 		for (int i = 0; i < (int)value.size(); i++)
 		{
-			String str = value.at((std::vector<Data>::size_type)i).getValue();
-			std::vector<String> values = str.split();
+			String str = value.at((vector<Data>::size_type)i).getValue();
+			vector<String> values = str.split();
 			if (find(values.begin(), values.end(), serverName) != values.end())
 				serv.push_back(*iterBegin);
 		}
 		iterBegin++;
 	}
+	if (serv.empty())
+		return (servers);
 	return (serv);
 }
 
-std::vector<ServerModel>	ServerData::getServersByPort(const std::vector<ServerModel>& servers, const unsigned short& port)
+vector<ServerPattern>	ServerData::getServersByIpAndPort(const vector<ServerPattern>& servers, String strHost)
 {
-	std::vector<ServerModel>	serv;
-	std::vector<ServerModel>::const_iterator iterBegin = servers.begin();
-	std::vector<ServerModel>::const_iterator iterEnd = servers.end();
+	vector<ServerPattern>	serv;
+	vector<ServerPattern>::const_iterator iterBegin = servers.begin();
+	vector<ServerPattern>::const_iterator iterEnd = servers.end();
+
 	while (iterBegin < iterEnd)
 	{
-		std::vector<Data> value = iterBegin->getData("listen");
+		vector<Data> value = iterBegin->getData("listen");
 		for (size_t i = 0; i < value.size(); i++)
-			if (value.empty() == false && (unsigned short)std::strtol(value[i].getValue().c_str(), NULL, 10) == port)
+			if (!value[i].getValue().compare(strHost))
 				serv.push_back(*iterBegin);
 		iterBegin++;
 	}
 	return (serv);
 }
 
-const std::vector<ServerModel>&	ServerData::getAllServers()
+const ServerPattern&	ServerData::getDefaultServer(const vector<ServerPattern>& servers)
 {
-	return (servers);
-}
-
-const ServerModel&	ServerData::getDefaultServer(const std::vector<ServerModel>& servers)
-{
-	std::vector<ServerModel>	serv;
-	std::vector<ServerModel>::const_iterator iterBegin = servers.begin();
-	std::vector<ServerModel>::const_iterator iterEnd = servers.end();
+	vector<ServerPattern>	serv;
+	vector<ServerPattern>::const_iterator iterBegin = servers.begin();
+	vector<ServerPattern>::const_iterator iterEnd = servers.end();
 	while (iterBegin < iterEnd)
 	{
-		std::vector<Data> value = iterBegin->getData("listen");
+		vector<Data> value = iterBegin->getData("listen");
 		for (int i = 0; i < (int)value.size(); i++)
 		{
-			String str = value.at((std::vector<Data>::size_type)i).getValue();
-			std::vector<String> values = str.split();
+			String str = value.at((vector<Data>::size_type)i).getValue();
+			vector<String> values = str.split();
 			if (find(values.begin(), values.end(), "default_server") != values.end())
 				serv.push_back(*iterBegin);
 		}
@@ -102,27 +105,18 @@ const ServerModel&	ServerData::getDefaultServer(const std::vector<ServerModel>& 
 	return (serv.front());
 }
 
-std::vector<ServerModel>	ServerData::getServer(ServerData& servers, String strHost)
+vector<ServerPattern>	ServerData::getServer(ServerData& servers, __unused const String& ClientAddress, String strHost)
 {
-	std::vector<ServerModel>	servModel;
-	std::vector<ServerModel>	srvs = servers.getAllServers();
+	vector<ServerPattern>	srvs = servers.getAllServers();
+	srvs = ServerData::getServersByIpAndPort(srvs, ClientAddress);
 	if (strHost.empty())
-		return (ServerData::getServersByServerName(srvs, "\"\""));
-	std::vector<String> str = strHost.split(':');
-	if (str.size() == 2)
+		strHost = "\"\"";
+	srvs = ServerData::getServersByServerName(srvs, strHost);
+	if (srvs.size() > 1)
 	{
-		long host = std::strtol(str.back().c_str(), NULL, 10);
-		if (host != 0)
-		{
-			servModel = ServerData::getServersByPort(srvs, (unsigned short)host);
-			servModel = ServerData::getServersByServerName(servModel, str.front());
-		}
-		// else
-		// 	servModel = ServerData::getServersByServerName(srvs, str.front());
+		ServerPattern s = ServerData::getDefaultServer(srvs);
+		srvs.clear();
+		srvs.push_back(s);
 	}
-	else if (str.size() == 1)
-		servModel = ServerData::getServersByServerName(srvs, str.at(0));
-	if (servModel.empty() == true)
-		servModel.push_back(servers.getDefaultServer(srvs));
-	return (servModel);
+	return (srvs);
 }

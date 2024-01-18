@@ -222,7 +222,6 @@ const std::string &Request::getQuery() const
     return (this->query);
 }
 
-
 const maps &Request::getHeader( void ) const
 {
 	return (this->_header);
@@ -243,7 +242,7 @@ std::string Request::extention( const std::string &path) const
 
 
 // check request with config file
-void Request::isFormed(ServerModel srv, Response &res) {
+void Request::isFormed(ServerPattern srv, Response &res) {
 	(void)res;
 	(void)srv;
 	if (!header("Transfer-Encoding").empty() && header("Transfer-Encoding") != "chunked")
@@ -270,7 +269,7 @@ void Request::whichMethode(Response &res) {
 
 
 // Server Check
-std::string Request::getRootFromLocation(ServerModel server) {
+std::string Request::getRootFromLocation(ServerPattern server) {
 	std::string			pathName = getPathname();
 	std::vector<Data>	vRoot;
 	static std::string	root;
@@ -279,7 +278,7 @@ std::string Request::getRootFromLocation(ServerModel server) {
 
 
 
-	Location location = server.getLocationByPath(server.getLocation(), pathName);
+	LocationPattern location = server.getLocationByPath(server.getLocations(), pathName);
 
 	if (!location.getPath().empty()) {
 		vRoot = location.getData("root");
@@ -293,7 +292,7 @@ std::string Request::getRootFromLocation(ServerModel server) {
 	return (root);
 }
 
-std::string Request::checkServer(const ServerModel &server)
+std::string Request::checkServer(const ServerPattern &server)
 {
 	bool isFound = false;
 	std::string path = getPathname();
@@ -303,7 +302,7 @@ std::string Request::checkServer(const ServerModel &server)
 
 	std::cout << "request-Path = |" << path << "|" << std::endl;
 
-	Location location = server.getLocationByPath(server.getLocation(), path);
+	LocationPattern location = server.getLocationByPath(server.getLocations(), path);
 	if (!location.getPath().empty()) {
 		std::vector<Data> vRoot = location.getData("root");
 		if (!vRoot.empty()) {

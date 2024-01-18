@@ -6,15 +6,14 @@
 /*   By: mzeroual <mzeroual@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/27 16:41:52 by nouakhro          #+#    #+#             */
-/*   Updated: 2023/12/12 17:19:36 by mzeroual         ###   ########.fr       */
+/*   Updated: 2024/01/18 11:47:08 by mzeroual         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SERVER_HPP
 #define SERVER_HPP
 #include"ServerData.hpp"
-#include"Parser.hpp"
-#include"ServerModel.hpp"
+#include"webserver.h"
 #include<sys/socket.h>
 #include <netinet/in.h>
 #ifndef BACKLOG
@@ -28,8 +27,8 @@ class	Server
 	public:
 	~Server();
 
-	static void	bindSocket(int, int);
-	static int	setSocket();
+	static void	bindSocket(int, const String &, int);
+	static int		setSocket();
 	static void	listenPort(int);
 };
 

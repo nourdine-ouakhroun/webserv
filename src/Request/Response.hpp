@@ -9,7 +9,7 @@
 #include <unistd.h>
 
 #include "Request.hpp"
-#include "ServerModel.hpp"
+#include "webserver.h"
 
 typedef std::map<std::string, std::string> maps;
 
@@ -54,7 +54,7 @@ public:
 
     // bool    isAllowed( const std::string &url );
     // bool    isFormed(Request req);
-    // bool    isMatched( const Request &req, std::vector<ServerModel> serv);
+    // bool    isMatched( const Request &req, std::vector<ServerPattern> serv);
 
 
     void checkPathname( const Request &req, const std::string& path );
