@@ -4,7 +4,7 @@
 #include <exception>
 #include "String.hpp"
 
-class ParsingException : public std::exception
+class ParsingException : public exception
 {
 	String	message;
 

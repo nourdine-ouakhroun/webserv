@@ -4,7 +4,7 @@
 #include <exception>
 #include "String.hpp"
 
-class ServerException : public std::exception
+class ServerException : public exception
 {
 	String	message;
 
