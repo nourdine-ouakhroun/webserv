@@ -66,7 +66,7 @@ void    Checker::checkDuplicate(String key)
         vector<Data> data = servers.at(i).getData(key);
         if (data.size() > 1)
             throw (ParsingException("Check Faild."));
-        checkLocation(servers.at(i).getLocation(), key);
+        checkLocation(servers.at(i).getLocations(), key);
     }
 }
 
@@ -82,7 +82,7 @@ void    Checker::checkValues( void )
             for (size_t j = 0; j < data.size(); j++)
                 if (data.at(j).getValue().empty() == true)
                     throw (ParsingException(data.at(j).getKey().append(" directive is duplicate.")));
-        checkLocationValues(servers.at(i).getLocation());
+        checkLocationValues(servers.at(i).getLocations());
     }
 }
 
@@ -111,7 +111,7 @@ void    Checker::checkBooleanValues(String key)
         vector<Data> data = servers.at(i).getData(key);
         if (data.size() > 1)
             throw (ParsingException("Check Faild."));
-        checkLocationValues(servers.at(i).getLocation(), key);
+        checkLocationValues(servers.at(i).getLocations(), key);
     }
 }
 

@@ -105,7 +105,7 @@ ResponseHeader	handler(ServerPattern& server, GeneralPattern &model, int readyFd
 	}
 
 	path.rightTrim("/");
-	LocationPattern	loca = ServerPattern::getLocationByPath(server.getLocation(), path);
+	LocationPattern	loca = ServerPattern::getLocationByPath(server.getLocations(), path);
 
 	{
 		// check is there's a return directive in this location.
