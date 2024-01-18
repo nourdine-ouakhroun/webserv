@@ -6,12 +6,14 @@
 /*   By: mzeroual <mzeroual@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/27 16:41:52 by nouakhro          #+#    #+#             */
-/*   Updated: 2023/12/07 14:43:15 by mzeroual         ###   ########.fr       */
+/*   Updated: 2024/01/16 17:44:07 by mzeroual         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef MANAGESERVERS
 #define MANAGESERVERS
+
+#include <fstream>
 #include"Server.hpp"
 #include"FileDepandenc.hpp"
 #include<poll.h>

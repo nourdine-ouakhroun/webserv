@@ -1,7 +1,9 @@
 #ifndef REQUEST_HPP
 #define REQUEST_HPP
 
+#include <sys/stat.h>
 #include "Response.hpp"
+#include "ServerData.hpp"
 
 class Response;
 
@@ -22,11 +24,11 @@ class Request
         Request( void );
         ~Request( void );
 
-	    void parseRequest( std::string request );
-        void parseRequestLine( std::string reqLine );
-        void parseUrl( void );
-        void parseHeader( std::string reqHeader );
-        void parseBody( std::string reqBody );
+	    void                        parseRequest( std::string request );
+        void                        parseRequestLine( std::string reqLine );
+        void                        parseUrl( void );
+        void                        parseHeader( std::string reqHeader );
+        void                        parseBody( std::string reqBody );
 
         std::string header(const std::string &key) const;
         std::string body(const std::string &key) const;
@@ -45,14 +47,17 @@ class Request
 
         // checkserver
 
-        void checkServer( void );
+        std::string checkServer(const ServerModel &server);
 
-        void isFormed(Response &res);
+        void isFormed(ServerModel srv, Response &res);
         void isMatched(Response &res);
         void isRedirected(Response &res);
         void isAllowed(Response &res);
         void whichMethode(Response &res);
 
+        // Server check
+        std::string getRootFromLocation(ServerModel server);
+        int isDirectory(const std::string& path);
 };
 // std::std::string	readRequest(FileDepandenc &file);
 std::vector<std::string> split(std::string line, std::string sep);
