@@ -1,5 +1,5 @@
 #include "Response.hpp"
-#include "ManageServers.hpp"
+#include "Servers.hpp"
 
 
 
@@ -157,7 +157,7 @@ void	Response::makeBodyResponse( void )
 //     return (1);
 // }
 
-// bool Response::isMatched( const Request &req, std::vector<ServerModel> servers )
+// bool Response::isMatched( const Request &req, std::vector<ServerPattern> servers )
 // {
 //     for (size_t server = 0; server < servers.size(); server++)
 //     {
