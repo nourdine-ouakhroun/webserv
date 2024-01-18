@@ -97,7 +97,7 @@ void    Select::printFds( void )
     for (int i = 0; i <= 2; i++)
     {
         printBits((unsigned int)set.fds_bits[i]);
-        std::cout << std::endl;
+        cout << endl;
 
     }
 }
