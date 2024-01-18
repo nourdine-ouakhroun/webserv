@@ -1,14 +1,14 @@
 #include "ParsingException.hpp"
 
-ParsingException::ParsingException( void ) : std::exception(), message()
+ParsingException::ParsingException( void ) : exception(), message()
 {
 }
 
-ParsingException::ParsingException(const String& Message) : std::exception(), message(Message)
+ParsingException::ParsingException(const String& Message) : exception(), message(Message)
 {
 }
 
-ParsingException::ParsingException(const ParsingException& copy) : std::exception(copy)
+ParsingException::ParsingException(const ParsingException& copy) : exception(copy)
 {
 	*this = copy;
 }
@@ -20,7 +20,7 @@ ParsingException&	ParsingException::operator=(const ParsingException& target)
 {
 	if (this != &target)
 	{
-		std::exception::operator=(target);
+		exception::operator=(target);
 		message = target.message;
 	}
 	return (*this);

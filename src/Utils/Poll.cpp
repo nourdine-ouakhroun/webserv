@@ -5,7 +5,7 @@ Poll::Poll( void )
 
 }
 
-Poll::Poll(const std::vector<struct pollfd>& _fds) : fds(_fds)
+Poll::Poll(const vector<struct pollfd>& _fds) : fds(_fds)
 {
 }
 
@@ -22,21 +22,26 @@ Poll::~Poll( void )
 Poll&   Poll::operator=(const Poll& target)
 {
     if (this != &target)
+    {
         fds = target.fds;
+        clientInfo = target.clientInfo;
+    }
     return (*this);
 }
 
 int    Poll::getReadyFd(int idx)
 {
-    if (fds[(std::vector<int>::size_type)idx].revents & POLLIN \
-        || fds[(std::vector<int>::size_type)idx].revents & POLLOUT)
-        return (fds[(std::vector<int>::size_type)idx].fd);
+    if (fds[(vector<int>::size_type)idx].revents & POLLIN \
+        || fds[(vector<int>::size_type)idx].revents & POLLOUT)
+        return (fds[(vector<int>::size_type)idx].fd);
     return (-1);
 }
 
-size_t  Poll::fdsSize( void )
+unsigned int Poll::fdsSize( void )
 {
-    return (fds.size());
+    if (fds.size() > (size_t)UINT_MAX)
+        return (UINT_MAX);
+    return ((unsigned int)fds.size());
 }
 
 int		Poll::waitingRequest( void )
@@ -44,24 +49,33 @@ int		Poll::waitingRequest( void )
 	return (poll(&fds[0], (nfds_t)fds.size(), 5000));
 }
 
-void    Poll::push_fd(int fd)
+void    Poll::push_fd(int fd, struct sockaddr_in _clientInfo)
 {
     struct pollfd pfd;
     pfd.fd = fd;
     pfd.events = POLLIN | POLLOUT;
     fds.push_back(pfd);
+    clientInfo.push_back(_clientInfo);
 }
 
 void    Poll::erase_fd(int fd)
 {
-    std::vector<struct pollfd>::iterator begin = fds.begin();
+    vector<struct pollfd>::iterator begin = fds.begin();
     while (begin < fds.end())
     {
-        if (begin->fd == fd)
+        if (fds.at((unsigned int)fd).fd == fd)
         {
-            fds.erase(begin);
+            fds.erase(fds.begin() + (unsigned int)fd);
+            clientInfo.erase(clientInfo.begin() + (unsigned int)fd);
             return ;
         }
-        begin++;
     }
+}
+
+struct sockaddr_in  Poll::getClientInfo(int fd)
+{
+    for (size_t i = 0; i < fds.size(); i++)
+        if (fds.at(i).fd == fd)
+            return (clientInfo.at(i));
+    throw (exception());
 }

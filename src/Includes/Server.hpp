@@ -1,47 +1,35 @@
-#ifndef	SERVER_HPP
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Server.hpp                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: nouakhro <nouakhro@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/11/27 16:41:52 by nouakhro          #+#    #+#             */
+/*   Updated: 2023/11/28 16:39:38 by nouakhro         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#ifndef SERVER_HPP
 #define SERVER_HPP
-
+#include"ServerData.hpp"
+#include"webserver.h"
+#include<sys/socket.h>
 #include <netinet/in.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <cstring>
-#include <unistd.h>
-#include "String.hpp"
-#include "Poll.hpp"
-#include "ServerException.hpp"
-#include "ServerData.hpp"
-#include <fcntl.h>
-
-class Server
+#ifndef BACKLOG
+#define BACKLOG 10
+#endif
+typedef struct sockaddr_in S_address;
+class	Server
 {
-	struct	sockaddr_in	socketData;
-	socklen_t	socketLen;
-	unsigned short	port;
-	static const int errorNumber = -202;
+	private : 
+	Server();
+	~Server();
+	public:
 
-
-	public :
-		Poll	fds;
-		Server( void );
-		Server(const unsigned short &_port);
-		Server(const Server& copy);
-		~Server( void ) throw();
-		Server&	operator=(const Server& target);
-		int		createNewSocket(unsigned short port);
-		int		getAvailabeFD( void );
-		int		accept(int targetSocket);
-		String	recieve(int socket);
-		int		send(int socket, String response);
-		Poll	getFds( void ) const
-		{
-			return (fds);
-		};
+	static void	bindSocket(int, const String &, int);
+	static int		setSocket();
+	static void	listenPort(int);
 };
-
-String	readFile(const String& path);
-unsigned short	getPort(String	value);
-std::vector<ServerModel>	getServer(ServerData& servers, std::vector<Data> header);
-std::vector<int>	openAllPorts(const std::vector<ServerModel>& serversInfo, Server& server);
-
 
 #endif

@@ -1,99 +1,212 @@
-#include "Parser.hpp"
-#include "Checker.hpp"
-#include "Server.hpp"
+#include "webserver.h"
 
 
-template <typename T>
-void	to_do(const Location& loca, T& value)
+unsigned int convertStringToBinary(String str)
 {
-	std::vector<Data>	data = loca.getData("root");
-	if (data.empty() == true)
-	{
-		value.append(ERROR_404);
-		return ;
-	}
-	String file(data.at(0).getValue());
-			 /* |   check if the path ended with /   | */
-	file.append((file.end() - 1)[0] == '/' ? "" : "/");
-	std::vector<Data> indexes = loca.getData("index");
-	if (indexes.empty() == true)
-	{
-		value.append(ERROR_403);
-		return ;
-	}
-	std::vector<String> indexs = String(indexes.at(0).getValue()).split();
-	for (size_t i = 0; i < indexs.size(); i++)
-	{
-		String tmp(file);
-		tmp.append(indexs.at(i));
-		value = readFile(tmp);
-		if (value.length() != 0)
-			return ;
-	}
-	value.append(ERROR_404);
+	unsigned int res = 0;
+	vector<String> strs = str.split('.');
+	for (size_t i = 0; i < strs.size(); i++)
+		res += (unsigned int)strtol(strs[i].c_str(), NULL, 10) << i * 8;
+	return (res);
 }
 
 
-String	handler(ServerData& servers, std::vector<Data> header)
+ResponseHeader	to_do(GeneralPattern& targetInfo, String path)
 {
-	GlobalModel model(header);
-	std::vector<ServerModel>	servModel;
-	String	content;
+	String root;
+	Directives directive(targetInfo, path);
+	ResponseHeader responseHeader;
 
-	servModel = getServer(servers, header);
-	if (servModel.empty() == true)
-		servModel = servers.getAllServers();
-	// content.append("Content-Type: ").append(String(model.getData("Accept").at(0).getValue()).split(',').at(0));
-	// content.append("\r\n");
-	String path(String(model.getData("Method").begin()->getValue()).split()[1]);
+	directive.handleLogges();
+	// handleLogges(targetInfo);
+
+	root = directive.getRootPath();
+	// vector<Data>	roots = targetInfo.getData("root");
+	// if (roots.empty() == true)
+	// 	return (errorPage(targetInfo.getData("error_page"), "404", "Not Found"));
+	
+	// {
+	// 	/**
+	// 	 * @name root and alias directives.
+	// 	 * @details In Nginx, when you have both the root directive and the alias directive within the same location block, the alias directive takes precedence over the root directive.
+	// 	 * 	1. alias
+	// 	 * 	2. root
+	// 	*/
+	// 	root = getRootPath(roots.at(0).getValue(), path);
+	// 	if (targetInfo.getData("alias").empty() == false)
+	// 		root = getAliasPath(targetInfo.getData("alias").at(0).getValue());
+	// }
+
+	{
+		/**
+		 * @brief the priority for serving files is determined by the directives used in the configuration.
+		 * 	1. try_files
+		 * 	2. index
+		 * 	3. auto_index on
+		*/
+
+		vector<Data> tryfiles = targetInfo.getData("try_files");
+		if (tryfiles.empty() == false)
+		{
+			vector<String> files2try = tryfiles.at(0).getValue().split();
+			root = tryFiles(files2try, root);
+			if (root.empty() == false)
+				responseHeader.fileName(root);
+			else
+				responseHeader.status("301 Moved Permanently").location(files2try.back());
+			return (responseHeader);
+		}
+
+		vector<Data> indexes = targetInfo.getData("index");
+		if (indexes.empty() == true)
+			indexes.push_back(Data("index", "index.html"));
+		
+		for (size_t i = 0; i < indexes.size(); i++)
+		{
+			root = getFileContent(indexes.at(i).getValue().split(), root);
+			if (root.empty() == false)
+				return (responseHeader.fileName(root));
+		}
+
+		if (targetInfo.isExist(Data("autoindex", "on")))
+			return (autoIndexing(targetInfo, root, path));
+	}
+
+	return (errorPage(targetInfo.getData("error_page"), "404", "Not Found"));
+}
+
+ResponseHeader	handler(ServerPattern& server, GeneralPattern &model, int readyFd)
+{
+	ResponseHeader	responseHeader;
+	(void)readyFd;
+	String method = model.getData("Method").front().getValue();
+	String path(method.split()[1]);
 	path.trim(" \t\r\n");
-	ServerModel server = servModel.at(0);
-	// setLogs(server);
-	std::vector<Data> roots = server.getData("root");
+	String strHost = model.getData("Host").front().getValue();
+	handleLogges(server);
+
+	// cout << "model.getData(\"Host\")[0].getValue() : " << model.getData("Host")[0].getValue() << endl;
+
+	vector<Data> roots = server.getData("root");
 	String root;
 	if (roots.empty() == false)
-		root = roots.at(0).getValue();
-	if (root.empty() == false && server.checkIsDirectory(root.append(path)) == 0)
-		return (content.append(readFile(root)));
-	if (ServerModel::findLocationByPath(servModel.at(0).getLocation(), root, path, to_do, content) == false)
-		return (ERROR_404);
-	return (content);
+		root = roots.front().getValue();
+
+	{
+		// check is url is a file.
+		if (root.empty() == false && server.checkIsDirectory(root.append(path)) == 0)
+			return (responseHeader.fileName(root));
+	}
+
+	{
+		// redirect the path that doesn't containt '/' in the end.
+		if (path.back() != '/')
+			return (responseHeader.status("301 Moved Permanently").location(path + "/"));
+	}
+
+	path.rightTrim("/");
+	LocationPattern	loca = ServerPattern::getLocationByPath(server.getLocations(), path);
+
+	{
+		// check is there's a return directive in this location.
+		vector<Data> returns = loca.getData("return");
+		if (returns.empty() == false)
+			return (returnDirective(returns, responseHeader));
+	}
+
+
+	GeneralPattern target;
+	try
+	{
+		target = (!loca.getPath().empty()) ? dynamic_cast<GeneralPattern&>(loca) : dynamic_cast<GeneralPattern&>(server);
+	}
+	catch(const exception& e)
+	{
+		cerr << e.what() << '\n';
+	}
+
+
+	// if (target.isExist(Data("autoindex", "on")))
+	// 	return (autoIndexing(target, root, path));
+	
+	return (to_do(target, loca.getPath()));
 }
 
-bool	requestHandler(const std::vector<int>& port, Server& server, ServerData& serv, int readyFd)
+bool	requestHandler(const vector<int>& port, Server& server, ServerData& serv, int readyFd)
 {
-	// static	size_t	totalByteSend;
-	if (readyFd > -1)
+	struct sockaddr_in clientSocket;
+	if (readyFd < 0)
+		return (true);
+	if (find(port.begin(), port.end(), readyFd) != port.end())
 	{
-		if (find(port.begin(), port.end(), readyFd) != port.end())
+		int newClient = server.accept(readyFd, (struct sockaddr *)&clientSocket);
+		if (newClient < 0)
+			return (false);
+		server.fds.push_fd(newClient, clientSocket);
+	}
+	else
+	{
+		String header = server.recieve(readyFd);
+		if (header.empty() == true)
+			return (true);
+		cout << header << endl;
+		GeneralPattern model(Parser::parseHeader(header));
+		ResponseHeader response;
+		try
 		{
-			int newClient = server.accept(readyFd);
-			if (newClient < 0)
-				return (false);
-			server.fds.push_fd(newClient);
+			String strHost = model.getData("Host").at(0).getValue();
+
+			vector<ServerPattern> servModel = ServerData::getServer(serv, readyFd, strHost);
+			if (servModel.empty() == true)
+				servModel = serv.getAllServers();
+
+			ServerPattern servPattern = servModel.at(0);
+			if (servModel.empty())
+				response = errorPage(servPattern.getData("error_page"), "400", "Bad Request");
+
+			response = handler(servPattern, model, readyFd);
+			String filename = response.getFileName();
+			if (filename.empty() == false)
+			{
+				String* str = getContentFile(filename);
+				if (!str)
+					throw (exception());
+				vector<Data> accept = model.getData("Accept");
+				if (accept.empty() == false)
+				{
+					ostringstream oss;
+					oss << str->size();
+					response.contentLength(oss.str());
+					if (accept.at(0).getValue().split(':').at(0).contains("image") == true)
+						response.contentType("*/*");
+					response.connection("close");
+				}
+				response.body(str);
+			}
 		}
-		else
+		catch(const exception& e)
 		{
-			String header = server.recieve(readyFd);
-			if (header.empty() == true)
-				return (true);
-			// std::cout << header << std::endl;
-			String content("HTTP/1.1 200 OK\r\n\r\n");
-			content.append(handler(serv, Parser::parseHeader(header)));
-			// std::cout << "==================> Response <=====================" << std::endl;
-			// std::cout << content << std::endl;
-			ssize_t sender = server.send(readyFd, content);
-			if (sender == -1)
-				Logger::error(std::cerr, "Send Failed.", "");
-			// std::cout << "Sender : " << sender << std::endl;
-			close(readyFd);
-			server.fds.erase_fd(readyFd);
+			Logger::error(cerr, "catch exception in requestHandler function : ", e.what());
+			response.status("500 Internal Server Error").body(new String("500 Internal Server Error"));
 		}
+		String *resStr = response.toString();
+		static int nlog;
+		cout << ++nlog << " ";
+		Logger::success(cout, "Response ==> ", resStr->substr(0, resStr->find('\r')));
+		// ssize_t resStrlen = (ssize_t)resStr->length();
+		// ssize_t sender = server.send(readyFd, *resStr);
+		server.send(readyFd, *resStr);
+		// if (sender == resStrlen)
+		// {
+		close(readyFd);
+		server.fds.erase_fd(readyFd);
+		// }
+		// delete resStr;
 	}
 	return (true);
 }
 
-void	runServerByPoll(ServerData& serv, Server& server, std::vector<int> port)
+void	runServerByPoll(ServerData& serv, Server& server, vector<int> port)
 {
 	while (true)
 	{
@@ -102,17 +215,23 @@ void	runServerByPoll(ServerData& serv, Server& server, std::vector<int> port)
 		if (pollReturn < 0)
 			break ;
 		if (pollReturn == 0)
+		{
+			// for(size_t i = 0; i < server.fds.fdsSize(); i++)
+			// {
+			// 	close(server.fds.fds[i].fd);
+			// 	server.fds.erase_fd(server.fds.fds[i].fd);
+			// }
 			continue ;
+		}
 		for (int i = 0; i < (int)tmpPoll.fdsSize(); i++)
-			if (requestHandler(port, server, serv, tmpPoll.getReadyFd(i)) == false)
-				break ;
+			requestHandler(port, server, serv, tmpPoll.getReadyFd(i));
 	}
 }
 
 Server	createServer(ServerData& serv)
 {
 	Server server;
-	std::vector<int> ports = openAllPorts(serv.getAllServers(), server);
+	vector<int> ports = openAllPorts(serv.getAllServers(), server);
 	runServerByPoll(serv, server, ports);
 	for (size_t i = 0; i < ports.size(); i++)
 		close(ports.at(i));
@@ -126,21 +245,17 @@ void	start(Parser& parser)
 	{
 		createServer(servers);
 	}
-	catch (std::exception& e)
+	catch (exception& e)
 	{
-		Logger::error(std::cerr, "I can't found the exact server, Reason => ", e.what());
+		Logger::error(cerr, "I can't found the exact server, Reason => ", e.what());
 	}
 }
 
-
-/**
- * @brief	main function.
- */
- int	main(int ac, char **av)
+int	main(int ac, char **av)
 {
 	if (ac < 2)
 	{
-		Logger::error(std::cerr, "Invalid argument", ".");
+		Logger::error(cerr, "Invalid argument", ".");
 		return (1);
 	}
 	try
@@ -152,26 +267,7 @@ void	start(Parser& parser)
 	}
 	catch (ParsingException& e)
 	{
-		Logger::error(std::cerr, e.what(), "");
+		Logger::error(cerr, e.what(), "afdsfasdf");
 	}
 	return (0);
 }
-
-/**
- * String str("the configuration file");
- * str.append(av[1]);
- * Logger::success(std::cout, str, " syntax is ok.");
- * Logger::success(std::cout, str, " test is successfuli.");
-*/
-
-// ACCESS_LOG
-// {
-		// exit(0);
-	// String access_log = servModel.at(0).getData("access_log").at(0).getValue();
-	// if (access_log.contains("main") == true)
-	// {
-	// 	std::ofstream accessLogFile(access_log.split()[0].trim(" \t\n\r"));
-	// 	Logger::info(accessLogFile, "Hello World", " Test 1");
-	// }
-	// std::vector<Data> hosts = model.getData("Method");
-// }
