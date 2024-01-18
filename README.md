@@ -1,8 +1,3 @@
-<<<<<<< HEAD
-# **WEB SERVER**
-
-## 
-=======
 <p align="center">
   <a href="" rel="noopener">
  <img width=400px height=400px src="readme-assets/webserv1.svg" alt="Project logo"></a>
@@ -58,4 +53,3 @@ Knowing its arcane will be useful, even if you won’t be working on a website.
 - <a href="https://www.digitalocean.com/community/tutorials/understanding-nginx-server-and-location-block-selection-algorithms"> understanding nginx server and location block selection algorithms </a>
 
 - <a href="http://nginx.org/en/docs/http/request_processing.html#:~:text=In%20this%20configuration%20nginx%20tests,default%20server%20for%20this%20port."> How nginx processes a request </a>
->>>>>>> 1a10bad815f605c58fee8015a083d5b6ad692ccd
