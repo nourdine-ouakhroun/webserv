@@ -112,14 +112,11 @@ void	Servers::runAllServers(void)
 	*/
 	allport = getAllPorts();
 	initSockets(allport);
-	// if (fdSockets.empty( ))
-	// 	initSocketPort80( );
 }
 
 
 void	Servers::readyToWrite(size_t &index, vector<pollfd> &poll_fd)
 {
-	cout << "index : " << index << " master : " << master.size() << endl;
 	size_t send_lenght = 2000;
 	if(send_lenght > master[index].respond.size())
 		send_lenght =  master[index].respond.size();
@@ -130,7 +127,6 @@ void	Servers::readyToWrite(size_t &index, vector<pollfd> &poll_fd)
 		if(master[index].respond.empty() == true)
 		{
 			close(master[index].getFdPoll().fd);
-			cout << "erase : " << index << endl;
 			erase(index, master);
 			erase(index, poll_fd);
 			index--;
@@ -160,16 +156,43 @@ void Servers::acceptConection(size_t index)
 	fcntl(newfd, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
 	Socket tmp;
 	tmp.setFdPoll(newfd, POLLIN);
+	tmp.ipAndPort = allport[index];
 	master.push_back(tmp);
+}
+
+void	getResponse(ServerData &servers, Socket& socket)
+{
+	cout << socket.getHeader() << endl;
+	GeneralPattern header(Parser::parseHeader(socket.getHeader()));
+	vector<ServerPattern> server = ServerData::getServer(servers, socket.ipAndPort, header.getData("Host").front().getValue());
+	ResponseHeader response = handler(server.front(), header);
+	String filename = response.getFileName();
+	if (filename.empty() == false)
+	{
+		String* str = getContentFile(filename);
+		if (!str)
+			throw (exception());
+		vector<Data> accept = header.getData("Accept");
+		if (accept.empty() == false)
+		{
+			ostringstream oss;
+			oss << str->size();
+			response.contentLength(oss.str());
+			if (accept.at(0).getValue().split(':').at(0).contains("image") == true)
+				response.contentType("*/*");
+			response.connection("close");
+		}
+		response.body(str);
+	}
+	String *str = response.toString();
+	socket.respond = *str;
+	delete str;
 }
 
 void Servers::readyToRead(size_t i, vector<pollfd> &poll_fd)
 {
-	cout << " i : " << i << " size : " << master.size() << endl;
 	for (size_t j = 0; j < fdSockets.size(); j++)
 	{
-		// cout << "hello world ------------- = " << master[i].getBody() << endl;
-		cout << "hello world /////////////" << endl;
 		if(poll_fd[i].fd == fdSockets[j])
 		{
 			acceptConection(j);
@@ -185,11 +208,8 @@ void Servers::readyToRead(size_t i, vector<pollfd> &poll_fd)
 	}
 	catch(int)
 	{
-		// GeneralPattern model = Parser::parseHeader(master[i].getHeader());
-		// handler()
-		master[i].respond = "HTTP/1.1 200 OK\r\n\r\n <h1> hello </h1>";
-		cout << " /////////////////// " << endl;
-		cout << master[i].getBody() << endl;
+		getResponse(servers, master[i]);
+		// master[i].respond = "HTTP/1.1 200 OK\r\n\r\n <h1> hello </h1>";
 		// Change read permission to write permission;
 		master[i].setFdPoll(POLLOUT);
 	}
@@ -203,7 +223,6 @@ void Servers::isSocketsAreReady(vector<pollfd> &poll_fd)
 		poll_fd.push_back(master[i].getFdPoll());
 	}
 	int pint = poll(&poll_fd[0], static_cast<nfds_t>(poll_fd.size()), 6000);
-	cout << "poll_fd.size() : " << poll_fd.size() << ", "<<  master.size() << endl;
 	if(pint == 0)
 		throw Servers::PollException("Server reloaded");
 	if(pint < 0)
