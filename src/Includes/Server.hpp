@@ -3,18 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nouakhro <nouakhro@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mzeroual <mzeroual@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/27 16:41:52 by nouakhro          #+#    #+#             */
-/*   Updated: 2023/11/28 16:39:38 by nouakhro         ###   ########.fr       */
+/*   Updated: 2024/01/18 11:47:08 by mzeroual         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SERVER_HPP
 #define SERVER_HPP
 #include"ServerData.hpp"
-#include"Parser.hpp"
-#include"ServerModel.hpp"
+#include"webserver.h"
 #include<sys/socket.h>
 #include <netinet/in.h>
 #ifndef BACKLOG
@@ -25,10 +24,10 @@ class	Server
 {
 	private : 
 	Server();
-	~Server();
 	public:
+	~Server();
 
-	static void	bindSocket(int, int);
+	static void	bindSocket(int, const String &, int);
 	static int		setSocket();
 	static void	listenPort(int);
 };

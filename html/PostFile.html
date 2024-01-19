@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chunked Transfer Encoding Example</title>
+</head>
+<body>
+
+<form id="myForm">
+    <label for="data">Enter Data:</label>
+    <textarea id="data" name="data" rows="4" cols="50"></textarea>
+    <br>
+    <input type="button" value="Submit" onclick="postData()">
+</form>
+
+<script>
+async function postData() {
+    var formData = new FormData(document.getElementById("myForm"));
+    var data = JSON.stringify(Object.fromEntries(formData.entries()));
+
+    var headers = new Headers();
+    headers.append('Content-Type', 'text/plain;charset=UTF-8');
+
+    try {
+        var response = await fetch('http://10.12.4.7', {
+            method: 'POST',
+            headers: headers,
+            body: data,
+        });
+
+        console.log(`Response status: ${response.status}`);
+        console.log(`Response body: ${await response.text()}`);
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+</script>
+
+</body>
+</html>
+    

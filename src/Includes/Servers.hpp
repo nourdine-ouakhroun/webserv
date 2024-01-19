@@ -27,6 +27,7 @@ class	Servers
 	// vector<Socket>	working;
 
 public:
+	vector<String>			allport;
 
 	Servers(ServerData	srvers);
 	~Servers();
@@ -35,14 +36,14 @@ public:
 	// void			setWorkingSockets(const vector<Socket> &);
 	void			setMasterSockets();
 	string			&getRespond(size_t);
-	vector<int>		getAllPorts(void) const;
+	vector<String>		getAllPorts(void) const;
 	const Socket	&getSocket(size_t) const ;
 	const string 	&getHeader(size_t) const ;
 
 	void	runAllServers(void);
-	void	initSockets(vector<int> &);
+	void	initSockets(vector<String> &);
 	void	initSocketPort80(void);
-	void	readyToRead(size_t);
+	void	readyToRead(size_t i, vector<pollfd> &poll_fd);
 	void	readyToWrite(size_t &index, vector<pollfd> &poll_fd);
 
 	size_t	SocketsSize(void) const ;

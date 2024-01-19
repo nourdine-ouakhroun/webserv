@@ -1,7 +1,7 @@
 #ifndef PARSSINGRequest_HPP
 #define PARSSINGRequest_HPP
-#include"Server.hpp"
-#include "Data.hpp"
+#include "Server.hpp"
+#include "webserver.h"
 #include <map>
 #include <vector>
 

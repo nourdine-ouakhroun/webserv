@@ -6,6 +6,8 @@
 #include <vector>
 using namespace std;
 
+using namespace std;
+
 class String : public string
 {
 	public :
@@ -29,6 +31,7 @@ class String : public string
 		String memSubstr(size_t begin, size_t end);
 };
 
+unsigned int convertStringToBinary(String str);
 
 
 #endif
