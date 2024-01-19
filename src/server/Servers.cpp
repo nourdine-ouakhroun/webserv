@@ -59,21 +59,6 @@ void	Servers::initSockets(vector<String>&	allport)
 	}
 }
 
-// void	Servers::initSocketPort80(void)
-// {
-// 	int	fd;
-// 	try
-// 	{
-// 		fd = Server::setSocket();
-// 		Server::bindSocket(fd, 80);
-// 		Server::listenPort(fd);
-// 	}
-// 	catch(runtime_error &e)
-// 	{
-// 		cout << e.what() << endl;return;
-// 	}
-// 	fdSockets.push_back(fd);
-// }
 vector<String> removeDuplicatePorts(const vector<String>& allPorts)
 {
 	vector<String> uniquePorts;
@@ -126,8 +111,8 @@ void	Servers::readyToWrite(size_t &index, vector<pollfd> &poll_fd)
 		master[index].respond.erase(0,send_lenght);
 		if(master[index].respond.empty() == true)
 		{
-			cout << "master[" << index << "].getFdPoll().fd : " << master[index].getFdPoll().fd << endl;
-			cout << "poll_fd[" << index << "].fd : " << poll_fd[index].fd << endl;
+			// cout << "master[" << index << "].getFdPoll().fd : " << master[index].getFdPoll().fd << endl;
+			// cout << "poll_fd[" << index << "].fd : " << poll_fd[index].fd << endl;
 			close(master[index].getFdPoll().fd);
 			erase(index, master);
 			erase(index, poll_fd);
@@ -164,7 +149,7 @@ void Servers::acceptConection(size_t index)
 
 void	getResponse(ServerData &servers, Socket& socket)
 {
-	// cout << socket.getHeader() << endl;
+	cout << socket.getHeader() << endl;
 	GeneralPattern header(Parser::parseHeader(socket.getHeader()));
 	vector<ServerPattern> server = ServerData::getServer(servers, socket.ipAndPort, header.getData("Host").front().getValue());
 	ResponseHeader response = handler(server.front(), header);
@@ -224,9 +209,9 @@ void Servers::isSocketsAreReady(vector<pollfd> &poll_fd)
 	{
 		poll_fd.push_back(master[i].getFdPoll());
 	}
-	int pint = poll(&poll_fd[0], static_cast<nfds_t>(poll_fd.size()), 6000);
-	if(pint == 0)
-		throw Servers::PollException("Server reloaded");
+	int pint = poll(&poll_fd[0], static_cast<nfds_t>(poll_fd.size()), -1);
+	// if(pint == 0)
+	// 	throw Servers::PollException("Server reloaded");
 	if(pint < 0)
 		throw runtime_error("poll : poll was failed");
 }

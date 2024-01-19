@@ -42,7 +42,6 @@ public:
 
 	void	runAllServers(void);
 	void	initSockets(vector<String> &);
-	void	initSocketPort80(void);
 	void	readyToRead(size_t i, vector<pollfd> &poll_fd);
 	void	readyToWrite(size_t &index, vector<pollfd> &poll_fd);
 
