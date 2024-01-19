@@ -25,7 +25,6 @@ SRCS		=	src/Parsing/Checker.cpp \
 				src/Server/Socket.cpp
 
 
-TEMPLATES =	src/Templates/*.tpp
 HEADERS	=	src/Includes/*.hpp
 
 
@@ -43,7 +42,7 @@ ${NAME}		: ${OBJS}
 	${CPP} ${CPPFLAGS} $^ -o $@
 	@echo "finish !!"
 
-${BIN}/%.o	:	src/%.cpp ${HEADERS} ${TEMPLATES} Makefile
+${BIN}/%.o	:	src/%.cpp ${HEADERS} Makefile
 	@mkdir -p $(dir $@)
 	${CPP} ${CPPFLAGS} -c $< -o $@
 

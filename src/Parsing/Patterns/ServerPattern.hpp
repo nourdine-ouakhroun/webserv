@@ -1,6 +1,7 @@
 #ifndef SERVER_MODEL
 #define SERVER_MODEL
 
+#include <map>
 #include <unistd.h>
 #include <dirent.h>
 #include <algorithm>
@@ -12,6 +13,7 @@ class	ServerPattern : public GeneralPattern
 {
 	vector<LocationPattern>	location;
 	public :
+		map<String, String>		mimeTypes;
 		ServerPattern( void );
 		ServerPattern(const GeneralPattern&, const vector<LocationPattern>&);
 		ServerPattern& operator=(const ServerPattern& target);

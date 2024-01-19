@@ -1,5 +1,43 @@
 #include "Parser.hpp"
 
+map<String, String> getMimeTypes(String fileName)
+{
+	map<String, String> mimeType;
+	fstream os(fileName);
+	if (!os.is_open())
+		return (mimeType);
+	while (!os.eof())
+	{
+		String tmp;
+		getline(os, tmp, '\n');
+		if (tmp.empty())
+			continue;
+		tmp.trim(" \t\n");
+		vector<String> values = tmp.split();
+		if (values.size() < 2)
+			continue ;
+		mimeType.insert(make_pair<String, String>(values.front(), values.back()));
+	}
+	return (mimeType);
+}
+
+void	Parser::includeMimeTypes( void )
+{
+	for (size_t i = 0; i < servers.size(); i++)
+	{
+		vector<Data> vls = servers[i].getData("include");
+		if (vls.empty())
+			continue;
+		servers[i].mimeTypes = getMimeTypes(vls.front().getValue());
+		map<String, String>::iterator it = servers[i].mimeTypes.begin();
+		while (it != servers[i].mimeTypes.end())
+		{
+			cout << "first : " << it->first << " second : " << it->second << endl;
+			it++;
+		}
+	}
+}
+
 /**
  * @brief CONFIG FILE EXAMPLE :
  * 
@@ -267,6 +305,7 @@ Parser::Parser(const String& _fileName) : fileName(_fileName)
 	getFinalResualt();	// convert vector of vector String into vector of ServerPattern.
 	checkServerKeys(); // check is there is unknow Keys.
 	checkingInfos();
+	includeMimeTypes();
 }
 
 /**
