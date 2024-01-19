@@ -1,8 +1,23 @@
 #include"ReadRequest.hpp"
-
+#include<../Request/Request.hpp>
 // ReadRequest::ReadRequest()
 // {
 // }
+ReadRequest::ReadException::ReadException()
+{
+	this->exception_msg = "POLL EXCEPTION";
+}
+ReadRequest::ReadException::ReadException(const string &exception_msg)
+{
+	this->exception_msg = exception_msg;
+}
+const char *ReadRequest::ReadException::what() const throw()
+{
+	return this->exception_msg.c_str();
+}
+ReadRequest::ReadException::~ReadException() throw()
+{
+}
 ReadRequest::ReadRequest(Socket &socket) : socket(socket)
 {
 }
@@ -16,21 +31,20 @@ void	ReadRequest::checkReqeust()
 	
 }
 
-void	ReadRequest::Request()
+void	ReadRequest::Read()
 {
 	ssize_t		bytes;
 	String		boundary;
-	char		buffer[READ_NUMBER] = {0};
+	char		read_buffer[READ_NUMBER] = {0};
 
 	bytes = 0;
-	// bzero(buffer, READ_NUMBER);
-	bytes = recv(socket.getFdPoll().fd, buffer, READ_NUMBER - 1, 0);
+	bytes = recv(socket.getFdPoll().fd, read_buffer, READ_NUMBER - 1, 0);
 	if(bytes > 0)
 	{
-		string request (buffer, (size_t)bytes);
+		string tmp_buffer (read_buffer, (size_t)bytes);
 		if(socket.getHeader().empty() == true)
-			setHeadre(request);
-		socket.setBody(request);
+			setHeadre(tmp_buffer);
+		socket.setBody(tmp_buffer);
 		if(socket.is_chuncked == true)
 		{
 			while (true)
@@ -46,36 +60,36 @@ void	ReadRequest::Request()
 				size_t decimal = static_cast<size_t>(strtol(hexa.c_str(), NULL, 16));
 				socket.hex_valeu += decimal;
 				if(decimal == 0)
-					throw 200;
+					throw ReadRequest::ReadException();
 			}
 		}
 		if((size_t)socket.getContenlenght() == socket.getBody().size())
-			throw 200;
+			throw ReadRequest::ReadException();;
 	}
 	return ;
 }
 
-void	ReadRequest::setHeadre(string &Request)
+void	ReadRequest::setHeadre(string &buffer)
 {
-	size_t	pos = Request.find("\r\n\r\n");
+	Request tmp;
+	size_t	pos = buffer.find("\r\n\r\n");
 	if(pos == NPOS)
 		throw runtime_error("");
-	socket.setHeader(Request.substr(0, pos + 4));
-	pos = socket.getHeader().find("\r\n");
-	socket.setMethod(headerMethod(socket.getHeader().substr(0, pos)));
-	if(socket.getMethod() != POST)
-		throw 200;
-	pos = socket.getHeader().find("chunked");
-	if(pos != NPOS)
+	socket.setHeader(buffer.substr(0, pos + 4));
+	tmp.parseRequest(socket.getHeader());
+	if(tmp.getMethode() != "POST")
+		throw ReadRequest::ReadException();
+	if(tmp.header("Transfer-Encoding") == "chunked")
 	{
 		socket.hex_valeu = 2;
 		socket.is_chuncked = true;
-		Request = Request.substr(Request.find("\r\n\r\n") + 2);
+		buffer = buffer.substr(buffer.find("\r\n\r\n") + 2);
 		return;
 	}
-	pos = Request.find("Content-Length: ") + 16;
-	socket.setContenlenght(strtol(Request.substr(pos, Request.find("\r\n", pos) - pos).c_str(), NULL, 10));
-	Request = Request.substr(Request.find("\r\n\r\n") + 4);
+	buffer = buffer.substr(buffer.find("\r\n\r\n") + 4);
+	if(tmp.header("Content-Length").empty() == false)
+		socket.setContenlenght(strtol(tmp.header("Content-Length").c_str(), NULL, 10));
+	throw ReadRequest::ReadException();
 }
 int	ReadRequest::headerMethod(String	line)
 {

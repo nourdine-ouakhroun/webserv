@@ -176,9 +176,9 @@ void Servers::readyToRead(size_t i, vector<pollfd> &poll_fd)
 	{
 		// Read the request;
 		ReadRequest read_request(master[i]);
-		read_request.Request();
+		read_request.Read();
 	}
-	catch(int)
+	catch(ReadRequest::ReadException)
 	{
 		master[i].respond = "HTTP/1.1 200 OK\r\n\r\n <h1> hello </h1>";
 		// Change read permission to write permission;

@@ -35,7 +35,17 @@ class   ReadRequest
         void	checkReqeust();
         void	checkIfFile(size_t	&);
         void	handelChunked(string &);
-        void	Request();
+        void	Read();
+    	class ReadException : exception
+	    {
+	    	string exception_msg;
+
+	    	public :
+	    		ReadException();
+	    		ReadException(const string &);
+	    		const char * what() const throw();
+	    		~ReadException() throw();
+	    };
 };
 
 
