@@ -5,7 +5,7 @@
 // }
 ReadRequest::ReadException::ReadException()
 {
-	this->exception_msg = "POLL EXCEPTION";
+	this->exception_msg = "Read Exception";
 }
 ReadRequest::ReadException::ReadException(const string &exception_msg)
 {
