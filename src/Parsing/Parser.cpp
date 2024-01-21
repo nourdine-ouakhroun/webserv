@@ -3,7 +3,7 @@
 map<String, String> getMimeTypes(String fileName)
 {
 	map<String, String> mimeType;
-	fstream os(fileName);
+	fstream os(fileName.c_str());
 	if (!os.is_open())
 		return (mimeType);
 	while (!os.eof())
@@ -26,15 +26,8 @@ void	Parser::includeMimeTypes( void )
 	for (size_t i = 0; i < servers.size(); i++)
 	{
 		vector<Data> vls = servers[i].getData("include");
-		if (vls.empty())
-			continue;
-		servers[i].mimeTypes = getMimeTypes(vls.front().getValue());
-		map<String, String>::iterator it = servers[i].mimeTypes.begin();
-		while (it != servers[i].mimeTypes.end())
-		{
-			cout << "first : " << it->first << " second : " << it->second << endl;
-			it++;
-		}
+		if (!vls.empty())
+			servers[i].mimeTypes = getMimeTypes(vls.front().getValue());
 	}
 }
 

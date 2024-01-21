@@ -58,7 +58,7 @@ ResponseHeader	to_do(GeneralPattern& targetInfo, String path, String &model)
 	if (ServerPattern::checkIsDirectory(root + model) == 0) // check is url is a file.
 		return (responseHeader.fileName(root + model));
 
-	if (model.back() != '/') // redirect the path that doesn't containt '/' in the end.
+	if (*(model.end() - 1) != '/') // redirect the path that doesn't containt '/' in the end.
 		return (responseHeader.status("301 Moved Permanently").location(model + "/"));
 	
 	if (model.size() != 1)
@@ -84,7 +84,7 @@ ResponseHeader	handler(ServerPattern& server, GeneralPattern &model)
 	ServerPattern::getAllLocationPath(server.getLocations(), pathss);
 	vector<String> newPaths;
 	String test(path);
-	test.rightTrim("/");
+	// test.rightTrim("/");
 	for (size_t i = 0; i < pathss.size(); i++)
 	{
 		if (!strncmp(pathss[i].c_str(), test.c_str(), pathss[i].size()) && pathss[i].size() == test.size())
@@ -133,6 +133,8 @@ void	socketHaveEvent(Servers &servers, vector<pollfd> &poll_fd)
 			servers.readyToWrite(i, poll_fd);
 	}
 }
+
+#include <signal.h>
 
 void	sighandler(int signum)
 {
