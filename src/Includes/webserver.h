@@ -22,7 +22,7 @@ ResponseHeader	returnDirective(const vector<Data> &returns, ResponseHeader &resp
 
 bool	checkFile(String file);
 
-ResponseHeader	handler(ServerPattern& server, GeneralPattern __unused &model);
-ResponseHeader	to_do(GeneralPattern& __unused targetInfo, __unused String path, String&);
+ResponseHeader	handler(ServerPattern& server, GeneralPattern  &model);
+ResponseHeader	to_do(GeneralPattern&  targetInfo,  String path, String&);
 
 #endif

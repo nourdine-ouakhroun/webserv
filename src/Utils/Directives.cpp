@@ -123,7 +123,7 @@ String	Directives::getRootPath( void )
 	if (data.getData("root").empty())
 		return ("");
 	String rootPath(data.getData("root").front().getValue());
-	rootPath.append(path).append(rootPath.back() == '/' ? "" : "/");
+	rootPath.append(path).append(*(rootPath.end() - 1) == '/' ? "" : "/");
 	String alias(getAliasPath());
 	if (!alias.empty())
 		rootPath = alias;

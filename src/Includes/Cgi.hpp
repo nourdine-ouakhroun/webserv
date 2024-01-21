@@ -4,6 +4,8 @@
 #include<map>
 #include "ServerData.hpp"
 #include <unistd.h>
+#include <sys/wait.h>
+
 class   Cgi{
     private :
         map<String, String> MultCGI;

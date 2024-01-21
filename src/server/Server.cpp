@@ -13,7 +13,7 @@ void	Server::bindSocket(int fd, const String &ip, int port)
 {
 	S_address socket_info;
 	socket_info.sin_family = PF_INET;
-	socket_info.sin_port = htons(port);
+	socket_info.sin_port = htons((short)port);
 	socket_info.sin_addr.s_addr = convertStringToBinary(ip);
 	cout << "IP : " << ip << " PORT : " << port << endl;
 	if(bind(fd, (const sockaddr*)&socket_info, sizeof(socket_info)) == -1)

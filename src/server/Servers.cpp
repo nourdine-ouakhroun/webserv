@@ -147,28 +147,35 @@ void Servers::acceptConection(size_t index)
 	master.push_back(tmp);
 }
 
+String	getExtention(const String& fileName)
+{
+	String res;
+	String::const_iterator it = find(fileName.begin(), fileName.end(), '.');
+	if (it != fileName.end())
+		return (string(++it, fileName.end()));
+	return (res);
+}
+
 void	getResponse(ServerData &servers, Socket& socket)
 {
 	cout << socket.getHeader() << endl;
 	GeneralPattern header(Parser::parseHeader(socket.getHeader()));
 	vector<ServerPattern> server = ServerData::getServer(servers, socket.ipAndPort, header.getData("Host").front().getValue());
-	ResponseHeader response = handler(server.front(), header);
+	ServerPattern srv = server.front();
+	ResponseHeader response = handler(srv, header);
 	String filename = response.getFileName();
 	if (filename.empty() == false)
 	{
 		String* str = getContentFile(filename);
 		if (!str)
 			throw (exception());
-		vector<Data> accept = header.getData("Accept");
-		if (accept.empty() == false)
-		{
-			ostringstream oss;
-			oss << str->size();
-			response.contentLength(oss.str());
-			if (accept.at(0).getValue().split(':').at(0).contains("image") == true)
-				response.contentType("*/*");
-			response.connection("close");
-		}
+		ostringstream oss;
+		oss << str->size();
+		response.contentLength(oss.str());
+		String extention = getExtention(filename);
+		if (!extention.empty() && srv.mimeTypes.find(extention) != srv.mimeTypes.end())
+			response.contentType(srv.mimeTypes.at(extention));
+		response.connection("close");
 		response.body(str);
 	}
 	String *str = response.toString();

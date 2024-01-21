@@ -10,7 +10,7 @@ Data ParssingRequest::SpliteEvryLine( String LineRequest)
 	size_t Position;
 	Data _data;
 	Position = LineRequest.find(": ");
-	if(Position != SIZE_T_MAX)
+	if(Position != SSIZE_MAX)
 	{
 		_data.setKey(LineRequest.substr(0, Position));
 		_data.setValue(LineRequest.substr(Position + 2, LineRequest.size() - (Position + 2) - 1));

@@ -171,7 +171,7 @@ size_t String::memStringSearchLast(string sstring, size_t lentgh)
 				return i;
 		}
 	}
-	return SIZE_T_MAX;
+	return SSIZE_MAX;
 }
 
 String String::memSubstr(size_t begin, size_t end)
@@ -194,5 +194,5 @@ size_t String::memStringSearch(string sstring, size_t lentgh)
 				return (i - (sstring.size() - 1));
 		}
 	}
-	return SIZE_T_MAX;
+	return SSIZE_MAX;
 }

@@ -22,7 +22,10 @@ string Cgi::HandelScript(vector<String> argvs)
 	{
 		argv[i + 2] = (char *)argvs[i].c_str();
 	}
-	pipe(fd);
+	if (pipe(fd) == -1)
+	{
+		cout << "pipe faild" << endl;
+	}
 	forkValeu = fork();
 	if(forkValeu == 0)
 	{
