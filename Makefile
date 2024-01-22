@@ -35,7 +35,7 @@ HEADERS	=	src/Includes/*.hpp src/Request/*.hpp
 
 
 CPP	=	c++
-CPPFLAGS	=	-Wall -Wextra -Werror -std=c++98  -O3 -I ./src/Includes -Wconversion #-fsanitize=address
+CPPFLAGS	=	-Wall -Wextra -Werror -std=c++98  -O3 -I ./src/Includes -Wconversion -fsanitize=address -g
 
 BIN			=	bin
 

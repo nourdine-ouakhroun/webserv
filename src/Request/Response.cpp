@@ -1,46 +1,93 @@
 #include "Response.hpp"
-#include "Servers.hpp"
+// std::string readF(const std::string &path);
+// std::string readFile(const std::string &path)
+// {
+// 	std::string content;
+// 	char buffer[READ_SIZE + 1];
 
+// 	int fd = open(path.c_str(), O_RDONLY);
+// 	if (fd < 0)
+// 		return (content);
 
+// 	while (1)
+// 	{
+// 		ssize_t readBytes = read(fd, buffer, READ_SIZE);
+// 		if (readBytes <= 0)
+// 			break;
+// 		buffer[readBytes] = 0;
+// 		content.append(buffer, (u_long)readBytes);
+// 	}
+// 	close(fd);
+// 	return (content);
+// }
 
-std::string readFile(int fd)
+	Response::Response(void) : statusCode(200), msg("OK")
 {
-    std::string		request;
-	ssize_t			byte = 0;
-	size_t			readbyte = 1024;
-	char			buf[readbyte + 1];
-
-	while(1)
-	{
-		byte = read(fd, buf, readbyte);
-		if (byte <= 0)
-            break;
-		buf[byte] = 0;
-		request += buf;
-		if (byte < (ssize_t)readbyte)
-			break ;
-	}
-	return (request);
-}
-
-Response::Response( void ) : statusCode(200), msg("OK")
-{
+	setErrorPage();
 	setMimeType();
 }
-
-Response::~Response( void )
-{
+Response::~Response(void) {
 }
 
-// seters
-void Response::setStatusCode( const int &statusCode )
+void Response::setErrorPage()
+{
+	errorPage[200] = "OK";
+	errorPage[201] = "Created";
+	errorPage[204] = "No Content";
+	errorPage[404] = "Not Found";
+	errorPage[501] = "Not Implamented";
+	errorPage[400] = "Bad Request";
+	errorPage[414] = "Request-Uri Too Longe";
+	errorPage[413] = "Request Entity Too Longe";
+	errorPage[301] = "Move Permanently";
+	errorPage[303] = "Forbidden";
+	errorPage[405] = "Method Not Allowed";
+	errorPage[500] = "Internal Server Error";
+}
+std::string Response::getErrorPage( int status ) {
+	return (errorPage[status]);
+}
+
+
+void Response::setResponse(int status)
+{
+	cout << status << endl;
+	string content;
+	setStatusCode(status);
+	setMsg(getErrorPage(status));
+	// setHeader(getErrorPage(status));
+
+	if (status == 301) {
+		setHeader("Location", request->getPathname() + "/");
+	}
+	else if (status != 200) {
+		string errorFile = request->getErrorFile(status);
+
+		if (!errorPage.empty() && access(errorFile.c_str(), O_RDONLY) == -1) {
+			content = "<h1>" + getErrorPage(status) + "</h1>";
+			setBody(content);
+		}
+		else {
+			content = Request::readFile(errorFile);
+			setBody(content);
+		}
+		setHeader("Content-Type", "text/html");
+		setHeader("Content-Length", to_string(content.size()));
+	}
+	else {
+		// success OK
+	}
+}
+
+void Response::setFileToServe(const std::string &fileName)
+{
+	fileToServe = fileName;
+}
+
+void Response::setStatusCode( int statusCode )
 {
     this->statusCode = statusCode;
 }
-// void Response::setVersion( const std::string &version )
-// {
-//     this->version = version;
-// }
 void Response::setMsg( const std::string &msg )
 {
     this->msg = msg;
@@ -72,23 +119,26 @@ const std::string &Response::getResponse( void ) const
 {
     return (this->response);
 }
+// const Request &Response::getRequest(void) const
+// {
+// 	return (request);
+// }
 
-void	Response::makeHeaderResponse( void )
-{
+void Response::makeResponse( void ) {
 	response += VERSION + std::to_string(getStatusCode()) + " " + getMsg() + ENDLINE;
 	if (!_header.empty()) {
 		for( maps::iterator it = _header.begin(); it != _header.end(); it++) {
 			response += it->first + ": " + it->second + ENDLINE; 
 		}
 	}
-}
-void	Response::makeBodyResponse( void )
-{
 	response += ENDLINE;
 	if (!_body.empty()) {
 		response += _body + "\n";
 	}
 }
+
+
+
 //const	std::string &getHeader(const std::string &key, const std::string &value) const
 //{
 //	return ()
@@ -206,38 +256,42 @@ std::string Response::getMimeType( const std::string &key) const
 		return (ret);
 	}
 	catch(...){
-		return ("text/plain");
+		return ("text/html");
 	}
 }
 
 
-void Response::checkPathname( const Request &req, const std::string& path )
-{
-	if (req.getPathname() == path)
-	{
+// void Response::checkPathname( const Request &req, const std::string& path )
+// {
+// 	if (req.getPathname() == path)
+// 	{
 		
-	}
-}
+// 	}
+// }
 
-void Response::send( void ) {
-	// (void)res;
-}
+// void Response::send( void ) {
+// 	// (void)res;
+// }
 
 void Response::setMimeType( void )
 {
-    this->mimeType[".csv"] = "text/csv";
-    this->mimeType[".doc"] = "application/msword";
-    this->mimeType[".css"] = "text/css";
-    this->mimeType[".gif"] = "image/gif";
-    this->mimeType[".html"] = "text/html";
-    this->mimeType[".ico"] = "image/vnd.microsoft.icon";
-    this->mimeType[".js"] = "text/javascript";
-    this->mimeType[".mp3"] = "audio/mpeg";
-    this->mimeType[".mp4"] = "video/mp4";
-    this->mimeType[".mpeg"] = "video/mpeg";
-    this->mimeType[".jpg"] = "image/jpeg";
-    this->mimeType[".png"] = "image/png";
-    this->mimeType[".woff"] = "font/woff";
-    this->mimeType[".woff2"] = "font/woff2";
-    this->mimeType[".ttf"] = "font/ttf";
+    this->mimeType["csv"] = "text/csv";
+    this->mimeType["doc"] = "application/msword";
+    this->mimeType["css"] = "text/css";
+    this->mimeType["gif"] = "image/gif";
+    this->mimeType["html"] = "text/html";
+    this->mimeType["ico"] = "image/vnd.microsoft.icon";
+    this->mimeType["js"] = "text/javascript";
+    this->mimeType["mp3"] = "audio/mpeg";
+    this->mimeType["mp4"] = "video/mp4";
+    this->mimeType["mpeg"] = "video/mpeg";
+    this->mimeType["jpg"] = "image/jpeg";
+    this->mimeType["png"] = "image/png";
+    this->mimeType["woff"] = "font/woff";
+    this->mimeType["woff2"] = "font/woff2";
+    this->mimeType["ttf"] = "font/ttf";
+}
+
+void Response::setRequest(const Request& req) {
+	request = &req;
 }

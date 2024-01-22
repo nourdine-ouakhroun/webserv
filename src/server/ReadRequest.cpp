@@ -13,7 +13,6 @@ ReadRequest::~ReadRequest()
 
 void	ReadRequest::checkReqeust()
 {
-	
 }
 
 void	ReadRequest::Request()
@@ -21,38 +20,57 @@ void	ReadRequest::Request()
 	ssize_t		bytes;
 	String		boundary;
 	char		buffer[READ_NUMBER] = {0};
+	// static int count = 0;
 
 	bytes = 0;
 	// bzero(buffer, READ_NUMBER);
 	bytes = recv(socket.getFdPoll().fd, buffer, READ_NUMBER - 1, 0);
-	if(bytes > 0)
+	if (bytes > 0)
 	{
-		string request (buffer, (size_t)bytes);
-		if(socket.getHeader().empty() == true)
-			setHeadre(request);
-		socket.setBody(request);
-		if(socket.is_chuncked == true)
+		// cout << "bytes : " << bytes << endl;
+		socket.request.append(buffer, (size_t)bytes);
+		if (socket.request[socket.request.size() - 2] == '\r' && socket.request.back() == '\n')
 		{
-			while (true)
-			{
-				if(socket.hex_valeu > socket.getBodyChange().size())
-					break;
-				size_t pos = socket.getBodyChange().find("\r\n", socket.hex_valeu);
-				if(pos == NPOS)
-					break;
-				pos += 2;
-				string hexa = socket.getBodyChange().substr(socket.hex_valeu, pos);
-				socket.getBodyChange().erase(socket.hex_valeu - 2, pos - (socket.hex_valeu - 2));
-				size_t decimal = static_cast<size_t>(strtol(hexa.c_str(), NULL, 16));
-				socket.hex_valeu += decimal;
-				if(decimal == 0)
-					throw 200;
-			}
+			// cout << "==================================" << endl;
+			// cout << socket.request.size() << endl;
+			// cout << "==================================" << endl;
+			return;
 		}
-		if((size_t)socket.getContenlenght() == socket.getBody().size())
-			throw 200;
+		throw runtime_error("");
 	}
-	return ;
+	else
+		cout << "no throw"  << endl;
+
+	// std::cout << "count " << count << std::endl;
+	// count ++; 
+	// if(bytes > 0)
+	// {
+	// 	string request (buffer, (size_t)bytes);
+	// 	if(socket.getHeader().empty() == true)
+	// 		setHeadre(request);
+	// 	socket.setBody(request);
+	// 	if(socket.is_chuncked == true)
+	// 	{
+	// 		while (true)
+	// 		{
+	// 			if(socket.hex_valeu > socket.getBodyChange().size())
+	// 				break;
+	// 			size_t pos = socket.getBodyChange().find("\r\n", socket.hex_valeu);
+	// 			if(pos == NPOS)
+	// 				break;
+	// 			pos += 2;
+	// 			string hexa = socket.getBodyChange().substr(socket.hex_valeu, pos);
+	// 			socket.getBodyChange().erase(socket.hex_valeu - 2, pos - (socket.hex_valeu - 2));
+	// 			size_t decimal = static_cast<size_t>(strtol(hexa.c_str(), NULL, 16));
+	// 			socket.hex_valeu += decimal;
+	// 			if(decimal == 0)
+	// 				throw 200;
+	// 		}
+	// 	}
+	// 	if((size_t)socket.getContenlenght() == socket.getBody().size())
+	// 		throw 200;
+	// }
+	return;
 }
 
 void	ReadRequest::setHeadre(string &Request)
