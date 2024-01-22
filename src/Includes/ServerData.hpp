@@ -26,8 +26,7 @@ class ServerData
 		static const ServerPattern&	getDefaultServer(const vector<ServerPattern>& servers);
 		const vector<ServerPattern>&	getAllServers() const;
 
-		static vector<ServerPattern>	getServer(ServerData& servers, const String& ClientAddress, String strHost);
-
+		static vector<ServerPattern> getServer(const ServerData &servers, const String &ClientAddress, String strHost);
 };
 
 #endif
