@@ -56,7 +56,7 @@ void    Request::parseRequest(std::string request)
 		}
 	}
 	this->parseHeader(headerReq);
-	this->parseBody(bodyReq);
+	// this->parseBody(bodyReq);
 	// this->parsePortAndHost();
 }
 
@@ -82,13 +82,23 @@ void Request::parseRequestLine( std::string reqLine )
 }
 void Request::parseHeader( std::string reqHeader )
 {
+	// cout << reqHeader <.< endl;
+	// for(size_t i = 0; i < reqHeader.size(); i++)
+	// {
+	// 	if(reqHeader[i] == '\r')
+	// 		cout << "\\r";
+	// 	else if(reqHeader[i] == '\n')
+	// 		cout << "\\n" << endl;
+	// 	else
+	// 		cout << reqHeader[i];
+	// }
     std::pair<std::string, std::string> keyValue;
 	std::string							line;
 	size_t								newlinePos = 0;
 	size_t								pos = 0;
 
 	this->_header.clear();
-	while ((newlinePos = reqHeader.find("\n")) != std::string::npos)
+	while ((newlinePos = reqHeader.find("\r\n")) != std::string::npos)
 	{
 		line = reqHeader.substr(0, newlinePos);
 		if ((pos = line.find(": ")) != std::string::npos)
@@ -109,7 +119,7 @@ void Request::parseHeader( std::string reqHeader )
 			}
 			this->_header[keyValue.first] = keyValue.second; 
 		}
-		reqHeader = reqHeader.substr(newlinePos + 1, reqHeader.length());
+		reqHeader = reqHeader.substr(newlinePos + 2, reqHeader.length());
 	}
 }
 void Request::parseBody( std::string reqBody )
