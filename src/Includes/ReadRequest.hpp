@@ -4,14 +4,12 @@
 #include"Socket.hpp"
 #include"Server.hpp"
 #include <cstdio>
+#include"../Request/Request.hpp"
 
 #define NPOS  string::npos 
-#define GET 0
-#define POST 1
-#define DELET 2
 
 #ifndef READ_NUMBER
-#define READ_NUMBER 1000000
+#define READ_NUMBER 100000
 #endif
 
 class   ReadRequest
@@ -25,17 +23,21 @@ class   ReadRequest
         ~ReadRequest();
 
         void	methodSerch(string &);
-        void	postUtils();
-        int		headerMethod(String);
+		void 	recvSomthing(char *, size_t);
         void	setHeadre(string &);
-        void	putInString();
-        void	putInFile();
-        void	removeBoundary(string &,size_t	&);
-        void	removePartOfupload();
         void	checkReqeust();
-        void	checkIfFile(size_t	&);
-        void	handelChunked(string &);
-        void	Request();
+        void	handelChunked();
+        void	Read();
+        class ReadException : exception
+        {
+            string exception_msg;
+
+            public :
+                ReadException();
+                ReadException(const string &);
+                const char * what() const throw();
+                ~ReadException() throw();
+        };
 };
 
 
