@@ -1,4 +1,8 @@
-#include"Servers.hpp"
+#include "Servers.hpp"
+#include "../Request/Request.hpp"
+#include "../Request/Response.hpp"
+
+
 
 Servers::Servers(ServerData	srvers)
 {
@@ -118,13 +122,13 @@ void	Servers::runAllServers(void)
 
 void	Servers::readyToWrite(size_t &index, vector<pollfd> &poll_fd)
 {
-	size_t send_lenght = 2000;
-	if(send_lenght > master[index].respond.size())
-		send_lenght =  master[index].respond.size();
-	ssize_t write_value = write(master[index].getFdPoll().fd,  master[index].respond.c_str(),  send_lenght);
+	// size_t send_lenght = 2000;
+	// if(send_lenght > master[index].respond.size())
+	// 	send_lenght =  master[index].respond.size();
+	ssize_t write_value = write(master[index].getFdPoll().fd, master[index].respond.c_str(), master[index].respond.size());
 	if(write_value > 0)
 	{
-		master[index].respond.erase(0,send_lenght);
+		master[index].respond.erase(0, (size_t)write_value);
 		if(master[index].respond.empty() == true)
 		{
 			close(master[index].getFdPoll().fd);
@@ -172,19 +176,42 @@ void Servers::readyToRead(size_t i, vector<pollfd> &poll_fd)
 		}
 	}
 
+
+	// =========================================================
+	Request 	request;
+	ReadRequest read_request(master[i]);
+	read_request.Request();
+	cout << master[i].request << endl;
+	request.parseRequest(master[i].request);
+
+	Response response;
+	response.setRequest(request);
+
+	std::string pathToServe;
+	ServerPattern server = ServerData::getServer(this->servers, master[i].ipAndPort, request.header("Host")).front();
+	
 	try
 	{
-		// Read the request;
-		ReadRequest read_request(master[i]);
-		read_request.Request();
+		request.setServer(server);
+
+		request.isFormed();
+		request.isMatched(response);
+        request.isMethodAllowed();
+		// request.isRedirected(response);
+        request.whichMethode(response);
 	}
-	catch(int)
+	catch (int status)
 	{
-		master[i].respond = "HTTP/1.1 200 OK\r\n\r\n <h1> hello </h1>";
-		// Change read permission to write permission;
-		master[i].setFdPoll(POLLOUT);
+		response.setResponse(status);
 	}
+
+
+	response.setHeader("Server", "Nginx-v2");
+	response.makeResponse();
 	
+	master[i].respond = response.getResponse();
+	master[i].setFdPoll(POLLOUT);
+	// =========================================================
 }
 
 void Servers::isSocketsAreReady(vector<pollfd> &poll_fd)
@@ -193,7 +220,7 @@ void Servers::isSocketsAreReady(vector<pollfd> &poll_fd)
 	{
 		poll_fd.push_back(master[i].getFdPoll());
 	}
-	int pint = poll(&poll_fd[0], static_cast<nfds_t>(poll_fd.size()), 6000);
+	int pint = poll(&poll_fd[0], static_cast<nfds_t>(poll_fd.size()), 8000);
 	if(pint == 0)
 		throw Servers::PollException("Server reloaded");
 	if(pint < 0)

@@ -10,6 +10,7 @@
 
 #include "Request.hpp"
 #include "webserver.h"
+#include "Servers.hpp"
 
 typedef std::map<std::string, std::string> maps;
 
@@ -20,47 +21,59 @@ class Request;
 class Response
 {
 private:
-    std::string response;
 	int         statusCode;
     std::string msg;
-    
-    maps        _header;
+
+    maps _header;
+    map<int, string> errorPage;
     std::string _body;
+
+    std::string response;
+    std::string fileToServe;
+
+    const Request *request;
 
     maps mimeType;
 
 public:
-    Response( void );
+    Response(void);
     ~Response( void );
 
-    void setStatusCode( const int &statusCode );
-    void setMsg( const std::string &msg );
+    void setErrorPage();
+    std::string getErrorPage( int status );
 
+        void setResponse(int status);
+
+    void setStatusCode(int statusCode);
+    void setMsg(const std::string &msg);
     void setHeader(const std::string &key, const std::string &value);
     void setBody(const std::string &body);
+    void setFileToServe(const std::string &fileName);
 
+    // Request     request;
+    void setRequest(const Request &request);
+
+    // const	std::string &getVersion( void ) const;
     int		getStatusCode( void ) const;
-    const	std::string &getVersion( void ) const;
     const	std::string &getMsg( void ) const ;
     const   std::string &getResponse( void ) const;
+    // const Request &getRequest(void) const;
 
     //const	std::string &getHeader(const std::string &key, const std::string &value) const;
     //const	std::string &getBody(const std::string &key, const std::string &value) const;
 	
 	// const std::string &getBody( void ) const;
 
-	void	makeHeaderResponse( void );
-	void	makeBodyResponse( void );
+    // void    setRequestLine(int status, std::string msg, std::string version);
 
-    // bool    isAllowed( const std::string &url );
-    // bool    isFormed(Request req);
-    // bool    isMatched( const Request &req, std::vector<ServerPattern> serv);
+    void    makeResponse( void );
 
 
-    void checkPathname( const Request &req, const std::string& path );
+
+    // void checkPathname( const Request &req, const std::string& path );
+    // void    send( void );
 
 
-    void    send( void );
 
 	void setMimeType( void );
     std::string getMimeType( const std::string &key ) const;

@@ -70,7 +70,7 @@ const string & Socket::getHeader() const
 {
 	return this->header;
 }
-const string & Socket::getBody() const
+const string &Socket::getBody() const
 {
 	return this->body;
 }
