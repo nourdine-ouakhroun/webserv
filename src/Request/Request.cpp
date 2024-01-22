@@ -287,7 +287,7 @@ std::string Request::extention( const std::string &path) const
 
 
 // check request with config file
-void Request::isFormed( int bodySize ) {
+void Request::isFormed( ) {
 	// cout << getMethode() << endl;
 
 	if (!header("Transfer-Encoding").empty() && header("Transfer-Encoding") != "chunked") throw 500;
@@ -296,8 +296,7 @@ void Request::isFormed( int bodySize ) {
 	else if (getPathname().length() > 2048)
 		throw 414;
 	else if (!server.getData("client_max_body_size").empty()
-	&& std::atoi(header("Content-Lengt").c_str()) > (int)(std::atoi(server.getData("client_max_body_size")[0].getValue().c_str()) / 100)
-	|| bodySize > (int)(std::atoi(server.getData("client_max_body_size")[0].getValue().c_str())))
+	&& std::atoi(header("Content-Lengt").c_str()) > (int)(std::atoi(server.getData("client_max_body_size")[0].getValue().c_str()) / 100))
 		throw 413;
 }
 void Request::isMatched(Response &res ) {

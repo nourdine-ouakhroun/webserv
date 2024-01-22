@@ -38,6 +38,7 @@ ServerPattern& ServerPattern::operator=(const ServerPattern& target)
 	{
 		GeneralPattern::operator=(target);
 		location = target.location;
+		mimeTypes = target.mimeTypes;
 		addDirectives("Options");
 		addDirectives("error_page");
 		addDirectives("error_log");

@@ -24,7 +24,7 @@
 	Response::Response(void) : statusCode(200), msg("OK")
 {
 	setErrorPage();
-	setMimeType();
+	// setMimeType();
 }
 Response::~Response(void) {
 }
@@ -273,7 +273,7 @@ std::string Response::getMimeType( const std::string &key) const
 // 	// (void)res;
 // }
 
-void Response::setMimeType( void )
+void Response::setMimeType(const map<string, string>& mimeType)
 {
     this->mimeType["csv"] = "text/csv";
     this->mimeType["doc"] = "application/msword";
@@ -290,6 +290,10 @@ void Response::setMimeType( void )
     this->mimeType["woff"] = "font/woff";
     this->mimeType["woff2"] = "font/woff2";
     this->mimeType["ttf"] = "font/ttf";
+
+	if (mimeType.size()) {
+		this->mimeType = mimeType;
+	}
 }
 
 void Response::setRequest(const Request& req) {

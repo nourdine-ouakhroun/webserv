@@ -23,23 +23,19 @@ SRCS		=	src/Parsing/Checker.cpp \
 				src/Server/ParssingRequest.cpp\
 				src/Server/Servers.cpp \
 				src/Server/Socket.cpp \
-		src/Request/Request.cpp \
-		src/Request/Response.cpp \
-# 		src/Request/StatusCode.cpp
-#		src/Request/Server.cpp
-#		src/Utils/Select.cpp
+				src/Request/Request.cpp \
+				src/Request/Response.cpp
 
 
-TEMPLATES =	src/Templates/*.tpp
 HEADERS	=	src/Includes/*.hpp src/Request/*.hpp
 
 
 CPP	=	c++
-CPPFLAGS	=	-Wall -Wextra -Werror -std=c++98  -O3 -I ./src/Includes -Wconversion -fsanitize=address -g
+CPPFLAGS	=	-Wall -Wextra -Werror -std=c++98 -Wconversion -O3 -I./src/Includes #-fsanitize=address -g
 
 BIN			=	bin
 
-OBJS		=	${SRCS:%.cpp=%.o}
+OBJS		=	${SRCS:src/%.cpp=${BIN}/%.o}
 
 
 all			:	${NAME}
@@ -48,12 +44,12 @@ ${NAME}		: ${OBJS}
 	${CPP} ${CPPFLAGS} $^ -o $@
 	@echo "finish !!"
 
-%.o	:	%.cpp ${HEADERS} ${TEMPLATES} Makefile
+${BIN}/%.o	:	src/%.cpp ${HEADERS} Makefile
 	@mkdir -p $(dir $@)
 	${CPP} ${CPPFLAGS} -c $< -o $@
 
 clean		:
-	rm -rf ${OBJS}
+	rm -rf ${BIN}
 
 fclean		:	clean
 	rm -rf ${NAME}

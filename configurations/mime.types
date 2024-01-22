@@ -1,0 +1,17 @@
+
+
+csv   text/csv
+doc   application/msword
+css   text/css
+gif   image/gif
+html    text/html
+ico   image/vnd.microsoft.icon
+js   text/javascript
+mp3   audio/mpeg
+mp4   video/mp4
+mpeg   video/mpeg
+jpg   image/jpeg
+png   image/png
+woff   font/woff
+woff2   font/woff2
+ttf   font/ttf

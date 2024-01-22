@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <dirent.h>
 #include <algorithm>
+#include <map>
 #include "LocationPattern.hpp"
 
 String	readFile(const String& path);
@@ -12,6 +13,7 @@ class	ServerPattern : public GeneralPattern
 {
 	vector<LocationPattern>	location;
 	public :
+		map<string, string>		mimeTypes;
 		ServerPattern( void );
 		ServerPattern(const GeneralPattern&, const vector<LocationPattern>&);
 		ServerPattern& operator=(const ServerPattern& target);
