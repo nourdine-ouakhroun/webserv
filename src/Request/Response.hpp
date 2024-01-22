@@ -75,7 +75,7 @@ public:
 
 
 
-	void setMimeType( void );
+	void setMimeType(const map<string, string> &mimeTypes);
     std::string getMimeType( const std::string &key ) const;
 
 };

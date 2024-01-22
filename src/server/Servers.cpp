@@ -189,10 +189,13 @@ void Servers::readyToRead(size_t i, vector<pollfd> &poll_fd)
 
 	std::string pathToServe;
 	ServerPattern server = ServerData::getServer(this->servers, master[i].ipAndPort, request.header("Host")).front();
-	
+	response.setMimeType(server.mimeTypes);
+
 	try
 	{
+
 		request.setServer(server);
+
 
 		request.isFormed();
 		request.isMatched(response);
