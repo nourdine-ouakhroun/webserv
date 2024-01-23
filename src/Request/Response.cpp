@@ -51,7 +51,10 @@ std::string Response::getErrorPage( int status ) {
 
 void Response::setResponse(int status)
 {
-	cout << status << endl;
+	cout << "CODE = " << status << endl;
+	string file = (request->getRoot() + request->getPathname() + request->isFound(request->getRoot() + request->getPathname()));
+	cout << "file " << file << endl;
+	
 	string content;
 	setStatusCode(status);
 	setMsg(getErrorPage(status));

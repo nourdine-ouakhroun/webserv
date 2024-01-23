@@ -63,28 +63,18 @@ Request::~Request(void) {
 
 
 
-void    Request::parseRequest( const std::string &req)
+void    Request::parseRequest( const std::string &Header)
 {
 	std::vector<std::string>	reqLine;
-	std::string body;
+	std::string					body;
 
-
-	size_t headerPos = req.find("\r\n\r\n");
-	if (headerPos != std::string::npos)
-	{
-		size_t start = req.find("\r\n");
-		if (start != std::string::npos)
-		{
-			std::string line = req.substr(0, start);
-			this->parseRequestLine(line);
-		}
-		_request = req.substr(start + 2, headerPos - start);
-		_body = req.substr(headerPos + 2, req.size() - headerPos);
-		parseHeader();
-		std::string encoding  = header("Transfer-Encoding");
-		if (!encoding.empty() && encoding == "chunked")
-			parseBody();
-	}
+	size_t start = Header.find("\r\n");
+	if (start != std::string::npos)
+		this->parseRequestLine(Header.substr(0, start));
+	parseHeader();
+	std::string encoding  = header("Transfer-Encoding");
+	if (!encoding.empty() && encoding == "chunked")
+		parseBody();
 }
 
 void Request::parseRequestLine( std::string reqLine )
@@ -135,45 +125,13 @@ void Request::parseHeader( void )
 						this->_header[sp[0]] = sp[1].substr(0, sp[1].length());
 				}
 			}
-			this->_header[keyValue.first] = keyValue.second; 
+			this->_header[keyValue.first] = keyValue.second;
 		}
 		request = request.substr(newlinePos + 1, request.length());
 	}
 }
 void Request::parseBody( void )
 {
-	// std::string key;
-	// std::string value;
-	// this->_body.clear();
-	// if (this->getMethode() == "POST" && this->header("Content-Type") == "application/x-www-form-urlencoded")
-	// 	this->query = reqBody;
-	// else if (this->getMethode() == "POST" && this->header("Content-Type") == "multipart/form-data")
-	// {
-	// 	std::string bondray = this->header("boundary");
-	// 	if (!bondray.empty())
-	// 	{
-	// 		std::string start = "--" + bondray;
-	// 		std::string end = start + "--";
-	// 		std::vector<std::string> sBoundary = split(reqBody, start);
-	// 		for (size_t i = 0; i < sBoundary.size() - 1; i++)
-	// 		{
-	// 			std::vector<std::string> s = split(sBoundary[i], "\n");
-	// 			if (!s.empty() && !s[0].empty())
-	// 			{
-	// 				size_t pos = 0;
-	// 				if ((pos = s[0].find("name")) != std::string::npos)
-	// 				{
-	// 					key = s[0].substr(pos + 6, (s[0].length() - (pos + 7)));
-	// 					if (!s[1].empty())
-	// 						value = s[1];
-	// 					_body.insert(std::make_pair(key, value));
-	// 					key.clear();
-	// 					value.clear();
-	// 				}
-	// 			}
-	// 		}
-	// 	}
-	// }
 	size_t hex_valeu = 0;
 	while (true)
 	{
@@ -213,15 +171,7 @@ std::string Request::header(const std::string &key)
 		return ("");
 	}
 }
-// std::string Request::body(const std::string &key) const
-// {
-// 	for (maps::const_iterator it = this->_header.begin(); it != this->_header.end(); it++)
-// 	{
-// 		if (it->first == key)
-// 			return (it->second);
-// 	}
-// 	return ("");
-// }
+
 
 void Request::setServer(const ServerPattern &server)
 {
@@ -245,7 +195,7 @@ const LocationPattern &Request::getLocation(void) const
 	return (location);
 }
 
-const std::string &Request::getMethode() const
+const std::string &Request::getMethod() const
 {
     return (this->method);
 }
@@ -287,11 +237,20 @@ std::string Request::extention( const std::string &path) const
 
 
 // check request with config file
-void Request::isFormed( ) {
-	// cout << getMethode() << endl;
-
-	if (!header("Transfer-Encoding").empty() && header("Transfer-Encoding") != "chunked") throw 500;
-	else if ((header("Transfer-Encoding").empty() && header("Content-Length").empty() && getMethode() == "POST"))
+bool isAllowdChar(string uri) {
+	string alloweChar = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;=%";
+	for (size_t i = 0; i < uri.size(); i++)
+	{
+		if (find(alloweChar.begin(), alloweChar.end(), uri[i]) == alloweChar.end() || (uri[i] == '%' && isdigit(uri[i + 1])) )
+			return (false);
+	}
+	return (true);
+}
+void Request::isFormed()
+{
+	if (!header("Transfer-Encoding").empty() && header("Transfer-Encoding") != "chunked")
+		throw 500;
+	else if ((header("Transfer-Encoding").empty() && header("Content-Length").empty() && getMethod() == "POST") || !isAllowdChar(getPathname()))
 		throw 400;
 	else if (getPathname().length() > 2048)
 		throw 414;
@@ -300,32 +259,60 @@ void Request::isFormed( ) {
 		throw 413;
 }
 void Request::isMatched(Response &res ) {
+	(void)res;
+		// bool isFound = false;
+	std::string path = getPathname();
+	// std::string root;
+	// std::string fullPath;
 
-	std::string pathToServe = getFullPath();
-	if (access(pathToServe.c_str(), O_RDONLY) == -1)
+	vector<String> pathss;
+	ServerPattern::getAllLocationPath(server.getLocations(), pathss);
+	vector<String> newPaths;
+	String test(path);
+	test.rightTrim("/");
+	for (size_t i = 0; i < pathss.size(); i++)
+	{
+		if (!strncmp(pathss[i].c_str(), test.c_str(), pathss[i].size()) && pathss[i].size() == test.size())
+		{
+			newPaths.clear();
+			newPaths.push_back(pathss[i]);
+			break;
+		}
+		if (!strncmp(pathss[i].c_str(), test.c_str(), pathss[i].size()))
+			newPaths.push_back(pathss[i]);
+	}
+	vector<String>::iterator it = max_element(newPaths.begin(), newPaths.end());
+	if (it == newPaths.end())
 		throw 404;
-	string content = Request::readFile(pathToServe);
-	res.setBody(content);
-	res.setHeader("Content-Length", to_string(content.size()));
-	res.setHeader("Content-Type", res.getMimeType(extention(getPathname())));
-	res.setResponse(200);
-
+	location = server.getLocationByPath(server.getLocations(), newPaths[0]);
+	if (location.getPath().empty()) {
+		throw 404;
+	}
 }
 void Request::isRedirected(Response &res) {
 	(void)res;
 }
 void Request::isMethodAllowed() {
-	// server.getAllLocationPath();
-	// LocationPattern loca = getLocation();
 	vector<Data> method = location.getData("method");
 	if (!method.empty()) {
 		vector<string> methods = split(method.front().getValue(), " ");
-		if (find(methods.begin(), methods.end(), getMethode()) == methods.end())
+		if (find(methods.begin(), methods.end(), getMethod()) == methods.end())
 			throw 405;
 	}
 }
 void Request::whichMethode(Response &res) {
-	(void)res;
+	if (getMethod() == "GET") {
+		GetMethod(res);
+		// handle Get method
+	}
+	else if (getPathname() == "POST") {
+		// handle Post method
+		PostMethod(res);
+	}
+	else if (getPathname() == "DELETE") {
+		// handle Delete method
+		DeleteMethod(res);
+	}
 }
 
 std::string Request::getFullPath()
@@ -389,7 +376,37 @@ std::string Request::getFullPath()
 	}
 	return (fullPath);
 }
-std::string Request::getErrorFile(int statusCode) const {
+string Request::getRoot() const{
+	return (location.getData("root")[0].getValue());
+}
+string Request::isFound( const string& path ) const
+{
+
+	// string root = getRoot();
+	// string path = getPathname();
+
+	std::vector<Data> vIndex = location.getData("index");
+	if (!vIndex.empty())
+	{
+		for (size_t i = 0; i < vIndex.size(); i++)
+		{
+			std::vector<std::string> filename = split(vIndex[i].getValue(), " ");
+			for (size_t j = 0; j < filename.size(); j++)
+			{
+				// cout << root + path + filename[j] << endl;
+				if (access((path + filename[j]).c_str(), O_RDONLY) != -1)
+					return (filename[j]);
+			}
+		}
+	}
+	return ("");
+
+	// location.getData("index")[0].getValue();
+	// location
+	// return (location.getData("root")[0].getValue());
+}
+std::string Request::getErrorFile(int statusCode) const
+{
 	vector<Data>  errorPage = server.getData("error_page");
 
 	for (size_t i = 0; i < errorPage.size(); i++) {
@@ -418,8 +435,105 @@ int Request::isDirectory(const std::string& path) const
 		return (-1);
 	return S_ISDIR(statbuf.st_mode);
 }
+bool Request::isCgi() {
+	vector<Data> cgiFiles = location.getData("cgi_file");
+	if (cgiFiles.empty())
+		return (false);
+	return (true);
+}
+
+string Request::getCgiFile()
+{
+	vector<Data> cgiFiles = location.getData("cgi_file");
+	if ( !cgiFiles.empty() )
+		return cgiFiles[0].getValue();
+	return "";
+}
+void Request::GetMethod(Response &res)
+{
+	(void)res;
+	// std::string root = getRoot();
+	// std::string path = getPathname();
+	// std::string index = getIndex();
+	std::string path = getRoot() + getPathname();
+
+	if (access(path.c_str(), O_RDONLY))
+		throw 404;
+	if (isDirectory(path))
+	{
+		// is Directory
+		if (path[path.size() - 1] != '/')
+			throw 301;
+		// if (access((root + path + index).c_str(), O_RDONLY) == -1) { //
+		string index = isFound(path);
+		if (!index.empty())
+		{
+			// success have a index
+			if (isCgi()) // if location have cgi
+			{
+				// run cgi here
+				cout << path + index << endl;
 
 
+				// // string cgiFile = getCgiFile();
+				// // cgi python3 .py
+				// // cgi c++ .cpp
+				// // cgi gcc .c
+				// vector<Data> cgi = location.getData("cgi");
+				// if (!cgi.empty()) {
+				// 	split(cgi[0].getValue(), );
+				// }
+				// extention(path + index);
+				// // cout << "cgiFile = " << cgiFile << endl;
+				// // if (cgiFile.empty())
+			}
+			else
+			{
+				throw 200;
+			}
+		}
+		else
+		{
+			// auto index
+			// check if autoindex in configfile is on or off if is off 403 otherwise return autoindex
+		}
+	}
+	else {
+		// is File
+		if (isCgi())
+		{
+			// run cgi here
+			cout << path << endl;
+		}
+		else
+		{
+			throw 200;
+		}
+	}
 
+		// cout << "root = " << root << endl;
+		// cout << "index = " << index << endl;
+	cout << "here" << endl;
+	// string pathToServe = getFullPath();
+	// if (!pathToServe.empty() && access(pathToServe.c_str(), O_RDONLY) == -1)
+	// 	throw 404;
+	// if (!pathToServe.empty() && isDirectory(pathToServe)) {
+	// 	// isDirectory
+	// 	cout << ">> isDirectory <<" << endl;
+	// }
+	// else {
+	// 	cout << ">> isFile <<" << endl;
+	// }
 
-
+	// string content = Request::readFile(pathToServe);
+	// res.setBody(content);
+	// res.setHeader("Content-Length", to_string(content.size()));
+	// res.setHeader("Content-Type", res.getMimeType(extention(getPathname())));
+	// res.setResponse(200);
+}
+void Request::PostMethod(Response &res) {
+	(void)res;
+}
+void Request::DeleteMethod(Response &res) {
+	(void)res;
+}
