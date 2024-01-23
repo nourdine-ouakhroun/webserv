@@ -2,6 +2,35 @@
 #include "../Request/Request.hpp"
 #include "../Request/Response.hpp"
 
+string makeRespose(const Socket &socket, const ServerData &serversData)
+{
+	ServerPattern	server;
+	Request			request;
+	Response		response;
+
+	request.parseRequest(socket.getHeader());
+	server = ServerData::getServer(serversData, socket.ipAndPort, request.header("Host")).front();
+	
+	request.setServer(server);
+	response.setRequest(request);
+	response.setMimeType(server.mimeTypes);
+	try
+	{
+		request.isFormed();
+		request.isMatched(response);
+        request.isMethodAllowed();
+		// request.isRedirected(response);
+        request.whichMethode(response);
+	}
+	catch (int status)
+	{
+		response.setResponse(status);
+	}
+	response.setHeader("Server", "Nginx-v2");
+	response.makeResponse();
+
+	return response.getResponse();
+}
 
 
 Servers::Servers(ServerData	srvers)
@@ -191,47 +220,13 @@ void Servers::acceptConection(size_t index)
  *khdm o 9ad zmr o tl9na rah bghina nkhdmo, m3ak escanor 9ahir lfasa ylh ghiyrha
  *
  *
+ * 
+ * matnsach rani pushit
  *
  *
  *
  */
-string makeRespose(const Socket &socket, const ServerData &serversData)
-{
-	Request 	request;
-	// ReadRequest read_request(master[i]);
-	// read_request.Request();
-	// cout << master[i].request << endl;
-	request.parseRequest(socket.getHeader());
 
-	Response response;
-	response.setRequest(request);
-
-	std::string pathToServe;
-	ServerPattern server = ServerData::getServer(serversData, socket.ipAndPort, request.header("Host")).front();
-	response.setMimeType(server.mimeTypes);
-
-	try
-	{
-
-		request.setServer(server);
-
-		request.isFormed();
-		request.isMatched(response);
-        request.isMethodAllowed();
-		// request.isRedirected(response);
-        request.whichMethode(response);
-	}
-	catch (int status)
-	{
-		response.setResponse(status);
-	}
-
-
-	response.setHeader("Server", "Nginx-v2");
-	response.makeResponse();
-
-	return response.getResponse();
-}
 
 void Servers::readyToRead(size_t i, vector<pollfd> &poll_fd)
 {

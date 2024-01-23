@@ -86,7 +86,7 @@ size_t findSeparator(const string & buffer){
 
 void chackMethode(const string & buffer, Request &tmp_parser){
 	tmp_parser.parseRequestLine(buffer.substr(0, buffer.find("\r\n")));
-	if(tmp_parser.getMethode() != "POST")
+	if(tmp_parser.getMethod() != "POST")
 		throw ReadRequest::ReadException();
 }
 void	ReadRequest::setHeadre(string &buffer)

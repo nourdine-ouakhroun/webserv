@@ -42,7 +42,7 @@ class Request
         void                setServer(const ServerPattern &server);
 
         const ServerPattern &getServer(void) const;
-        const std::string   &getMethode( void ) const;
+        const std::string   &getMethod( void ) const;
         const std::string   &getUrl( void ) const;
         const std::string   &getVersion( void ) const;
         const std::string   &getPathname( void ) const;
@@ -57,11 +57,15 @@ class Request
         // std::string checkServer( void );
         std::string getFullPath();
         std::string getErrorFile(int statusCode) const;
+        string      getRoot() const;
+        string      isFound(const string &path) const;
+        bool        isCgi();
+        string      getCgiFile();
 
             // void getPath();
 
-
-        void isFormed();
+            void
+            isFormed();
         void isMatched(Response &res);
         void isRedirected(Response &res);
         void isMethodAllowed();
@@ -72,7 +76,11 @@ class Request
 
         void setLocation(const LocationPattern &location);
         const LocationPattern &getLocation(void) const;
-};
+
+        void GetMethod(Response &res);
+        void PostMethod(Response &res);
+        void DeleteMethod(Response &res);
+        };
 // std::std::string	readRequest(FileDepandenc &file);
 std::vector<std::string> split(std::string line, std::string sep);
 
