@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   FileDepandency.hpp                                 :+:      :+:    :+:   */
+/*   Socket.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nouakhro <nouakhro@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mzeroual <mzeroual@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/29 19:51:28 by nouakhro          #+#    #+#             */
-/*   Updated: 2023/12/11 18:09:59 by nouakhro         ###   ########.fr       */
+/*   Updated: 2024/01/19 21:35:51 by mzeroual         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,8 @@ class   Socket
 
 		size_t	is_chuncked;
 		string	respond;
-		size_t	hex_valeu;
+		string request;
+		size_t hex_valeu;
 };
 
 #endif

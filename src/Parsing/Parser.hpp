@@ -10,7 +10,7 @@
 #include "Patterns/ServerPattern.hpp"
 
 #ifndef KEYS
-	#define KEYS "return autoindex error_log index access_log error_page alias client_body_buffer_size client_max_body_size error_page listen location root server server_name try_files types "
+	#define KEYS "include return autoindex method error_log index access_log error_page alias client_body_buffer_size client_max_body_size error_page listen location root server server_name try_files types "
 #endif
 
 
@@ -48,6 +48,7 @@ class Parser
 		void	checkServerKeys( void );
 		void	checkLocationKeys(const vector<LocationPattern>& loca, const vector<String>& keys);
 		void	checkingInfos( void );
+		void	includeMimeTypes( void );
 };
 
 #endif
