@@ -161,11 +161,9 @@ void Servers::acceptConection(size_t index)
 	master.push_back(tmp);
 }
 
-string makeRespose(size_t bodySize, const string &header, const ServerData &allServers)
+string makeResponse(size_t bodySize, const string &header, const ServerData &allServers)
 {
-	(void)bodySize;
-	(void)header;
-	(void)allServers;
+	
 	return "";
 }
 
@@ -186,7 +184,7 @@ void Servers::readyToRead(size_t i, vector<pollfd> &poll_fd)
 	}
 	catch(ReadRequest::ReadException)
 	{
-		master[i].respond = makeRespose(master[i].getBody().size(), master[i].getHeader(), servers);
+		master[i].respond = makeResponse(master[i].getBody().size(), master[i].getHeader(), servers);
 		master[i].setFdPoll(POLLOUT);
 	}
 }
@@ -194,12 +192,10 @@ void Servers::readyToRead(size_t i, vector<pollfd> &poll_fd)
 void Servers::isSocketsAreReady(vector<pollfd> &poll_fd)
 {
 	for (size_t i = 0; i < master.size(); i++)
-	{
 		poll_fd.push_back(master[i].getFdPoll());
-	}
 	int pint = poll(&poll_fd[0], static_cast<nfds_t>(poll_fd.size()), 6000);
-	// if(pint == 0)
-	// 	throw Servers::PollException("Server reloaded");
+	if(pint == 0)
+		throw Servers::PollException("Server reloaded");
 	if(pint < 0)
 		throw runtime_error("poll : poll was failed");
 }
