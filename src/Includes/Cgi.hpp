@@ -4,17 +4,21 @@
 #include<map>
 #include "ServerData.hpp"
 #include <unistd.h>
+#include"../Request/Request.hpp"
+class Request;
 class   Cgi{
     private :
-        map<String, String> MultCGI;
-        string PathScript;
+		vector<string> env;
+        string scriptName;
+        string body;
         Cgi();
 
     public :
-        Cgi( string ,map<String, String>);
-        void setCgi( string key , string valeu);
+        Cgi(const string& scriptName,const string& body);
+        Cgi(const string& scriptName);
         ~Cgi();
-        string HandelScript(vector<String>);
+        void setEnvironment(const Request& header, const string &script_name);
+        string	HandelScript();
 
 };
 

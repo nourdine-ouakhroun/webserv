@@ -23,6 +23,7 @@ String	readFile(const String& path)
 	return (content);
 }
 
+
 unsigned short	getPort(String	value)
 {
 	unsigned short port = 80;

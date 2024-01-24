@@ -1,4 +1,35 @@
-#include"Servers.hpp"
+#include "Servers.hpp"
+
+string makeRespose(const Socket &socket, const ServerData &serversData)
+{
+	ServerPattern	server;
+	Request			request;
+	Response		response;
+
+	request.parseRequest(socket.getHeader());
+	server = ServerData::getServer(serversData, socket.ipAndPort, request.header("Host")).front();
+	
+	request.setServer(server);
+	response.setRequest(request);
+	response.setMimeType(server.mimeTypes);
+	try
+	{
+		request.isFormed();
+		request.isMatched(response);
+        request.isMethodAllowed();
+		// request.isRedirected(response);
+        request.whichMethode(response);
+	}
+	catch (int status)
+	{
+		response.setResponse(status);
+	}
+	response.setHeader("Server", "Nginx-v2");
+	response.makeResponse();
+
+	return response.getResponse();
+}
+
 
 Servers::Servers(ServerData	srvers)
 {
@@ -118,13 +149,13 @@ void	Servers::runAllServers(void)
 
 void	Servers::readyToWrite(size_t &index, vector<pollfd> &poll_fd)
 {
-	size_t send_lenght = 2000;
-	if(send_lenght > master[index].respond.size())
-		send_lenght =  master[index].respond.size();
-	ssize_t write_value = write(master[index].getFdPoll().fd,  master[index].respond.c_str(),  send_lenght);
+	// size_t send_lenght = 2000;
+	// if(send_lenght > master[index].respond.size())
+	// 	send_lenght =  master[index].respond.size();
+	ssize_t write_value = write(master[index].getFdPoll().fd, master[index].respond.c_str(), master[index].respond.size());
 	if(write_value > 0)
 	{
-		master[index].respond.erase(0,send_lenght);
+		master[index].respond.erase(0, (size_t)write_value);
 		if(master[index].respond.empty() == true)
 		{
 			close(master[index].getFdPoll().fd);
@@ -161,13 +192,39 @@ void Servers::acceptConection(size_t index)
 	master.push_back(tmp);
 }
 
-string makeResponse(size_t bodySize, const string &header, const ServerData &allServers)
-{
-	(void)bodySize;
-	(void)header;
-	(void)allServers;
-	return "";
-}
+/**
+ *
+ *
+ *
+ *
+ *
+ *chof daba hahia socket variable fih kolchi yak
+ *dik sa3a bdl fdik function(makeRespose) kifma 3jbk
+ *o wahd lblan socket had lvariabl 3lach 3tito like gha hit
+ *nta ghatkhdm kolchi fwst had function yk o mnha ta CGI o CGI
+ *ana dik sa3a ghanhtaj dak lbody so rah khas lbody ikon 3ndk ta fhad lfunction
+ *bach fach ghatl9a nta bli rah post ghat3tih li (body) mtfahmin mamtfahminch soni liya hm hm hm
+ *nta db biti tzid chi7aja fdak lcalss(Socket) zidha fih
+ *
+ *
+ *
+ * hanta hit 3arf dinmk at9oliya tani olach 3ati liya hadak kaml odak tkhrbi9 o z3t lwrdi
+ * ila knti mabaghich had lobjet ta3i (socket nta tkhdm mno ga3
+ * ghat9ad class whd akhor yak
+ * oghat initi fih gha les variable lighatkhdm bihom fwst had function
+ * b7a body size, header,ipAndPort, o lbody tahowa hit ghaykhso youslni l CGI ya3ni ghaykhso i7dr l3ndk
+ * fhad lfunction mz1 wa ikon mz1 awla maykonch
+ * ghandiroh bzz malk tkhl3na fasi dlhbs rah gha sakt lik a ghanod like ghanchtf 3lik mohim ma3lana
+ *khdm o 9ad zmr o tl9na rah bghina nkhdmo, m3ak escanor 9ahir lfasa ylh ghiyrha
+ *
+ *
+ * 
+ * matnsach rani pushit
+ *
+ *
+ *
+ */
+
 
 void Servers::readyToRead(size_t i, vector<pollfd> &poll_fd)
 {
@@ -186,16 +243,18 @@ void Servers::readyToRead(size_t i, vector<pollfd> &poll_fd)
 	}
 	catch(ReadRequest::ReadException)
 	{
-		master[i].respond = makeResponse(master[i].getBody().size(), master[i].getHeader(), servers);
+		master[i].respond = makeRespose(master[i], servers);
 		master[i].setFdPoll(POLLOUT);
 	}
 }
+
+
 
 void Servers::isSocketsAreReady(vector<pollfd> &poll_fd)
 {
 	for (size_t i = 0; i < master.size(); i++)
 		poll_fd.push_back(master[i].getFdPoll());
-	int pint = poll(&poll_fd[0], static_cast<nfds_t>(poll_fd.size()), 6000);
+	int pint = poll(&poll_fd[0], static_cast<nfds_t>(poll_fd.size()), 8000);
 	if(pint == 0)
 		throw Servers::PollException("Server reloaded");
 	if(pint < 0)

@@ -4,14 +4,18 @@
 #include <sys/stat.h>
 #include "Response.hpp"
 #include "ServerData.hpp"
-
-class Response;
+#include "String.hpp"
+#include "Cgi.hpp"
 
 typedef std::map<std::string, std::string> maps;
 
+class Response;
 class Request
 {
     private:
+        ServerPattern server;
+        LocationPattern location;
+
         std::string method;
         std::string url;
         std::string version;
@@ -19,46 +23,65 @@ class Request
         std::string query;
         
         maps        _header;
-        maps        _body;
+
+        std::string _request;
+        std::string _body;
+
     public:
         Request( void );
         ~Request( void );
 
-	    void                        parseRequest( std::string request );
+        void                        parseRequest(const std::string &request);
         void                        parseRequestLine( std::string reqLine );
+        void                        parseHeader( void );
+        void                        parseBody( void );
         void                        parseUrl( void );
-        void                        parseHeader( std::string reqHeader );
-        void                        parseBody( std::string reqBody );
 
-        std::string header(const std::string &key) const;
-        std::string body(const std::string &key) const;
-
+        std::string header(const std::string &key);
         std::string extention( const std::string &path) const;
 
+        void                setServer(const ServerPattern &server);
 
-        const std::string &getMethode( void ) const;
-        const std::string &getUrl( void ) const;
-        const std::string &getVersion( void ) const;
-        const std::string &getPathname( void ) const;
-        const std::string &getQuery( void ) const;
-        
-        const maps &getHeader( void ) const;
-        const maps &getBody( void ) const;
+        const ServerPattern &getServer(void) const;
+        const std::string   &getMethod( void ) const;
+        const std::string   &getUrl( void ) const;
+        const std::string   &getVersion( void ) const;
+        const std::string   &getPathname( void ) const;
+        const std::string   &getQuery( void ) const;
 
-        // checkserver
+        const std::string   &getRequest(void) const;
+        const std::string   &getBody(void) const;
 
-        std::string checkServer(const ServerPattern &server);
 
-        void isFormed(ServerPattern srv, Response &res);
+
+        // Server
+        // std::string checkServer( void );
+        std::string getFullPath();
+        std::string getErrorFile(int statusCode) const;
+        string      getRoot() const;
+        string      isFound(const string &path) const;
+        bool        isCgi();
+        string      getCgiFile();
+
+            // void getPath();
+
+            void
+            isFormed();
         void isMatched(Response &res);
         void isRedirected(Response &res);
-        void isAllowed(Response &res);
+        void isMethodAllowed();
         void whichMethode(Response &res);
 
-        // Server check
-        std::string getRootFromLocation(ServerPattern server);
-        int isDirectory(const std::string& path);
-};
+        static std::string readFile(const std::string &path);
+        int isDirectory(const std::string &path) const;
+
+        void setLocation(const LocationPattern &location);
+        const LocationPattern &getLocation(void) const;
+
+        void GetMethod(Response &res);
+        void PostMethod(Response &res);
+        void DeleteMethod(Response &res);
+        };
 // std::std::string	readRequest(FileDepandenc &file);
 std::vector<std::string> split(std::string line, std::string sep);
 

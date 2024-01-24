@@ -16,6 +16,8 @@
 #include<poll.h>
 #include<fstream>
 #include<chrono>
+#include "../Request/Request.hpp"
+#include "../Request/Response.hpp"
 
 typedef struct sockaddr_in S_address;
 
