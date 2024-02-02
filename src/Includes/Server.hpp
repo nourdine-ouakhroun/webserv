@@ -17,7 +17,7 @@
 #include<sys/socket.h>
 #include <netinet/in.h>
 #ifndef BACKLOG
-#define BACKLOG 10
+#define BACKLOG SOMAXCONN
 #endif
 typedef struct sockaddr_in S_address;
 class	Server

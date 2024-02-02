@@ -59,7 +59,10 @@ ResponseHeader	to_do(GeneralPattern& targetInfo, String path, String &model)
 		return (responseHeader.fileName(root + model));
 
 	if (*(model.end() - 1) != '/') // redirect the path that doesn't containt '/' in the end.
+	{
+		cout << "redirect : " << model + "/" << endl;
 		return (responseHeader.status("301 Moved Permanently").location(model + "/"));
+	}
 	
 	if (model.size() != 1)
 		model.rightTrim("/");

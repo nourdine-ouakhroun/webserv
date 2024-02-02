@@ -747,7 +747,11 @@ void    Parser::checkingInfos( void )
         for (size_t j = 0; j < data.size(); j++)
         {
             String characters(".0123456789:");
-            String value(data.at(j).getValue());
+			vector<String> values = data.at(j).getValue().split();
+			cout << "values : " << values.size() << endl;
+			if (values.size() < 1 || values.size() > 2 || (values.size() == 2 && values[1].compare("default_server")))
+                    throw (ParsingException("check Failed : invalid arguments in listen."));
+            String value(values[0]);
             for (size_t z = 0; z < value.size(); z++)
                 if (find(characters.begin(), characters.end(), value.at(z)) == characters.end())
                     throw (ParsingException("check Failed : invalid character in listen."));

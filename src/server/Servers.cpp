@@ -81,11 +81,8 @@ vector<String>	Servers::getAllPorts(void) const
 	{
 		vector <Data> ports = allservers[i].getData("listen");
 		for (size_t j = 0; j < ports.size(); j++)
-		{
-			allport.push_back(ports[j].getValue());
-		}
+			allport.push_back(ports[j].getValue().split()[0]);
 	}
-	// cout << "allport.size() : " << allport.size() << endl;
 	allport = removeDuplicatePorts(allport);
 	return allport;
 }
@@ -158,8 +155,9 @@ String	getExtention(const String& fileName)
 
 void	getResponse(ServerData &servers, Socket& socket)
 {
-	cout << socket.getHeader() << endl;
+	// cout << socket.getHeader() << endl;
 	GeneralPattern header(Parser::parseHeader(socket.getHeader()));
+	Logger::success(cout, "Get Request From : ", header.getData("Host")[0].getValue());
 	vector<ServerPattern> server = ServerData::getServer(servers, socket.ipAndPort, header.getData("Host").front().getValue());
 	ServerPattern srv = server.front();
 	ResponseHeader response = handler(srv, header);
@@ -216,7 +214,7 @@ void Servers::isSocketsAreReady(vector<pollfd> &poll_fd)
 	{
 		poll_fd.push_back(master[i].getFdPoll());
 	}
-	int pint = poll(&poll_fd[0], static_cast<nfds_t>(poll_fd.size()), -1);
+	int pint = poll(&poll_fd[0], static_cast<nfds_t>(poll_fd.size()), 500);
 	// if(pint == 0)
 	// 	throw Servers::PollException("Server reloaded");
 	if(pint < 0)

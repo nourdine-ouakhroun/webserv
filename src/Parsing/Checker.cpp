@@ -30,11 +30,7 @@ void    Checker::checkLocation(const vector<LocationPattern>& loca, String key)
     if (loca.empty() == true)
         return ;
     for (size_t i = 0; i < loca.size(); i++)
-    {
-        if (loca.at(i).getData("listen").empty() == false 
-            || loca.at(i).getData("server_name").empty() == false)
-            throw (ParsingException("Check Faild."));
-        
+    {   
         vector<Data> data = loca.at(i).getData(key);
         if (data.size() > 1)
             throw (ParsingException("Check Faild."));
@@ -76,7 +72,7 @@ void    Checker::checkValues( void )
     {
         vector<Data> listens = servers.at(i).getData("listen");
         if (listens.empty() == true)
-            servers[i].addData(Data("lsten", "80"));
+            servers[i].addData(Data("listen", "80"));
         vector<Data> data = servers.at(i).getAllData();
         if (data.empty() == false)
             for (size_t j = 0; j < data.size(); j++)
