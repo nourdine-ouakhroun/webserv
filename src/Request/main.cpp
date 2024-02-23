@@ -1,26 +1,60 @@
-// #include "Server.hpp"
-// #include "Parser.hpp"
-// #include "Checker.hpp"
-// #include "ServerData.hpp"
-
-
-
-// int main(int ac, char *av[])
-// {
-// 	if (ac != 2)
-// 		return (0);
-// 	Parser parsing(av[1]);
-// 	Checker	check(parsing.getServers());
-// 	check.fullCheck();
-// 	ServerData servers(parsing.getServers());
-	
-// 	Server	s;
-// }
-
-// #include "ManageServers.hpp"
 #include "Servers.hpp"
 #include "webserver.h"
 #include "Directives.hpp"
+
+#define READ_SIZE 1000
+
+
+std::vector<std::string> split(std::string line, std::string sep)
+{
+	std::vector<std::string> sp;
+	if (line.empty())
+		return (sp);
+	size_t pos = 0;
+	while ((pos = line.find(sep)) != std::string::npos)
+	{
+		std::string l = line.substr(0, pos);
+		if (!l.empty())
+			sp.push_back(l);
+		pos += sep.length();
+		line.erase(0, pos);
+	}
+	sp.push_back(line.substr(0, line.length()));
+	return (sp);
+}
+
+string readF(const std::string &path)
+{
+	std::string content;
+	char buffer[READ_SIZE + 1];
+
+	int fd = open(path.c_str(), O_RDONLY);
+	if (fd < 0)
+		return (content);
+
+	while (1)
+	{
+		ssize_t readBytes = read(fd, buffer, READ_SIZE);
+		if (readBytes <= 0)
+			break;
+		buffer[readBytes] = 0;
+		content.append(buffer, (size_t)readBytes);
+	}
+	close(fd);
+	return (content);
+}
+
+
+int isDirectory(const std::string& path)
+{
+	struct stat statbuf;
+	if (stat(path.c_str(), &statbuf))
+		return (-1);
+	return S_ISDIR(statbuf.st_mode);
+}
+
+
+
 
 void socketHaveEvent(Servers &servers, vector<pollfd> &poll_fd)
 {

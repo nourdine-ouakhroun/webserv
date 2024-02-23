@@ -30,7 +30,7 @@ class Parser
 		Parser& operator=(const Parser& target);
 		const vector<vector<String> >& getServersContents( void ) const;
 		const	vector<ServerPattern>&	getServers( void ) const;
-		static vector<Data>	parseHeader(const String& header);
+		static vector<Data>	parseRequest(const String& header);
 		
 		void	printServerPattern(const ServerPattern& server);
 	

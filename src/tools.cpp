@@ -166,7 +166,7 @@ unsigned short	getPort(String	value)
 // void getResponse(ServerData &servers, Socket &socket)
 // {
 // 	cout << socket.getHeader() << endl;
-// 	GeneralPattern header(Parser::parseHeader(socket.getHeader()));
+// 	GeneralPattern header(Parser::parseRequest(socket.getHeader()));
 // 	vector<ServerPattern> server = ServerData::getServer(servers, socket.ipAndPort, header.getData("Host").front().getValue());
 // 	ResponseHeader response = handler(server.front(), header);
 // 	String filename = response.getFileName();

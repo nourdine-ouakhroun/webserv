@@ -70,7 +70,7 @@ void Request::parseLine(std::string line)
 	headerRequest[key] = value;
 }
 
-void Request::parseHeader(std::string h1)
+void Request::parseRequest(std::string h1)
 {
 	size_t	newlinePos = 0;
 	size_t	pos = 0;
@@ -109,7 +109,7 @@ void    Request::parseReq(std::string request)
 		// bodyReq = request.substr(headerPos + 4, request.length());
 	}
 
-	parseHeader(headerReq);
+	parseRequest(headerReq);
 	requestIsFormed();
 }
 
@@ -150,7 +150,7 @@ void Request::statusCodeError(int statusCode, std::string phrase)
 }
 void Request::requestIsFormed()
 {
-	std::cout << "from methode requestIsformed()" << std::endl;
+	std::cout << "from method requestIsformed()" << std::endl;
 	displayReq();
 	if (requestLine.size() == 3 && !allowedChar(requestLine[1]))
 		statusCodeError(400, "Bad Request!");

@@ -1,34 +1,75 @@
 #include "Servers.hpp"
 #include "../Request/Request.hpp"
 #include "../Request/Response.hpp"
+string readF(const std::string &path);
+
 
 string makeRespose(const Socket &socket, const ServerData &serversData)
 {
+	(void)socket;
+	(void)serversData;
 	ServerPattern	server;
-	Request			request;
-	Response		response;
-
-	request.parseRequest(socket.getHeader());
-	server = ServerData::getServer(serversData, socket.ipAndPort, request.header("Host")).front();
 	
-	request.setServer(server);
-	response.setRequest(request);
+	Request			request;
+	// cout << socket.getBody() << endl;
+
+	request.parseRequest(socket.getHeader() + socket.getBody());
+	// cout << request.getBody() << endl;
+
+
+
+	server = ServerData::getServer(serversData, socket.ipAndPort, request.header("Host")).front();
+	Response	response(request, server);
 	response.setMimeType(server.mimeTypes);
+
+	
+
+	string content;
+	
 	try
 	{
-		request.isFormed();
-		request.isMatched(response);
-        request.isMethodAllowed();
-		// request.isRedirected(response);
-        request.whichMethode(response);
+		response.isFormed();
+		response.isMatched();
+        response.isMethodAllowed();
+		response.isRedirected();
+        response.whichMethod();
+	}
+	catch (string body) {
+		response.setBody(body);
 	}
 	catch (int status)
 	{
-		response.setResponse(status);
-	}
-	response.setHeader("Server", "Nginx-v2");
-	response.makeResponse();
+		string path = request.getPath();
+		string file = (response.getRoot() + path + response.isFound(response.getRoot() + path));
 
+		response.setStatusCode(status);
+		response.setMsg(response.getErrorPage(status));
+
+		string errorFileName = response.getErrorFile(status);
+		if (status != 200) {
+			if (!errorFileName.empty() || status == 301) {
+				response.setStatusCode(301);
+				response.setMsg("Moved Permanently");
+				if (!errorFileName.empty())
+					response.setHeader("Location", errorFileName);
+				else
+					response.setHeader("Location", response.getRedirection());
+			}
+			else {
+				response.setBody("<h1>" + response.getErrorPage(status) + "</h1>");
+			}
+		}
+		else {
+		// 	// success OK
+			content = readF(file);
+			if (response.getBody().empty())
+				response.setBody(content);
+		}
+		if (response.getBody().length())
+			response.setHeader("Content-Length", to_string(response.getBody().length()));
+		response.setHeader("Content-Type", response.getMimeType(request.extention(request.getPath())));
+	}
+	response.makeResponse();
 	return response.getResponse();
 }
 
@@ -42,10 +83,6 @@ Servers::~Servers(void)
 {
 }
 
-// void	Servers::setWorkingSockets(const vector<Socket> & working) 
-// {
-// 	this->working = working;
-// }
 
 size_t	Servers::SocketsSize(void) const 
 {

@@ -25,9 +25,9 @@ using namespace std;
 class   Socket
 {
 	string	header;
+	string	body;
 	string	boundary;
 	ssize_t content_lenght;
-	string	body;
 	int 		method;
 	pollfd		fdpoll;
 

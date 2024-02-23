@@ -41,7 +41,7 @@ void ReadRequest::handelChunked()
 void ReadRequest::recvSomthing(char * buffer, size_t bytes)
 {
 	string request (buffer, bytes);
-	if(socket.getHeader().empty() == true)
+	if (socket.getHeader().empty() == true)
 		setHeadre(request);
 	socket.setBody(request);
 	if(socket.is_chuncked == true)

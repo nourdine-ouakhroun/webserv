@@ -664,7 +664,7 @@ void Parser::printLocations(const LocationPattern &locs)
 	}
 }
 
-vector<Data> Parser::parseHeader(const String &header)
+vector<Data> Parser::parseRequest(const String &header)
 {
 	vector<Data> vec;
 	istringstream iss(header);
