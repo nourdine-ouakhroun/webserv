@@ -15,6 +15,7 @@
 class   ReadRequest
 {
         Socket	&socket;
+        string request;
         ReadRequest();
 
     public:
@@ -28,6 +29,9 @@ class   ReadRequest
         void	checkReqeust();
         void	handelChunked();
         void	Read();
+
+        const string& getRequest() const;
+
         class ReadException : exception
         {
             string exception_msg;

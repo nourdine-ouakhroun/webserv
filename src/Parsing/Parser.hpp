@@ -10,7 +10,7 @@
 #include "Patterns/ServerPattern.hpp"
 
 #ifndef KEYS
-#define KEYS "cgi include return autoindex method error_log index access_log error_page alias client_body_buffer_size client_max_body_size error_page listen location root server server_name try_files types "
+	#define KEYS "include return autoindex error_log index access_log error_page alias client_body_buffer_size client_max_body_size error_page listen location root server server_name try_files types "
 #endif
 
 
@@ -30,7 +30,7 @@ class Parser
 		Parser& operator=(const Parser& target);
 		const vector<vector<String> >& getServersContents( void ) const;
 		const	vector<ServerPattern>&	getServers( void ) const;
-		static vector<Data>	parseRequest(const String& header);
+		static vector<Data>	parseHeader(const String& header);
 		
 		void	printServerPattern(const ServerPattern& server);
 	

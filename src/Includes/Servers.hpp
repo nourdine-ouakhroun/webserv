@@ -36,7 +36,7 @@ public:
 	// void			setWorkingSockets(const vector<Socket> &);
 	void			setMasterSockets();
 	string			&getRespond(size_t);
-	vector<String>		getAllPorts(void) const;
+	vector<String>	getAllPorts(void) const;
 	const Socket	&getSocket(size_t) const ;
 	const string 	&getHeader(size_t) const ;
 

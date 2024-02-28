@@ -1,6 +1,7 @@
 #include "Servers.hpp"
 #include "../Request/Request.hpp"
 #include "../Request/Response.hpp"
+
 string readF(const std::string &path);
 
 
@@ -10,17 +11,20 @@ string makeRespose(const Socket &socket, const ServerData &serversData)
 	(void)serversData;
 	ServerPattern	server;
 	
-	Request			request;
-	// cout << socket.getBody() << endl;
-
-	request.parseRequest(socket.getHeader() + socket.getBody());
-	// cout << request.getBody() << endl;
+	Request			req;
 
 
+	// cout << socket.getHeader() + socket.getBody() << endl;
+	// exit(0);
+	req.parseRequest(socket.getHeader() + socket.getBody());
 
-	server = ServerData::getServer(serversData, socket.ipAndPort, request.header("Host")).front();
-	Response	response(request, server);
-	response.setMimeType(server.mimeTypes);
+
+
+
+
+	server = ServerData::getServer(serversData, socket.ipAndPort, req.header("Host")).front();
+	Response	res(req, server);
+	res.setMimeType(server.mimeTypes);
 
 	
 
@@ -28,49 +32,46 @@ string makeRespose(const Socket &socket, const ServerData &serversData)
 	
 	try
 	{
-		response.isFormed();
-		response.isMatched();
-        response.isMethodAllowed();
-		response.isRedirected();
-        response.whichMethod();
-	}
-	catch (string body) {
-		response.setBody(body);
+		res.isFormed();
+		res.isMatched();
+        res.isMethodAllowed();
+		res.isRedirected();
+        res.whichMethod();
 	}
 	catch (int status)
 	{
-		string path = request.getPath();
-		string file = (response.getRoot() + path + response.isFound(response.getRoot() + path));
+		string path = req.getPath();
+		string file = (res.getRoot() + path + res.isFound(res.getRoot() + path));
 
-		response.setStatusCode(status);
-		response.setMsg(response.getErrorPage(status));
+		res.setStatusCode(status);
+		res.setMsg(res.getErrorPage(status));
 
-		string errorFileName = response.getErrorFile(status);
+		string errorFileName = res.getErrorFile(status);
 		if (status != 200) {
 			if (!errorFileName.empty() || status == 301) {
-				response.setStatusCode(301);
-				response.setMsg("Moved Permanently");
+				res.setStatusCode(302);
+				res.setMsg("Found");
 				if (!errorFileName.empty())
-					response.setHeader("Location", errorFileName);
+					res.setHeader("Location", errorFileName);
 				else
-					response.setHeader("Location", response.getRedirection());
+					res.setHeader("Location", res.getRedirection());
 			}
 			else {
-				response.setBody("<h1>" + response.getErrorPage(status) + "</h1>");
+				res.setBody("<h1 style=\"text-align: center;\" >" + res.getErrorPage(status) + "</h1>");
 			}
 		}
 		else {
 		// 	// success OK
 			content = readF(file);
-			if (response.getBody().empty())
-				response.setBody(content);
+			if (res.getBody().empty())
+				res.setBody(content);
 		}
-		if (response.getBody().length())
-			response.setHeader("Content-Length", to_string(response.getBody().length()));
-		response.setHeader("Content-Type", response.getMimeType(request.extention(request.getPath())));
+		if (res.getBody().length())
+			res.setHeader("Content-Length", to_string(res.getBody().length()));
+		res.setHeader("Content-Type", res.getMimeType(req.extention(req.getPath())));
 	}
-	response.makeResponse();
-	return response.getResponse();
+	res.makeResponse();
+	return res.getResponse();
 }
 
 
@@ -280,7 +281,7 @@ void Servers::readyToRead(size_t i, vector<pollfd> &poll_fd)
 	{
 		read_request.Read();
 	}
-	catch(ReadRequest::ReadException)
+	catch (ReadRequest::ReadException)
 	{
 		master[i].respond = makeRespose(master[i], servers);
 		master[i].setFdPoll(POLLOUT);

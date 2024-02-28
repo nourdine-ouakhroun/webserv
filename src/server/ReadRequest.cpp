@@ -38,6 +38,48 @@ void ReadRequest::handelChunked()
 			throw ReadRequest::ReadException();
 	}
 }
+
+// void ReadRequest::recvSomthing(char * buffer, size_t bytes)
+// {
+// 	string req (buffer, bytes);
+// 	this->request.append(req);
+
+// 	// char const *str = req.c_str();
+// 	// int i = 0;
+// 	// while (str[i]) {
+// 	// 	cout << (int)str[i++] << endl;
+// 	// }
+// 	// cout << "last = " << (int)str[i] << endl;
+
+// 	// if (socket.getHeader().empty() == true)
+// 	// 	setHeadre(req);
+// 	// socket.setBody(req);
+// 	// if (socket.is_chuncked == true)
+// 	// 	handelChunked();
+
+// 	if (request.find("\n\r\n\r") != string::npos) {
+// 		Request req;
+// 		req.parseRequest(request);
+// 		if (req.getMethod() == "GET")
+// 			throw ReadRequest::ReadException();
+// 		else {
+// 			string contentLength = req.header("Content-Length");
+// 			string encoding = req.header("Transfer-Encoding");
+// 			if (!contentLength.empty()) {
+// 				// contentLength
+// 			}
+// 			else if (!encoding.empty()) {
+// 				// chunked
+// 			}
+// 			else {
+// 					throw 400;
+// 			}
+// 			// throw ReadRequest::ReadException();
+
+// 		}
+// 	}
+// }
+
 void ReadRequest::recvSomthing(char * buffer, size_t bytes)
 {
 	string request (buffer, bytes);
@@ -46,9 +88,16 @@ void ReadRequest::recvSomthing(char * buffer, size_t bytes)
 	socket.setBody(request);
 	if(socket.is_chuncked == true)
 		handelChunked();
-	if((size_t)socket.getContenlenght() == socket.getBody().size())
+	if ((size_t)socket.getContenlenght() == socket.getBody().size()) {
 		throw ReadRequest::ReadException();
+	}
 }
+
+
+const string& ReadRequest::getRequest() const {
+	return (request);
+}
+
 void	ReadRequest::Read()
 {
 	ssize_t		bytes;
@@ -57,9 +106,8 @@ void	ReadRequest::Read()
 
 	bytes = 0;
 	bytes = recv(socket.getFdPoll().fd, buffer, READ_NUMBER - 1, 0);
-	if(bytes > 0)
+	if (bytes > 0)
 		recvSomthing(buffer, (size_t)bytes);
-	return ;
 }
 
 size_t findSeparator(const string & buffer){
