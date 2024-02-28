@@ -26,7 +26,7 @@ class Response
 private:
     const Request&          request;
     const ServerPattern&    server;
-    LocationPattern         location;
+    GeneralPattern         location;
 
 
 	int         statusCode;
@@ -93,19 +93,19 @@ public:
 
     // geters of cobnfigFile
     // std::string checkServer( void );
-    std::string getFullPath();
+    // std::string getFullPath();
     std::string getErrorFile(int statusCode) const;
     string      getRoot() const;
     string      isFound(const string &path) const;
     bool        isCgi();
-    // bool        isUpload();
+    string      isUpload();
 
     string      getCgiFile();
 
-    string runScript(vector<String> args, string fileName);
+    string      runScript(vector<String> args, string fileName);
 
-    const string& getRedirection() const;
-    void    setRedirection(const string& redirection);
+    const string&   getRedirection() const;
+    void            setRedirection(const string& redirection);
 
 
 };
