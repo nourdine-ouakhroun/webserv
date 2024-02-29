@@ -460,30 +460,8 @@ void Response::GetMethod() {
 		}
 		else
 		{
-			if (!this->location.getData("autoindex").empty() && this->location.getData("autoindex")[0].getValue() == "on") {
-				// on return autoindex of the directory
-				cout << "autoindex work" << endl;
-				DIR *directory = opendir(path.c_str());
-				if (directory == NULL)
-					return ;
-				struct dirent *dir;
-				body.append("<!DOCTYPE html>")
-					.append("<html lang=\"en\">")
-					.append("<head>")
-					.append("<meta charset=\"UTF-8\">")
-					.append("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">")
-					.append("<title>Document</title>")
-					.append("</head>")
-					.append("<body>")
-					.append("<h1> autoIndex </h1>");
-				while ( (dir = readdir(directory))  != NULL ) {
-						body.append("<a href=\"")
-            			.append(dir->d_name)
-            			.append("\">").append(dir->d_name)
-           				.append("</a></br>");
-				}
-				body.append("</body>");
-			}
+			if (!this->location.getData("autoindex").empty() && this->location.getData("autoindex")[0].getValue() == "on")
+				body = getDirectoryContent(path, request.getPath());
 			else
 				throw 403;
 			// auto index
