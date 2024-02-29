@@ -7,6 +7,7 @@ ServerPattern::ServerPattern( void ) : GeneralPattern()
 ServerPattern::ServerPattern(const GeneralPattern& model, const vector<LocationPattern>& _location) : GeneralPattern(model), location(_location)
 {
 	addDirectives("root");
+	addDirectives("index");
 	addDirectives("error_page");
 	addDirectives("error_log");
 	addDirectives("access_log");
@@ -39,6 +40,7 @@ ServerPattern& ServerPattern::operator=(const ServerPattern& target)
 		GeneralPattern::operator=(target);
 		location = target.location;
 		mimeTypes = target.mimeTypes;
+		addDirectives("index");
 		addDirectives("Options");
 		addDirectives("error_page");
 		addDirectives("error_log");
@@ -54,6 +56,7 @@ void	ServerPattern::setLocation(vector<LocationPattern>& _location)
 {
 	location = _location;
 	addDirectives("root");
+	addDirectives("index");
 	addDirectives("error_page");
 	addDirectives("error_log");
 	addDirectives("access_log");

@@ -17,6 +17,7 @@ string makeRespose(const Socket &socket, const ServerData &serversData)
 	// cout << socket.getHeader() + socket.getBody() << endl;
 	// exit(0);
 	req.parseRequest(socket.getHeader() + socket.getBody());
+	cout << req.getPath() << endl;
 
 
 
