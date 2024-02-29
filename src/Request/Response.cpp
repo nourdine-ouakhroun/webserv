@@ -219,7 +219,7 @@ void Response::setMimeType(const map<string, string>& mimeType)
 
 
 
-bool isAllowdChar(string uri) {
+bool isAllowdChar(const string& uri) {
 	string alloweChar = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;=%";
 	for (size_t i = 0; i < uri.size(); i++)
 	{
@@ -238,8 +238,9 @@ void Response::isFormed()
 		throw 400;
 	else if (request.getPath().length() > 2048)
 		throw 414;
-	else if (!server.getData("client_maxrequestBody_size").empty()
-	&& std::atoi(request.header("Content-Lengt").c_str()) > (int)(std::atoi(server.getData("client_maxrequestBody_size")[0].getValue().c_str()) / 100))
+	// else if (!server.getData("client_max_body_size").empty()
+	// && std::atoi(request.header("Content-Length").c_str()) > (int)(std::strtod(server.getData("client_max_body_size")[0].getValue().c_str())))
+	else if ((double)request.getBody().size() > std::strtod(server.getData("client_max_body_size")[0].getValue().c_str(), NULL))
 		throw 413;
 }
 void Response::isMatched() {
