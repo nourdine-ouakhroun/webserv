@@ -25,7 +25,7 @@ Checker& Checker::operator=(const Checker& target)
     return (*this);
 }
 
-void    Checker::checkLocation(const vector<LocationPattern>& loca, String key)
+void    Checker::checkLocation(const vector<LocationPattern>& loca, String key, String oppositeKey)
 {
     if (loca.empty() == true)
         return ;
@@ -36,7 +36,8 @@ void    Checker::checkLocation(const vector<LocationPattern>& loca, String key)
             throw (ParsingException("Check Faild."));
         
         vector<Data> data = loca.at(i).getData(key);
-        if (data.size() > 1)
+        vector<Data> oppositeData = loca.at(i).getData(oppositeKey);
+        if (data.size() > 1 || (data.size() && oppositeData.size()))
             throw (ParsingException("Check Faild."));
         if (loca.at(i).getInnerLocation().empty() == false)
             checkLocation(loca.at(i).getInnerLocation(), key);  
@@ -59,14 +60,15 @@ void    Checker::checkLocationValues(const vector<LocationPattern>& loca)
     }
 }
 
-void    Checker::checkDuplicate(String key)
+void    Checker::checkDuplicate(String key, String oppositeKey)
 {
     for (size_t i = 0; i < servers.size(); i++)
     {
         vector<Data> data = servers.at(i).getData(key);
-        if (data.size() > 1)
+        vector<Data> oppositeData = servers.at(i).getData(oppositeKey);
+        if (data.size() > 1 || (data.size() && oppositeData.size()))
             throw (ParsingException("Check Faild."));
-        checkLocation(servers.at(i).getLocations(), key);
+        checkLocation(servers.at(i).getLocations(), key, oppositeKey);
     }
 }
 
@@ -85,6 +87,7 @@ void    Checker::checkValues( void )
         checkLocationValues(servers.at(i).getLocations());
     }
 }
+
 
 void    Checker::checkLocationValues(const vector<LocationPattern>& loca, String key)
 {
@@ -121,9 +124,9 @@ void    Checker::fullCheck( void )
     if (servers.empty() == true)
         return ;
     checkValues();
-    checkDuplicate("root");
+    checkDuplicate("root", "alias");
+    checkDuplicate("alias", "root");
     checkDuplicate("return");
-    checkDuplicate("alias");
     checkDuplicate("try_files");
     checkDuplicate("autoindex");
     checkDuplicate("error_log");

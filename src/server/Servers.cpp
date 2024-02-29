@@ -165,13 +165,11 @@ vector<String>	Servers::getAllPorts(void) const
 {
 	vector<String>			allport;
 	vector <ServerPattern>	allservers = servers.getAllServers();
-	for (size_t i = 0; i < allservers.size( ); i++)
+	for (size_t i = 0; i < allservers.size(); i++)
 	{
 		vector <Data> ports = allservers[i].getData("listen");
 		for (size_t j = 0; j < ports.size(); j++)
-		{
-			allport.push_back(ports[j].getValue());
-		}
+			allport.push_back(ports[j].getValue().split().front());
 	}
 	// cout << "allport.size() : " << allport.size() << endl;
 	allport = removeDuplicatePorts(allport);
