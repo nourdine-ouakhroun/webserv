@@ -86,9 +86,12 @@ void    Checker::checkLocationValues(const vector<LocationPattern>& loca, String
 {
     if (loca.empty() == true)
         return ;
-    vector<String> booleanValues;
-    booleanValues.push_back("on");
-    booleanValues.push_back("off");
+    static vector<String> booleanValues;
+    if (booleanValues.empty())
+    {
+        booleanValues.push_back("on");
+        booleanValues.push_back("off");
+    }
     for (size_t i = 0; i < loca.size(); i++)
     {
         vector<Data> data = loca.at(i).getData(key);

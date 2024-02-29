@@ -39,7 +39,7 @@ ResponseHeader servingFileContent(GeneralPattern& targetInfo, String path)
 	return (directive.errorPage("404", "Not Found"));
 }
 
-ResponseHeader	to_do(GeneralPattern& targetInfo, String path, String &model)
+ResponseHeader	to_do(GeneralPattern& targetInfo, String path, String &model, const __unused GeneralPattern& reqInfo)
 {
 	String root;
 	String fileName;
@@ -60,8 +60,8 @@ ResponseHeader	to_do(GeneralPattern& targetInfo, String path, String &model)
 
 	if (*(model.end() - 1) != '/') // redirect the path that doesn't containt '/' in the end.
 	{
-		cout << "redirect : " << model + "/" << endl;
-		return (responseHeader.status("301 Moved Permanently").location(model + "/"));
+		// cout << "redirect : " << "http://" + reqInfo.getData("Host").front().getValue() + model + "/" << endl;
+		return (responseHeader.status("301 Moved Permanently").location("/"));
 	}
 	
 	if (model.size() != 1)
@@ -99,25 +99,27 @@ ResponseHeader	handler(ServerPattern& server, GeneralPattern &model)
 		if (!strncmp(pathss[i].c_str(), test.c_str(), pathss[i].size()))
 			newPaths.push_back(pathss[i]);
 	}
-
+	GeneralPattern target;
 	vector<String>::iterator it = max_element(newPaths.begin(), newPaths.end());
 	if (it == newPaths.end())
-		return (responseHeader);
-
-	LocationPattern	loca = ServerPattern::getLocationByPath(server.getLocations(), *it);
-	GeneralPattern target;
-
-	try
 	{
-		target = dynamic_cast<GeneralPattern&>(loca);
-		if (loca.getPath().empty() && path.equal("/") && path.size() == 1)
-			target = dynamic_cast<GeneralPattern&>(server);
+		target = server;
 	}
-	catch(const exception& e)
+	else
 	{
-		cerr << e.what() << '\n';
+		target = ServerPattern::getLocationByPath(server.getLocations(), *it);
+		// try
+		// {
+		// 	target = dynamic_cast<GeneralPattern&>(loca);
+		// 	if (loca.getPath().empty() && path.equal("/") && path.size() == 1)
+		// 		target = dynamic_cast<GeneralPattern&>(server);
+		// }
+		// catch(const exception& e)
+		// {
+		// 	cerr << e.what() << '\n';
+		// }
 	}
-	return (to_do(target, loca.getPath(), path));
+	return (to_do(target, target.getPath(), path, model));
 }
 
 void	socketHaveEvent(Servers &servers, vector<pollfd> &poll_fd)
@@ -160,6 +162,7 @@ int main(int ac, char **av)
 		cerr << e.what() << '\n';
 	}
 	ServerData serv(parser.getServers());
+	serv.displayServers();
 	Servers servers(serv);
 	servers.runAllServers();
 	servers.setMasterSockets();

@@ -101,7 +101,10 @@ ResponseHeader	handler(ServerPattern& server, GeneralPattern &model, int readyFd
 	{
 		// redirect the path that doesn't containt '/' in the end.
 		if (path.back() != '/')
+		{
+			cout << "path + / ==> " << path + "/" << endl;
 			return (responseHeader.status("301 Moved Permanently").location(path + "/"));
+		}
 	}
 
 	path.rightTrim("/");
@@ -241,6 +244,8 @@ Server	createServer(ServerData& serv)
 void	start(Parser& parser)
 {
 	ServerData servers(parser.getServers());
+	cout << "display servers : " << endl;
+	servers.displayServers();
 	try
 	{
 		createServer(servers);

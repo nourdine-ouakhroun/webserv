@@ -522,12 +522,12 @@ void	Parser::splitContentIntoServers( void )
 	while (begin < end)
 	{
 		vector<String> srv = getServerConfig(begin, end);
-		if (srv.empty() == false)
-			serversContents.push_back(srv);
+		// if (srv.empty() == false)
+		serversContents.push_back(srv);
 		begin++;
 	}
-	if (serversContents.empty() == true)
-		throw (ParsingException("No Server to run."));
+	// if (serversContents.empty() == true)
+	// 	throw (ParsingException("No Server to run."));
 	// clear file content vector.
 	fileContent.clear();
 }
@@ -738,6 +738,9 @@ void    Parser::checkingInfos( void )
         vector<Data> data = servers.at(i).getData("root");
 		if (data.empty())
 			servers.at(i).addData(Data("root", "/tmp"));
+		data = servers.at(i).getData("index");
+		if (data.empty())
+			servers.at(i).addData(Data("index", "index.html"));
         data = servers.at(i).getData("listen");
 		if (data.empty())
 		{

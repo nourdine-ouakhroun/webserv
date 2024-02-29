@@ -98,9 +98,9 @@ ServerPattern	ServerData::getDefaultServer(const vector<ServerPattern>& servers)
 		}
 		iterBegin++;
 	}
-	if (serv.size() > 1)
-		Logger::warn(cout, "Duplicate default server.", "");
-	else if (serv.size() == 0)
+	// if (serv.size() > 1)
+	// 	Logger::warn(cout, "Duplicate default server.", "");
+	if (serv.size() == 0)
 		serv.push_back(servers.front());
 	return (serv.front());
 }
