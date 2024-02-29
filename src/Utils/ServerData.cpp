@@ -74,14 +74,14 @@ vector<ServerPattern>	ServerData::getServersByIpAndPort(const vector<ServerPatte
 	{
 		vector<Data> value = iterBegin->getData("listen");
 		for (size_t i = 0; i < value.size(); i++)
-			if (!value[i].getValue().compare(strHost))
+			if (!value[i].getValue().split()[0].compare(strHost))
 				serv.push_back(*iterBegin);
 		iterBegin++;
 	}
 	return (serv);
 }
 
-const ServerPattern&	ServerData::getDefaultServer(const vector<ServerPattern>& servers)
+ServerPattern	ServerData::getDefaultServer(const vector<ServerPattern>& servers)
 {
 	vector<ServerPattern>	serv;
 	vector<ServerPattern>::const_iterator iterBegin = servers.begin();
@@ -98,14 +98,14 @@ const ServerPattern&	ServerData::getDefaultServer(const vector<ServerPattern>& s
 		}
 		iterBegin++;
 	}
-	if (serv.size() > 1)
-		throw (ServerException("Duplicate default server."));
-	else if (serv.size() == 0)
+	// if (serv.size() > 1)
+	// 	Logger::warn(cout, "Duplicate default server.", "");
+	if (serv.size() == 0)
 		serv.push_back(servers.front());
 	return (serv.front());
 }
 
-vector<ServerPattern> ServerData::getServer(const ServerData &servers, __unused const String &ClientAddress, String strHost)
+vector<ServerPattern>	ServerData::getServer(const ServerData& servers,  const String& ClientAddress, String strHost)
 {
 	vector<ServerPattern>	srvs = servers.getAllServers();
 	srvs = ServerData::getServersByIpAndPort(srvs, ClientAddress);
