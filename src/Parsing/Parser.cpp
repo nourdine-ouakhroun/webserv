@@ -751,7 +751,6 @@ void    Parser::checkingInfos( void )
         {
             String characters(".0123456789:");
 			vector<String> values = data.at(j).getValue().split();
-			cout << "values : " << values.size() << endl;
 			if (values.size() < 1 || values.size() > 2 || (values.size() == 2 && values[1].compare("default_server")))
                     throw (ParsingException("check Failed : invalid arguments in listen."));
             String value(values[0]);
