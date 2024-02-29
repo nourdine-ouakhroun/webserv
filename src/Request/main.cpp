@@ -102,6 +102,8 @@ int main(int ac, char **av)
 	}
 	signal(SIGPIPE, SIG_IGN);
 	Parser parser(av[1]);
+	Checker check(parser.getServers());
+	check.fullCheck();
 	ServerData serv(parser.getServers());
 	Servers servers(serv);
 	servers.runAllServers();
