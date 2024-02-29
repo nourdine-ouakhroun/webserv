@@ -13,12 +13,12 @@ class Checker
         ~Checker( void );
         Checker&    operator=(const Checker& target);
         void        fullCheck( void );
-        void        checkDuplicate(String key);
-        void        checkLocation(const vector<LocationPattern>& loca, String key);
+        void        checkLocation(const vector<LocationPattern>& loca, String key, String oppositeKey = "unknown");
         void        checkValues( void );
         void        checkLocationValues(const vector<LocationPattern>& loca);
         void        checkLocationValues(const vector<LocationPattern>& loca, String key);
         void        checkBooleanValues(String key);
+        void        checkDuplicate(String key, String oppositeKey = "unknown");
 
 };
 
