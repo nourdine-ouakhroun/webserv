@@ -33,6 +33,38 @@ unsigned short	getPort(String	value)
 	return port;
 }
 
+double    convertKiloToByte(double x)
+{
+    return (x * 1000);
+}
+double    convertMigaToByte(double x)
+{
+    return (convertKiloToByte(x) * 1000);
+}
+double    convertGigaToByte(double x)
+{
+    return (convertMigaToByte(x) * 1000);
+}
+
+long long  convertor(String str)
+{
+    double value = 1e6;
+    char *res = NULL;
+    double x = strtod(str.c_str(), &res);
+    if (res)
+    {
+        if (res[0] == 'G' || res[0] == 'g')
+            value = convertGigaToByte(x);
+        else if (res[0] == 'M' || res[0] == 'm')
+            value = convertMigaToByte(x);
+        else if (res[0] == 'K' || res[0] == 'k')
+            value = convertKiloToByte(x);
+    }
+	else
+		value = x;
+    return (static_cast<long long>(value));
+}
+
 // vector<int>	openAllPorts(const vector<ServerPattern>& serversInfo, Server& server)
 // {
 // 	vector<int> ports;
