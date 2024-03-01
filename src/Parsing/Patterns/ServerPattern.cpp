@@ -13,6 +13,7 @@ ServerPattern::ServerPattern(const GeneralPattern& model, const vector<LocationP
 	addDirectives("Options");
 	addDirectives("AddHandler");
 	addDirectives("autoindex");
+	addDirectives("client_max_body_size");
 }
 
 void	ServerPattern::addDirectives(const String& key)
@@ -44,8 +45,10 @@ ServerPattern& ServerPattern::operator=(const ServerPattern& target)
 		addDirectives("error_log");
 		addDirectives("access_log");
 		addDirectives("root");
+		addDirectives("index");
 		addDirectives("AddHandler");
 		addDirectives("autoindex");
+		addDirectives("client_max_body_size");
 	}
 	return (*this);
 }
@@ -54,12 +57,14 @@ void	ServerPattern::setLocation(vector<LocationPattern>& _location)
 {
 	location = _location;
 	addDirectives("root");
+	addDirectives("index");
 	addDirectives("error_page");
 	addDirectives("error_log");
 	addDirectives("access_log");
 	addDirectives("Options");
 	addDirectives("AddHandler");
 	addDirectives("autoindex");
+	addDirectives("client_max_body_size");
 }
 
 const vector<LocationPattern>&	ServerPattern::getLocations( void ) const

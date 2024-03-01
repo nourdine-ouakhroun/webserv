@@ -22,6 +22,12 @@ void	handleLogges(GeneralPattern& server);
 
 bool	checkFile(String file);
 
+
+double    convertGigaToByte(double x);
+double    convertMigaToByte(double x);
+double    convertKiloToByte(double x);
+long long  convertor(String str);
+
 // ResponseHeader	handler(ServerPattern& server, GeneralPattern __unused &model);
 // ResponseHeader	to_do(GeneralPattern& __unused targetInfo, __unused String path, String&);
 

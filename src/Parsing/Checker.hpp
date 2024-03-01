@@ -19,6 +19,11 @@ class Checker
         void        checkLocationValues(const vector<LocationPattern>& loca, String key);
         void        checkBooleanValues(String key);
         void        checkDuplicate(String key, String oppositeKey = "unknown");
+        // void        checkLocationClientMaxBodySize(const vector<LocationPattern>& loca);
+
+        // void        checkClientMaxBodySize();
+        void	CheckClientBodySize();
+        void    checkLocationClientMaxBodySize(const vector<LocationPattern>& loca);
 
 };
 

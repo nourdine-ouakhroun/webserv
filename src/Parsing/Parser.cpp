@@ -284,6 +284,7 @@ Parser::Parser( void )
 {
 }
 
+
 /**
  * @brief	Parser Parametraise Constructor.
 */
@@ -741,6 +742,9 @@ void    Parser::checkingInfos( void )
 		data = servers.at(i).getData("index");
 		if (data.empty())
 			servers.at(i).addData(Data("index", "index.html"));
+		data = servers.at(i).getData("client_max_body_size");
+		if (data.empty())
+			servers.at(i).addData(Data("client_max_body_size", "1m"));
         data = servers.at(i).getData("listen");
 		if (data.empty())
 		{
