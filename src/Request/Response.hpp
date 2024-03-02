@@ -96,6 +96,8 @@ public:
     // std::string getFullPath();
     std::string getErrorFile(int statusCode) const;
     string      getRoot() const;
+    string      getAlias() const;
+
     string      isFound(const string &path) const;
     bool        isCgi();
     string      isUpload();
@@ -106,6 +108,10 @@ public:
 
     const string&   getRedirection() const;
     void            setRedirection(const string& redirection);
+
+
+
+
 
 
 };

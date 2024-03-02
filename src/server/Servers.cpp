@@ -43,19 +43,25 @@ string makeRespose(const Socket &socket, const ServerData &serversData)
 	{
 		string path = req.getPath();
 		string file = (res.getRoot() + path + res.isFound(res.getRoot() + path));
+		cout << res.getAlias() << endl;
+		// string file = (path);
+
+
 
 		res.setStatusCode(status);
 		res.setMsg(res.getErrorPage(status));
 
 		string errorFileName = res.getErrorFile(status);
-		if (status != 200) {
-			if (!errorFileName.empty() || status == 301) {
-				res.setStatusCode(302);
-				res.setMsg("Found");
-				if (!errorFileName.empty())
-					res.setHeader("Location", errorFileName);
-				else
-					res.setHeader("Location", res.getRedirection());
+		if (!errorFileName.empty()) {
+			res.setStatusCode(302);
+			res.setMsg(res.getErrorPage(302));
+			res.setHeader("Location", errorFileName);
+		}
+		else if (status != 200) {
+			if (status >= 300 && status < 400) {
+				res.setStatusCode(status);
+				res.setMsg(res.getErrorPage(status));
+				res.setHeader("Location", res.getRedirection());
 			}
 			else {
 				res.setBody("<h1 style=\"text-align: center;\" >" + res.getErrorPage(status) + "</h1>");
