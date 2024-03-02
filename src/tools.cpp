@@ -23,6 +23,14 @@ String	readFile(const String& path)
 	return (content);
 }
 
+unsigned int convertStringToBinary(String str)
+{
+	unsigned int res = 0;
+	vector<String> strs = str.split('.');
+	for (size_t i = 0; i < strs.size(); i++)
+		res += (unsigned int)strtol(strs[i].c_str(), NULL, 10) << i * 8;
+	return (res);
+}
 
 unsigned short	getPort(String	value)
 {

@@ -21,6 +21,7 @@ void	handleLogges(GeneralPattern& server);
 // ResponseHeader	returnDirective(const vector<Data> &returns, ResponseHeader &responseHeader);
 
 bool	checkFile(String file);
+unsigned int convertStringToBinary(String str);
 
 
 double    convertGigaToByte(double x);

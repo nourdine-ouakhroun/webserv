@@ -11,7 +11,7 @@
 
 
 #ifndef KEYS
-	#define KEYS "include return autoindex error_log index access_log error_page alias client_body_buffer_size client_max_body_size error_page listen location root server server_name try_files types "
+	#define KEYS "upload_dir cgi include return autoindex error_log index access_log error_page alias client_body_buffer_size client_max_body_size error_page listen location root server server_name try_files types "
 #endif
 
 double    convertGigaToByte(double x);
