@@ -1,19 +1,21 @@
 #include "ServerPattern.hpp"
 
+void	ServerPattern::makeAllLocationInheritedFromServer( void )
+{
+	static vector<String> directives;
+	if (directives.empty())
+		directives = String(INHERITED_DIRECTIVES).split();
+	for (size_t i = 0; i < directives.size(); i++)
+		addDirectives(directives[i]);
+}
+
 ServerPattern::ServerPattern( void ) : GeneralPattern()
 {
 }
 
 ServerPattern::ServerPattern(const GeneralPattern& model, const vector<LocationPattern>& _location) : GeneralPattern(model), location(_location)
 {
-	addDirectives("root");
-	addDirectives("error_page");
-	addDirectives("error_log");
-	addDirectives("access_log");
-	addDirectives("Options");
-	addDirectives("AddHandler");
-	addDirectives("autoindex");
-	addDirectives("client_max_body_size");
+	makeAllLocationInheritedFromServer();
 }
 
 void	ServerPattern::addDirectives(const String& key)
@@ -40,15 +42,7 @@ ServerPattern& ServerPattern::operator=(const ServerPattern& target)
 		GeneralPattern::operator=(target);
 		location = target.location;
 		mimeTypes = target.mimeTypes;
-		addDirectives("Options");
-		addDirectives("error_page");
-		addDirectives("error_log");
-		addDirectives("access_log");
-		addDirectives("root");
-		addDirectives("index");
-		addDirectives("AddHandler");
-		addDirectives("autoindex");
-		addDirectives("client_max_body_size");
+		makeAllLocationInheritedFromServer();
 	}
 	return (*this);
 }
@@ -56,15 +50,7 @@ ServerPattern& ServerPattern::operator=(const ServerPattern& target)
 void	ServerPattern::setLocation(vector<LocationPattern>& _location)
 {
 	location = _location;
-	addDirectives("root");
-	addDirectives("index");
-	addDirectives("error_page");
-	addDirectives("error_log");
-	addDirectives("access_log");
-	addDirectives("Options");
-	addDirectives("AddHandler");
-	addDirectives("autoindex");
-	addDirectives("client_max_body_size");
+	makeAllLocationInheritedFromServer();
 }
 
 const vector<LocationPattern>&	ServerPattern::getLocations( void ) const
