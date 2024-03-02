@@ -28,6 +28,7 @@ string Cgi::HandelScript(vector<String> argvs)
 	{
 		dup2(fd[1],STDOUT_FILENO);
 		close(fd[0]);
+		
 		if(execve(argv[0], (char *const *)argv, NULL) < 0)
 		{
 			cout << "execve filed" << endl;

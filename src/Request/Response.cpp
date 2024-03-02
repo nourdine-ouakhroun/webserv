@@ -5,7 +5,8 @@ string Response::runScript(vector<String> args, string fileName)
 {
 	string		body;
 	int			forkValue(0);
-	int			fd[2];
+	int			input[2];
+	int			output[2];
 	int			exitStatus;
 	string		extention;
 	size_t		pos;
@@ -37,46 +38,76 @@ string Response::runScript(vector<String> args, string fileName)
 		extention = fileName.substr(pos, fileName.size() - pos);
 	if (!extention.empty() && args.size() == 2) {
 		if (args[1] == extention) {
-			int valuePipe = pipe(fd);
-			if (valuePipe < 0)
-				exit(0);
+			pipe(input);
+			pipe(output);
+
+
+			// fcntl(fd[1], F_SETFL, O_NONBLOCK, FD_CLOEXEC);
+			// fcntl(fd[0], F_SETFL, O_NONBLOCK, FD_CLOEXEC);
+			
+				// ssize_t byteIsSend = 0;
+				// ssize_t count = 0;
+				// do
+				// {
+				// 	// if (byteIsSend == -1)
+				// 	// 	break;
+				// 	count += byteIsSend;
+				// 	cout << byteIsSend << endl;
+				// 	if (count >= (ssize_t)resBody.size())
+				// 		break ;
+				// 	// resBody.erase(0, (size_t)byteIsSend);
+					
+				// } while (true);
 			forkValue = fork();
 			if (forkValue == 0)
 			{
+				close(output[0]);
+				dup2(output[1], STDOUT_FILENO);
+				dup2(output[1], STDERR_FILENO);
 
-				dup2(fd[1], STDOUT_FILENO);
-				dup2(fd[0], STDIN_FILENO);
+
+				close(input[1]);
+				dup2(input[0], STDIN_FILENO);
+
+
+				
 				if (execve(argv[0], argv, envp) < 0)
-				{
-					cout << "execve failed" << endl;
-					exit(0);
-				}
+					throw 500;
+				
 			}
-			else{
-				write(fd[1], request.getBody().c_str(), request.getBody().size());
+			else {
+				
+
+				const string &resBody = request.getBody();
+				close(input[0]);
+				write(input[1], resBody.c_str(), resBody.size());
+
 				waitpid(forkValue, &exitStatus, 0);
 				if (WIFEXITED(exitStatus)) {
-					if (WEXITSTATUS(exitStatus) != 0)
-					{
-						return "<h1> RUN ERROR </h1>";
-					}
+					if (WEXITSTATUS(exitStatus) != 0) {}
 				}
+
 				char res[200];
 				bzero(res, 200);
 				ssize_t bytes = 0;
-				while((bytes = read(fd[0], res, 199)) != 0)
+				while((bytes = read(output[0], res, 199)) != 0)
 				{
 					body.append(res);
 					bzero(res, 200);
 					if (bytes < 199)
 						break;
 				}
-				close(fd[0]);
-				close(fd[1]);
+				close(output[1]);
+
+
+
+				// close(fd[0]);
+				// close(fd[1]);
 			}
 		}
 
 	}
+	std::cout << body << std::endl;
 	return body;
 }
 
@@ -101,6 +132,7 @@ void Response::setErrorPage()
 	errorPage[204] = "No Content";
 
 	errorPage[301] = "Move Permanently";
+	errorPage[302] = "Found";
 
 	errorPage[404] = "Not Found";
 	errorPage[400] = "Bad Request";
@@ -282,8 +314,18 @@ void Response::isRedirected() {
 	if (!location.empty()) {
 		vector<Data> redirection = location.getData("return");
 		if (redirection.size()) {
-			this->redirection = redirection[0].getValue();
-			throw 301;
+			cout << "redirection: " << redirection[0].getValue() << endl;
+			vector<string> sp = split(redirection[0].getValue(), " ");
+			for (size_t i = 0; i < sp.size(); i++)
+			{
+				cout << sp[i] << endl;
+			}
+			if (sp.size() == 2) {
+				this->redirection = sp[1];
+				int red = atoi(sp[0].c_str());
+				if (red >= 300 && red < 400)
+					throw red;
+			}
 		}
 	}
 }
@@ -385,9 +427,17 @@ std::string Response::getErrorFile(int statusCode) const
 	}
 	return ("");
 }
-string Response::getRoot() const{
+string Response::getRoot() const {
 	if (!location.empty())
 		return (location.getData("root")[0].getValue());
+	return ("");
+}
+string Response::getAlias() const {
+	if (!location.empty()) {
+		vector<Data> data = location.getData("alias");
+		if (data.size())
+			return (data[0].getValue());
+	}
 	return ("");
 }
 string Response::isFound( const string& path ) const
@@ -428,14 +478,6 @@ string Response::isUpload() {
 	else
 		return ("");
 }
-
-
-
-
-
-
-
-
 
 
 
