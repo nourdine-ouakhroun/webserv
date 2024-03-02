@@ -61,3 +61,6 @@ cclean 	:
 
 run		:	all
 	./webserv configurations/default.conf
+
+run_tmp		:	all
+	./webserv configurations/tmp.conf
