@@ -737,7 +737,7 @@ void    Parser::checkingInfos( void )
     for (size_t i = 0; i < servers.size(); i++)
     {
         vector<Data> data = servers.at(i).getData("root");
-		if (data.empty())
+		if (data.empty() && servers.at(i).getData("alias").empty())
 			servers.at(i).addData(Data("root", "./Host"));
 		data = servers.at(i).getData("index");
 		if (data.empty())

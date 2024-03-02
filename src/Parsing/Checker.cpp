@@ -151,7 +151,7 @@ void    Checker::checkLocationClientMaxBodySize(const vector<LocationPattern>& l
     for (size_t i = 0; i < loca.size(); i++)
     {
         vector<Data> data = loca.at(i).getData("client_max_body_size");        
-        if (data.size() > 1 || !checkClientBodySizeValue(data.front().getValue()))
+        if (data.size() > 1 || (data.size() && !checkClientBodySizeValue(data.front().getValue())))
             throw (ParsingException("checking Faild in `client_max_body_size`."));
         if (loca.at(i).getInnerLocation().empty() == false)
             checkLocationClientMaxBodySize(loca.at(i).getInnerLocation());  
