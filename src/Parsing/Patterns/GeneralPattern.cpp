@@ -79,7 +79,7 @@ bool	GeneralPattern::empty( void ) const
 
 String	GeneralPattern::getPath( void ) const
 {
-	return ("");
+	return ("/");
 }
 
 void	GeneralPattern::printGeneralPattern(const GeneralPattern& model, String &str)

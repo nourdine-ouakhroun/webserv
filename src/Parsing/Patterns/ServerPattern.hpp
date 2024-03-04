@@ -32,7 +32,8 @@ class	ServerPattern : public GeneralPattern
 		static	void	printServerPatternInfo(const ServerPattern& serverPattern);
 
 		bool			empty( void ) const;
-		void	execute( void ) const;
+		void		execute( void ) const;
+		String				getPath( void ) const;
 		static void    getAllLocationPath(const vector<LocationPattern>& lcts, vector<String> &paths);
 
 };

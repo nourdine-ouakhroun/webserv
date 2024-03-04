@@ -85,6 +85,13 @@ void    Checker::checkDuplicate(String key, String oppositeKey)
     }
 }
 
+void    Checker::checkServers(String key)
+{
+    for (size_t i = 0; i < servers.size(); i++)
+        if (!servers.at(i).getData(key).empty())
+            throw (ParsingException("Check Faild in " + key));
+}
+
 
 void    Checker::checkLocationValues(const vector<LocationPattern>& loca, String key)
 {
@@ -174,6 +181,7 @@ void    Checker::fullCheck( void )
 {
     if (servers.empty() == true)
         return ;
+    checkServers("alias");
     checkValues();
     checkDuplicate("root", "alias");
     checkDuplicate("alias", "root");
