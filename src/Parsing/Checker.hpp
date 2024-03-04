@@ -24,6 +24,9 @@ class Checker
         // void        checkClientMaxBodySize();
         void	CheckClientBodySize();
         void    checkLocationClientMaxBodySize(const vector<LocationPattern>& loca);
+        void    checkServers(String key);
+
+
 
 };
 

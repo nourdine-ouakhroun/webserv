@@ -23,7 +23,7 @@ void	ServerPattern::addDirectiveToLocation(vector<LocationPattern>&	servers, con
 		return ;
 	for (size_t i = 0; i < servers.size(); i++)
 	{
-		if (servers.at(i).getData(oppositeKey).empty())
+		if (!servers.at(i).getData(oppositeKey).empty())
 			continue ;
 		String rootValue(serverDirective);
 		vector<Data> roots = servers.at(i).getData(key);
@@ -150,6 +150,11 @@ bool	ServerPattern::empty( void ) const
 
 void	ServerPattern::execute( void ) const
 {
+}
+
+String	ServerPattern::getPath( void ) const
+{
+	return ("/");
 }
 
 void    ServerPattern::getAllLocationPath(const vector<LocationPattern>& lcts, vector<String>& paths)
