@@ -12,8 +12,11 @@
 #include "webserver.h"
 #include "Servers.hpp"
 
+#define DIR 0
+#define FILE 1
+
 typedef std::map<std::string, std::string> maps;
-int isDirectory(const std::string& path);
+// int isDirectory(const std::string& path);
 string readF(const std::string& fileName);
 
 
@@ -46,6 +49,11 @@ private:
 
 
 public:
+string pathToServe;
+    int isDirectory(const std::string& path);
+    int isFile(const std::string& path);
+
+
     Response( const Request& req, const ServerPattern& server );
     ~Response( void );
 
@@ -103,6 +111,7 @@ public:
     string      isUpload();
 
     string      getCgiFile();
+    string     getLocationPath();
 
     string      runScript(vector<String> args, string fileName);
 
