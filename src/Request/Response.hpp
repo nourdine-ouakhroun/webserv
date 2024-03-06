@@ -27,102 +27,75 @@ class Request;
 class Response
 {
 private:
-    const Request&          request;
-    const ServerPattern&    server;
-    GeneralPattern         location;
+	const Request&          request;
+	const ServerPattern&    server;
+	GeneralPattern        	location;
 
 
 	int         statusCode;
-    std::string msg;
+	std::string message;
 
-    maps    header;
-    string  body;
-    string  response;
+	maps    header;
+	string  body;
+	string  response;
 
-    map<int, string> errorPage;
+	map<int, string>	errorPage;
+	map<string, string>	mimeType;
 
-    string fileToServe;
+	string	fileToServe;
+	string	redirection;
 
-    maps mimeType;
-    string redirection;
 
 
 
 public:
 string pathToServe;
-    int isDirectory(const std::string& path);
-    int isFile(const std::string& path);
+	Response( const Request& req, const ServerPattern& server );
+	~Response( void );
+	void	setStatusCode(int statusCode);
+	void	setMessage(const std::string &message);
+	void	setMimeType(const map<string, string> &mimeTypes);
+	void	setRedirection(const string& redirection);
+	void	setHeader(const std::string &key, const std::string &value);
+	void	setBody(const std::string &body);
+	void	setResponse(const string& Response);
+	void    setErrorPage();
+	void	setFileToServe(const std::string &path);
 
+	const string&	getFileToServe() const;
+	const string&	getMessage() const;
+	const string&	getResponse() const;
+	const string&	getRedirection() const;
+	const string&	getBody() const;
+	string			getMimeType( const std::string &key ) const;
+	string			getErrorPage( int status );
+	const map<int, string>&	getErrorPage() const;
 
-    Response( const Request& req, const ServerPattern& server );
-    ~Response( void );
+	void    makeResponse();
 
-    const map<int, string>& getErrorPage() const;
+	int isDirectory(const std::string& path);
+	int isFile(const std::string& path);
 
+	void isFormed();
+	void isMatched();
+	void isRedirected();
+	void isMethodAllowed();
+	void whichMethod();
 
-    void    setErrorPage();
-    string  getErrorPage( int status );
+	void GetMethod();
+	void PostMethod();
+	void DeleteMethod();
 
+	std::string getErrorFile(int statusCode) const;
+	string      getRoot() const;
+	string      getAlias() const;
+	string      isFound(const string &path) const;
+	bool        isCgi();
+	string      isUpload();
+	string      getCgiFile();
+	string      getLocationPath();
 
-    void setStatusCode(int statusCode);
-    void setMsg(const std::string &msg);
-
-    void setHeader(const std::string &key, const std::string &value);
-    void setBody(const std::string &body);
-    const string& getBody() const;
-
-    void setFileToServe(const std::string &fileName);
-
-
-
-    int		getStatusCode( void ) const;
-    const	std::string &getMsg( void ) const ;
-    const   std::string &getResponse( void ) const;
-
-
-    void    makeResponse( void );
-
-	void   setMimeType(const map<string, string> &mimeTypes);
-    string getMimeType( const std::string &key ) const;
-
-
-
-
-    void isFormed();
-    void isMatched();
-    void isRedirected();
-    void isMethodAllowed();
-    void whichMethod();
-
-    void GetMethod();
-    void PostMethod();
-    void DeleteMethod();
-
-
-    // geters of cobnfigFile
-    // std::string checkServer( void );
-    // std::string getFullPath();
-    std::string getErrorFile(int statusCode) const;
-    string      getRoot() const;
-    string      getAlias() const;
-
-    string      isFound(const string &path) const;
-    bool        isCgi();
-    string      isUpload();
-
-    string      getCgiFile();
-    string     getLocationPath();
-
-    string      runScript(vector<String> args, string fileName);
-
-    const string&   getRedirection() const;
-    void            setRedirection(const string& redirection);
-
-
-
-
-
-
+	string      runScript(vector<String> args, string fileName);
 };
 
 #endif

@@ -111,5 +111,29 @@ void	GeneralPattern::execute( void ) const
 void	GeneralPattern::updateData(const Data& _data, size_t pos)
 {
 	data[pos] = _data;
-	// _data.printData(data[pos], "\t");cclea
+}
+
+void	GeneralPattern::clearKey(const String & key)
+{
+	vector<Data>::const_iterator	iterBegin = data.begin();
+	vector<Data>::const_iterator	iterEnd = data.end();
+	long long indx = 0;
+	while (iterBegin < iterEnd)
+	{
+		indx++;
+		if (!iterBegin->getKey().compare(key))
+		{
+			data.erase(iterBegin);
+			iterBegin = data.begin() + (indx - 1);
+			iterEnd = data.end();
+			continue;
+		}
+		iterBegin++;
+	}
+}
+
+void	GeneralPattern::setKeyValues(const String &key, const Data& data)
+{
+	clearKey(key);
+	addData(data);
 }
