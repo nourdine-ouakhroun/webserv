@@ -1,0 +1,10 @@
+Host/app1 ==> index.html
+
+// /app1 ==> index.html
+// index.html
+path = /app/app1
+
+loaction / {
+    alias ./Host;
+    index index.html;
+}

@@ -1,5 +1,21 @@
 #include "Response.hpp"
+#include <cmath>
 
+int Response::isDirectory(const std::string& path)
+{
+	struct stat statbuf;
+	if (stat(path.c_str(), &statbuf) == -1)
+		return (-1);
+	return (S_ISDIR(statbuf.st_mode));
+}
+
+int Response::isFile(const std::string& path)
+{
+	struct stat statbuf;
+	if (stat(path.c_str(), &statbuf) == -1)
+		return (-1);
+	return (S_ISREG(statbuf.st_mode));
+}
 
 string Response::runScript(vector<String> args, string fileName)
 {
@@ -41,73 +57,45 @@ string Response::runScript(vector<String> args, string fileName)
 			pipe(input);
 			pipe(output);
 
-
-			// fcntl(fd[1], F_SETFL, O_NONBLOCK, FD_CLOEXEC);
-			// fcntl(fd[0], F_SETFL, O_NONBLOCK, FD_CLOEXEC);
-			
-				// ssize_t byteIsSend = 0;
-				// ssize_t count = 0;
-				// do
-				// {
-				// 	// if (byteIsSend == -1)
-				// 	// 	break;
-				// 	count += byteIsSend;
-				// 	cout << byteIsSend << endl;
-				// 	if (count >= (ssize_t)resBody.size())
-				// 		break ;
-				// 	// resBody.erase(0, (size_t)byteIsSend);
-					
-				// } while (true);
 			forkValue = fork();
 			if (forkValue == 0)
 			{
 				close(output[0]);
 				dup2(output[1], STDOUT_FILENO);
 				dup2(output[1], STDERR_FILENO);
-
-
 				close(input[1]);
 				dup2(input[0], STDIN_FILENO);
-
-
-				
 				if (execve(argv[0], argv, envp) < 0)
-					throw 500;
-				
+					exit(1);
 			}
 			else {
-				
-
 				const string &resBody = request.getBody();
 				close(input[0]);
 				write(input[1], resBody.c_str(), resBody.size());
-
+				close(input[1]);
 				waitpid(forkValue, &exitStatus, 0);
 				if (WIFEXITED(exitStatus)) {
-					if (WEXITSTATUS(exitStatus) != 0) {}
-				}
+					if (WEXITSTATUS(exitStatus) != 0) {
+							cout << "status: " << WEXITSTATUS(exitStatus) << endl;
+							throw 500;
+					}
 
+				}
 				char res[200];
 				bzero(res, 200);
 				ssize_t bytes = 0;
-				while((bytes = read(output[0], res, 199)) != 0)
-				{
+				while((bytes = read(output[0], res, 199)) != 0) {
 					body.append(res);
 					bzero(res, 200);
 					if (bytes < 199)
 						break;
 				}
 				close(output[1]);
-
-
-
-				// close(fd[0]);
-				// close(fd[1]);
+				close(output[0]);
 			}
 		}
 
 	}
-	std::cout << body << std::endl;
 	return body;
 }
 
@@ -133,6 +121,7 @@ void Response::setErrorPage()
 
 	errorPage[301] = "Move Permanently";
 	errorPage[302] = "Found";
+	errorPage[304] = "Not Modified";
 
 	errorPage[404] = "Not Found";
 	errorPage[400] = "Bad Request";
@@ -212,7 +201,7 @@ std::string Response::getMimeType( const std::string &key) const
 		return (ret);
 	}
 	catch(...){
-		return ("text/html");
+		return ("text/plain");
 	}
 }
 
@@ -234,6 +223,8 @@ void Response::setMimeType(const map<string, string>& mimeType)
     this->mimeType["woff"] = "font/woff";
     this->mimeType["woff2"] = "font/woff2";
     this->mimeType["ttf"] = "font/ttf";
+    this->mimeType["py"] = "text/x-python";
+	
 
 	if (mimeType.size()) {
 		this->mimeType = mimeType;
@@ -272,7 +263,7 @@ void Response::isFormed()
 		throw 414;
 	// else if (!server.getData("client_max_body_size").empty()
 	// && std::atoi(request.header("Content-Length").c_str()) > (int)(std::strtod(server.getData("client_max_body_size")[0].getValue().c_str())))
-	else if ((double)request.getBody().size() > std::strtod(server.getData("client_max_body_size")[0].getValue().c_str(), NULL))
+	else if (std::isinf(strtod(server.getData("client_max_body_size")[0].getValue().c_str(), NULL)) || (double)request.getBody().size() > std::strtod(server.getData("client_max_body_size")[0].getValue().c_str(), NULL))
 		throw 413;
 }
 void Response::isMatched() {
@@ -305,10 +296,6 @@ void Response::isMatched() {
 		location = server;
 	else
 		location = server.getLocationByPath(server.getLocations(), *it);
-	// if (location.getPath().empty()) {
-	// 	location = server;
-	// 	// throw 404;
-	// }
 }
 void Response::isRedirected() {
 	if (!location.empty()) {
@@ -471,6 +458,13 @@ string Response::getCgiFile()
 	return "";
 }
 
+string Response::getLocationPath() {
+	location.getPath();
+	return (location.getPath());
+}
+
+
+
 string Response::isUpload() {
 	vector<Data> uploadFile = location.getData("upload_dir");
 	if ( !uploadFile.empty())
@@ -480,39 +474,75 @@ string Response::isUpload() {
 }
 
 
-
 void Response::GetMethod() {
-	std::string path = getRoot() + request.getPath();
-	if (access(path.c_str(), O_RDONLY))
-		throw 404;
-	if (isDirectory(path)) {
+	// string pathToServe;
+	string path = request.getPath();
+	string root = getRoot();
+	string alias = getAlias();
+
+	cout << "--------------------------------" << endl;
+	cout << "path : |" << path << "|" << endl;
+	cout << "root : |" << root << "|" << endl;
+	cout << "alias: |" << alias << "|" << endl;
+
+	if (!alias.empty()) {
+		string locationPath = "/app";
+		string newPath;
+		size_t pos = 0;
+		if ((pos = path.find(locationPath)) != string::npos)
+			newPath = path.substr(pos + locationPath.length(), path.length() - pos + locationPath.length());
+		cout << newPath << endl;
+		pathToServe = alias + newPath;
+		// path = alias + file;    
+	}
+	else
+		pathToServe = root + request.getPath();
+	cout << "patToServe: |" << pathToServe << "|" << endl;
+	cout << "--------------------------------" << endl;
+	// cout << isDirectory(pathToServe) << endl;;
+	// exit(0);
+
+	// exit(0);
+
+	// if (access(pathToServe.c_str(), O_RDONLY))
+	// 	throw 404;
+	string index;
+
+	if (isDirectory(pathToServe) == 1) {
 		// is Directory
-		if (path[path.size() - 1] != '/') {
-			redirection = request.getPath() + "/";
+		if (path != "/" && pathToServe[pathToServe.size() - 1] != '/') {
+			redirection = path + "/";
 			throw 301;
 		}
-		// if (access((root + path + index).c_str(), O_RDONLY) == -1) { //
-		string index = isFound(path);
+
+		index = isFound(pathToServe);
 		if (!index.empty()) {
 			// success have a index
-			if (access((path + index).c_str(),  O_RDONLY) != -1)
+			if (access((pathToServe + index).c_str(),  O_RDONLY) != -1)
 				throw 200;
 			else if (isCgi()) // if location have cgi
 				// run cgi here
-				body = runScript(location.getData("cgi")[0].getValue().split(' ') , path + index);
+				body = runScript(location.getData("cgi")[0].getValue().split(' ') , pathToServe + index);
 		}
 		else
 		{
 			if (!this->location.getData("autoindex").empty() && this->location.getData("autoindex")[0].getValue() == "on")
-				body = getDirectoryContent(path, request.getPath());
+			{
+				if (pathToServe[pathToServe.length() - 1] == '/')
+					body = getDirectoryContent(pathToServe, request.getPath());
+				else
+					throw 404;
+			}
 			else
 				throw 403;
 			// auto index
 			// check if autoindex in configfile is on or off if is off 403 otherwise return autoindex
 		}
 	}
-	else {
+	else if (isFile(pathToServe) == 1) {
 		// is File
+		// if (pathToServe == alias)
+		// 	throw 500;
 		size_t pos;
 		string extention;
 		if ((pos = path.rfind(".")) != string::npos)
@@ -520,70 +550,76 @@ void Response::GetMethod() {
 		if (isCgi() && !extention.empty() && extention == location.getData("cgi")[0].getValue().split(' ')[1])
 			// run cgi here
 			body = runScript(location.getData("cgi")[0].getValue().split(' ') , path);
-		else
-			throw 200;
+		else {
+			if (access((path + index).c_str(), O_RDONLY) != -1)
+				throw 404;
+			else
+				throw 200;
+		}
 	}
+	else
+		throw 404;
 	throw 200;
 }
 
 void Response::PostMethod() {
-	string uploadDir = isUpload();
-	if (!uploadDir.empty()) {
-		cout << "Upload" << endl;
+	// string uploadDir = isUpload();
+	// if (!uploadDir.empty()) {
+	// 	cout << "Upload" << endl;
 
-		if (uploadDir.back() != '/')
-			uploadDir.append("/");
-		vector<pair<string, string> > upload = request.getUploads();
+	// 	if (uploadDir.back() != '/')
+	// 		uploadDir.append("/");
+	// 	vector<pair<string, string> > upload = request.getUploads();
 
-		for (size_t i = 0; i < upload.size(); i++)
-		{
-			if (!upload[i].first.empty()) {
-				ofstream up(uploadDir + upload[i].first);
-				up << upload[i].second;
-				up.close();
-			}
-		}
-	}
-	else {
-		cout << "Not Upload" << endl;
-		std::string path = getRoot() + request.getPath();
+	// 	for (size_t i = 0; i < upload.size(); i++)
+	// 	{
+	// 		if (!upload[i].first.empty()) {
+	// 			ofstream up(uploadDir + upload[i].first);
+	// 			up << upload[i].second;
+	// 			up.close();
+	// 		}
+	// 	}
+	// }
+	// else {
+	// 	cout << "Not Upload" << endl;
+	// 	std::string path = getRoot() + request.getPath();
 
-		if (access(path.c_str(), O_RDONLY))
-			throw 404;
-		if (isDirectory(path)) {
-			// is Directory
-			if (path[path.size() - 1] != '/') {
-				redirection = request.getPath() + "/";
-				throw 301;
-			}
-			// if (access((root + path + index).c_str(), O_RDONLY) == -1) { //
-			string index = isFound(path);
-			if (!index.empty()) {
-				// success have a index
-				if (access((path + index).c_str(),  O_RDONLY) != -1)
-					throw 200;
-				else if (isCgi()) // if location have cgi
-					body = runScript(location.getData("cgi")[0].getValue().split(' ') , path + index);
-					// run cgi here
-			}
-			else
-				throw 403;
-		}
-		else {
-			// is File
-			size_t pos;
-			string extention;
-			if ((pos = path.rfind(".")) != string::npos)
-				extention = path.substr(pos, path.size() - pos);
-			cout << isCgi() << endl;
-			if (isCgi() && !extention.empty() && extention == location.getData("cgi")[0].getValue().split(' ')[1])
-				body = runScript(location.getData("cgi")[0].getValue().split(' ') , path);
-				// run cgi here
-			else
-				throw 200;
-		}
-		throw 200;
-	}
+	// 	if (access(path.c_str(), O_RDONLY))
+	// 		throw 404;
+	// 	if (isDirectory(path)) {
+	// 		// is Directory
+	// 		if (path[path.size() - 1] != '/') {
+	// 			redirection = request.getPath() + "/";
+	// 			throw 301;
+	// 		}
+	// 		// if (access((root + path + index).c_str(), O_RDONLY) == -1) { //
+	// 		string index = isFound(path);
+	// 		if (!index.empty()) {
+	// 			// success have a index
+	// 			if (access((path + index).c_str(),  O_RDONLY) != -1)
+	// 				throw 200;
+	// 			else if (isCgi()) // if location have cgi
+	// 				body = runScript(location.getData("cgi")[0].getValue().split(' ') , path + index);
+	// 				// run cgi here
+	// 		}
+	// 		else
+	// 			throw 403;
+	// 	}
+	// 	else {
+	// 		// is File
+	// 		size_t pos;
+	// 		string extention;
+	// 		if ((pos = path.rfind(".")) != string::npos)
+	// 			extention = path.substr(pos, path.size() - pos);
+	// 		cout << isCgi() << endl;
+	// 		if (isCgi() && !extention.empty() && extention == location.getData("cgi")[0].getValue().split(' ')[1])
+	// 			body = runScript(location.getData("cgi")[0].getValue().split(' ') , path);
+	// 			// run cgi here
+	// 		else
+	// 			throw 200;
+	// 	}
+	// 	throw 200;
+	// }
 }
 
 void Response::DeleteMethod() {

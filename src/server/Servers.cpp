@@ -13,11 +13,8 @@ string makeRespose(const Socket &socket, const ServerData &serversData)
 	
 	Request			req;
 
-
-	// cout << socket.getHeader() + socket.getBody() << endl;
-	// exit(0);
 	req.parseRequest(socket.getHeader() + socket.getBody());
-	cout << req.getPath() << endl;
+
 
 
 
@@ -41,12 +38,9 @@ string makeRespose(const Socket &socket, const ServerData &serversData)
 	}
 	catch (int status)
 	{
-		string path = req.getPath();
-		string file = (res.getRoot() + path + res.isFound(res.getRoot() + path));
-		cout << res.getAlias() << endl;
-		// string file = (path);
-
-
+		cout << "StatusCode: " << status << endl;
+		string file = res.pathToServe + res.isFound(res.pathToServe);
+		cout << "file: " << file << endl;
 
 		res.setStatusCode(status);
 		res.setMsg(res.getErrorPage(status));
@@ -64,18 +58,26 @@ string makeRespose(const Socket &socket, const ServerData &serversData)
 				res.setHeader("Location", res.getRedirection());
 			}
 			else {
-				res.setBody("<h1 style=\"text-align: center;\" >" + res.getErrorPage(status) + "</h1>");
+				res.setBody("<h1 style=\"text-align: center;\" >" + to_string(status) + " " + res.getErrorPage(status) + "</h1>");
 			}
+			res.setHeader("Content-Type", "text/html");
+
 		}
 		else {
 		// 	// success OK
 			content = readF(file);
 			if (res.getBody().empty())
 				res.setBody(content);
+			res.setHeader("Content-Type", res.getMimeType(req.extention(file)));
 		}
 		if (res.getBody().length())
 			res.setHeader("Content-Length", to_string(res.getBody().length()));
-		res.setHeader("Content-Type", res.getMimeType(req.extention(req.getPath())));
+
+
+		
+		// res.setStatusCode(304);
+		// res.setMsg(res.getErrorPage(304));
+		// res.setHeader("Content-Type", "application/octet-stream");
 	}
 	res.makeResponse();
 	return res.getResponse();
