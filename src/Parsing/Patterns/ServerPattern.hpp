@@ -23,14 +23,17 @@ class	ServerPattern : public GeneralPattern
 		void	addLocation(LocationPattern _location);
 		static	LocationPattern	getLocationByPath(vector<LocationPattern> locations, const String& srcPath);
 		const	vector<LocationPattern>&	getLocations( void ) const;
-		void	addDirectiveToLocation(vector<LocationPattern>&	servers, const String& key, const String& serverRoot);
-		void	addDirectives(const String& key);
+		
+		void	addDirectiveToLocation(vector<LocationPattern>&	servers, const String& key, const String& serverRoot, const String &oppositeKey = "unknown");
+		void	addDirectives(const String& key, const String &oppositeKey = "unknown");
+
 		static int	checkIsDirectory(const String& filename);
 
 		static	void	printServerPatternInfo(const ServerPattern& serverPattern);
 
 		bool			empty( void ) const;
-		void	execute( void ) const;
+		void		execute( void ) const;
+		String				getPath( void ) const;
 		static void    getAllLocationPath(const vector<LocationPattern>& lcts, vector<String> &paths);
 
 };

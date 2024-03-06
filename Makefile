@@ -26,7 +26,7 @@ SRCS		=	src/Parsing/Checker.cpp \
 				src/Request/Response.cpp
 
 
-HEADERS	=	src/Includes/*.hpp src/Request/*.hpp
+HEADERS	=	src/Includes/*.hpp src/Request/*.hpp src/Parsing/*.hpp
 
 
 CPP	=	c++
@@ -60,3 +60,6 @@ cclean 	:
 
 run		:	all
 	./webserv configurations/default.conf
+
+run_tmp		:	all
+	./webserv configurations/tmp.conf

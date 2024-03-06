@@ -1,14 +1,5 @@
 #include"Server.hpp"
 
-unsigned int convertStringToBinary(String str)
-{
-	unsigned int res = 0;
-	vector<String> strs = str.split('.');
-	for (size_t i = 0; i < strs.size(); i++)
-		res += (unsigned int)strtol(strs[i].c_str(), NULL, 10) << i * 8;
-	return (res);
-}
-
 void	Server::bindSocket(int fd, const String &ip, int port)
 {
 	S_address socket_info;
@@ -19,8 +10,8 @@ void	Server::bindSocket(int fd, const String &ip, int port)
 	if(bind(fd, (const sockaddr*)&socket_info, sizeof(socket_info)) == -1)
 	{
 		close(fd);
-		throw runtime_error("bind : can't Bind this Port");
 		exit(1);
+		// throw runtime_error("bind : can't Bind this Port");
 	}
 }
 

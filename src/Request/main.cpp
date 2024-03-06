@@ -98,26 +98,34 @@ int main(int ac, char **av)
 		return (1);
 	}
 	signal(SIGPIPE, SIG_IGN);
-	Parser parser(av[1]);
-	Checker check(parser.getServers());
-	// check.fullCheck();
-	ServerData serv(parser.getServers());
-	Servers servers(serv);
-	servers.runAllServers();
-	servers.setMasterSockets();
-	while (true)
+	try
 	{
-		try
+		Parser parser(av[1]);
+		Checker check(parser.getServers());
+		check.fullCheck();
+		ServerData serv(parser.getServers());
+		serv.displayServers();
+		Servers servers(serv);
+		servers.runAllServers();
+		servers.setMasterSockets();
+		while (true)
 		{
-			vector<pollfd> poll_fd;
-			servers.isSocketsAreReady(poll_fd);
-			socketHaveEvent(servers, poll_fd);
-			// cout << "i'm done" << "Servers : " << servers.SocketsSize() << endl;
+			try
+			{
+				vector<pollfd> poll_fd;
+				servers.isSocketsAreReady(poll_fd);
+				socketHaveEvent(servers, poll_fd);
+				// cout << "i'm done" << "Servers : " << servers.SocketsSize() << endl;
+			}
+			catch (const Servers::PollException &e)
+			{
+				Logger::warn(cout, e.what(), "");
+				continue;
+			}
 		}
-		catch (const Servers::PollException &e)
-		{
-			Logger::warn(cout, e.what(), "");
-			continue;
-		}
+	}
+	catch(exception& e)
+	{
+		Logger::error(cerr, e.what(), "");
 	}
 }

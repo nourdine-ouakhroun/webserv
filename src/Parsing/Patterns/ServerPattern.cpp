@@ -6,21 +6,42 @@ ServerPattern::ServerPattern( void ) : GeneralPattern()
 
 ServerPattern::ServerPattern(const GeneralPattern& model, const vector<LocationPattern>& _location) : GeneralPattern(model), location(_location)
 {
-	addDirectives("root");
-	addDirectives("index");
+	addDirectives("root", "alias");
 	addDirectives("error_page");
 	addDirectives("error_log");
 	addDirectives("access_log");
 	addDirectives("Options");
 	addDirectives("AddHandler");
 	addDirectives("autoindex");
+	addDirectives("client_max_body_size");
 }
 
-void	ServerPattern::addDirectives(const String& key)
+
+void	ServerPattern::addDirectiveToLocation(vector<LocationPattern>&	servers, const String& key, const String& serverDirective, const String &oppositeKey)
+{
+	if (servers.empty() == true)
+		return ;
+	for (size_t i = 0; i < servers.size(); i++)
+	{
+		if (!servers.at(i).getData(oppositeKey).empty())
+			continue ;
+		String rootValue(serverDirective);
+		vector<Data> roots = servers.at(i).getData(key);
+		if (roots.empty() == true)
+			servers.at(i).addData(Data(key, rootValue));
+		else
+			rootValue = roots.at(0).getValue();
+		vector<LocationPattern>& innerLocation = servers.at(i).getInnerLocation();
+		if (innerLocation.empty() == false)
+			addDirectiveToLocation(innerLocation, key, rootValue, oppositeKey);
+	}
+}
+
+void	ServerPattern::addDirectives(const String& key, const String &oppositeKey)
 {
 	vector<Data> data = getData(key);
 	if (data.empty() == false)
-		addDirectiveToLocation(location, key, data.at(0).getValue());
+		addDirectiveToLocation(location, key, data.at(0).getValue(), oppositeKey);
 }
 
 ServerPattern::~ServerPattern( void ) throw()
@@ -45,9 +66,11 @@ ServerPattern& ServerPattern::operator=(const ServerPattern& target)
 		addDirectives("error_page");
 		addDirectives("error_log");
 		addDirectives("access_log");
-		addDirectives("root");
+		addDirectives("root", "alias");
+		addDirectives("index");
 		addDirectives("AddHandler");
 		addDirectives("autoindex");
+		addDirectives("client_max_body_size");
 	}
 	return (*this);
 }
@@ -55,7 +78,7 @@ ServerPattern& ServerPattern::operator=(const ServerPattern& target)
 void	ServerPattern::setLocation(vector<LocationPattern>& _location)
 {
 	location = _location;
-	addDirectives("root");
+	addDirectives("root", "alias");
 	addDirectives("index");
 	addDirectives("error_page");
 	addDirectives("error_log");
@@ -63,6 +86,7 @@ void	ServerPattern::setLocation(vector<LocationPattern>& _location)
 	addDirectives("Options");
 	addDirectives("AddHandler");
 	addDirectives("autoindex");
+	addDirectives("client_max_body_size");
 }
 
 const vector<LocationPattern>&	ServerPattern::getLocations( void ) const
@@ -99,29 +123,14 @@ LocationPattern	ServerPattern::getLocationByPath(vector<LocationPattern> locatio
 		{
 			LocationPattern loca = getLocationByPath(ibegin->getInnerLocation(), srcPath);
 			if (loca.getPath().empty() == false)
+			{
+				// loca
 				return (loca);
+			}
 		}
 		ibegin++;
 	}
 	return (LocationPattern());
-}
-
-void	ServerPattern::addDirectiveToLocation(vector<LocationPattern>&	servers, const String& key, const String& serverDirective)
-{
-	if (servers.empty() == true)
-		return ;
-	for (size_t i = 0; i < servers.size(); i++)
-	{
-		String rootValue(serverDirective);
-		vector<Data> roots = servers.at(i).getData(key);
-		if (roots.empty() == true)
-			servers.at(i).addData(Data(key, rootValue));
-		else
-			rootValue = roots.at(0).getValue();
-		vector<LocationPattern>& innerLocation = servers.at(i).getInnerLocation();
-		if (innerLocation.empty() == false)
-			addDirectiveToLocation(innerLocation, key, rootValue);
-	}
 }
 
 int		ServerPattern::checkIsDirectory(const String& filename)
@@ -145,6 +154,11 @@ bool	ServerPattern::empty( void ) const
 
 void	ServerPattern::execute( void ) const
 {
+}
+
+String	ServerPattern::getPath( void ) const
+{
+	return ("/");
 }
 
 void    ServerPattern::getAllLocationPath(const vector<LocationPattern>& lcts, vector<String>& paths)
