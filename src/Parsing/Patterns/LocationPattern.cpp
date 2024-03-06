@@ -6,9 +6,9 @@ LocationPattern::LocationPattern( void ) : GeneralPattern()
 
 LocationPattern::LocationPattern(const GeneralPattern& model, const String& Path, const vector<LocationPattern>& _innerLocation) :
 	GeneralPattern(model),
-	innerLocation(_innerLocation),
-	path(Path)
+	innerLocation(_innerLocation)
 {
+	path = Path;
 }
 
 LocationPattern::LocationPattern(const LocationPattern& copy) : GeneralPattern(copy)

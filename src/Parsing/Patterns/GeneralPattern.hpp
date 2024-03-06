@@ -8,6 +8,8 @@ class GeneralPattern
 {
 	vector<Data> data;
 
+	protected :
+		String path;
 	public	:
 		GeneralPattern( void );
 		GeneralPattern(vector<Data> _data);

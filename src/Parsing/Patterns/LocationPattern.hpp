@@ -7,7 +7,7 @@
 class	LocationPattern : public GeneralPattern
 {
 	vector<LocationPattern>	innerLocation;
-	String		path;
+	// String		path;
 
 	public :
 		LocationPattern( void );
