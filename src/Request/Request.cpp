@@ -105,7 +105,6 @@ void Request::parseMultipartFormData(const std::string& body, const std::string&
     parts = split(body, boundary + "\r\n");
 	for (size_t i = 0; i < parts.size(); i++)
 	{
-		cout << "#" << parts[i] << "#";
 		string key;
 		string content;
 		parts[i] = parts[i].substr(0, parts[i].length() - 2);

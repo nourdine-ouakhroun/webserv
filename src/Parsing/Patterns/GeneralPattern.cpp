@@ -1,11 +1,11 @@
 #include "GeneralPattern.hpp"
 
-GeneralPattern::GeneralPattern( void )
+GeneralPattern::GeneralPattern( void ) : path("/")
 {
 
 }
 
-GeneralPattern::GeneralPattern(vector<Data> _data) : data(_data)
+GeneralPattern::GeneralPattern(vector<Data> _data) : data(_data), path("/")
 {
 }
 
@@ -22,7 +22,10 @@ GeneralPattern::~GeneralPattern( void )  throw()
 GeneralPattern&	GeneralPattern::operator=(const GeneralPattern& target)
 {
 	if (this != &target)
+	{
 		setData(target.data);
+		path = target.path;
+	}
 	return (*this);
 }
 
@@ -79,7 +82,7 @@ bool	GeneralPattern::empty( void ) const
 
 String	GeneralPattern::getPath( void ) const
 {
-	return ("/");
+	return (path);
 }
 
 void	GeneralPattern::printGeneralPattern(const GeneralPattern& model, String &str)

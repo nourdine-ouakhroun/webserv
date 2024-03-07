@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Upload File</title>
+<title>Enter Your First and Last Name</title>
 <style>
     body {
         font-family: Arial, sans-serif;
@@ -27,11 +27,17 @@
         font-weight: bold;
         margin-bottom: 5px;
     }
-    .form-group input[type="file"] {
-        width: 100%;
+    .form-group input[type="text"] {
+        width: calc(100% - 22px);
         padding: 10px;
         border: 1px solid #ccc;
         border-radius: 5px;
+        margin-top: 3px;
+    }
+    .form-group input[type="text"]:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
     }
     .btn {
         background-color: #007bff;
@@ -49,13 +55,17 @@
 <body>
 
 <div class="container">
-    <h2>Upload a File</h2>
-    <form  method="post" enctype="multipart/form-data">
+    <h2>Enter Your First and Last Name</h2>
+    <form action="./cgi/displayInfo.py" method="GET">
         <div class="form-group">
-            <label for="file">Choose a file:</label>
-            <input type="file" id="file" name="file" multiple required>
+            <label for="first_name">First Name:</label>
+            <input type="text" id="first_name" name="first_name" required>
         </div>
-        <button type="submit" class="btn">Upload</button>
+        <div class="form-group">
+            <label for="last_name">Last Name:</label>
+            <input type="text" id="last_name" name="last_name" required>
+        </div>
+        <button type="submit" class="btn">Submit</button>
     </form>
 </div>
 

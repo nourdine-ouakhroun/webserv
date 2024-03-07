@@ -12,11 +12,8 @@
 #include "webserver.h"
 #include "Servers.hpp"
 
-#define DIR 0
-#define FILE 1
 
 typedef std::map<std::string, std::string> maps;
-// int isDirectory(const std::string& path);
 string readF(const std::string& fileName);
 
 
@@ -34,16 +31,16 @@ private:
 
 	int         statusCode;
 	std::string message;
+	maps    	header;
+	string		body;
+	string		response;
 
-	maps    header;
-	string  body;
-	string  response;
 
-	map<int, string>	errorPage;
-	map<string, string>	mimeType;
+	map<int, string>		statusMessage;
+	map<string, string>		mimeType;
 
-	string	fileToServe;
-	string	redirection;
+	string					fileToServe;
+	string					_redirection;
 
 
 
@@ -59,7 +56,7 @@ string pathToServe;
 	void	setHeader(const std::string &key, const std::string &value);
 	void	setBody(const std::string &body);
 	void	setResponse(const string& Response);
-	void    setErrorPage();
+	void    setStatusMessage();
 	void	setFileToServe(const std::string &path);
 
 	const string&	getFileToServe() const;
@@ -68,8 +65,8 @@ string pathToServe;
 	const string&	getRedirection() const;
 	const string&	getBody() const;
 	string			getMimeType( const std::string &key ) const;
-	string			getErrorPage( int status );
-	const map<int, string>&	getErrorPage() const;
+	string			getStatusMessage( int status );
+	const map<int, string>&	getStatusMessage() const;
 
 	void    makeResponse();
 
@@ -85,6 +82,9 @@ string pathToServe;
 	void GetMethod();
 	void PostMethod();
 	void DeleteMethod();
+	void redirection(int code, const string& path);
+
+	void deleteAll (const string& path);
 
 	std::string getErrorFile(int statusCode) const;
 	string      getRoot() const;
