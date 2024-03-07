@@ -669,56 +669,18 @@ void Response::DeleteMethod() {
 		// is Directory
 		if (path != "/" && pathToServe[pathToServe.size() - 1] != '/')
 			throw 409;
-		else if (isCgi()) // if location have cgi
-		{
-			index = isFound(pathToServe);
-			if (!index.empty())
-				setResponse(runScript(location.getData("cgi")[0].getValue().split(' ') , pathToServe + index));
-			else
-				throw 403;
-		}
-		else {
-			// i need to delete logic here;
-			// delete all content folder;
-			// cout << remove(pathToServe.c_str()) << endl;;
-			// std::remove()
-
-
-
-			deleteAll(pathToServe);
-
-
-		}
-
-
-
-
+		deleteAll(pathToServe);
+		throw 204;
 	}
 	else if (isFile(pathToServe) == 1) {
 		// is File
-		size_t pos;
-		string extention;
-		if ((pos = pathToServe.rfind(".")) != string::npos)
-			extention = pathToServe.substr(pos, pathToServe.size() - pos);
-		if (isCgi() && !extention.empty() && extention == location.getData("cgi")[0].getValue().split(' ')[1])
-			setResponse(runScript(location.getData("cgi")[0].getValue().split(' ') , pathToServe));
-			// run cgi here
-		else {
-			// delete file here;
-			// cout << "path to delete: " << pathToServe << endl;
-			if (!remove(pathToServe.c_str()))
-				// setBody("Remove This Path " + pathToServe);
-				throw 204;
-			else
-				throw 500;
-
-			// cout << remove(pathToServe.c_str()) << endl;;
-
-		}
+		if (!remove(pathToServe.c_str()))
+			throw 204;
+		else
+			throw 500;
 	}
 	else
 		throw 404;
-	throw 200;
 }
 
 void Response::redirection(int code, const string& path) {
