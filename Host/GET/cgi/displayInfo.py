@@ -3,7 +3,11 @@ import cgi
 import cgitb; cgitb.enable()  # Enable for debugging
 
 def main():
-    # print("Content-Type: text/html\n")  # HTTP header to indicate HTML content
+    print("HTTP/1.1 200 OK\r")
+    print("Content-Length: 50000\r")
+    print("Content-Type: text/html\r")
+    print("\r")
+
     print("<html><head><title>CGI Query String Values</title></head><body>")
     print("<h1>Query String Values</h1>")
     
@@ -19,7 +23,6 @@ def main():
         print("</ul>")
     else:
         print("<p>No query string values found.</p>")
-    
     print("</body></html>")
 
 if __name__ == "__main__":
