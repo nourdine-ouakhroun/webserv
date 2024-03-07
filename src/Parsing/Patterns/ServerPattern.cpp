@@ -1,23 +1,31 @@
 #include "ServerPattern.hpp"
 
-ServerPattern::ServerPattern( void ) : GeneralPattern()
-{
-}
-
-ServerPattern::ServerPattern(const GeneralPattern& model, const vector<LocationPattern>& _location) : GeneralPattern(model), location(_location)
+void	ServerPattern::addRootsDirectivesToNestedLocation()
 {
 	addDirectives("root", "alias");
+	addDirectives("index");
 	addDirectives("error_page");
 	addDirectives("error_log");
 	addDirectives("access_log");
 	addDirectives("Options");
 	addDirectives("AddHandler");
 	addDirectives("autoindex");
+	addDirectives("cgi");
 	addDirectives("client_max_body_size");
 }
 
+ServerPattern::ServerPattern( void ) : GeneralPattern()
+{
+	addRootsDirectivesToNestedLocation();
+}
 
-void	ServerPattern::addDirectiveToLocation(vector<LocationPattern>&	servers, const String& key, const String& serverDirective, const String &oppositeKey)
+ServerPattern::ServerPattern(const GeneralPattern& model, const vector<LocationPattern>& _location) : GeneralPattern(model), location(_location)
+{
+	addRootsDirectivesToNestedLocation();
+}
+
+
+void	ServerPattern::addDirectiveToLocation(vector<LocationPattern>&	servers, const String& key, const vector<Data>& serverDirective, const String &oppositeKey)
 {
 	if (servers.empty() == true)
 		return ;
@@ -25,12 +33,13 @@ void	ServerPattern::addDirectiveToLocation(vector<LocationPattern>&	servers, con
 	{
 		if (!servers.at(i).getData(oppositeKey).empty())
 			continue ;
-		String rootValue(serverDirective);
+		vector<Data> rootValue = serverDirective;
 		vector<Data> roots = servers.at(i).getData(key);
 		if (roots.empty() == true)
-			servers.at(i).addData(Data(key, rootValue));
+			for (size_t j = 0; j < rootValue.size(); j++)
+				servers.at(i).addData(rootValue[j]);
 		else
-			rootValue = roots.at(0).getValue();
+			rootValue = roots;
 		vector<LocationPattern>& innerLocation = servers.at(i).getInnerLocation();
 		if (innerLocation.empty() == false)
 			addDirectiveToLocation(innerLocation, key, rootValue, oppositeKey);
@@ -41,7 +50,7 @@ void	ServerPattern::addDirectives(const String& key, const String &oppositeKey)
 {
 	vector<Data> data = getData(key);
 	if (data.empty() == false)
-		addDirectiveToLocation(location, key, data.at(0).getValue(), oppositeKey);
+		addDirectiveToLocation(location, key, data, oppositeKey);
 }
 
 ServerPattern::~ServerPattern( void ) throw()
@@ -61,16 +70,7 @@ ServerPattern& ServerPattern::operator=(const ServerPattern& target)
 		GeneralPattern::operator=(target);
 		location = target.location;
 		mimeTypes = target.mimeTypes;
-		addDirectives("index");
-		addDirectives("Options");
-		addDirectives("error_page");
-		addDirectives("error_log");
-		addDirectives("access_log");
-		addDirectives("root", "alias");
-		addDirectives("index");
-		addDirectives("AddHandler");
-		addDirectives("autoindex");
-		addDirectives("client_max_body_size");
+		addRootsDirectivesToNestedLocation();
 	}
 	return (*this);
 }
@@ -78,15 +78,7 @@ ServerPattern& ServerPattern::operator=(const ServerPattern& target)
 void	ServerPattern::setLocation(vector<LocationPattern>& _location)
 {
 	location = _location;
-	addDirectives("root", "alias");
-	addDirectives("index");
-	addDirectives("error_page");
-	addDirectives("error_log");
-	addDirectives("access_log");
-	addDirectives("Options");
-	addDirectives("AddHandler");
-	addDirectives("autoindex");
-	addDirectives("client_max_body_size");
+	addRootsDirectivesToNestedLocation();
 }
 
 const vector<LocationPattern>&	ServerPattern::getLocations( void ) const
