@@ -1,4 +1,28 @@
-#include"Servers.hpp"
+#include "Servers.hpp"
+#include "../Request/Request.hpp"
+#include "../Request/Response.hpp"
+
+#define READ_SIZE 1000
+std::string readFile(const std::string &path)
+{
+	std::string	content;
+	char		buffer[READ_SIZE + 1];
+
+	int fd = open(path.c_str(), O_RDONLY);
+	if (fd < 0)
+		return (content);
+
+	while (1)
+	{
+		ssize_t readBytes = read(fd, buffer, READ_SIZE);
+		if (readBytes <= 0)
+			break;
+		buffer[readBytes] = 0;
+		content.append(buffer, (u_long)readBytes);
+	}
+	close(fd);
+	return (content);
+}
 
 Servers::Servers(ServerData	srvers)
 {
@@ -118,13 +142,13 @@ void	Servers::runAllServers(void)
 
 void	Servers::readyToWrite(size_t &index, vector<pollfd> &poll_fd)
 {
-	size_t send_lenght = 2000;
-	if(send_lenght > master[index].respond.size())
-		send_lenght =  master[index].respond.size();
-	ssize_t write_value = write(master[index].getFdPoll().fd,  master[index].respond.c_str(),  send_lenght);
+	// size_t send_lenght = 2000;
+	// if(send_lenght > master[index].respond.size())
+	// 	send_lenght =  master[index].respond.size();
+	ssize_t write_value = write(master[index].getFdPoll().fd, master[index].respond.c_str(), master[index].respond.size());
 	if(write_value > 0)
 	{
-		master[index].respond.erase(0,send_lenght);
+		master[index].respond.erase(0, (size_t)write_value);
 		if(master[index].respond.empty() == true)
 		{
 			close(master[index].getFdPoll().fd);
@@ -172,18 +196,50 @@ void Servers::readyToRead(size_t i, vector<pollfd> &poll_fd)
 		}
 	}
 
+
+	Request 	request;
+	Response	response;
+
+	std::string fileToServe;
+
+	ReadRequest read_request(master[i]);
+	read_request.Request();
+	cout << "size : " << master[i].request.size() << endl;
+	request.parseRequest(master[i].request);
+	request.parseBody(request.getBody());
+
+	ServerPattern server = ServerData::getServer(this->servers, master[i].ipAndPort, request.header("Host")).front();
 	try
 	{
-		// Read the request;
-		ReadRequest read_request(master[i]);
-		read_request.Request();
+
+		fileToServe = request.checkServer(server);
+		response.setFileToServe(fileToServe);
+		std::string body = request.getBody();
+		std::cout << "body" <<  body << endl;
+		// response.setRequest(request);
+
+		std::cout << "fileToServe " << fileToServe << std::endl;
 	}
-	catch(int)
+	catch (int status)
 	{
-		master[i].respond = "HTTP/1.1 200 OK\r\n\r\n <h1> hello </h1>";
-		// Change read permission to write permission;
-		master[i].setFdPoll(POLLOUT);
+		response.setResponse( status );
 	}
+
+	std::ifstream fileStream(fileToServe, std::ifstream::ate | std::ifstream::binary);
+	std::string contentLength = std::to_string(fileStream.tellg());
+	fileStream.close();
+
+	response.setBody(readFile(fileToServe));
+
+	response.setHeader("Server", "nginx-v2");
+	response.setHeader("Content-Type", response.getMimeType(request.extention(fileToServe)));
+	response.setHeader("Content-Length", contentLength);
+	response.makeResponse();
+
+
+	master[i].respond = response.getResponse();
+	master[i].setFdPoll(POLLOUT);
+
 	
 }
 
@@ -193,7 +249,7 @@ void Servers::isSocketsAreReady(vector<pollfd> &poll_fd)
 	{
 		poll_fd.push_back(master[i].getFdPoll());
 	}
-	int pint = poll(&poll_fd[0], static_cast<nfds_t>(poll_fd.size()), 6000);
+	int pint = poll(&poll_fd[0], static_cast<nfds_t>(poll_fd.size()), 1000);
 	if(pint == 0)
 		throw Servers::PollException("Server reloaded");
 	if(pint < 0)

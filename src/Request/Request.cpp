@@ -25,7 +25,7 @@ Request::~Request( void )
 {
 }
 
-void    Request::parseRequest(std::string request)
+void    Request::parseRequest(const std::string &request)
 {
 	std::vector<std::string>	reqLine;
 	std::string 	            headerReq;
@@ -40,23 +40,12 @@ void    Request::parseRequest(std::string request)
 			std::string line = request.substr(0, start);
 				this->parseRequestLine(line);
 		}
-		size_t i = 0;
-		while (i < headerPos)
-		{
-			if (request[i] != '\r')
-				headerReq += request[i];
-			i++;
-		}
-		i = headerPos + 4;
-		while (i < request.length())
-		{
-			if (request[i] != '\r')
-				bodyReq += request[i];
-			i++;
-		}
+		headerReq = request.substr(start + 2, headerPos);
+		bodyReq = request[headerPos + 2];
+		// bodyReq = request.substr(headerPos + 2, request.size());
 	}
 	this->parseHeader(headerReq);
-	this->parseBody(bodyReq);
+	// this->parseBody(bodyReq);
 	// this->parsePortAndHost();
 }
 
@@ -112,39 +101,53 @@ void Request::parseHeader( std::string reqHeader )
 		reqHeader = reqHeader.substr(newlinePos + 1, reqHeader.length());
 	}
 }
-void Request::parseBody( std::string reqBody )
+void Request::parseBody( std::string& reqBody )
 {
-	std::string key;
-	std::string value;
-	this->_body.clear();
-	if (this->getMethode() == "POST" && this->header("Content-Type") == "application/x-www-form-urlencoded")
-		this->query = reqBody;
-	else if (this->getMethode() == "POST" && this->header("Content-Type") == "multipart/form-data")
+	// std::string key;
+	// std::string value;
+	// this->_body.clear();
+	// if (this->getMethode() == "POST" && this->header("Content-Type") == "application/x-www-form-urlencoded")
+	// 	this->query = reqBody;
+	// else if (this->getMethode() == "POST" && this->header("Content-Type") == "multipart/form-data")
+	// {
+	// 	std::string bondray = this->header("boundary");
+	// 	if (!bondray.empty())
+	// 	{
+	// 		std::string start = "--" + bondray;
+	// 		std::string end = start + "--";
+	// 		std::vector<std::string> sBoundary = split(reqBody, start);
+	// 		for (size_t i = 0; i < sBoundary.size() - 1; i++)
+	// 		{
+	// 			std::vector<std::string> s = split(sBoundary[i], "\n");
+	// 			if (!s.empty() && !s[0].empty())
+	// 			{
+	// 				size_t pos = 0;
+	// 				if ((pos = s[0].find("name")) != std::string::npos)
+	// 				{
+	// 					key = s[0].substr(pos + 6, (s[0].length() - (pos + 7)));
+	// 					if (!s[1].empty())
+	// 						value = s[1];
+	// 					_body.insert(std::make_pair(key, value));
+	// 					key.clear();
+	// 					value.clear();
+	// 				}
+	// 			}
+	// 		}
+	// 	}
+	// }
+	size_t hex_valeu = 0;
+	while (true)
 	{
-		std::string bondray = this->header("boundary");
-		if (!bondray.empty())
-		{
-			std::string start = "--" + bondray;
-			std::string end = start + "--";
-			std::vector<std::string> sBoundary = split(reqBody, start);
-			for (size_t i = 0; i < sBoundary.size() - 1; i++)
-			{
-				std::vector<std::string> s = split(sBoundary[i], "\n");
-				if (!s.empty() && !s[0].empty())
-				{
-					size_t pos = 0;
-					if ((pos = s[0].find("name")) != std::string::npos)
-					{
-						key = s[0].substr(pos + 6, (s[0].length() - (pos + 7)));
-						if (!s[1].empty())
-							value = s[1];
-						_body.insert(std::make_pair(key, value));
-						key.clear();
-						value.clear();
-					}
-				}
-			}
-		}
+		size_t pos = reqBody.find("\r\n", hex_valeu);
+		if(pos == std::string::npos)
+			break;
+		pos += 2;
+		string hexa = reqBody.substr(hex_valeu, pos);
+		reqBody.erase(hex_valeu - 2, pos - (hex_valeu - 2));
+		size_t decimal = static_cast<size_t>(strtol(hexa.c_str(), NULL, 16));
+		hex_valeu += decimal;
+		if(decimal == 0)
+			break ;
 	}
 }
 
@@ -226,7 +229,7 @@ const maps &Request::getHeader( void ) const
 {
 	return (this->_header);
 }
-const maps &Request::getBody( void ) const
+std::string &Request::getBody( void )
 {
 	return (this->_body);
 }
@@ -236,7 +239,7 @@ std::string Request::extention( const std::string &path) const
 	size_t pos = path.rfind(".");
 	std::string extention;
 	if (pos != std::string::npos)
-		extention = path.substr(pos, path.length());
+		extention = path.substr(pos + 1, path.length());
 	return (extention);
 }
 
@@ -291,25 +294,45 @@ std::string Request::getRootFromLocation(ServerPattern server) {
 	}
 	return (root);
 }
+#include "String.hpp"
 
 std::string Request::checkServer(const ServerPattern &server)
 {
-	bool isFound = false;
-	std::string path = getPathname();
-	std::string root;
-	std::string fullPath;
-	// struct stat s;
+	bool		isFound = false;
+	std::string	path = getPathname();
+	std::string	root;
+	std::string	fullPath;
 
-	std::cout << "request-Path = |" << path << "|" << std::endl;
-
-	LocationPattern location = server.getLocationByPath(server.getLocations(), path);
+	vector<String> pathss;
+	ServerPattern::getAllLocationPath(server.getLocations(), pathss);
+	vector<String> newPaths;
+	String test(path);
+	test.rightTrim("/");
+	for (size_t i = 0; i < pathss.size(); i++)
+	{
+		if (!strncmp(pathss[i].c_str(), test.c_str(), pathss[i].size()) && pathss[i].size() == test.size())
+		{
+			newPaths.clear();
+			newPaths.push_back(pathss[i]);
+			break;
+		}
+		if (!strncmp(pathss[i].c_str(), test.c_str(), pathss[i].size()))
+			newPaths.push_back(pathss[i]);
+	}
+	vector<String>::iterator it = max_element(newPaths.begin(), newPaths.end());
+	if (it == newPaths.end())
+		throw 404;
+	LocationPattern location = server.getLocationByPath(server.getLocations(), newPaths[0]);
 	if (!location.getPath().empty()) {
+
 		std::vector<Data> vRoot = location.getData("root");
 		if (!vRoot.empty()) {
 			root = vRoot[0].getValue();
-
 			if (isDirectory(root + getPathname()) && (root + getPathname()).back() != '/' )
 				throw 301;
+		}
+		if (!isDirectory(root + path)) {
+			return (root + path);
 		}
 		std::vector<Data> vIndex = location.getData("index");
 		if (!vIndex.empty())
@@ -319,17 +342,15 @@ std::string Request::checkServer(const ServerPattern &server)
 				std::vector<std::string> filename = split(vIndex[i].getValue(), " ");
 				for (size_t j = 0; (j < filename.size() && !isFound); j++)
 				{
-					if (access((root + path + filename[j]).c_str(), O_RDONLY) != -1) {
-						fullPath = root + path + filename[j];
+					std::string fileExist = root + path + filename[j];
+					if (access(fileExist.c_str(), O_RDONLY) != -1)
+					{
+						fullPath = fileExist;
 						isFound = true;
-					}
-					else {
-						std::cout << "File-Not-Found >>" << root + filename[j]  << std::endl;
 					}
 				}
 			}
 		}
-		std::cout << "full-Path = |" << fullPath << "|" << std::endl;
 	}
 	return (fullPath);
 }

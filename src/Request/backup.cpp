@@ -14,7 +14,6 @@
 			
 			ServerPattern	server = ServerData::getServer(this->servers, req.header("Host"))[0];
 			fileToServe = req.checkServer(server);
-
 			res.setBody(readF(fileToServe));
 		}
 		catch (int status) {
@@ -62,15 +61,7 @@
 			// res.send(); // Send Response
 		}
 
-		std::ifstream fileStream(fileToServe, std::ifstream::ate | std::ifstream::binary);
-		std::string	contentLength = std::to_string(fileStream.tellg());
-		fileStream.close();
-
-		res.setHeader("server", "nginx-v2");
-		res.setHeader("Content-Type", res.getMimeType(extention(fileToServe)) );
-		res.setHeader("Content-Length", contentLength);
-		res.makeHeaderResponse();
-		res.makeBodyResponse();
+		
 
 		std::string response = res.getResponse();
 		ssize_t sendByte = 0;
@@ -79,4 +70,4 @@
 		
 		close(working[i].fdpoll.fd);
 		erase(master, i);
-	}
+	// }
