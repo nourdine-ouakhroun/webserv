@@ -27,10 +27,6 @@ ServerPattern::ServerPattern(const GeneralPattern& model, const vector<LocationP
 
 void	ServerPattern::addDirectiveToLocation(vector<LocationPattern>&	servers, const String& key, const vector<Data>& serverDirective, const String &oppositeKey)
 {
-	(void)servers;
-	(void)key;
-	(void)serverDirective;
-	(void)oppositeKey;
 	if (servers.empty() == true)
 		return ;
 	for (size_t i = 0; i < servers.size(); i++)
