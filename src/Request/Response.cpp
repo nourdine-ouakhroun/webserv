@@ -1,27 +1,26 @@
 #include "Response.hpp"
-#include "Servers.hpp"
 
 
 
-std::string readFile(int fd)
-{
-    std::string		request;
-	ssize_t			byte = 0;
-	size_t			readbyte = 1024;
-	char			buf[readbyte + 1];
+// std::string readFile(int fd)
+// {
+//     std::string		request;
+// 	ssize_t			byte = 0;
+// 	size_t			readbyte = 1024;
+// 	char			buf[readbyte + 1];
 
-	while(1)
-	{
-		byte = read(fd, buf, readbyte);
-		if (byte <= 0)
-            break;
-		buf[byte] = 0;
-		request += buf;
-		if (byte < (ssize_t)readbyte)
-			break ;
-	}
-	return (request);
-}
+// 	while(1)
+// 	{
+// 		byte = read(fd, buf, readbyte);
+// 		if (byte <= 0)
+//             break;
+// 		buf[byte] = 0;
+// 		request += buf;
+// 		if (byte < (ssize_t)readbyte)
+// 			break ;
+// 	}
+// 	return (request);
+// }
 
 Response::Response( void ) : statusCode(200), msg("OK")
 {
@@ -33,14 +32,84 @@ Response::~Response( void )
 }
 
 // seters
-void Response::setStatusCode( const int &statusCode )
-{
-    this->statusCode = statusCode;
-}
 // void Response::setVersion( const std::string &version )
 // {
 //     this->version = version;
 // }
+void Response::setResponse(int status)
+{
+	switch (status)
+	{
+		case 404:
+		{
+
+			setStatusCode(status);
+			setMsg("Not Found");
+			setBody("<h1>Page Not Found</h1>");
+			break;
+		}
+		case 403:
+		{
+			setStatusCode(status);
+			setMsg("Page Is Forbidden");
+			setBody("<h1>Page Is Forbidden</h1>");
+			break;
+		}
+		case 400:
+		{
+			setStatusCode(status);
+			setMsg("Bad Request");
+			setBody("<h1>Bad Request</h1>");
+		}
+		case 414:
+		{
+			setStatusCode(status);
+			setMsg("Request-Uri Too Longe");
+			setBody("<h1>Request-Uri Too Longe<h1>");
+		}
+		case 413:
+		{
+			setStatusCode(status);
+			setMsg("Request Entity Too Longe");
+			setBody("<h1>Request Entity Too Longe<h1>");
+		}
+		case 301:
+		{
+			setStatusCode(status);
+			setMsg("Move Permanently");
+			// setHeader("Location", request.getPathname() + "/");
+		}
+		case 500:
+		{
+			setStatusCode(status);
+			setMsg("Not Implamented");
+			setBody("<h1>Not Implamented</h1>");
+		}
+		default:
+		{
+			setStatusCode(200);
+			setMsg("OK");
+			setBody(readFile(fileToServe));
+
+			// setBody("<h1>Not Implamented</h1>");
+			break;
+		}
+	}
+}
+
+// void Response::setRequest(const Request &request)
+// {
+// 	request = request;
+// }
+void Response::setFileToServe(const std::string &fileName)
+{
+	fileToServe = fileName;
+}
+
+void Response::setStatusCode( int statusCode )
+{
+    this->statusCode = statusCode;
+}
 void Response::setMsg( const std::string &msg )
 {
     this->msg = msg;
@@ -72,23 +141,26 @@ const std::string &Response::getResponse( void ) const
 {
     return (this->response);
 }
+// const Request &Response::getRequest(void) const
+// {
+// 	return (request);
+// }
 
-void	Response::makeHeaderResponse( void )
-{
+void Response::makeResponse( void ) {
 	response += VERSION + std::to_string(getStatusCode()) + " " + getMsg() + ENDLINE;
 	if (!_header.empty()) {
 		for( maps::iterator it = _header.begin(); it != _header.end(); it++) {
 			response += it->first + ": " + it->second + ENDLINE; 
 		}
 	}
-}
-void	Response::makeBodyResponse( void )
-{
 	response += ENDLINE;
 	if (!_body.empty()) {
 		response += _body + "\n";
 	}
 }
+
+
+
 //const	std::string &getHeader(const std::string &key, const std::string &value) const
 //{
 //	return ()
@@ -211,33 +283,33 @@ std::string Response::getMimeType( const std::string &key) const
 }
 
 
-void Response::checkPathname( const Request &req, const std::string& path )
-{
-	if (req.getPathname() == path)
-	{
+// void Response::checkPathname( const Request &req, const std::string& path )
+// {
+// 	if (req.getPathname() == path)
+// 	{
 		
-	}
-}
+// 	}
+// }
 
-void Response::send( void ) {
-	// (void)res;
-}
+// void Response::send( void ) {
+// 	// (void)res;
+// }
 
 void Response::setMimeType( void )
 {
-    this->mimeType[".csv"] = "text/csv";
-    this->mimeType[".doc"] = "application/msword";
-    this->mimeType[".css"] = "text/css";
-    this->mimeType[".gif"] = "image/gif";
-    this->mimeType[".html"] = "text/html";
-    this->mimeType[".ico"] = "image/vnd.microsoft.icon";
-    this->mimeType[".js"] = "text/javascript";
-    this->mimeType[".mp3"] = "audio/mpeg";
-    this->mimeType[".mp4"] = "video/mp4";
-    this->mimeType[".mpeg"] = "video/mpeg";
-    this->mimeType[".jpg"] = "image/jpeg";
-    this->mimeType[".png"] = "image/png";
-    this->mimeType[".woff"] = "font/woff";
-    this->mimeType[".woff2"] = "font/woff2";
-    this->mimeType[".ttf"] = "font/ttf";
+    this->mimeType["csv"] = "text/csv";
+    this->mimeType["doc"] = "application/msword";
+    this->mimeType["css"] = "text/css";
+    this->mimeType["gif"] = "image/gif";
+    this->mimeType["html"] = "text/html";
+    this->mimeType["ico"] = "image/vnd.microsoft.icon";
+    this->mimeType["js"] = "text/javascript";
+    this->mimeType["mp3"] = "audio/mpeg";
+    this->mimeType["mp4"] = "video/mp4";
+    this->mimeType["mpeg"] = "video/mpeg";
+    this->mimeType["jpg"] = "image/jpeg";
+    this->mimeType["png"] = "image/png";
+    this->mimeType["woff"] = "font/woff";
+    this->mimeType["woff2"] = "font/woff2";
+    this->mimeType["ttf"] = "font/ttf";
 }

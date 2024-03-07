@@ -11,7 +11,7 @@
 #define DELET 2
 
 #ifndef READ_NUMBER
-#define READ_NUMBER 2025
+#define READ_NUMBER 1000000
 #endif
 
 class   ReadRequest

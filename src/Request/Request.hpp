@@ -5,10 +5,10 @@
 #include "Response.hpp"
 #include "ServerData.hpp"
 
-class Response;
 
 typedef std::map<std::string, std::string> maps;
 
+class Response;
 class Request
 {
     private:
@@ -18,17 +18,17 @@ class Request
         std::string pathname;
         std::string query;
         
-        maps        _header;
-        maps        _body;
+        maps            _header;
+        std::string     _body;
     public:
         Request( void );
         ~Request( void );
 
-	    void                        parseRequest( std::string request );
+	    void                        parseRequest( const std::string& request );
         void                        parseRequestLine( std::string reqLine );
         void                        parseUrl( void );
         void                        parseHeader( std::string reqHeader );
-        void                        parseBody( std::string reqBody );
+        void                        parseBody( std::string& reqBody );
 
         std::string header(const std::string &key) const;
         std::string body(const std::string &key) const;
@@ -42,8 +42,8 @@ class Request
         const std::string &getPathname( void ) const;
         const std::string &getQuery( void ) const;
         
-        const maps &getHeader( void ) const;
-        const maps &getBody( void ) const;
+        const   maps          &getHeader( void ) const;
+        std::string  &getBody( void );
 
         // checkserver
 
