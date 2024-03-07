@@ -24,7 +24,7 @@ class	ServerPattern : public GeneralPattern
 		static	LocationPattern	getLocationByPath(vector<LocationPattern> locations, const String& srcPath);
 		const	vector<LocationPattern>&	getLocations( void ) const;
 		
-		void	addDirectiveToLocation(vector<LocationPattern>&	servers, const String& key, const String& serverRoot, const String &oppositeKey = "unknown");
+		void	addDirectiveToLocation(vector<LocationPattern>&	servers, const String& key, const vector<Data>& serverRoot, const String &oppositeKey = "unknown");
 		void	addDirectives(const String& key, const String &oppositeKey = "unknown");
 
 		static int	checkIsDirectory(const String& filename);
@@ -36,6 +36,7 @@ class	ServerPattern : public GeneralPattern
 		String				getPath( void ) const;
 		static void    getAllLocationPath(const vector<LocationPattern>& lcts, vector<String> &paths);
 
+		void	addRootsDirectivesToNestedLocation();
 };
 
 
