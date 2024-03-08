@@ -8,6 +8,8 @@ class GeneralPattern
 {
 	vector<Data> data;
 
+	protected :
+		String path;
 	public	:
 		GeneralPattern( void );
 		GeneralPattern(vector<Data> _data);
@@ -18,12 +20,16 @@ class GeneralPattern
 		GeneralPattern&				setData(const vector<Data> &data);
 		void						updateData(const Data& _data, size_t pos);
 		void						addData(const Data& _data);
-		vector<Data>			getData(const String& key) const;
-		const vector<Data>&	getAllData( void ) const;
+		void						clearKey(const String & key);
+		void						setKeyValues(const String &key, const Data& data);
+
+		vector<Data>				getData(const String& key) const;
+		const vector<Data>&			getAllData( void ) const;
 		bool						isExist(const Data& value);
 		virtual bool				empty( void ) const;
 		virtual	String				getPath( void ) const;
 		virtual	void				execute( void ) const;
+
 		static	void				printGeneralPattern(const GeneralPattern&, const String&);
 		static	void				printGeneralPattern(const GeneralPattern&, String&);
 };

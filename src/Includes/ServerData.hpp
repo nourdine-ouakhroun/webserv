@@ -23,10 +23,10 @@ class ServerData
 		void	displayServers( void );
 		static vector<ServerPattern>	getServersByServerName(const vector<ServerPattern>& servers, const String& serverName);
 		static vector<ServerPattern>	getServersByIpAndPort(const vector<ServerPattern>& servers, String strHost);
-		static const ServerPattern&	getDefaultServer(const vector<ServerPattern>& servers);
+		static ServerPattern			getDefaultServer(const vector<ServerPattern>& servers);
 		const vector<ServerPattern>&	getAllServers() const;
 
-		static vector<ServerPattern>	getServer(ServerData& servers, const String& ClientAddress, String strHost);
+		static vector<ServerPattern>	getServer(const ServerData& servers, const String& ClientAddress, String strHost);
 
 };
 

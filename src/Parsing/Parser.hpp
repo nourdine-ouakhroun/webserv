@@ -9,10 +9,15 @@
 #include "ParsingException.hpp"
 #include "Patterns/ServerPattern.hpp"
 
+
 #ifndef KEYS
-	#define KEYS "return autoindex error_log index access_log error_page alias client_body_buffer_size client_max_body_size error_page listen location root server server_name try_files types "
+	#define KEYS "upload_dir cgi include return autoindex error_log index access_log error_page alias client_body_buffer_size client_max_body_size error_page listen location root server server_name try_files types "
 #endif
 
+double    convertGigaToByte(double x);
+double    convertMigaToByte(double x);
+double    convertKiloToByte(double x);
+long long  convertor(String str);
 
 class Parser
 {
@@ -48,6 +53,11 @@ class Parser
 		void	checkServerKeys( void );
 		void	checkLocationKeys(const vector<LocationPattern>& loca, const vector<String>& keys);
 		void	checkingInfos( void );
+		void	includeMimeTypes( void );
+
+		// ================================================
+		// void	parsingClientBodySize();
+		// void    checkLocationClientMaxBodySize(const vector<LocationPattern>& loca);
 };
 
 #endif

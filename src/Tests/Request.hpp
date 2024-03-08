@@ -30,7 +30,7 @@ public:
 	
 	void		parseReq(std::string);
 	void		parseLine(std::string);
-	void		parseHeader(std::string h1);
+	void		parseRequest(std::string h1);
 	
 	
 	void		displayReq();

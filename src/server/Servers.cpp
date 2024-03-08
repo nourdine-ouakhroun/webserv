@@ -2,27 +2,78 @@
 #include "../Request/Request.hpp"
 #include "../Request/Response.hpp"
 
-#define READ_SIZE 1000
-std::string readFile(const std::string &path)
+string readF(const std::string &path);
+
+
+string makeRespose(const Socket &socket, const ServerData &serversData)
 {
-	std::string	content;
-	char		buffer[READ_SIZE + 1];
+	(void)socket;
+	(void)serversData;
+	ServerPattern	server;
+	
+	Request			req;
 
-	int fd = open(path.c_str(), O_RDONLY);
-	if (fd < 0)
-		return (content);
 
-	while (1)
+	// cout << socket.getHeader() + socket.getBody() << endl;
+	// exit(0);
+	req.parseRequest(socket.getBody());
+
+
+
+
+
+	server = ServerData::getServer(serversData, socket.ipAndPort, req.header("Host")).front();
+	Response	res(req, server);
+	res.setMimeType(server.mimeTypes);
+
+	
+
+	string content;
+	
+	try
 	{
-		ssize_t readBytes = read(fd, buffer, READ_SIZE);
-		if (readBytes <= 0)
-			break;
-		buffer[readBytes] = 0;
-		content.append(buffer, (u_long)readBytes);
+		res.isFormed();
+		res.isMatched();
+        res.isMethodAllowed();
+		res.isRedirected();
+        res.whichMethod();
 	}
-	close(fd);
-	return (content);
+	catch (int status)
+	{
+		string path = req.getPath();
+		string file = (res.getRoot() + path + res.isFound(res.getRoot() + path));
+
+		res.setStatusCode(status);
+		res.setMsg(res.getErrorPage(status));
+
+		string errorFileName = res.getErrorFile(status);
+		if (status != 200) {
+			if (!errorFileName.empty() || status == 301) {
+				res.setStatusCode(302);
+				res.setMsg("Found");
+				if (!errorFileName.empty())
+					res.setHeader("Location", errorFileName);
+				else
+					res.setHeader("Location", res.getRedirection());
+			}
+			else {
+				res.setBody("<h1 style=\"text-align: center;\" >" + res.getErrorPage(status) + "</h1>");
+			}
+		}
+		else {
+		// 	// success OK
+			content = readF(file);
+			if (res.getBody().empty())
+				res.setBody(content);
+		}
+		if (res.getBody().length())
+			res.setHeader("Content-Length", to_string(res.getBody().length()));
+		res.setHeader("Content-Type", res.getMimeType(req.extention(req.getPath())));
+	}
+	res.makeResponse();
+	return res.getResponse();
 }
+
 
 Servers::Servers(ServerData	srvers)
 {
@@ -33,10 +84,6 @@ Servers::~Servers(void)
 {
 }
 
-// void	Servers::setWorkingSockets(const vector<Socket> & working) 
-// {
-// 	this->working = working;
-// }
 
 size_t	Servers::SocketsSize(void) const 
 {
@@ -53,10 +100,6 @@ const vector<Socket>&	Servers::getMasterSockets(void) const
 	return this->master;
 }
 
-const string&	Servers::getHeader(size_t index) const
-{
-	return this->master[index].getHeader();
-}
 
 // string&	Servers::getRespond(size_t index)
 // {
@@ -117,13 +160,11 @@ vector<String>	Servers::getAllPorts(void) const
 {
 	vector<String>			allport;
 	vector <ServerPattern>	allservers = servers.getAllServers();
-	for (size_t i = 0; i < allservers.size( ); i++)
+	for (size_t i = 0; i < allservers.size(); i++)
 	{
 		vector <Data> ports = allservers[i].getData("listen");
 		for (size_t j = 0; j < ports.size(); j++)
-		{
-			allport.push_back(ports[j].getValue());
-		}
+			allport.push_back(ports[j].getValue().split().front());
 	}
 	// cout << "allport.size() : " << allport.size() << endl;
 	allport = removeDuplicatePorts(allport);
@@ -185,6 +226,40 @@ void Servers::acceptConection(size_t index)
 	master.push_back(tmp);
 }
 
+/**
+ *
+ *
+ *
+ *
+ *
+ *chof daba hahia socket variable fih kolchi yak
+ *dik sa3a bdl fdik function(makeRespose) kifma 3jbk
+ *o wahd lblan socket had lvariabl 3lach 3tito like gha hit
+ *nta ghatkhdm kolchi fwst had function yk o mnha ta CGI o CGI
+ *ana dik sa3a ghanhtaj dak lbody so rah khas lbody ikon 3ndk ta fhad lfunction
+ *bach fach ghatl9a nta bli rah post ghat3tih li (body) mtfahmin mamtfahminch soni liya hm hm hm
+ *nta db biti tzid chi7aja fdak lcalss(Socket) zidha fih
+ *
+ *
+ *
+ * hanta hit 3arf dinmk at9oliya tani olach 3ati liya hadak kaml odak tkhrbi9 o z3t lwrdi
+ * ila knti mabaghich had lobjet ta3i (socket nta tkhdm mno ga3
+ * ghat9ad class whd akhor yak
+ * oghat initi fih gha les variable lighatkhdm bihom fwst had function
+ * b7a body size, header,ipAndPort, o lbody tahowa hit ghaykhso youslni l CGI ya3ni ghaykhso i7dr l3ndk
+ * fhad lfunction mz1 wa ikon mz1 awla maykonch
+ * ghandiroh bzz malk tkhl3na fasi dlhbs rah gha sakt lik a ghanod like ghanchtf 3lik mohim ma3lana
+ *khdm o 9ad zmr o tl9na rah bghina nkhdmo, m3ak escanor 9ahir lfasa ylh ghiyrha
+ *
+ *
+ * 
+ * matnsach rani pushit
+ *
+ *
+ *
+ */
+
+
 void Servers::readyToRead(size_t i, vector<pollfd> &poll_fd)
 {
 	for (size_t j = 0; j < fdSockets.size(); j++)
@@ -195,61 +270,25 @@ void Servers::readyToRead(size_t i, vector<pollfd> &poll_fd)
 			return;
 		}
 	}
-
-
-	Request 	request;
-	Response	response;
-
-	std::string fileToServe;
-
 	ReadRequest read_request(master[i]);
-	read_request.Request();
-	cout << "size : " << master[i].request.size() << endl;
-	request.parseRequest(master[i].request);
-	request.parseBody(request.getBody());
-
-	ServerPattern server = ServerData::getServer(this->servers, master[i].ipAndPort, request.header("Host")).front();
 	try
 	{
-
-		fileToServe = request.checkServer(server);
-		response.setFileToServe(fileToServe);
-		std::string body = request.getBody();
-		std::cout << "body" <<  body << endl;
-		// response.setRequest(request);
-
-		std::cout << "fileToServe " << fileToServe << std::endl;
+		read_request.Read();
 	}
-	catch (int status)
+	catch (ReadRequest::ReadException)
 	{
-		response.setResponse( status );
+		master[i].respond = makeRespose(master[i], servers);
+		master[i].setFdPoll(POLLOUT);
 	}
-
-	std::ifstream fileStream(fileToServe, std::ifstream::ate | std::ifstream::binary);
-	std::string contentLength = std::to_string(fileStream.tellg());
-	fileStream.close();
-
-	response.setBody(readFile(fileToServe));
-
-	response.setHeader("Server", "nginx-v2");
-	response.setHeader("Content-Type", response.getMimeType(request.extention(fileToServe)));
-	response.setHeader("Content-Length", contentLength);
-	response.makeResponse();
-
-
-	master[i].respond = response.getResponse();
-	master[i].setFdPoll(POLLOUT);
-
-	
 }
+
+
 
 void Servers::isSocketsAreReady(vector<pollfd> &poll_fd)
 {
 	for (size_t i = 0; i < master.size(); i++)
-	{
 		poll_fd.push_back(master[i].getFdPoll());
-	}
-	int pint = poll(&poll_fd[0], static_cast<nfds_t>(poll_fd.size()), 1000);
+	int pint = poll(&poll_fd[0], static_cast<nfds_t>(poll_fd.size()), 8000);
 	if(pint == 0)
 		throw Servers::PollException("Server reloaded");
 	if(pint < 0)
