@@ -54,7 +54,7 @@ string makeRespose(const Socket &socket, const ServerData &serversData)
 				if (status >= 300 && status < 400)
 					res.redirection(status, res.getRedirection());
 				else
-					res.setBody("<h1 style=\"text-align: center;\" >" + to_string(status) + " " + res.getStatusMessage(status) + "</h1>");
+					res.setBody("<h1 style=\"text-align: center;\" >" + String::toString(status) + " " + res.getStatusMessage(status) + "</h1>");
 				res.setHeader("Content-Type", "text/html");
 			}
 			else {
@@ -63,11 +63,11 @@ string makeRespose(const Socket &socket, const ServerData &serversData)
 					content = readF(file);
 					res.setBody(content);
 					res.setHeader("Content-Type", res.getMimeType(req.extention(file)));
-					res.setHeader("Content-Length", to_string(content.size()));
+					res.setHeader("Content-Length", String::toString(content.size()));
 				}
 				else {
 					res.setHeader("Content-Type", "text/html");
-					res.setHeader("Content-Length", to_string(res.getBody().size()));
+					res.setHeader("Content-Length", String::toString(res.getBody().size()));
 				}
 			}
 			res.makeResponse();

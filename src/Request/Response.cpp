@@ -186,7 +186,7 @@ const string&	Response::getFileToServe() const {
 
 
 void Response::makeResponse( void ) {
-	response += VERSION + to_string(statusCode) + " " + getMessage() + ENDLINE;
+	response += VERSION + String::toString(statusCode) + " " + getMessage() + ENDLINE;
 	if (!header.empty()) {
 		for ( maps::iterator it = header.begin(); it != header.end(); it++) {
 			response += it->first + ": " + it->second + ENDLINE; 
@@ -213,24 +213,23 @@ std::string Response::getMimeType( const std::string &key) const
 
 void Response::setMimeType(const map<string, string>& mimeType)
 {
-    this->mimeType["csv"] = "text/csv";
-    this->mimeType["doc"] = "application/msword";
-    this->mimeType["css"] = "text/css";
-    this->mimeType["gif"] = "image/gif";
-    this->mimeType["html"] = "text/html";
-    this->mimeType["ico"] = "image/vnd.microsoft.icon";
-    this->mimeType["js"] = "text/javascript";
-    this->mimeType["mp3"] = "audio/mpeg";
-    this->mimeType["mp4"] = "video/mp4";
-    this->mimeType["mpeg"] = "video/mpeg";
-    this->mimeType["jpg"] = "image/jpeg";
-    this->mimeType["png"] = "image/png";
-    this->mimeType["woff"] = "font/woff";
-    this->mimeType["woff2"] = "font/woff2";
-    this->mimeType["ttf"] = "font/ttf";
-    this->mimeType["py"] = "text/x-python";
+    // this->mimeType["csv"] = "text/csv";
+    // this->mimeType["doc"] = "application/msword";
+    // this->mimeType["css"] = "text/css";
+    // this->mimeType["gif"] = "image/gif";
+    // this->mimeType["html"] = "text/html";
+    // this->mimeType["ico"] = "image/vnd.microsoft.icon";
+    // this->mimeType["js"] = "text/javascript";
+    // this->mimeType["mp3"] = "audio/mpeg";
+    // this->mimeType["mp4"] = "video/mp4";
+    // this->mimeType["mpeg"] = "video/mpeg";
+    // this->mimeType["jpg"] = "image/jpeg";
+    // this->mimeType["png"] = "image/png";
+    // this->mimeType["woff"] = "font/woff";
+    // this->mimeType["woff2"] = "font/woff2";
+    // this->mimeType["ttf"] = "font/ttf";
+    // this->mimeType["py"] = "application/octet-stream";
 	
-
 	if (mimeType.size()) {
 		this->mimeType = mimeType;
 	}
@@ -250,8 +249,8 @@ bool isAllowdChar(const string& uri) {
 }
 void Response::isFormed()
 {
-	string size = server.getData("client_max_body_size")[0].getValue();
-	size = size.substr(0, size.length() - 1);
+	string value = server.getData("client_max_body_size")[0].getValue();
+	long long size = convertor(value);
 
 	if (!request.header("Transfer-Encoding").empty() && request.header("Transfer-Encoding") != "chunked")
 		throw 500;
@@ -259,7 +258,7 @@ void Response::isFormed()
 		throw 400;
 	else if (request.getPath().length() > 2048)
 		throw 414;
-	else if (std::isinf(strtod(size.c_str(), NULL)) || (double)request.getBody().size() > std::strtod(size.c_str(), NULL))
+	else if (std::isinf(size) || (double)request.getBody().size() > size)
 		throw 413;
 }
 void Response::isMatched() {
@@ -496,12 +495,12 @@ void Response::GetMethod() {
 
 	if (!alias.empty()) {
 		string locationPath = location.getPath();
-		cout << "locationPath: " << locationPath << endl;
+		// cout << "locationPath: " << locationPath << endl;
 		string newPath;
 		size_t pos = 0;
 		if ((pos = path.find(locationPath)) != string::npos)
 			newPath = path.substr(pos + locationPath.length(), path.length() - pos + locationPath.length());
-		cout << newPath << endl;
+		// cout << newPath << endl;
 		pathToServe = alias + newPath;  
 	}
 	else

@@ -16,7 +16,7 @@ map<string, string> getMimeTypes(String fileName)
 		vector<String> values = tmp.split();
 		if (values.size() < 2)
 			continue ;
-		mimeType.insert(make_pair<string, string>(string(values.front()), string(values.back())));
+		mimeType.insert(make_pair<string, string>(string(values.back()), string(values.front())));
 	}
 	return (mimeType);
 }
