@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>GET, POST, and DELETE Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        .form-wrapper {
+            margin-bottom: 20px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+
+<form action="./GET/Form.html" method="get">
+    <button type="submit">Upload</button>
+</form>
+
+
+<form action="./" method="post">
+    <input type="hidden" name="someData" value="HereGoesYourValue">
+    <button type="submit">Delete</button>
+</form>
+
+<!-- DELETE button, which will use JavaScript to perform the action -->
+<button id="deleteBtn">DELETE Request</button>
+
+<script>
+    document.getElementById('deleteBtn').addEventListener('click', function() {
+        fetch('your-server-endpoint', {
+            method: 'DELETE', // or 'PUT'
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                data: 'YourDataHere'
+            }) // body data type must match "Content-Type" header if you're sending data
+        }).then(response => response.json())
+        .then(data => console.log(data))
+        .catch((error) => console.error('Error:', error));
+    });
+</script>
+
+</body>
+</html>

@@ -20,7 +20,7 @@ void	Server::listenPort(int Socketfd)
 	/**
 	 * @attention check BACKLOG fhmha
 	*/
-	if(listen(Socketfd, BACKLOG)  == -1)
+	if(listen(Socketfd, SOMAXCONN)  == -1)
 	{
 		close(Socketfd);
 		throw runtime_error("listen : can't listen");

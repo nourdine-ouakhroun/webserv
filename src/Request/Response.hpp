@@ -12,8 +12,8 @@
 #include "webserver.h"
 #include "Servers.hpp"
 
+
 typedef std::map<std::string, std::string> maps;
-int isDirectory(const std::string& path);
 string readF(const std::string& fileName);
 
 
@@ -24,94 +24,78 @@ string readF(const std::string& fileName);
 class Response
 {
 private:
-    const Request&          request;
-    const ServerPattern&    server;
-    GeneralPattern         location;
+	const Request&          request;
+	const ServerPattern&    server;
+	GeneralPattern        	location;
 
 
 	int         statusCode;
-    std::string msg;
+	std::string message;
+	maps    	header;
+	string		body;
+	string		response;
 
-    maps    header;
-    string  body;
-    string  response;
 
-    map<int, string> errorPage;
+	map<int, string>		statusMessage;
+	map<string, string>		mimeType;
 
-    string fileToServe;
+	string					fileToServe;
+	string					_redirection;
 
-    // Request     request;
-
-    maps mimeType;
-    string redirection;
 
 
 
 public:
-    Response( const Request& req, const ServerPattern& server );
-    ~Response( void );
+string pathToServe;
+	Response( const Request& req, const ServerPattern& server );
+	~Response( void );
+	void	setStatusCode(int statusCode);
+	void	setMessage(const std::string &message);
+	void	setMimeType(const map<string, string> &mimeTypes);
+	void	setRedirection(const string& redirection);
+	void	setHeader(const std::string &key, const std::string &value);
+	void	setBody(const std::string &body);
+	void	setResponse(const string& Response);
+	void    setStatusMessage();
+	void	setFileToServe(const std::string &path);
 
-    const map<int, string>& getErrorPage() const;
+	const string&	getFileToServe() const;
+	const string&	getMessage() const;
+	const string&	getResponse() const;
+	const string&	getRedirection() const;
+	const string&	getBody() const;
+	string			getMimeType( const std::string &key ) const;
+	string			getStatusMessage( int status );
+	const map<int, string>&	getStatusMessage() const;
 
+	void    makeResponse();
 
-    void    setErrorPage();
-    string  getErrorPage( int status );
+	int isDirectory(const std::string& path);
+	int isFile(const std::string& path);
 
+	void isFormed();
+	void isMatched();
+	void isRedirected();
+	void isMethodAllowed();
+	void whichMethod();
 
-    void setStatusCode(int statusCode);
-    void setMsg(const std::string &msg);
+	void GetMethod();
+	void PostMethod();
+	void DeleteMethod();
+	void redirection(int code, const string& path);
 
-    void setHeader(const std::string &key, const std::string &value);
-    void setBody(const std::string &body);
-    const string& getBody() const;
+	void deleteAll (const string& path);
 
-    void setFileToServe(const std::string &fileName);
+	std::string getErrorFile(int statusCode) const;
+	string      getRoot() const;
+	string      getAlias() const;
+	string      isFound(const string &path) const;
+	bool        isCgi();
+	string      isUpload();
+	string      getCgiFile();
+	string      getLocationPath();
 
-
-
-    // void setRequest(const Request &request);
-
-    // const	std::string &getVersion( void ) const;
-    int		getStatusCode( void ) const;
-    const	std::string &getMsg( void ) const ;
-    const   std::string &getResponse( void ) const;
-    // const Request &getRequest(void) const;
-
-
-    void    makeResponse( void );
-
-	void   setMimeType(const map<string, string> &mimeTypes);
-    string getMimeType( const std::string &key ) const;
-
-
-
-
-    void isFormed();
-    void isMatched();
-    void isRedirected();
-    void isMethodAllowed();
-    void whichMethod();
-
-    void GetMethod();
-    void PostMethod();
-    void DeleteMethod();
-
-
-    // geters of cobnfigFile
-    // std::string checkServer( void );
-    // std::string getFullPath();
-    std::string getErrorFile(int statusCode) const;
-    string      getRoot() const;
-    string      isFound(const string &path) const;
-    bool        isCgi();
-    string      isUpload();
-
-    string      getCgiFile();
-
-    string      runScript(vector<String> args, string fileName);
-
-    const string&   getRedirection() const;
-    void            setRedirection(const string& redirection);
+	string      runScript(vector<String> args, string fileName);
 };
 
 #endif

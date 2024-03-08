@@ -115,7 +115,10 @@ LocationPattern	ServerPattern::getLocationByPath(vector<LocationPattern> locatio
 		{
 			LocationPattern loca = getLocationByPath(ibegin->getInnerLocation(), srcPath);
 			if (loca.getPath().empty() == false)
+			{
+				// loca
 				return (loca);
+			}
 		}
 		ibegin++;
 	}

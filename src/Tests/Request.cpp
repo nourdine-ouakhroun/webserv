@@ -126,10 +126,10 @@ bool	allowdSpecialchar(char chr)
 }
 bool	allowedChar(std::string url)
 {
-	std::cout << "|" << url << "|" << std::endl;
+	// std::cout << "|" << url << "|" << std::endl;
 	for(size_t i = 0; i < url.length(); i++)
 	{
-		std::cout << (!isprint(url[i])) << std::endl;
+		// std::cout << (!isprint(url[i])) << std::endl;
 		if (!isprint(url[i]))
 			return (0);
 	}
