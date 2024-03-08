@@ -28,6 +28,14 @@ class String : public string
 		size_t memStringSearchLast(string sstring, size_t lentgh);
 		size_t memStringSearch(string sstring, size_t lentgh);
 		String memSubstr(size_t begin, size_t end);
+		
+		template<typename T>
+		static String	toString(const T& value)
+		{
+			stringstream ss;
+			ss << value;
+			return (ss.str());
+		}
 };
 
 unsigned int convertStringToBinary(String str);
