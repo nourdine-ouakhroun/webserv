@@ -2,64 +2,66 @@
 #define REQUEST_HPP
 
 #include <sys/stat.h>
-#include "Response.hpp"
-#include "ServerData.hpp"
+#include <unistd.h>
 
+#include "ServerData.hpp"
+#include "String.hpp"
 
 typedef std::map<std::string, std::string> maps;
+std::vector<std::string> split(const std::string &line, const std::string &sep);
 
 class Response;
 class Request
 {
     private:
-        std::string method;
-        std::string url;
-        std::string version;
-        std::string pathname;
-        std::string query;
         
-        maps            _header;
-        std::string     _body;
+        string  method;
+        string  path;
+        string  query;
+        string  version;
+        string  boundary;
+        string  contentType;
+        maps    _header;
+
+        // vector< vector<pair<string, string> > > formData;
+        
+        string	Header;
+	    string	Body;
+        
+        vector<pair<string, string> > upload;
+
+        
+        // maps    _body;
     public:
         Request( void );
         ~Request( void );
 
-	    void                        parseRequest( const std::string& request );
-        void                        parseRequestLine( std::string reqLine );
-        void                        parseUrl( void );
-        void                        parseHeader( std::string reqHeader );
-        void                        parseBody( std::string& reqBody );
+        // ------------------------------ parsing request ----------------------------------
+        void                        parseRequest(const std::string &request);
+        void                        parseRequestLine( const string& reqLine );
+        void                        parseHeader();
+        void                        parseUrl( string url );
 
-        std::string header(const std::string &key) const;
-        std::string body(const std::string &key) const;
+        void                        unchunked();
+        void                        parseBody();
+        void                        parseMultipartFormData(const std::string& payload, const std::string& boundary);
+        // ---------------------------------------------------------------------------------
 
-        std::string extention( const std::string &path) const;
+        // --------------------------------------- geters -----------------------------------
+        const std::string   &getMethod( void ) const;
+        const std::string   &getPath( void ) const;
+        const std::string   &getQuery( void ) const;
+        const std::string   &getVersion( void ) const;
+        const std::string   &getBoundary() const;
+        const std::string   &getContentType() const;
 
 
-        const std::string &getMethode( void ) const;
-        const std::string &getUrl( void ) const;
-        const std::string &getVersion( void ) const;
-        const std::string &getPathname( void ) const;
-        const std::string &getQuery( void ) const;
-        
-        const   maps          &getHeader( void ) const;
-        std::string  &getBody( void );
+        const maps          &getHeader( void ) const;
+        const std::string   &getBody( void ) const;
+        const vector<pair<string, string> > getUploads() const;
 
-        // checkserver
-
-        std::string checkServer(const ServerPattern &server);
-
-        void isFormed(ServerPattern srv, Response &res);
-        void isMatched(Response &res);
-        void isRedirected(Response &res);
-        void isAllowed(Response &res);
-        void whichMethode(Response &res);
-
-        // Server check
-        std::string getRootFromLocation(ServerPattern server);
-        int isDirectory(const std::string& path);
+        const std::string   &header(const std::string &key) const;
+        std::string         extention(const string& path) const;
+        // -----------------------------------------------------------------------------------
 };
-// std::std::string	readRequest(FileDepandenc &file);
-std::vector<std::string> split(std::string line, std::string sep);
-
 #endif

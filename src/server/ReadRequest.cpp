@@ -16,99 +16,99 @@ void	ReadRequest::checkReqeust()
 	
 }
 
-void	ReadRequest::Request()
+
+void ReadRequest::handelChunked()
+{
+	while (true)
+	{
+		if(socket.hex_valeu > socket.changeBody().size())
+			break;
+		size_t pos = socket.changeBody().find("\r\n", socket.hex_valeu);
+		if(pos == NPOS)
+			break;
+		string hexa = socket.changeBody().substr(socket.hex_valeu, pos - socket.hex_valeu);
+		pos += 2;
+		socket.changeBody().erase(socket.hex_valeu - 2, pos - (socket.hex_valeu - 2));
+		size_t decimal = static_cast<size_t>(strtol(hexa.c_str(), NULL, 16));
+		socket.hex_valeu += decimal;
+		if(decimal == 0)
+			throw ReadRequest::ReadException();
+	}
+}
+
+void ReadRequest::recvSomthing(char * buffer, size_t bytes)
+{
+	string request (buffer, bytes);
+	socket.setBody(request);
+	if (socket.hex_valeu == false)
+		setHeadre(request);
+	if(socket.is_chuncked == true)
+		handelChunked();
+	if ((size_t)socket.getContenlenght() == socket.getBody().size()) {
+		throw ReadRequest::ReadException();
+	}
+}
+
+
+const string& ReadRequest::getRequest() const {
+	return (request);
+}
+
+void	ReadRequest::Read()
 {
 	ssize_t		bytes;
 	String		boundary;
-	char		buffer[READ_NUMBER] = {0};
+	char		buffer[READ_NUMBER];
 	// static int count = 0;
 
 	bytes = 0;
-	// bzero(buffer, READ_NUMBER);
 	bytes = recv(socket.getFdPoll().fd, buffer, READ_NUMBER - 1, 0);
 	if (bytes > 0)
-	{
-		cout << "bytes : " << bytes << endl;
-		socket.request.append(buffer, (size_t)bytes);
-		if (socket.request[socket.request.size() - 2] == '\r' && socket.request.back() == '\n')
-		{
-			cout << "==================================" << endl;
-			cout << socket.request.size() << endl;
-			cout << "==================================" << endl;
-			return;
-		}
-		throw runtime_error("");
-	}
-	else
-		cout << "no throw"  << endl;
-
-	// std::cout << "count " << count << std::endl;
-	// count ++; 
-	// if(bytes > 0)
-	// {
-	// 	string request (buffer, (size_t)bytes);
-	// 	if(socket.getHeader().empty() == true)
-	// 		setHeadre(request);
-	// 	socket.setBody(request);
-	// 	if(socket.is_chuncked == true)
-	// 	{
-	// 		while (true)
-	// 		{
-	// 			if(socket.hex_valeu > socket.getBodyChange().size())
-	// 				break;
-	// 			size_t pos = socket.getBodyChange().find("\r\n", socket.hex_valeu);
-	// 			if(pos == NPOS)
-	// 				break;
-	// 			pos += 2;
-	// 			string hexa = socket.getBodyChange().substr(socket.hex_valeu, pos);
-	// 			socket.getBodyChange().erase(socket.hex_valeu - 2, pos - (socket.hex_valeu - 2));
-	// 			size_t decimal = static_cast<size_t>(strtol(hexa.c_str(), NULL, 16));
-	// 			socket.hex_valeu += decimal;
-	// 			if(decimal == 0)
-	// 				throw 200;
-	// 		}
-	// 	}
-	// 	if((size_t)socket.getContenlenght() == socket.getBody().size())
-	// 		throw 200;
-	// }
-	return;
+		recvSomthing(buffer, (size_t)bytes);
 }
 
-void	ReadRequest::setHeadre(string &Request)
-{
-	size_t	pos = Request.find("\r\n\r\n");
+size_t findSeparator(const string & buffer){
+	size_t	pos = buffer.find("\r\n\r\n");
 	if(pos == NPOS)
 		throw runtime_error("");
-	socket.setHeader(Request.substr(0, pos + 4));
-	pos = socket.getHeader().find("\r\n");
-	socket.setMethod(headerMethod(socket.getHeader().substr(0, pos)));
-	if(socket.getMethod() != POST)
-		throw 200;
-	pos = socket.getHeader().find("chunked");
-	if(pos != NPOS)
-	{
-		socket.hex_valeu = 2;
-		socket.is_chuncked = true;
-		Request = Request.substr(Request.find("\r\n\r\n") + 2);
-		return;
-	}
-	pos = Request.find("Content-Length: ") + 16;
-	socket.setContenlenght(strtol(Request.substr(pos, Request.find("\r\n", pos) - pos).c_str(), NULL, 10));
-	Request = Request.substr(Request.find("\r\n\r\n") + 4);
+	return pos;
 }
-int	ReadRequest::headerMethod(String	line)
+
+void methode(const string & buffer, Request &tmp_parser){
+	tmp_parser.parseRequestLine(buffer.substr(0, buffer.find("\r\n")));
+	if(tmp_parser.getMethod() != "POST")
+		throw ReadRequest::ReadException();
+}
+void	ReadRequest::setHeadre(string &buffer)
 {
-	if(line.empty() == true)
-		throw runtime_error("");
-	vector<String> splited = line.split();
-	/**
-	 * @todo protection
-	*/
-	if(splited[0] == "GET")
-		return 0;
-	if(splited[0] == "POST")
-		return 1;
-	if(splited[0] == "DELET")
-		return 2;
-	return 3;
+	size_t	position = findSeparator(buffer);
+	Request	tmp_parser;
+	string	tmpHeader(buffer.substr(0, position + 4));
+	position += 4;
+	socket.hex_valeu = position + 2;// for the chuncked
+	methode(buffer, tmp_parser);
+	tmp_parser.parseRequest(tmpHeader);
+	if(tmp_parser.header("Transfer-Encoding") == "chunked")
+		socket.is_chuncked = true;
+	else if(tmp_parser.header("Content-Length").empty() == false)
+		socket.setContenlenght((size_t)strtol(tmp_parser.header("Content-Length").c_str(), NULL, 10) + position);
+	else
+		throw ReadRequest::ReadException();
+}
+
+
+ReadRequest::ReadException::ReadException()
+{
+	this->exception_msg = "Read EXCEPTION";
+}
+ReadRequest::ReadException::ReadException(const string &exception_msg)
+{
+	this->exception_msg = exception_msg;
+}
+const char *ReadRequest::ReadException::what() const throw()
+{
+	return this->exception_msg.c_str();
+}
+ReadRequest::ReadException::~ReadException() throw()
+{
 }

@@ -1,5 +1,36 @@
 #include "Parser.hpp"
 
+map<string, string> getMimeTypes(String fileName)
+{
+	map<string, string> mimeType;
+	fstream os(fileName.c_str());
+	if (!os.is_open())
+		return (mimeType);
+	while (!os.eof())
+	{
+		String tmp;
+		getline(os, tmp, '\n');
+		if (tmp.empty())
+			continue;
+		tmp.trim(" \t\n");
+		vector<String> values = tmp.split();
+		if (values.size() < 2)
+			continue ;
+		mimeType.insert(make_pair<string, string>(string(values.front()), string(values.back())));
+	}
+	return (mimeType);
+}
+
+void	Parser::includeMimeTypes( void )
+{
+	for (size_t i = 0; i < servers.size(); i++)
+	{
+		vector<Data> vls = servers[i].getData("include");
+		if (!vls.empty())
+			servers[i].mimeTypes = getMimeTypes(vls.front().getValue());
+	}
+}
+
 /**
  * @brief CONFIG FILE EXAMPLE :
  * 
@@ -253,6 +284,7 @@ Parser::Parser( void )
 {
 }
 
+
 /**
  * @brief	Parser Parametraise Constructor.
 */
@@ -267,6 +299,7 @@ Parser::Parser(const String& _fileName) : fileName(_fileName)
 	getFinalResualt();	// convert vector of vector String into vector of ServerPattern.
 	checkServerKeys(); // check is there is unknow Keys.
 	checkingInfos();
+	includeMimeTypes();
 }
 
 /**
@@ -490,12 +523,12 @@ void	Parser::splitContentIntoServers( void )
 	while (begin < end)
 	{
 		vector<String> srv = getServerConfig(begin, end);
-		if (srv.empty() == false)
-			serversContents.push_back(srv);
+		// if (srv.empty() == false)
+		serversContents.push_back(srv);
 		begin++;
 	}
-	if (serversContents.empty() == true)
-		throw (ParsingException("No Server to run."));
+	// if (serversContents.empty() == true)
+	// 	throw (ParsingException("No Server to run."));
 	// clear file content vector.
 	fileContent.clear();
 }
@@ -704,8 +737,14 @@ void    Parser::checkingInfos( void )
     for (size_t i = 0; i < servers.size(); i++)
     {
         vector<Data> data = servers.at(i).getData("root");
+		if (data.empty() && servers.at(i).getData("alias").empty())
+			servers.at(i).addData(Data("root", "./Host"));
+		data = servers.at(i).getData("index");
 		if (data.empty())
-			servers.at(i).addData(Data("root", "html"));
+			servers.at(i).addData(Data("index", "index.html"));
+		data = servers.at(i).getData("client_max_body_size");
+		if (data.empty())
+			servers.at(i).addData(Data("client_max_body_size", "1m"));
         data = servers.at(i).getData("listen");
 		if (data.empty())
 		{
@@ -715,7 +754,10 @@ void    Parser::checkingInfos( void )
         for (size_t j = 0; j < data.size(); j++)
         {
             String characters(".0123456789:");
-            String value(data.at(j).getValue());
+			vector<String> values = data.at(j).getValue().split();
+			if (values.size() < 1 || values.size() > 2 || (values.size() == 2 && values[1].compare("default_server")))
+                    throw (ParsingException("check Failed : invalid arguments in listen."));
+            String value(values[0]);
             for (size_t z = 0; z < value.size(); z++)
                 if (find(characters.begin(), characters.end(), value.at(z)) == characters.end())
                     throw (ParsingException("check Failed : invalid character in listen."));

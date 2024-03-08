@@ -1,0 +1,128 @@
+server {
+    listen 80;
+    server_name example.com;
+
+    location /upload {
+        # Set the maximum allowed size for client request bodies to 10MB
+        client_max_body_size 10M;
+
+        # Set the directory where uploaded files will be stored
+        # Ensure this directory exists and is writable by Nginx
+        # Replace "/path/to/upload/directory" with your desired directory
+        # Ensure the path ends with a slash
+        # Example: /var/www/html/upload/
+        # Example: /home/user/uploads/
+        # Example: /srv/nginx/uploads/
+        # Make sure the directory has proper permissions: chmod -R 755 /path/to/upload/directory
+        # Change the owner to match the Nginx user: chown -R nginx:nginx /path/to/upload/directory
+        # Or the default user (www-data on Debian/Ubuntu, nginx on CentOS/RHEL): chown -R www-data:www-data /path/to/upload/directory
+        # Consider restricting permissions further based on your security requirements
+        # For example: chmod -R 700 /path/to/upload/directory
+        # For improved security, you may consider using a separate partition or filesystem for uploads
+
+        # Set the directory where temporary files will be stored during upload
+        # This directory should be on the same filesystem as the upload directory
+        # Ensure the path ends with a slash
+        # Example: /var/tmp/nginx/
+        client_body_temp_path /var/tmp/nginx/;
+        # Make sure the directory has proper permissions: chmod -R 700 /var/tmp/nginx/
+
+        # Allow file uploads
+        # This directive allows POST requests with the Content-Type "multipart/form-data",
+        # which is commonly used for file uploads.
+        # The "upload_pass" directive specifies the URL to pass the uploaded files to.
+        # The "upload_store" directive specifies the directory to store uploaded files.
+        # The "$upload_file_name" variable represents the name of the uploaded file.
+        # The "$upload_tmp_path" variable represents the path to the temporary file.
+        # You can customize these directives according to your requirements.
+        # More options are available for fine-tuning the upload process.
+        # See the official Nginx documentation for details: https://nginx.org/en/docs/http/ngx_http_upload_module.html
+        upload_pass /upload_handler;
+        upload_store /path/to/upload/directory;
+        upload_store_access user:r;
+        upload_set_form_field $upload_field_name.name "$upload_file_name";
+        upload_set_form_field $upload_field_name.content_type "$upload_content_type";
+        upload_set_form_field $upload_field_name.path "$upload_tmp_path";
+
+        # Enable the upload module
+        # Make sure the module is compiled and installed on your Nginx server
+        # This directive specifies the location of the module's .so file
+        # Adjust the path accordingly if your setup differs
+        # Example for Ubuntu/Debian: /usr/lib/nginx/modules/ngx_http_upload_module.so
+        # Example for CentOS/RHEL: /usr/lib64/nginx/modules/ngx_http_upload_module.so
+        # Example for manual compilation: /usr/local/nginx/modules/ngx_http_upload_module.so
+        # Uncomment the line below if you're using the ngx_http_upload_module
+        # load_module modules/ngx_http_upload_module.so;
+
+        # Redirect to a different URL after successful upload (optional)
+        # Uncomment and adjust the "return" directive if you want to redirect users
+        # return 302 /success.html;
+
+        # Specify allowed MIME types for file uploads (optional)
+        # Uncomment and customize the "if" block if you want to restrict uploads by MIME type
+        # Only files with matching Content-Type headers will be accepted
+        # If no matching types are found, a 415 (Unsupported Media Type) error will be returned
+        # You can add or remove MIME types as needed
+        # if ($upload_content_type !~ "^(image/|video/|audio/|application/pdf)") {
+        #     return 415;
+        # }
+
+        # Specify allowed file extensions for file uploads (optional)
+        # Uncomment and customize the "if" block if you want to restrict uploads by file extension
+        # Only files with matching extensions will be accepted
+        # If no matching extensions are found, a 415 (Unsupported Media Type) error will be returned
+        # You can add or remove file extensions as needed
+        # if ($upload_file_name !~ "^.+\.(jpg|jpeg|png|gif|pdf|doc|docx|txt)$") {
+        #     return 415;
+        # }
+
+        # Set permissions for uploaded files (optional)
+        # Uncomment and customize the "if" block if you want to set specific permissions for uploaded files
+        # By default, uploaded files are given the permissions of the parent directory
+        # For improved security, you may want to restrict permissions further
+        # For example: chmod 640 $upload_path$upload_name;
+        # if ($upload_file_name) {
+        #     chmod 644 $upload_path$upload_name;
+        # }
+
+        # Set response headers (optional)
+        # Uncomment and customize the "add_header" directives if you want to include additional headers in the response
+        # add_header X-Content-Type-Options nosniff;
+        # add_header X-Frame-Options SAMEORIGIN;
+        # add_header X-XSS-Protection "1; mode=block";
+
+        # Include additional security measures (optional)
+        # Uncomment and include additional directives to enhance security
+        # You may need to adjust these directives based on your specific requirements
+        # See the official Nginx documentation for more information: https://nginx.org/en/docs/http/ngx_http_security_module.html
+        # include /etc/nginx/security.conf;
+
+        # Specify the allowed HTTP methods (optional)
+        # Uncomment and customize the "limit_except" directive if you want to restrict the allowed HTTP methods
+        # Only the specified methods will be allowed, and requests with other methods will be rejected
+        # limit_except POST {
+        #     deny all;
+        # }
+
+        # Error handling (optional)
+        # Uncomment and customize the "error_page" directive if you want to specify custom error pages
+        # error_page 404 /404.html;
+        # error_page 500 502 503 504 /50x.html;
+        # location = /50x.html {
+        #     internal;
+        # }
+
+        # Log file configuration (optional)
+        # Uncomment and customize the "access_log" and "error_log" directives if you want to specify custom log files
+        # access_log /var/log/nginx/upload_access.log;
+        # error_log /var/log/nginx/upload_error.log;
+
+        # Allow or deny access based on client IP address (optional)
+        # Uncomment and customize the "allow" and "deny" directives if you want to control access based on IP address
+        # allow 192.168.1.0/24;
+        # deny all;
+
+        # Enable or disable access logging (optional)
+        # Uncomment and customize the "access_log" directive if you want to enable or disable access logging
+    }
+}
