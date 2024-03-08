@@ -5,6 +5,9 @@
 #define READ_SIZE 1000
 
 
+
+
+
 // std::vector<std::string> split(std::string line, std::string sep)
 // {
 // 	std::vector<std::string> sp;
@@ -61,13 +64,7 @@ string readF(const string &path)
 }
 
 
-int isDirectory(const std::string& path)
-{
-	struct stat statbuf;
-	if (stat(path.c_str(), &statbuf))
-		return (-1);
-	return S_ISDIR(statbuf.st_mode);
-}
+
 
 
 

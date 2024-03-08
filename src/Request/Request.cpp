@@ -13,70 +13,57 @@ void    Request::parseRequest( const std::string &request )
 {
 	size_t pos = request.find("\r\n\r\n");
 	if (pos != string::npos) {
-		Header = request.substr(0, pos + 2);
-		Body = request.substr(pos + 4, request.length() - pos);
+		this->Header = request.substr(0, pos + 2);
+		this->Body = request.substr(pos + 4, request.length() - pos);
 	}
 
 	size_t start = request.find("\r\n");
 	if (start != std::string::npos)
-		parseRequestLine(Header.substr(0, start));
-	
-	if (!Header.empty())
+		parseRequestLine(this->Header.substr(0, start));
+	this->Header = this->Header.substr(start + 2, this->Header.length() - start + 2);
+
+	if (!this->Header.empty())
 		parseHeader();
-	if (!Body.empty())
+	if (!this->Body.empty())
 		parseBody();
 }
-void Request::unchunked() {
-	size_t hex_value = 0;
-	while (true)
-	{
-		size_t pos = Body.find("\r\n", hex_value);
-		string hex = Body.substr(hex_value, pos - hex_value);
-		Body.erase(hex_value, pos - hex_value + 2);
-		size_t decimal = static_cast<size_t>(strtol(hex.c_str(), NULL, 16));
-		hex_value += decimal + 2;
-		if (decimal == 0)
-			break ;
-	}
-}
+// void Request::unchunked() {
+// 	size_t hex_value = 0;
+// 	while (true)
+// 	{
+// 		size_t pos = Body.find("\r\n", hex_value);
+// 		string hex = Body.substr(hex_value, pos - hex_value);
+// 		Body.erase(hex_value, pos - hex_value + 2);
+// 		size_t decimal = static_cast<size_t>(strtol(hex.c_str(), NULL, 16));
+// 		hex_value += decimal + 2;
+// 		if (decimal == 0)
+// 			break ;
+// 	}
+// }
 void Request::parseRequestLine( const string& requestLine )
 {
 	if (!requestLine.empty())
 	{
 		std::vector<std::string> sp = split(requestLine, " ");
-		// cout << sp.size() << endl;
-		// for (size_t i = 0; i < sp.size(); i++)
-		// {
-		// 	cout << sp[i] << endl;
-		// }
-		
-		if (!sp.empty())
-		{
-			if (!sp[0].empty()) {
-				this->method = sp[0];
-				if (!sp[1].empty()) {
-					parseUrl(sp[1]);
-					if (!sp[2].empty())
-						this->version = sp[2];
-				}
-			}
+		if (sp.size() == 3) {
+			this->_method = sp[0];
+			parseUrl(sp[1]);
+			this->_version = sp[2];
 		}
 	}
 }
-void Request::parseUrl( string url )
-{
+void Request::parseUrl( const string& url ) {
     std::string path;
     size_t pos = 0;
     if ((pos = url.find("?")) != std::string::npos)
 	{
-    	this->path = url.substr(0, pos);
-        this->query = url.substr(pos + 1, url.length());
+    	this->_path = url.substr(0, pos);
+        this->_query = url.substr(pos + 1, url.length());
 	}
 	else
-    	this->path = url.substr(0, url.length());
+    	this->_path = url.substr(0, url.length());
 }
-void Request::parseHeader()
-{
+void Request::parseHeader() {
     std::pair<std::string, std::string> keyValue;
 	std::string							line;
 	size_t								newlinePos = 0;
@@ -84,9 +71,9 @@ void Request::parseHeader()
 	size_t								step = 0;
 
 	this->_header.clear();
-	while ((newlinePos = Header.find("\r\n", step)) != std::string::npos)
+	while ((newlinePos = this->Header.find("\r\n", step)) != std::string::npos)
 	{
-		line = Header.substr(step, newlinePos - step);
+		line = this->Header.substr(step, newlinePos - step);
 		if ((pos = line.find(": ")) != std::string::npos)
 		{
 			keyValue.first = line.substr(0, pos);
@@ -95,14 +82,14 @@ void Request::parseHeader()
 		}
 		step = newlinePos + 2;
 	}
-	string content = header("Content-Type");
+	string content = this->header("Content-Type");
 	if (!content.empty()) {
 		vector<string> sp = split(content, "; ");
 		if (sp.size() > 1) {
-			contentType = sp[0];
+			_contentType = sp[0];
 			size_t pos = 0;
 			if (!sp[1].empty() && (pos = sp[1].find("boundary")) != string::npos) {
-				boundary = sp[1].substr(size_t(9), size_t(pos - 9));
+				_boundary = sp[1].substr(size_t(9), size_t(pos - 9));
 			}
 		}
 	}
@@ -148,16 +135,25 @@ void Request::parseMultipartFormData(const std::string& body, const std::string&
 				content = lines[line];
 			}
 		}
-		upload.push_back(make_pair(key, content));
+		_upload.push_back(make_pair(key, content));
 	}	
 }
 void Request::parseBody() {
-	parseMultipartFormData(Body, "--" + getBoundary());
+	parseMultipartFormData(this->Body, "--" + getBoundary());
+}
+const vector<pair<string, string> > Request::getUploads() const {
+	return (_upload);
+}
+
+std::string Request::extention( const string &path) const {
+	size_t pos = path.rfind(".");
+	std::string extention;
+	if (pos != std::string::npos)
+		extention = path.substr(pos + 1, path.length() - pos);
+	return (extention);
 }
 // ---------------------------------------------------------------------------------------------
-
-const std::string& Request::header(const std::string &key) const
-{
+const std::string& Request::header(const std::string &key) const {
 	try {
 		std::string value = _header.at(key);
 		return (*new string(value));
@@ -166,49 +162,32 @@ const std::string& Request::header(const std::string &key) const
 		return (*new string(""));
 	}
 }
-
-const std::string &Request::getMethod() const
-{
-    return (method);
+const std::string &Request::getMethod() const {
+    return (_method);
+}
+const std::string &Request::getVersion() const {
+    return (_version);
+}
+const std::string &Request::getPath() const {
+    return (_path);
+}
+const std::string &Request::getQuery() const {
+    return (_query);
+}
+const std::string &Request::getBoundary() const {
+    return (_boundary);
+}
+const std::string &Request::getContentType() const {
+    return (_contentType);
+}
+const std::string &Request::getHeader() const {
+    return (Header);
+}
+const std::string &Request::getBody() const {
+    return (Body);
 }
 
-const std::string &Request::getVersion() const
-{
-    return (version);
-}
-const std::string &Request::getPath() const
-{
-    return (path);
-}
 
-const std::string &Request::getQuery() const
-{
-    return (query);
-}
-const std::string &Request::getBoundary() const
-{
-    return (boundary);
-}
-const std::string &Request::getContentType() const
-{
-    return (contentType);
-}
-
-const maps   &Request::getHeader( void ) const{
+const map<string, string>   &Request::getHeaders( void ) const {
 	return (_header);
-}
-const std::string   &Request::getBody( void ) const{
-	return (Body);
-}
-const vector<pair<string, string> > Request::getUploads() const {
-	return (upload);
-}
-
-std::string Request::extention( const string &path) const
-{
-	size_t pos = path.rfind(".");
-	std::string extention;
-	if (pos != std::string::npos)
-		extention = path.substr(pos + 1, path.length() - pos);
-	return (extention);
 }

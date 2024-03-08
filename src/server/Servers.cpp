@@ -2,7 +2,6 @@
 #include "../Request/Request.hpp"
 #include "../Request/Response.hpp"
 
-string readF(const std::string &path);
 
 
 string makeRespose(const Socket &socket, const ServerData &serversData)
@@ -11,9 +10,8 @@ string makeRespose(const Socket &socket, const ServerData &serversData)
 	(void)serversData;
 	ServerPattern	server;
 	
+
 	Request			req;
-
-
 	// cout << socket.getHeader() + socket.getBody() << endl;
 	// exit(0);
 	req.parseRequest(socket.getBody());
@@ -26,10 +24,10 @@ string makeRespose(const Socket &socket, const ServerData &serversData)
 	Response	res(req, server);
 	res.setMimeType(server.mimeTypes);
 
-	
+	// cout << "Method: " << req.getMethod() << endl;
+	// cout << "Method: " << req.getBody() << endl;
 
 	string content;
-	
 	try
 	{
 		res.isFormed();
@@ -40,37 +38,41 @@ string makeRespose(const Socket &socket, const ServerData &serversData)
 	}
 	catch (int status)
 	{
-		string path = req.getPath();
-		string file = (res.getRoot() + path + res.isFound(res.getRoot() + path));
+		// cout << "StatusCode: " << status << endl;
+		string response = res.getResponse();
 
-		res.setStatusCode(status);
-		res.setMsg(res.getErrorPage(status));
+		if (response.empty()) {
+			string file = res.pathToServe + res.isFound(res.pathToServe);
+			res.setStatusCode(status);
+			res.setMessage(res.getStatusMessage(status));
+			res.setHeader("Content-Type", "text/html");
 
-		string errorFileName = res.getErrorFile(status);
-		if (status != 200) {
-			if (!errorFileName.empty() || status == 301) {
-				res.setStatusCode(302);
-				res.setMsg("Found");
-				if (!errorFileName.empty())
-					res.setHeader("Location", errorFileName);
+			string fileName = res.getErrorFile(status);
+			if (!fileName.empty()) 
+				res.redirection(301, fileName);
+			else if (status != 200) {
+				if (status >= 300 && status < 400)
+					res.redirection(status, res.getRedirection());
 				else
-					res.setHeader("Location", res.getRedirection());
+					res.setBody("<h1 style=\"text-align: center;\" >" + to_string(status) + " " + res.getStatusMessage(status) + "</h1>");
+				res.setHeader("Content-Type", "text/html");
 			}
 			else {
-				res.setBody("<h1 style=\"text-align: center;\" >" + res.getErrorPage(status) + "</h1>");
+			// 	// success OK
+				if (res.getBody().empty()) {
+					content = readF(file);
+					res.setBody(content);
+					res.setHeader("Content-Type", res.getMimeType(req.extention(file)));
+					res.setHeader("Content-Length", to_string(content.size()));
+				}
+				else {
+					res.setHeader("Content-Type", "text/html");
+					res.setHeader("Content-Length", to_string(res.getBody().size()));
+				}
 			}
+			res.makeResponse();
 		}
-		else {
-		// 	// success OK
-			content = readF(file);
-			if (res.getBody().empty())
-				res.setBody(content);
-		}
-		if (res.getBody().length())
-			res.setHeader("Content-Length", to_string(res.getBody().length()));
-		res.setHeader("Content-Type", res.getMimeType(req.extention(req.getPath())));
 	}
-	res.makeResponse();
 	return res.getResponse();
 }
 
@@ -101,10 +103,7 @@ const vector<Socket>&	Servers::getMasterSockets(void) const
 }
 
 
-// string&	Servers::getRespond(size_t index)
-// {
-// 	return this->master[index].respond;
-// }
+
 
 void	Servers::initSockets(vector<String>&	allport)
 {

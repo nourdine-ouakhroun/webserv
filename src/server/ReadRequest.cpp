@@ -85,7 +85,7 @@ void	ReadRequest::setHeadre(string &buffer)
 	Request	tmp_parser;
 	string	tmpHeader(buffer.substr(0, position + 4));
 	position += 4;
-	socket.hex_valeu = position + 2;// for the chuncked
+	socket.hex_valeu = position + 2; // for chuncked
 	methode(buffer, tmp_parser);
 	tmp_parser.parseRequest(tmpHeader);
 	if(tmp_parser.header("Transfer-Encoding") == "chunked")
