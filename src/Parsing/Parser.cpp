@@ -1,36 +1,5 @@
 #include "Parser.hpp"
 
-map<string, string> getMimeTypes(String fileName)
-{
-	map<string, string> mimeType;
-	fstream os(fileName.c_str());
-	if (!os.is_open())
-		return (mimeType);
-	while (!os.eof())
-	{
-		String tmp;
-		getline(os, tmp, '\n');
-		if (tmp.empty())
-			continue;
-		tmp.trim(" \t\n");
-		vector<String> values = tmp.split();
-		if (values.size() < 2)
-			continue ;
-		mimeType.insert(make_pair<string, string>(string(values.back()), string(values.front())));
-	}
-	return (mimeType);
-}
-
-void	Parser::includeMimeTypes( void )
-{
-	for (size_t i = 0; i < servers.size(); i++)
-	{
-		vector<Data> vls = servers[i].getData("include");
-		if (!vls.empty())
-			servers[i].mimeTypes = getMimeTypes(vls.front().getValue());
-	}
-}
-
 /**
  * @brief CONFIG FILE EXAMPLE :
  * 
@@ -61,9 +30,8 @@ void	Parser::includeMimeTypes( void )
  * 		error_page	402 403 404 405 40x.html;
  * }
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- */
-
-/**
+ * 
+ * 
  * @brief	AFTER GETFILECONTENT :
  * ~~~~~~~~~~~~~~~~~~~ vector<String> fileContent ~~~~~~~~~~~~~~~~~~~
  * [0] 	: "Server"
@@ -99,9 +67,8 @@ void	Parser::includeMimeTypes( void )
  * [30] : "error_page	402 403 404 405 40x.html;"
  * [31] : "}"
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- */
-
-/**
+ * 
+ * 
  * @brief	AFTER CHECKSYSNTAX :
  * 	check semicolon and remove it, if an error happen then this function thow an Exception.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -137,9 +104,8 @@ void	Parser::includeMimeTypes( void )
  * [29] : "}"
  * [30] : "error_page	402 403 404 405 40x.html"
  * [31] : "}"
- */
-
-/**
+ * 
+ * 
  * @brief	AFTER SPLIT CONTENT INTO SERVERS
  * ~~~~~~~~~~ vector<vector<String> > serversContents ~~~~~~~~~~
  * INDEX: 0
@@ -177,9 +143,8 @@ void	Parser::includeMimeTypes( void )
  * [1][14] : "error_page	402 403 404 405 40x.html"
  * [1][15] : "}"
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- */
-
-/**
+ * 
+ * 
  * @brief	AFTER GET FINAL RESUALT :
  * ~~~~~~~~~~~~~~~~~~ vector<ServerPattern> servers ~~~~~~~~~~~~~~~~~~~
  * INDEX: 0
@@ -432,19 +397,25 @@ void	Parser::checkSyntax( void )
 	vector<String> server;
 	bool	insideServer = false;
 	if (fileContent.empty() == true)
-		return ;
+		throw (ParsingException("Empty file."));
 	vector<String>::iterator iterBegin = fileContent.begin();
 	const vector<String>::iterator iterEnd = fileContent.end();
+
 	while (iterBegin < iterEnd)
 	{
 		// Counting Brackets.
 		openBrackets += iterBegin->countRepeating('{');
 		openBrackets -= iterBegin->countRepeating('}');
+
 		// Skip Server Line.
 		if (!iterBegin->compare("server"))
 		{
 			insideServer = !insideServer;
 			iterBegin++;
+			// check if server followed by "{"
+			if (iterBegin < iterEnd)
+				if (*iterBegin != "{")
+					throw (ParsingException("Syntax error."));
 			continue ;
 		}
 		if (insideServer == true)
@@ -452,6 +423,10 @@ void	Parser::checkSyntax( void )
 			// Skip Location Line.
 			if (iterBegin->contains("location ") == true || iterBegin->countRepeating('{') || iterBegin->countRepeating('}'))
 			{
+				// check if location followed by a "{"
+				if (iterBegin->contains("location ") == true && (iterBegin + 1) < iterEnd)
+					if (*(iterBegin + 1) != "{")
+						throw (ParsingException("Syntax error."));
 				iterBegin++;
 				continue ;
 			}
@@ -477,6 +452,7 @@ void	Parser::checkSyntax( void )
 	}
 }
 
+
 /**
  * @brief	Extract Server Configuration one by one from vector of File Content vector.
  * @param	iterBegin	The begin of File Content vector.
@@ -488,26 +464,35 @@ vector<String>	Parser::getServerConfig(vector<String>::iterator& iterBegin, cons
 	int	openBrackets = 0; // Numebr of Brackets.
 	vector<String> server; // Return Value;
 	bool	insideServer = false;
+	bool	isServer = false;
 
 	while (iterBegin < iterEnd)
 	{
+		isServer = false;
 		if (!iterBegin->compare("server"))
 		{
 			insideServer = true;
+			isServer = true;
 			iterBegin++;
 		}
+		if (isServer && iterBegin->compare("{"))
+			throw (ParsingException("Syntax Error."));
 		openBrackets += iterBegin->countRepeating('{');
 		if (iterBegin->countRepeating('{'))
 			iterBegin++;
 		openBrackets -= iterBegin->countRepeating('}');
-		if (!openBrackets)
-			break ;
 		if (insideServer == true)
 		{
+			server.push_back("server valid");
+			if (!openBrackets)
+				break ;
 			String s = iterBegin->trim(" \t");
 			server.push_back(s);
 			iterBegin++;
 		}
+		if (!openBrackets)
+			break ;
+		iterBegin++;
 	}
 	return server;
 }
@@ -518,17 +503,19 @@ vector<String>	Parser::getServerConfig(vector<String>::iterator& iterBegin, cons
 */
 void	Parser::splitContentIntoServers( void )
 {
+	if (fileContent.empty())
+		throw (ParsingException("Empty file."));
 	vector<String>::iterator begin = fileContent.begin();
 	const vector<String>::iterator end = fileContent.end();
 	while (begin < end)
 	{
 		vector<String> srv = getServerConfig(begin, end);
-		// if (srv.empty() == false)
-		serversContents.push_back(srv);
+		if (srv.empty() == false)
+			serversContents.push_back(srv);
 		begin++;
 	}
-	// if (serversContents.empty() == true)
-	// 	throw (ParsingException("No Server to run."));
+	if (serversContents.empty() == true)
+		throw (ParsingException("No Server to run."));
 	// clear file content vector.
 	fileContent.clear();
 }
@@ -597,7 +584,7 @@ void	Parser::parsingFile(vector<String> content)
 			server.addData(extractDataFromString(*iBegin));
 			iBegin++;
 		}
-		else // Location Part
+		else if (!iBegin->compare(0, 9, "location "))
 		{
 			String _path = extractDataFromString(*iBegin).getValue();
 			server.addLocation(getLocations(++iBegin, iEnd, _path.trim(" \t")));
@@ -772,6 +759,38 @@ void    Parser::checkingInfos( void )
         }
     }
 }
+
+map<string, string> Parser::getMimeTypes(String fileName)
+{
+	map<string, string> mimeType;
+	fstream os(fileName.c_str());
+	if (!os.is_open())
+		return (mimeType);
+	while (!os.eof())
+	{
+		String tmp;
+		getline(os, tmp, '\n');
+		if (tmp.empty())
+			continue;
+		tmp.trim(" \t\n");
+		vector<String> values = tmp.split();
+		if (values.size() < 2)
+			continue ;
+		mimeType.insert(make_pair<string, string>(string(values.front()), string(values.back())));
+	}
+	return (mimeType);
+}
+
+void	Parser::includeMimeTypes( void )
+{
+	for (size_t i = 0; i < servers.size(); i++)
+	{
+		vector<Data> vls = servers[i].getData("include");
+		if (!vls.empty())
+			servers[i].mimeTypes = getMimeTypes(vls.front().getValue());
+	}
+}
+
 
 /**
  * @brief	Getter of vector of vector of String.

@@ -124,21 +124,6 @@ void	Servers::initSockets(vector<String>&	allport)
 	}
 }
 
-// void	Servers::initSocketPort80(void)
-// {
-// 	int	fd;
-// 	try
-// 	{
-// 		fd = Server::setSocket();
-// 		Server::bindSocket(fd, 80);
-// 		Server::listenPort(fd);
-// 	}
-// 	catch(runtime_error &e)
-// 	{
-// 		cout << e.what() << endl;return;
-// 	}
-// 	fdSockets.push_back(fd);
-// }
 
 vector<String> removeDuplicatePorts(const vector<String>& allPorts)
 {
