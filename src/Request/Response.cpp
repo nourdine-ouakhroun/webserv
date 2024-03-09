@@ -20,7 +20,7 @@ int Response::isFile(const std::string& path)
 
 string Response::runScript(vector<String> args, string fileName)
 {
-	string		str;
+	string		response;
 	int			forkValue(0);
 	int			input[2];
 	int			output[2];
@@ -63,6 +63,7 @@ string Response::runScript(vector<String> args, string fileName)
 			forkValue = fork();
 			if (forkValue == 0)
 			{
+				// time
 				close(output[0]);
 				dup2(output[1], STDOUT_FILENO);
 				dup2(output[1], STDERR_FILENO);
@@ -88,7 +89,7 @@ string Response::runScript(vector<String> args, string fileName)
 				bzero(res, 200);
 				ssize_t bytes = 0;
 				while ((bytes = read(output[0], res, 199)) != 0) {
-					str.append(res);
+					response.append(res);
 					bzero(res, 200);
 					if (bytes < 199)
 						break;
@@ -99,7 +100,7 @@ string Response::runScript(vector<String> args, string fileName)
 		}
 
 	}
-	return str;
+	return response;
 }
 
 
@@ -284,9 +285,6 @@ void Response::isMatched() {
 		}
 		if (!strncmp(pathss[i].c_str(), test.c_str(), pathss[i].size()))
 			newPaths.push_back(pathss[i]);
-			// localhost/web/app1/hello
-			// /web
-			// /web/app1
 	}
 	vector<String>::iterator it = max_element(newPaths.begin(), newPaths.end());
 	if (it == newPaths.end())
@@ -488,10 +486,27 @@ const map<int, string>& Response::getStatusMessage() const {
 	return (statusMessage);
 }
 
+void removeSlash(string &path) {
+	size_t i = 0;
+	string str;
+	while (path[i])
+	{
+		if ((path[i] == '/' && path[i + 1] != '/') || path[i] != '/')
+			str += path[i];
+
+		i++;
+	}
+	path = str;
+}
+
 void Response::GetMethod() {
 
 	string index;
 	string path = request.getPath();
+	cout << "path: " << path << endl;
+	removeSlash(path);
+	cout << "path: " << path << endl;
+	
 	string root = getRoot();
 	string alias = getAlias();
 
@@ -507,7 +522,6 @@ void Response::GetMethod() {
 	}
 	else
 		pathToServe = root + request.getPath();
-	cout << pathToServe << endl;
 	if (isDirectory(pathToServe) == 1) {
 		// is Directory
 		if (path != "/" && pathToServe[pathToServe.size() - 1] != '/') {
