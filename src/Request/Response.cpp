@@ -19,57 +19,6 @@ int Response::isFile(const std::string& path)
 }
 
 
-
-
-/**
- * 
- * 
- * 	
-	char	*argv[] = {
-		const_cast<char*>(args[0].c_str()),
-		const_cast<char*>(fileName.c_str()),
-		NULL
-	};
-	char	*envp[] = {
-		const_cast<char*>(string("REDIRECT_STATUS=200").c_str()),
-		const_cast<char*>(string("HTTP_CONNECTION=" + request.header("Connection")).c_str()),
-		const_cast<char*>(string("HTTP_HOST=" + request.header("Host")).c_str()),
-		const_cast<char*>(string("CONTENT_LENGTH=" + request.header("Content-Length")).c_str()),
-		const_cast<char*>(string("CONTENT_TYPE=" + request.header("Content-Type")).c_str()),
-		const_cast<char*>(string("HTTP_ACCEPT=" + request.header("Accept")).c_str()),
-		const_cast<char*>(string("HTTP_USER_AGENT=" + request.header("User-Agent")).c_str()),
-		const_cast<char*>(string("PATH_INFO=" + request.getPath()).c_str()),
-		const_cast<char*>(string("SCRIPT_NAME=" + fileName).c_str()),
-		const_cast<char*>(string("QUERY_STRING=" + request.getQuery()).c_str()),
-		const_cast<char*>(string("REQUEST_METHOD=" + request.getMethod()).c_str()),
-		NULL
-	};
- *
-
-
- 		char	*argv[] = {
-					&args[0][0],
-					&fileName[0],
-					NULL
-				};
-				char	*envp[] = {
-					&string("REDIRECT_STATUS=200")[0],
-					&string("HTTP_CONNECTION=" + request.header("Connection"))[0],
-					&string("HTTP_HOST=" + request.header("Host"))[0],
-					&string("CONTENT_LENGTH=" + request.header("Content-Length"))[0],
-					&string("CONTENT_TYPE=" + request.header("Content-Type"))[0],
-					&string("HTTP_ACCEPT=" + request.header("Accept"))[0],
-					&string("HTTP_USER_AGENT=" + request.header("User-Agent"))[0],
-					&string("PATH_INFO=" + request.getPath())[0],
-					&string("SCRIPT_NAME=" + fileName)[0],
-					&string("QUERY_STRING=" + request.getQuery())[0],
-					&string("REQUEST_METHOD=" + request.getMethod())[0],
-					NULL
-				};
-
-*/
-
-
 string Response::runScript(vector<String> args, string fileName)
 {
 	string		str;

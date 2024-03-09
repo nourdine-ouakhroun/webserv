@@ -494,7 +494,7 @@ vector<String>	Parser::getServerConfig(vector<String>::iterator& iterBegin, cons
 		}
 		if (!openBrackets)
 			break ;
-		iterBegin++;
+		// iterBegin++;
 	}
 	return server;
 }
@@ -740,7 +740,6 @@ void    Parser::checkingInfos( void )
 			servers.at(i).addData(Data("listen", "0.0.0.0:80"));
 			continue;
 		}
-		servers.at(i).clearKey("listen");
         for (size_t j = 0; j < data.size(); j++)
         {
             String characters(".0123456789:");
@@ -754,6 +753,7 @@ void    Parser::checkingInfos( void )
             vector<String> strs = value.split(':');
             if (strs.size() == 1)
             {
+				servers.at(i).clearKey("listen");
                 if (strs.at(0).find('.') == String::npos)
                     servers.at(i).addData(Data("listen", "0.0.0.0:" + strs[0]));
                 else
