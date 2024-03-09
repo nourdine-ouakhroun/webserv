@@ -67,6 +67,11 @@ string makeRespose(const Socket &socket, const ServerData &serversData)
 			}
 			res.makeResponse();
 		}
+		else {
+			Request parseCgiRes;
+			// parseCgiRes.parse;
+
+		}
 	}
 	return res.getResponse();
 }
