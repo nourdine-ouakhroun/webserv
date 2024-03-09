@@ -37,6 +37,7 @@ OBJS		=	${SRCS:src/%.cpp=${BIN}/%.o}
 
 
 all			:	${NAME}
+	@mkdir -p html
 
 ${NAME}		: ${OBJS}
 	${CPP} ${CPPFLAGS} $^ -o $@

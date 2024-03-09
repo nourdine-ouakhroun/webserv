@@ -483,12 +483,14 @@ vector<String>	Parser::getServerConfig(vector<String>::iterator& iterBegin, cons
 		openBrackets -= iterBegin->countRepeating('}');
 		if (insideServer == true)
 		{
-			server.push_back("server valid");
+			if (server.empty())
+				server.push_back("server valid");
 			if (!openBrackets)
 				break ;
 			String s = iterBegin->trim(" \t");
 			server.push_back(s);
 			iterBegin++;
+			continue;
 		}
 		if (!openBrackets)
 			break ;
@@ -725,7 +727,7 @@ void    Parser::checkingInfos( void )
     {
         vector<Data> data = servers.at(i).getData("root");
 		if (data.empty() && servers.at(i).getData("alias").empty())
-			servers.at(i).addData(Data("root", "./Host"));
+			servers.at(i).addData(Data("root", "html"));
 		data = servers.at(i).getData("index");
 		if (data.empty())
 			servers.at(i).addData(Data("index", "index.html"));
