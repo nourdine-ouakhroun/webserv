@@ -18,6 +18,58 @@ int Response::isFile(const std::string& path)
 	return (S_ISREG(statbuf.st_mode));
 }
 
+
+
+
+/**
+ * 
+ * 
+ * 	
+	char	*argv[] = {
+		const_cast<char*>(args[0].c_str()),
+		const_cast<char*>(fileName.c_str()),
+		NULL
+	};
+	char	*envp[] = {
+		const_cast<char*>(string("REDIRECT_STATUS=200").c_str()),
+		const_cast<char*>(string("HTTP_CONNECTION=" + request.header("Connection")).c_str()),
+		const_cast<char*>(string("HTTP_HOST=" + request.header("Host")).c_str()),
+		const_cast<char*>(string("CONTENT_LENGTH=" + request.header("Content-Length")).c_str()),
+		const_cast<char*>(string("CONTENT_TYPE=" + request.header("Content-Type")).c_str()),
+		const_cast<char*>(string("HTTP_ACCEPT=" + request.header("Accept")).c_str()),
+		const_cast<char*>(string("HTTP_USER_AGENT=" + request.header("User-Agent")).c_str()),
+		const_cast<char*>(string("PATH_INFO=" + request.getPath()).c_str()),
+		const_cast<char*>(string("SCRIPT_NAME=" + fileName).c_str()),
+		const_cast<char*>(string("QUERY_STRING=" + request.getQuery()).c_str()),
+		const_cast<char*>(string("REQUEST_METHOD=" + request.getMethod()).c_str()),
+		NULL
+	};
+ *
+
+
+ 		char	*argv[] = {
+					&args[0][0],
+					&fileName[0],
+					NULL
+				};
+				char	*envp[] = {
+					&string("REDIRECT_STATUS=200")[0],
+					&string("HTTP_CONNECTION=" + request.header("Connection"))[0],
+					&string("HTTP_HOST=" + request.header("Host"))[0],
+					&string("CONTENT_LENGTH=" + request.header("Content-Length"))[0],
+					&string("CONTENT_TYPE=" + request.header("Content-Type"))[0],
+					&string("HTTP_ACCEPT=" + request.header("Accept"))[0],
+					&string("HTTP_USER_AGENT=" + request.header("User-Agent"))[0],
+					&string("PATH_INFO=" + request.getPath())[0],
+					&string("SCRIPT_NAME=" + fileName)[0],
+					&string("QUERY_STRING=" + request.getQuery())[0],
+					&string("REQUEST_METHOD=" + request.getMethod())[0],
+					NULL
+				};
+
+*/
+
+
 string Response::runScript(vector<String> args, string fileName)
 {
 	string		str;
@@ -29,27 +81,6 @@ string Response::runScript(vector<String> args, string fileName)
 	size_t		pos;
 
 
-	char	*argv[] = {
-		strdup(args[0].c_str()),
-		strdup(fileName.c_str()),
-		NULL
-	};
-	char	*envp[] = {
-		strdup(("REDIRECT_STATUS=200")),
-		strdup(("HTTP_CONNECTION=" + request.header("Connection")).c_str()),
-		strdup(("HTTP_HOST=" + request.header("Host")).c_str()),
-		strdup(("CONTENT_LENGTH=" + request.header("Content-Length")).c_str()),
-		strdup(("CONTENT_TYPE=" + request.header("Content-Type")).c_str()),
-		strdup(("HTTP_ACCEPT=" + request.header("Accept")).c_str()),
-		strdup(("HTTP_USER_AGENT=" + request.header("User-Agent")).c_str()),
-		strdup(("PATH_INFO=" + request.getPath()).c_str()),
-		strdup(("SCRIPT_NAME=" + fileName).c_str()),
-		strdup(("QUERY_STRING=" + request.getQuery()).c_str()),
-		strdup(("REQUEST_METHOD=" + request.getMethod()).c_str()),
-		NULL
-	};
-
-	
 
 	if ((pos = fileName.rfind(".")) != string::npos)
 		extention = fileName.substr(pos, fileName.size() - pos);
@@ -57,12 +88,36 @@ string Response::runScript(vector<String> args, string fileName)
 		if (args[1] == extention) {
 			pipe(input);
 			pipe(output);
-			cout << argv[0] << endl;
-			cout << argv[1] << endl;
-
+			
 			forkValue = fork();
 			if (forkValue == 0)
 			{
+				char	*argv[] = {
+					&args[0][0],
+					&fileName[0],
+					NULL
+				};
+
+				string str[11] = {
+					("REDIRECT_STATUS=200\0"),
+					("HTTP_CONNECTION=" + request.header("Connection") + "\0"),
+					("HTTP_HOST=" + request.header("Host")),
+					("CONTENT_LENGTH=" + request.header("Content-Length") + "\0"),
+					("CONTENT_TYPE=" + request.header("Content-Type") + "\0"),
+					("HTTP_ACCEPT=" + request.header("Accept") + "\0"),
+					("HTTP_USER_AGENT=" + request.header("User-Agent") + "\0"),
+					("PATH_INFO=" + request.getPath() + "\0"),
+					("SCRIPT_NAME=" + fileName + "\0"),
+					("QUERY_STRING=" + request.getQuery() + "\0"),
+					("REQUEST_METHOD=" + request.getMethod() + "\0")
+				};
+
+				char	*envp[12];
+				size_t i = 0;
+				for ( i = 0 ; i < 11; i++)
+					envp[i] = &str[i][0];
+				envp[i] = NULL;
+
 				close(output[0]);
 				dup2(output[1], STDOUT_FILENO);
 				dup2(output[1], STDERR_FILENO);
@@ -398,6 +453,7 @@ void Response::whichMethod() {
 // 	}
 // 	return (fullPath);
 // }
+
 std::string Response::getErrorFile(int statusCode) const
 {
 	vector<Data>  errorPage = location.getData("error_page");
@@ -506,7 +562,7 @@ void Response::GetMethod() {
 	}
 	else
 		pathToServe = root + request.getPath();
-	cout << pathToServe << endl;
+	// cout << pathToServe << endl;
 	if (isDirectory(pathToServe) == 1) {
 		// is Directory
 		if (path != "/" && pathToServe[pathToServe.size() - 1] != '/') {
@@ -630,7 +686,7 @@ void Response::deleteAll (const string& path)
 
 	while ((dirp = readdir(dir)) != NULL)
 	{
-		cout << "Name: " << path+dirp->d_name << endl;
+		// cout << "Name: " << path+dirp->d_name << endl;
 		if (string(dirp->d_name) == "." || string(dirp->d_name) == "..")
 			continue ;
 		else if (isDirectory(path + dirp->d_name) == 1)

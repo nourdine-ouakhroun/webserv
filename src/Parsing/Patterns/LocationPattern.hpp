@@ -7,7 +7,6 @@
 class	LocationPattern : public GeneralPattern
 {
 	vector<LocationPattern>	innerLocation;
-	// String		path;
 
 	public :
 		LocationPattern( void );
@@ -22,7 +21,6 @@ class	LocationPattern : public GeneralPattern
 		
 		bool			empty( void ) const;
 		String			getPath( void ) const;
-		void			execute( void ) const;
 };
 
 #endif

@@ -11,22 +11,6 @@ bool	checkFile(String file)
 	return (true);
 }
 
-String*  getContentFile(String file)
-{
-    fstream new_file;
-    
-    new_file.open(file.c_str(), ios::in);
-    if (new_file.is_open() == false)
-        return (NULL);
-    String  sa;
-    String  *content = new String();
-    while (getline(new_file, sa))
-        content->append(sa + "\n");
-    new_file.close();
-    return (content);
-}
-
-
 String	getFileContent(const vector<String>& indexes, const String& path)
 {
 	String value;

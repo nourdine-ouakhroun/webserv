@@ -153,13 +153,12 @@ std::string Request::extention( const string &path) const {
 	return (extention);
 }
 // ---------------------------------------------------------------------------------------------
-const std::string& Request::header(const std::string &key) const {
+std::string Request::header(const std::string &key) const {
 	try {
-		std::string value = _header.at(key);
-		return (*new string(value));
+		return (_header.at(key));
 	}
 	catch(...){
-		return (*new string(""));
+		return ("");
 	}
 }
 const std::string &Request::getMethod() const {

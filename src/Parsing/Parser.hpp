@@ -11,13 +11,8 @@
 
 
 #ifndef KEYS
-	#define KEYS "upload_dir cgi include return autoindex error_log index access_log error_page alias client_body_buffer_size client_max_body_size error_page listen location root server server_name try_files types "
+	#define KEYS "method upload_dir cgi include return autoindex error_log index access_log error_page alias client_max_body_size error_page listen location root server server_name "
 #endif
-
-double    convertGigaToByte(double x);
-double    convertMigaToByte(double x);
-double    convertKiloToByte(double x);
-long long  convertor(String str);
 
 class Parser
 {
@@ -32,32 +27,29 @@ class Parser
 		Parser(const String& _fileName);
 		Parser(const Parser& copy);
 		~Parser( void ) throw();
-		Parser& operator=(const Parser& target);
-		const vector<vector<String> >& getServersContents( void ) const;
-		const	vector<ServerPattern>&	getServers( void ) const;
-		static vector<Data>	parseHeader(const String& header);
-		
-		void	printServerPattern(const ServerPattern& server);
+		Parser&								operator=(const Parser& target);
+		const	vector<vector<String> >&	getServersContents( void ) const;
+		const	vector<ServerPattern>&		getServers( void ) const;
+		void								printServerPattern(const ServerPattern& server);
+		static vector<Data>					parseHeader(const String& header);
 	
 	private :
-		Data	extractDataFromString(String& line);
-		void	 printLocations(const LocationPattern& locs);
-		LocationPattern	 getLocations(vector<String>::iterator& begin, const vector<String>::iterator& end, String	path);
-		void	 getFileContent( void );
-		vector<String>	 getServerConfig(vector<String>::iterator&, const vector<String>::iterator&);
-		void	parsingFile(vector<String> content);
-		void	splitContentIntoServers( void );
-		void	getFinalResualt( void );
-		void	checkSyntax( void );
-		String	readFile( void );
-		void	checkServerKeys( void );
-		void	checkLocationKeys(const vector<LocationPattern>& loca, const vector<String>& keys);
-		void	checkingInfos( void );
-		void	includeMimeTypes( void );
+		Data				extractDataFromString(String& line);
+		void				printLocations(const LocationPattern& locs);
+		LocationPattern		getLocations(vector<String>::iterator& begin, const vector<String>::iterator& end, String	path);
+		void	 			getFileContent( void );
+		vector<String>		getServerConfig(vector<String>::iterator&, const vector<String>::iterator&);
+		void				parsingFile(vector<String> content);
+		void				splitContentIntoServers( void );
+		void				getFinalResualt( void );
+		void				checkSyntax( void );
+		String				readFile( void );
+		void				checkServerKeys( void );
+		void				checkLocationKeys(const vector<LocationPattern>& loca, const vector<String>& keys);
+		void				checkingInfos( void );
+		void				includeMimeTypes( void );
+		map<string, string>	getMimeTypes(String fileName);
 
-		// ================================================
-		// void	parsingClientBodySize();
-		// void    checkLocationClientMaxBodySize(const vector<LocationPattern>& loca);
 };
 
 #endif
