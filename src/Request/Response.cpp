@@ -376,6 +376,7 @@ void Response::isMethodAllowed() {
 	}
 }
 void Response::whichMethod() {
+
 	if (request.getMethod() == "GET") {
 		GetMethod();
 		// handle Get method

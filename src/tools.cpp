@@ -1,6 +1,5 @@
 #include "Server.hpp"
 #include "Logger.hpp"
-#include "Directives.hpp"
 #include "Socket.hpp"
 
 String	readFile(const String& path)
