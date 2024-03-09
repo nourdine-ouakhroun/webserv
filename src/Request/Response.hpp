@@ -20,7 +20,7 @@ string readF(const std::string& fileName);
 #define VERSION "HTTP/1.1 "
 #define ENDLINE "\r\n"
 
-class Request;
+// class Request;
 class Response
 {
 private:

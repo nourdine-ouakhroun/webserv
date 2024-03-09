@@ -196,7 +196,6 @@ std::string Response::getStatusMessage( int status ) {
 	return (statusMessage[status]);
 }
 
-
 void Response::setFileToServe(const std::string &fileName)
 {
 	fileToServe = fileName;

@@ -13,8 +13,13 @@ string makeRespose(const Socket &socket, const ServerData &serversData)
 
 	Request			req;
 	// cout << socket.getHeader() + socket.getBody() << endl;
-	// cout << "-----------------------------------" << endl;
-	req.parseRequest(socket.getHeader() + socket.getBody());
+	// exit(0);
+	req.parseRequest(socket.getBody());
+
+
+
+
+
 	server = ServerData::getServer(serversData, socket.ipAndPort, req.header("Host")).front();
 	Response	res(req, server);
 	res.setMimeType(server.mimeTypes);
@@ -97,10 +102,6 @@ const vector<Socket>&	Servers::getMasterSockets(void) const
 	return this->master;
 }
 
-const string&	Servers::getHeader(size_t index) const
-{
-	return this->master[index].getHeader();
-}
 
 
 
@@ -270,9 +271,7 @@ void Servers::readyToRead(size_t i, vector<pollfd> &poll_fd)
 void Servers::isSocketsAreReady(vector<pollfd> &poll_fd)
 {
 	for (size_t i = 0; i < master.size(); i++)
-	{
 		poll_fd.push_back(master[i].getFdPoll());
-	}
 	int pint = poll(&poll_fd[0], static_cast<nfds_t>(poll_fd.size()), 8000);
 	if(pint == 0)
 		throw Servers::PollException("Server reloaded");
