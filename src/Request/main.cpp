@@ -1,6 +1,6 @@
 #include "Servers.hpp"
 #include "webserver.h"
-#include "Directives.hpp"
+
 
 #define READ_SIZE 1000
 
@@ -115,7 +115,6 @@ int main(int ac, char **av)
 				vector<pollfd> poll_fd;
 				servers.isSocketsAreReady(poll_fd);
 				socketHaveEvent(servers, poll_fd);
-				// cout << "i'm done" << "Servers : " << servers.SocketsSize() << endl;
 			}
 			catch (const Servers::PollException &e)
 			{

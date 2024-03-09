@@ -740,6 +740,7 @@ void    Parser::checkingInfos( void )
 			servers.at(i).addData(Data("listen", "0.0.0.0:80"));
 			continue;
 		}
+		servers.at(i).clearKey("listen");
         for (size_t j = 0; j < data.size(); j++)
         {
             String characters(".0123456789:");
@@ -754,9 +755,9 @@ void    Parser::checkingInfos( void )
             if (strs.size() == 1)
             {
                 if (strs.at(0).find('.') == String::npos)
-                    servers.at(i).updateData(Data("listen", "0.0.0.0:" + strs[0]), j);
+                    servers.at(i).addData(Data("listen", "0.0.0.0:" + strs[0]));
                 else
-                    servers.at(i).updateData(Data("listen", strs[0] + ":80"), j);
+                    servers.at(i).addData(Data("listen", strs[0] + ":80"));
             }
         }
     }

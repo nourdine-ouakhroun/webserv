@@ -18,7 +18,6 @@ SRCS		=	src/Parsing/Checker.cpp \
 				src/Server/ReadRequest.cpp \
 				src/configurationTools.cpp \
 				src/tools.cpp \
-				src/Utils/Directives.cpp \
 				src/Server/Servers.cpp \
 				src/Server/Socket.cpp \
 				src/Request/Request.cpp \
