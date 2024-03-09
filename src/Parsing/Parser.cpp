@@ -594,7 +594,7 @@ void	Parser::parsingFile(vector<String> content)
 }
 
 /**
- * 
+ * @brief return the final result of parsing file into server struct.
 */
 void	Parser::getFinalResualt( void )
 {
