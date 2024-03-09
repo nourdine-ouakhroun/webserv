@@ -14,7 +14,6 @@ SRCS		=	src/Parsing/Checker.cpp \
 				src/Utils/Poll.cpp \
 				src/Request/main.cpp \
 				src/Server/Server.cpp \
-				src/Server/Cgi.cpp \
 				src/Exception/PollException.cpp \
 				src/Server/ReadRequest.cpp \
 				src/configurationTools.cpp \
