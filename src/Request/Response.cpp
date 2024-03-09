@@ -158,14 +158,12 @@ string Response::runScript(vector<String> args, string fileName)
 }
 
 
-Response::Response( const Request& req, const ServerPattern& server ) : request(req), server(server)
+Response::Response( const Request& req, const ServerPattern& _server ) : request(req), server(_server)
 {
 	setStatusCode(200);
 	setMessage("OK");
 	setHeader("Server", "Nginx-v2");
 	setStatusMessage();
-	(void)this->request;
-	(void)this->server;
 }
 
 Response::~Response(void) {
@@ -181,16 +179,16 @@ void Response::setStatusMessage()
 	statusMessage[302] = "Found";
 	statusMessage[304] = "Not Modified";
 
-	statusMessage[404] = "Not Found";
 	statusMessage[400] = "Bad Request";
 	statusMessage[403] = "Forbidden";
+	statusMessage[404] = "Not Found";
 
-	statusMessage[414] = "Request-Uri Too Longe";
-	statusMessage[413] = "Request Entity Too Longe";
 	statusMessage[405] = "Method Not Allowed";
+	statusMessage[413] = "Request Entity Too Longe";
+	statusMessage[414] = "Request-Uri Too Longe";
 
-	statusMessage[501] = "Not Implamented";
 	statusMessage[500] = "Internal Server Error";
+	statusMessage[501] = "Not Implamented";
 }
 std::string Response::getStatusMessage( int status ) {
 	return (statusMessage[status]);
@@ -265,29 +263,10 @@ std::string Response::getMimeType( const std::string &key) const
 	}
 }
 
-
 void Response::setMimeType(const map<string, string>& mimeType)
-{
-    // this->mimeType["csv"] = "text/csv";
-    // this->mimeType["doc"] = "application/msword";
-    // this->mimeType["css"] = "text/css";
-    // this->mimeType["gif"] = "image/gif";
-    // this->mimeType["html"] = "text/html";
-    // this->mimeType["ico"] = "image/vnd.microsoft.icon";
-    // this->mimeType["js"] = "text/javascript";
-    // this->mimeType["mp3"] = "audio/mpeg";
-    // this->mimeType["mp4"] = "video/mp4";
-    // this->mimeType["mpeg"] = "video/mpeg";
-    // this->mimeType["jpg"] = "image/jpeg";
-    // this->mimeType["png"] = "image/png";
-    // this->mimeType["woff"] = "font/woff";
-    // this->mimeType["woff2"] = "font/woff2";
-    // this->mimeType["ttf"] = "font/ttf";
-    // this->mimeType["py"] = "application/octet-stream";
-	
-	if (mimeType.size()) {
+{	
+	if (mimeType.size())
 		this->mimeType = mimeType;
-	}
 }
 
 
