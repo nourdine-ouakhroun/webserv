@@ -28,7 +28,6 @@ class GeneralPattern
 		bool						isExist(const Data& value);
 		virtual bool				empty( void ) const;
 		virtual	String				getPath( void ) const;
-		virtual	void				execute( void ) const;
 
 		static	void				printGeneralPattern(const GeneralPattern&, const String&);
 		static	void				printGeneralPattern(const GeneralPattern&, String&);

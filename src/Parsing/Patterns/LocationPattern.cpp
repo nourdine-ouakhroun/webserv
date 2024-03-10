@@ -79,7 +79,3 @@ bool	LocationPattern::empty( void ) const
 		return (true);
 	return (false);
 }
-
-void	LocationPattern::execute( void ) const
-{
-}

@@ -4,6 +4,7 @@
 
 
 
+
 string makeRespose(const Socket &socket, const ServerData &serversData)
 {
 	(void)socket;
@@ -13,8 +14,13 @@ string makeRespose(const Socket &socket, const ServerData &serversData)
 
 	Request			req;
 	// cout << socket.getHeader() + socket.getBody() << endl;
-	// cout << "-----------------------------------" << endl;
-	req.parseRequest(socket.getHeader() + socket.getBody());
+	// exit(0);
+	req.parseRequest(socket.getBody());
+
+
+
+
+
 	server = ServerData::getServer(serversData, socket.ipAndPort, req.header("Host")).front();
 	Response	res(req, server);
 	res.setMimeType(server.mimeTypes);
@@ -30,6 +36,7 @@ string makeRespose(const Socket &socket, const ServerData &serversData)
         res.isMethodAllowed();
 		res.isRedirected();
         res.whichMethod();
+
 	}
 	catch (int status)
 	{
@@ -49,20 +56,23 @@ string makeRespose(const Socket &socket, const ServerData &serversData)
 				if (status >= 300 && status < 400)
 					res.redirection(status, res.getRedirection());
 				else
-					res.setBody("<h1 style=\"text-align: center;\" >" + to_string(status) + " " + res.getStatusMessage(status) + "</h1>");
-				res.setHeader("Content-Type", "text/html");
+					res.setBody("<h1 style=\"text-align: center;\" >" + String::toString(status) + " " + res.getStatusMessage(status) + "</h1>");
+				// res.setHeader("Content-Type", "text/html");
 			}
 			else {
 			// 	// success OK
+			cout << "file: " << file << endl;
 				if (res.getBody().empty()) {
 					content = readF(file);
 					res.setBody(content);
+					cout << "ex  : " << req.extention(file) << endl; 
+					cout << "file: " << res.getMimeType(req.extention(file)) << endl; 
 					res.setHeader("Content-Type", res.getMimeType(req.extention(file)));
-					res.setHeader("Content-Length", to_string(content.size()));
+					res.setHeader("Content-Length", String::toString(content.size()));
 				}
 				else {
-					res.setHeader("Content-Type", "text/html");
-					res.setHeader("Content-Length", to_string(res.getBody().size()));
+					// res.setHeader("Content-Type", "text/html");
+					res.setHeader("Content-Length", String::toString(res.getBody().size()));
 				}
 			}
 			res.makeResponse();
@@ -102,10 +112,6 @@ const vector<Socket>&	Servers::getMasterSockets(void) const
 	return this->master;
 }
 
-const string&	Servers::getHeader(size_t index) const
-{
-	return this->master[index].getHeader();
-}
 
 
 
@@ -129,21 +135,6 @@ void	Servers::initSockets(vector<String>&	allport)
 	}
 }
 
-// void	Servers::initSocketPort80(void)
-// {
-// 	int	fd;
-// 	try
-// 	{
-// 		fd = Server::setSocket();
-// 		Server::bindSocket(fd, 80);
-// 		Server::listenPort(fd);
-// 	}
-// 	catch(runtime_error &e)
-// 	{
-// 		cout << e.what() << endl;return;
-// 	}
-// 	fdSockets.push_back(fd);
-// }
 
 vector<String> removeDuplicatePorts(const vector<String>& allPorts)
 {
@@ -290,9 +281,7 @@ void Servers::readyToRead(size_t i, vector<pollfd> &poll_fd)
 void Servers::isSocketsAreReady(vector<pollfd> &poll_fd)
 {
 	for (size_t i = 0; i < master.size(); i++)
-	{
 		poll_fd.push_back(master[i].getFdPoll());
-	}
 	int pint = poll(&poll_fd[0], static_cast<nfds_t>(poll_fd.size()), 8000);
 	if(pint == 0)
 		throw Servers::PollException("Server reloaded");

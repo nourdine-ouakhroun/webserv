@@ -1,32 +1,8 @@
 #include "Servers.hpp"
 #include "webserver.h"
-#include "Directives.hpp"
+
 
 #define READ_SIZE 1000
-
-
-
-
-
-// std::vector<std::string> split(std::string line, std::string sep)
-// {
-// 	std::vector<std::string> sp;
-// 	if (line.empty())
-// 		return (sp);
-// 	size_t pos = 0;
-	
-// 	while ((pos = line.find(sep)) != std::string::npos)
-// 	{
-// 		std::string l = line.substr(0, pos);
-// 		if (!l.empty())
-// 			sp.push_back(l);
-// 		pos += sep.length();
-// 		line.erase(0, pos);
-// 	}
-// 	sp.push_back(line.substr(0, line.length()));
-// 	return (sp);
-// }
-
 
 vector<string> split(const string& line, const string& sep) {
     vector<string> tokens;
@@ -62,12 +38,6 @@ string readF(const string &path)
 	close(fd);
 	return (content);
 }
-
-
-
-
-
-
 
 void socketHaveEvent(Servers &servers, vector<pollfd> &poll_fd)
 {
@@ -115,7 +85,6 @@ int main(int ac, char **av)
 				vector<pollfd> poll_fd;
 				servers.isSocketsAreReady(poll_fd);
 				socketHaveEvent(servers, poll_fd);
-				// cout << "i'm done" << "Servers : " << servers.SocketsSize() << endl;
 			}
 			catch (const Servers::PollException &e)
 			{

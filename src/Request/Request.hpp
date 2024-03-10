@@ -8,6 +8,7 @@
 #include "String.hpp"
 
 
+class Response;
 class Request
 {
     private:
@@ -50,7 +51,7 @@ class Request
         const string                        &getHeader( void ) const;
         const string                        &getBody( void ) const;
         const vector<pair<string, string> > getUploads() const;
-        const std::string                   &header(const std::string &key) const;
+        std::string                         header(const std::string &key) const;
         std::string                         extention(const string& path) const;
         // -----------------------------------------------------------------------------------
 };
