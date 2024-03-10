@@ -176,6 +176,42 @@ void	Checker::CheckClientBodySize()
     }
 }
 
+void    checkCgiTimeLocations(const vector<LocationPattern>& loca)
+{
+    if (loca.empty() == true)
+        return ;
+    static String characters("0123456789");
+    for (size_t i = 0; i < loca.size(); i++)
+    {
+        const vector<Data>& values = loca.at(i).getData("cgi_time");
+        for (size_t j = 0; j < values.size(); j++)
+        {
+            const String& value = values.at(j).getValue();
+            for (size_t z = 0; z < value.size(); z++)
+                if (find(characters.begin(), characters.end(), value.at(z)) == characters.end())
+                    throw (ParsingException("check Failed : invalid character in cgi_time."));
+        }
+        checkCgiTimeLocations(loca.at(i).getInnerLocation());
+    }
+}
+
+void	Checker::checkCgiTime( void )
+{
+    static String characters("0123456789");
+    for (size_t i = 0; i < servers.size(); i++)
+    {
+        const vector<Data>& values = servers.at(i).getData("cgi_time");
+        for (size_t j = 0; j < values.size(); j++)
+        {
+            const String& value = values.at(j).getValue();
+            for (size_t z = 0; z < value.size(); z++)
+                if (find(characters.begin(), characters.end(), value.at(z)) == characters.end())
+                    throw (ParsingException("check Failed : invalid character in cgi_time."));
+        }
+        checkCgiTimeLocations(servers.at(i).getLocations());
+    }
+}
+
 
 
 void Checker::checkDuplicateListen( void )
@@ -211,4 +247,5 @@ void    Checker::fullCheck( void )
     checkDuplicate("access_log");
     checkBooleanValues("autoindex");
     CheckClientBodySize();
+    checkCgiTime();
 }
