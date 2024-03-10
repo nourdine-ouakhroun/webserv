@@ -151,7 +151,7 @@ vector<String>	Servers::getAllPorts(void) const
 			allport.push_back(ports[j].getValue().split().front());
 	}
 	// cout << "allport.size() : " << allport.size() << endl;
-	// allport = removeDuplicatePorts(allport);
+	allport = removeDuplicatePorts(allport);
 	return allport;
 }
 

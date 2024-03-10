@@ -25,6 +25,7 @@ class Checker
         void	CheckClientBodySize();
         void    checkLocationClientMaxBodySize(const vector<LocationPattern>& loca);
         void    checkServers(String key);
+        void    checkDuplicateListen( void );
 
 
 
