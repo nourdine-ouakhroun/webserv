@@ -706,6 +706,9 @@ void    Parser::checkingInfos( void )
 		data = servers.at(i).getData("index");
 		if (data.empty())
 			servers.at(i).addData(Data("index", "index.html"));
+		data = servers.at(i).getData("method");
+		if (data.empty())
+			servers.at(i).addData(Data("method", "GET"));
 		data = servers.at(i).getData("client_max_body_size");
 		if (data.empty())
 			servers.at(i).addData(Data("client_max_body_size", "1m"));
