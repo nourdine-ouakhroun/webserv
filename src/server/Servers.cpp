@@ -4,6 +4,7 @@
 
 
 
+
 string makeRespose(const Socket &socket, const ServerData &serversData)
 {
 	(void)socket;
@@ -11,21 +12,11 @@ string makeRespose(const Socket &socket, const ServerData &serversData)
 	ServerPattern	server;
 	
 
-	Request			req;
-	// cout << socket.getHeader() + socket.getBody() << endl;
-	// exit(0);
+	Request	req;
 	req.parseRequest(socket.getBody());
-
-
-
-
-
 	server = ServerData::getServer(serversData, socket.ipAndPort, req.header("Host")).front();
 	Response	res(req, server);
 	res.setMimeType(server.mimeTypes);
-
-	// cout << "Method: " << req.getMethod() << endl;
-	// cout << "Method: " << req.getBody() << endl;
 
 	string content;
 	try
@@ -38,7 +29,6 @@ string makeRespose(const Socket &socket, const ServerData &serversData)
 	}
 	catch (int status)
 	{
-		// cout << "StatusCode: " << status << endl;
 		string response = res.getResponse();
 
 		if (response.empty()) {
@@ -55,22 +45,23 @@ string makeRespose(const Socket &socket, const ServerData &serversData)
 					res.redirection(status, res.getRedirection());
 				else
 					res.setBody("<h1 style=\"text-align: center;\" >" + String::toString(status) + " " + res.getStatusMessage(status) + "</h1>");
-				res.setHeader("Content-Type", "text/html");
 			}
 			else {
-			// 	// success OK
+				// success OK
 				if (res.getBody().empty()) {
 					content = readF(file);
 					res.setBody(content);
 					res.setHeader("Content-Type", res.getMimeType(req.extention(file)));
 					res.setHeader("Content-Length", String::toString(content.size()));
 				}
-				else {
-					res.setHeader("Content-Type", "text/html");
+				else
 					res.setHeader("Content-Length", String::toString(res.getBody().size()));
-				}
 			}
 			res.makeResponse();
+		}
+		else {
+			Request parseCgiRes;
+			// parseCgiRes.parse;
 		}
 	}
 	return res.getResponse();
@@ -102,9 +93,6 @@ const vector<Socket>&	Servers::getMasterSockets(void) const
 	return this->master;
 }
 
-
-
-
 void	Servers::initSockets(vector<String>&	allport)
 {
 	for(size_t i = 0; i < allport.size();i++)
@@ -124,7 +112,6 @@ void	Servers::initSockets(vector<String>&	allport)
 		fdSockets.push_back(fd);
 	}
 }
-
 
 vector<String> removeDuplicatePorts(const vector<String>& allPorts)
 {
