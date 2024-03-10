@@ -22,6 +22,7 @@ class GeneralPattern
 		void						addData(const Data& _data);
 		void						clearKey(const String & key);
 		void						setKeyValues(const String &key, const Data& data);
+		void						addMultipleData(const vector<Data>& _data);
 
 		vector<Data>				getData(const String& key) const;
 		const vector<Data>&			getAllData( void ) const;

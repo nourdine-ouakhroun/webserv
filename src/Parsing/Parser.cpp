@@ -249,7 +249,6 @@ Parser::Parser( void )
 {
 }
 
-
 /**
  * @brief	Parser Parametraise Constructor.
 */
@@ -484,7 +483,7 @@ vector<String>	Parser::getServerConfig(vector<String>::iterator& iterBegin, cons
 		if (insideServer == true)
 		{
 			if (server.empty())
-				server.push_back("server valid");
+				server.push_back("servercheck valid");
 			if (!openBrackets)
 				break ;
 			String s = iterBegin->trim(" \t");
@@ -494,7 +493,7 @@ vector<String>	Parser::getServerConfig(vector<String>::iterator& iterBegin, cons
 		}
 		if (!openBrackets)
 			break ;
-		// iterBegin++;
+		iterBegin++;
 	}
 	return server;
 }
@@ -655,30 +654,6 @@ void	Parser::printLocations(const LocationPattern& locs)
 	}
 }
 
-vector<Data>	Parser::parseHeader(const String& header)
-{
-	vector<Data> vec;
-	istringstream	iss(header);
-	String			tmp, key, value;
-	String			httpMethod;
-	getline(iss, httpMethod, '\n');
-	vec.push_back(Data("Method", httpMethod.trim(" \t")));
-	unsigned long	pos = 0;
-	while (iss.eof() == false)
-	{
-		getline(iss, tmp, '\n');
-		if (tmp.length() == 0 || tmp[0] == '\r')
-			continue ;
-		if ((pos = tmp.find_first_of(':')) != String::npos)
-		{
-			key = tmp.substr(0, pos);
-			value = tmp.substr(pos + 1);
-			vec.push_back(Data(key.trim(" \t\r\n"), value.trim(" \t\r\n")));
-		}
-	}
-	return (vec);
-}
-
 /**
  * @brief	Check All Location Keys is valid or not.
 */
@@ -731,17 +706,24 @@ void    Parser::checkingInfos( void )
 		data = servers.at(i).getData("index");
 		if (data.empty())
 			servers.at(i).addData(Data("index", "index.html"));
+		data = servers.at(i).getData("method");
+		if (data.empty())
+			servers.at(i).addData(Data("method", "GET"));
 		data = servers.at(i).getData("client_max_body_size");
 		if (data.empty())
 			servers.at(i).addData(Data("client_max_body_size", "1m"));
         data = servers.at(i).getData("listen");
+		servers.at(i).clearKey("servercheck");
 		if (data.empty())
 		{
+			servers.at(i).clearKey("listen");
 			servers.at(i).addData(Data("listen", "0.0.0.0:80"));
 			continue;
 		}
+		vector<Data> newData;
         for (size_t j = 0; j < data.size(); j++)
         {
+			servers.at(i).clearKey("listen");
             String characters(".0123456789:");
 			vector<String> values = data.at(j).getValue().split();
 			if (values.size() < 1 || values.size() > 2 || (values.size() == 2 && values[1].compare("default_server")))
@@ -753,13 +735,19 @@ void    Parser::checkingInfos( void )
             vector<String> strs = value.split(':');
             if (strs.size() == 1)
             {
-				servers.at(i).clearKey("listen");
                 if (strs.at(0).find('.') == String::npos)
-                    servers.at(i).addData(Data("listen", "0.0.0.0:" + strs[0]));
+                    newData.push_back(Data("listen", "0.0.0.0:" + strs[0]));
                 else
-                    servers.at(i).addData(Data("listen", strs[0] + ":80"));
+                    newData.push_back(Data("listen", strs[0] + ":80"));
             }
+			else
+			{
+				// servers.at(i).clearKey("listen");
+				newData.push_back(data.at(j));
+			}
         }
+		if (newData.size())
+			servers.at(i).addMultipleData(newData);
     }
 }
 

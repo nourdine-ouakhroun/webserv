@@ -61,16 +61,11 @@ void socketHaveEvent(Servers &servers, vector<pollfd> &poll_fd)
 
 int main(int ac, char **av)
 {
-	// static_cast<void>(ac);
-	if (ac != 2)
-	{
-		Logger::error(std::cerr, "invalid argements.", "");
-		return (1);
-	}
+	string configFile((ac != 2) ? "configurations/default.conf" : av[1]);
 	signal(SIGPIPE, SIG_IGN);
 	try
 	{
-		Parser parser(av[1]);
+		Parser parser(configFile);
 		Checker check(parser.getServers());
 		check.fullCheck();
 		ServerData serv(parser.getServers());
