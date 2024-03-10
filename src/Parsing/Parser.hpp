@@ -11,7 +11,7 @@
 
 
 #ifndef KEYS
-	#define KEYS "method upload_dir cgi include return autoindex error_log index access_log error_page alias client_max_body_size error_page listen location root server server_name servercheck"
+	#define KEYS "method cgi_time upload_dir cgi include return autoindex error_log index access_log error_page alias client_max_body_size error_page listen location root server server_name servercheck"
 #endif
 
 class Parser

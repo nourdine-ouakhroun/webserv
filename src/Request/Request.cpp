@@ -2,6 +2,19 @@
 
 #define READ_SIZE 1000
 
+string removeSlash(const string &path) {
+	size_t i = 0;
+	string str;
+	while (path[i])
+	{
+		if ((path[i] == '/' && path[i + 1] != '/') || path[i] != '/')
+			str += path[i];
+
+		i++;
+	}
+	return (str);
+}
+
 
 Request::Request(void) {
 }
@@ -53,22 +66,22 @@ void Request::parseRequestLine( const string& requestLine )
 	}
 }
 void Request::parseUrl( const string& url ) {
-    std::string path;
+    string path;
     size_t pos = 0;
     if ((pos = url.find("?")) != std::string::npos)
 	{
-    	this->_path = url.substr(0, pos);
+    	this->_path = removeSlash(url.substr(0, pos));
         this->_query = url.substr(pos + 1, url.length());
 	}
 	else
-    	this->_path = url.substr(0, url.length());
+    	this->_path = removeSlash(url.substr(0, url.length()));
 }
 void Request::parseHeader() {
-    std::pair<std::string, std::string> keyValue;
-	std::string							line;
-	size_t								newlinePos = 0;
-	size_t								pos = 0;
-	size_t								step = 0;
+    pair<string, string>			keyValue;
+	string							line;
+	size_t							newlinePos = 0;
+	size_t							pos = 0;
+	size_t							step = 0;
 
 	this->_header.clear();
 	while ((newlinePos = this->Header.find("\r\n", step)) != std::string::npos)
