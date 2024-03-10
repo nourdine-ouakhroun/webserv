@@ -177,10 +177,29 @@ void	Checker::CheckClientBodySize()
 }
 
 
+
+void Checker::checkDuplicateListen( void )
+{
+	for (size_t i = 0; i < servers.size(); i++)
+	{
+		const vector<Data>& listens = servers.at(i).getData("listen");
+		for (size_t j = 0; j < listens.size(); j++)
+        {
+            String value = listens.at(j).getValue().split().front();
+			for (size_t z = j + 1; z < listens.size(); z++)
+				if (value == listens.at(z).getValue().split().front())
+					throw (ParsingException("Duplicate listen."));
+        }
+	}
+}
+
+
+
 void    Checker::fullCheck( void )
 {
     if (servers.empty() == true)
         return ;
+    checkDuplicateListen();
     checkServers("alias");
     checkValues();
     checkDuplicate("root", "alias");
