@@ -1,6 +1,6 @@
 #include "ServerPattern.hpp"
 
-void	ServerPattern::addRootsDirectivesToNestedLocation()
+void	ServerPattern::addRootsDirectivesToNestedLocation( void )
 {
 	addDirectives("root", "alias");
 	addDirectives("index");
@@ -115,10 +115,7 @@ LocationPattern	ServerPattern::getLocationByPath(vector<LocationPattern> locatio
 		{
 			LocationPattern loca = getLocationByPath(ibegin->getInnerLocation(), srcPath);
 			if (loca.getPath().empty() == false)
-			{
-				// loca
 				return (loca);
-			}
 		}
 		ibegin++;
 	}
@@ -142,10 +139,6 @@ bool	ServerPattern::empty( void ) const
 	if (GeneralPattern::empty() && location.empty())
 		return (true);
 	return (false);
-}
-
-void	ServerPattern::execute( void ) const
-{
 }
 
 String	ServerPattern::getPath( void ) const

@@ -18,6 +18,8 @@ int Response::isFile(const std::string& path)
 	return (S_ISREG(statbuf.st_mode));
 }
 
+
+
 string Response::runScript(vector<String> args, string fileName)
 {
 	string		response;
@@ -29,27 +31,6 @@ string Response::runScript(vector<String> args, string fileName)
 	size_t		pos;
 
 
-	char	*argv[] = {
-		strdup(args[0].c_str()),
-		strdup(fileName.c_str()),
-		NULL
-	};
-	char	*envp[] = {
-		strdup(("REDIRECT_STATUS=200")),
-		strdup(("HTTP_CONNECTION=" + request.header("Connection")).c_str()),
-		strdup(("HTTP_HOST=" + request.header("Host")).c_str()),
-		strdup(("CONTENT_LENGTH=" + request.header("Content-Length")).c_str()),
-		strdup(("CONTENT_TYPE=" + request.header("Content-Type")).c_str()),
-		strdup(("HTTP_ACCEPT=" + request.header("Accept")).c_str()),
-		strdup(("HTTP_USER_AGENT=" + request.header("User-Agent")).c_str()),
-		strdup(("PATH_INFO=" + request.getPath()).c_str()),
-		strdup(("SCRIPT_NAME=" + fileName).c_str()),
-		strdup(("QUERY_STRING=" + request.getQuery()).c_str()),
-		strdup(("REQUEST_METHOD=" + request.getMethod()).c_str()),
-		NULL
-	};
-
-	
 
 	if ((pos = fileName.rfind(".")) != string::npos)
 		extention = fileName.substr(pos, fileName.size() - pos);
@@ -57,13 +38,36 @@ string Response::runScript(vector<String> args, string fileName)
 		if (args[1] == extention) {
 			pipe(input);
 			pipe(output);
-			cout << argv[0] << endl;
-			cout << argv[1] << endl;
-
 			forkValue = fork();
+			alarm(5);
 			if (forkValue == 0)
 			{
-				// time
+				char	*argv[] = {
+					&args[0][0],
+					&fileName[0],
+					NULL
+				};
+
+				string str[11] = {
+					("REDIRECT_STATUS=200\0"),
+					("HTTP_CONNECTION=" + request.header("Connection") + "\0"),
+					("HTTP_HOST=" + request.header("Host")),
+					("CONTENT_LENGTH=" + request.header("Content-Length") + "\0"),
+					("CONTENT_TYPE=" + request.header("Content-Type") + "\0"),
+					("HTTP_ACCEPT=" + request.header("Accept") + "\0"),
+					("HTTP_USER_AGENT=" + request.header("User-Agent") + "\0"),
+					("PATH_INFO=" + request.getPath() + "\0"),
+					("SCRIPT_NAME=" + fileName + "\0"),
+					("QUERY_STRING=" + request.getQuery() + "\0"),
+					("REQUEST_METHOD=" + request.getMethod() + "\0")
+				};
+
+				char	*envp[12];
+				size_t i = 0;
+				for ( i = 0 ; i < 11; i++)
+					envp[i] = &str[i][0];
+				envp[i] = NULL;
+
 				close(output[0]);
 				dup2(output[1], STDOUT_FILENO);
 				dup2(output[1], STDERR_FILENO);
@@ -78,6 +82,7 @@ string Response::runScript(vector<String> args, string fileName)
 				write(input[1], resBody.c_str(), resBody.size());
 				close(input[1]);
 				waitpid(forkValue, &exitStatus, 0);
+				alarm(0);
 				if (WIFEXITED(exitStatus)) {
 					if (WEXITSTATUS(exitStatus) != 0) {
 						cout << "status: " << WEXITSTATUS(exitStatus) << endl;
@@ -104,14 +109,12 @@ string Response::runScript(vector<String> args, string fileName)
 }
 
 
-Response::Response( const Request& req, const ServerPattern& server ) : request(req), server(server)
+Response::Response( const Request& req, const ServerPattern& _server ) : request(req), server(_server)
 {
 	setStatusCode(200);
 	setMessage("OK");
 	setHeader("Server", "Nginx-v2");
 	setStatusMessage();
-	(void)this->request;
-	(void)this->server;
 }
 
 Response::~Response(void) {
@@ -127,21 +130,21 @@ void Response::setStatusMessage()
 	statusMessage[302] = "Found";
 	statusMessage[304] = "Not Modified";
 
-	statusMessage[404] = "Not Found";
 	statusMessage[400] = "Bad Request";
 	statusMessage[403] = "Forbidden";
+	statusMessage[404] = "Not Found";
 
-	statusMessage[414] = "Request-Uri Too Longe";
-	statusMessage[413] = "Request Entity Too Longe";
 	statusMessage[405] = "Method Not Allowed";
+	statusMessage[413] = "Request Entity Too Longe";
+	statusMessage[414] = "Request-Uri Too Longe";
 
-	statusMessage[501] = "Not Implamented";
 	statusMessage[500] = "Internal Server Error";
+	statusMessage[501] = "Not Implamented";
+	statusMessage[504] = "Gateway Timeout";
 }
 std::string Response::getStatusMessage( int status ) {
 	return (statusMessage[status]);
 }
-
 
 void Response::setFileToServe(const std::string &fileName)
 {
@@ -188,7 +191,7 @@ const string&	Response::getFileToServe() const {
 
 
 void Response::makeResponse( void ) {
-	response += VERSION + to_string(statusCode) + " " + getMessage() + ENDLINE;
+	response += VERSION + String::toString(statusCode) + " " + getMessage() + ENDLINE;
 	if (!header.empty()) {
 		for ( maps::iterator it = header.begin(); it != header.end(); it++) {
 			response += it->first + ": " + it->second + ENDLINE; 
@@ -212,30 +215,10 @@ std::string Response::getMimeType( const std::string &key) const
 	}
 }
 
-
 void Response::setMimeType(const map<string, string>& mimeType)
-{
-    this->mimeType["csv"] = "text/csv";
-    this->mimeType["doc"] = "application/msword";
-    this->mimeType["css"] = "text/css";
-    this->mimeType["gif"] = "image/gif";
-    this->mimeType["html"] = "text/html";
-    this->mimeType["ico"] = "image/vnd.microsoft.icon";
-    this->mimeType["js"] = "text/javascript";
-    this->mimeType["mp3"] = "audio/mpeg";
-    this->mimeType["mp4"] = "video/mp4";
-    this->mimeType["mpeg"] = "video/mpeg";
-    this->mimeType["jpg"] = "image/jpeg";
-    this->mimeType["png"] = "image/png";
-    this->mimeType["woff"] = "font/woff";
-    this->mimeType["woff2"] = "font/woff2";
-    this->mimeType["ttf"] = "font/ttf";
-    this->mimeType["py"] = "text/x-python";
-	
-
-	if (mimeType.size()) {
+{	
+	if (mimeType.size())
 		this->mimeType = mimeType;
-	}
 }
 
 
@@ -252,8 +235,8 @@ bool isAllowdChar(const string& uri) {
 }
 void Response::isFormed()
 {
-	string size = server.getData("client_max_body_size")[0].getValue();
-	size = size.substr(0, size.length() - 1);
+	string value = server.getData("client_max_body_size")[0].getValue();
+	long long size = convertor(value);
 
 	if (!request.header("Transfer-Encoding").empty() && request.header("Transfer-Encoding") != "chunked")
 		throw 500;
@@ -261,7 +244,7 @@ void Response::isFormed()
 		throw 400;
 	else if (request.getPath().length() > 2048)
 		throw 414;
-	else if (std::isinf(strtod(size.c_str(), NULL)) || (double)request.getBody().size() > std::strtod(size.c_str(), NULL))
+	else if (std::isinf(size) || (double)request.getBody().size() > size)
 		throw 413;
 }
 void Response::isMatched() {
@@ -321,6 +304,7 @@ void Response::isMethodAllowed() {
 	}
 }
 void Response::whichMethod() {
+
 	if (request.getMethod() == "GET") {
 		GetMethod();
 		// handle Get method
@@ -397,6 +381,7 @@ void Response::whichMethod() {
 // 	}
 // 	return (fullPath);
 // }
+
 std::string Response::getErrorFile(int statusCode) const
 {
 	vector<Data>  errorPage = location.getData("error_page");
@@ -512,12 +497,12 @@ void Response::GetMethod() {
 
 	if (!alias.empty()) {
 		string locationPath = location.getPath();
-		cout << "locationPath: " << locationPath << endl;
+		// cout << "locationPath: " << locationPath << endl;
 		string newPath;
 		size_t pos = 0;
 		if ((pos = path.find(locationPath)) != string::npos)
 			newPath = path.substr(pos + locationPath.length(), path.length() - pos + locationPath.length());
-		cout << newPath << endl;
+		// cout << newPath << endl;
 		pathToServe = alias + newPath;  
 	}
 	else
@@ -645,7 +630,7 @@ void Response::deleteAll (const string& path)
 
 	while ((dirp = readdir(dir)) != NULL)
 	{
-		cout << "Name: " << path+dirp->d_name << endl;
+		// cout << "Name: " << path+dirp->d_name << endl;
 		if (string(dirp->d_name) == "." || string(dirp->d_name) == "..")
 			continue ;
 		else if (isDirectory(path + dirp->d_name) == 1)

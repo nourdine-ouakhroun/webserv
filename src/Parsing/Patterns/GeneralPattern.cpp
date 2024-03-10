@@ -107,10 +107,6 @@ void	GeneralPattern::printGeneralPattern(const GeneralPattern& model, const Stri
 	}
 }
 
-void	GeneralPattern::execute( void ) const
-{
-}
-
 void	GeneralPattern::updateData(const Data& _data, size_t pos)
 {
 	data[pos] = _data;

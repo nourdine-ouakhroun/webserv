@@ -14,12 +14,10 @@ SRCS		=	src/Parsing/Checker.cpp \
 				src/Utils/Poll.cpp \
 				src/Request/main.cpp \
 				src/Server/Server.cpp \
-				src/Server/Cgi.cpp \
 				src/Exception/PollException.cpp \
 				src/Server/ReadRequest.cpp \
 				src/configurationTools.cpp \
 				src/tools.cpp \
-				src/Utils/Directives.cpp \
 				src/Server/Servers.cpp \
 				src/Server/Socket.cpp \
 				src/Request/Request.cpp \
@@ -38,6 +36,7 @@ OBJS		=	${SRCS:src/%.cpp=${BIN}/%.o}
 
 
 all			:	${NAME}
+	@mkdir -p html
 
 ${NAME}		: ${OBJS}
 	${CPP} ${CPPFLAGS} $^ -o $@

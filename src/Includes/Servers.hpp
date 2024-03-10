@@ -38,7 +38,6 @@ public:
 	string			&getRespond(size_t);
 	vector<String>	getAllPorts(void) const;
 	const Socket	&getSocket(size_t) const ;
-	const string 	&getHeader(size_t) const ;
 
 	void	runAllServers(void);
 	void	initSockets(vector<String> &);

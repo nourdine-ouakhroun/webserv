@@ -66,15 +66,11 @@ void 			Socket::setMethod(const int & method)
 // {
 // 	return filename;
 // }
-const string & Socket::getHeader() const
-{
-	return this->header;
-}
 const string &Socket::getBody() const
 {
 	return this->body;
 }
-string & Socket::getBodyChange()
+string & Socket::changeBody()
 {
 	return this->body;
 }
@@ -82,10 +78,6 @@ string & Socket::getBodyChange()
 // {
 // 	this->request.append(request, this->request.size(), lenght);
 // }
-void Socket::setHeader(const string& header) 
-{
-	this->header.append(header);
-}
 void Socket::setBody(const string& body) 
 {
 	this->body.append(body);
@@ -113,7 +105,7 @@ const string &Socket::getBoundary() const
 {
 	return this->boundary;
 }
-const ssize_t& Socket::getContenlenght() const
+const size_t& Socket::getContenlenght() const
 {
 	return this->content_lenght;
 }
@@ -130,7 +122,7 @@ const ssize_t& Socket::getContenlenght() const
 // {
 // 	this->lenght = (ssize_t)lenght;
 // }
-void Socket::setContenlenght(const ssize_t & contenlenght)
+void Socket::setContenlenght(const size_t & contenlenght)
 {
 	this->content_lenght = contenlenght;
 }
