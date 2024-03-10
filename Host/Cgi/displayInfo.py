@@ -3,8 +3,6 @@ import cgi
 import cgitb; cgitb.enable()  # Enable for debugging
 
 def main():
-    while(1):
-        print()
     print("HTTP/1.1 200 OK\r")
     print("Content-Length: 50000\r")
     print("Content-Type: text/html\r")
@@ -12,7 +10,7 @@ def main():
 
     print("<html><head><title>CGI Query String Values</title></head><body>")
     print("<h1>Query String Values</h1>")
-    
+
     # Create instance of FieldStorage
     form = cgi.FieldStorage()
 

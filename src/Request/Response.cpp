@@ -1,6 +1,19 @@
 #include "Response.hpp"
 #include <cmath>
+#include <signal.h>
 
+void removeSlash(string &path) {
+	size_t i = 0;
+	string str;
+	while (path[i])
+	{
+		if ((path[i] == '/' && path[i + 1] != '/') || path[i] != '/')
+			str += path[i];
+
+		i++;
+	}
+	path = str;
+}
 
 int Response::isDirectory(const std::string& path)
 {
@@ -23,10 +36,10 @@ int Response::isFile(const std::string& path)
 string Response::runScript(vector<String> args, string fileName)
 {
 	string		response;
-	int			forkValue(0);
+	pid_t		pid;
 	int			input[2];
 	int			output[2];
-	int			exitStatus;
+	int			status;
 	string		extention;
 	size_t		pos;
 
@@ -36,12 +49,11 @@ string Response::runScript(vector<String> args, string fileName)
 		extention = fileName.substr(pos, fileName.size() - pos);
 	if (!extention.empty() && args.size() == 2) {
 		if (args[1] == extention) {
-			pipe(input);
-			pipe(output);
-			forkValue = fork();
-			alarm(5);
-			if (forkValue == 0)
-			{
+			if (pipe(input) == -1 || pipe(output) == -1)
+				throw 500;
+			if ((pid = fork()) == -1)
+				throw 500;
+			if (pid == 0) {
 				char	*argv[] = {
 					&args[0][0],
 					&fileName[0],
@@ -77,16 +89,36 @@ string Response::runScript(vector<String> args, string fileName)
 					exit(1);
 			}
 			else {
+				time_t start_time = time(NULL);
+				if (start_time == (long)-1)
+					throw 500;
+				double timeout_seconds = 100000.0;
+
 				const string &resBody = request.getBody();
 				close(input[0]);
 				write(input[1], resBody.c_str(), resBody.size());
 				close(input[1]);
-				waitpid(forkValue, &exitStatus, 0);
-				alarm(0);
-				if (WIFEXITED(exitStatus)) {
-					if (WEXITSTATUS(exitStatus) != 0) {
-						cout << "status: " << WEXITSTATUS(exitStatus) << endl;
-						throw 500;
+
+				while (true) {
+            		if (waitpid(pid, &status, WNOHANG) == pid) {
+                		break;
+            		}
+					// cout << "start_time  : " <<  start_time << endl;
+					// cout << "current_time: " <<  (double(time(NULL) - start_time)) << endl;
+
+            		double current_time = double(time(NULL) - start_time);
+            		if (current_time > timeout_seconds) {
+                		kill(pid, SIGKILL);
+                		waitpid(pid, &status, 0);
+						throw 504;
+					}
+					usleep(100000); // 100 milliseconds
+            	}
+
+				if (WIFEXITED(status)) {
+					if (WEXITSTATUS(status) != 0) {
+						cout << "status: " << WEXITSTATUS(status) << endl;
+						// throw 500;
 					}
 
 				}
@@ -103,7 +135,6 @@ string Response::runScript(vector<String> args, string fileName)
 				close(output[0]);
 			}
 		}
-
 	}
 	return response;
 }
@@ -302,20 +333,39 @@ void Response::isMethodAllowed() {
 		if (find(methods.begin(), methods.end(), request.getMethod()) == methods.end())
 			throw 405;
 	}
+	else
+		throw 405;
 }
 void Response::whichMethod() {
+	string path = request.getPath();
+	cout << "path: " << path << endl;
+	removeSlash(path);
+	cout << "path: " << path << endl;
+	string root = getRoot();
+	string alias = getAlias();
 
+	if (!alias.empty()) {
+		string locationPath = location.getPath();
+		string newPath;
+		size_t pos = 0;
+		if ((pos = path.find(locationPath)) != string::npos)
+			newPath = path.substr(pos + locationPath.length(), path.length() - pos + locationPath.length());
+		pathToServe = alias + newPath;  
+	}
+	else
+		pathToServe = root + request.getPath();
+		
 	if (request.getMethod() == "GET") {
-		GetMethod();
+		GetMethod(pathToServe);
 		// handle Get method
 	}
 	else if (request.getMethod() == "POST") {
 		// handle Post method
-		PostMethod();
+		PostMethod(pathToServe);
 	}
 	else if (request.getMethod() == "DELETE") {
 		// handle Delete method
-		DeleteMethod();
+		DeleteMethod(pathToServe);
 	}
 }
 
@@ -471,46 +521,34 @@ const map<int, string>& Response::getStatusMessage() const {
 	return (statusMessage);
 }
 
-void removeSlash(string &path) {
-	size_t i = 0;
-	string str;
-	while (path[i])
-	{
-		if ((path[i] == '/' && path[i + 1] != '/') || path[i] != '/')
-			str += path[i];
+void Response::GetMethod(const string& pathToServe) {
 
-		i++;
-	}
-	path = str;
-}
-
-void Response::GetMethod() {
-
-	string index;
-	string path = request.getPath();
-	cout << "path: " << path << endl;
-	removeSlash(path);
-	cout << "path: " << path << endl;
+	// removeSlash(path);
+	// cout << "path: " << path << endl;
 	
-	string root = getRoot();
-	string alias = getAlias();
+	// cout << "path: " << path << endl;
+	// string root = getRoot();
+	// string alias = getAlias();
 
-	if (!alias.empty()) {
-		string locationPath = location.getPath();
-		// cout << "locationPath: " << locationPath << endl;
-		string newPath;
-		size_t pos = 0;
-		if ((pos = path.find(locationPath)) != string::npos)
-			newPath = path.substr(pos + locationPath.length(), path.length() - pos + locationPath.length());
-		// cout << newPath << endl;
-		pathToServe = alias + newPath;  
-	}
-	else
-		pathToServe = root + request.getPath();
+	// if (!alias.empty()) {
+	// 	string locationPath = location.getPath();
+	// 	// cout << "locationPath: " << locationPath << endl;
+	// 	string newPath;
+	// 	size_t pos = 0;
+	// 	if ((pos = path.find(locationPath)) != string::npos)
+	// 		newPath = path.substr(pos + locationPath.length(), path.length() - pos + locationPath.length());
+	// 	// cout << newPath << endl;
+	// 	pathToServe = alias + newPath;  
+	// }
+	// else
+	// 	pathToServe = root + request.getPath();
+
+	// string path = request.getPath();
+	string index;
 	if (isDirectory(pathToServe) == 1) {
 		// is Directory
-		if (path != "/" && pathToServe[pathToServe.size() - 1] != '/') {
-			_redirection = path + "/";
+		if (request.getPath() != "/" && pathToServe[pathToServe.size() - 1] != '/') {
+			_redirection = request.getPath() + "/";
 			throw 301;
 		}
 
@@ -554,7 +592,7 @@ void Response::GetMethod() {
 			setResponse(runScript(location.getData("cgi")[0].getValue().split(' ') , pathToServe));
 
 		else {
-			if (access((path + index).c_str(), O_RDONLY) != -1)
+			if (access((request.getPath() + index).c_str(), O_RDONLY) != -1)
 				throw 404;
 			else
 				throw 200;
@@ -564,27 +602,27 @@ void Response::GetMethod() {
 		throw 404;
 	throw 200;
 }
-void Response::PostMethod() {
-	string path = request.getPath();
-	string root = getRoot();
-	string alias = getAlias();
+void Response::PostMethod(const string& pathToServe) {
+	// string path = request.getPath();
+	// string root = getRoot();
+	// string alias = getAlias();
 
-	if (!alias.empty()) {
-		string locationPath = location.getPath();
-		string newPath;
-		size_t pos = 0;
-		if ((pos = path.find(locationPath)) != string::npos)
-			newPath = path.substr(pos + locationPath.length(), path.length() - pos + locationPath.length());
-		cout << newPath << endl;
-		pathToServe = alias + newPath;
-	}
-	else
-		pathToServe = root + request.getPath();
+	// if (!alias.empty()) {
+	// 	string locationPath = location.getPath();
+	// 	string newPath;
+	// 	size_t pos = 0;
+	// 	if ((pos = path.find(locationPath)) != string::npos)
+	// 		newPath = path.substr(pos + locationPath.length(), path.length() - pos + locationPath.length());
+	// 	cout << newPath << endl;
+	// 	pathToServe = alias + newPath;
+	// }
+	// else
+	// 	pathToServe = root + request.getPath();
 	string index;
 	if (isDirectory(pathToServe) == 1) {
 		// is Directory
-		if (path != "/" && pathToServe[pathToServe.size() - 1] != '/') {
-			_redirection = path + "/";
+		if (request.getPath() != "/" && pathToServe[pathToServe.size() - 1] != '/') {
+			_redirection = request.getPath() + "/";
 			throw 301;
 		}
 		index = isFound(pathToServe);
@@ -611,7 +649,7 @@ void Response::PostMethod() {
 			// run cgi here
 			setResponse(runScript(location.getData("cgi")[0].getValue().split(' ') , pathToServe));
 		else {
-			if (access((path + index).c_str(), O_RDONLY) != -1)
+			if (access((request.getPath() + index).c_str(), O_RDONLY) != -1)
 				throw 404;
 			else
 				throw 200;
@@ -620,6 +658,42 @@ void Response::PostMethod() {
 	else
 		throw 404;
 	throw 200;
+}
+void Response::DeleteMethod(const string& pathToServe) {
+	// cout << "Delete" << endl;
+	// string path = request.getPath();
+	// string root = getRoot();
+	// string alias = getAlias();
+
+	// if (!alias.empty()) {
+	// 	string locationPath = location.getPath();
+	// 	string newPath;
+	// 	size_t pos = 0;
+	// 	if ((pos = path.find(locationPath)) != string::npos)
+	// 		newPath = path.substr(pos + locationPath.length(), path.length() - pos + locationPath.length());
+	// 	cout << newPath << endl;
+	// 	pathToServe = alias + newPath;
+	// }
+	// else
+	// 	pathToServe = root + request.getPath();
+	cout << "path to delete: " << pathToServe << endl;
+	string index;
+	if (isDirectory(pathToServe) == 1) {
+		// is Directory
+		if (request.getPath() != "/" && pathToServe[pathToServe.size() - 1] != '/')
+			throw 409;
+		deleteAll(pathToServe);
+		throw 204;
+	}
+	else if (isFile(pathToServe) == 1) {
+		// is File
+		if (!remove(pathToServe.c_str()))
+			throw 204;
+		else
+			throw 500;
+	}
+	else
+		throw 404;
 }
 void Response::deleteAll (const string& path) 
 {
@@ -644,44 +718,6 @@ void Response::deleteAll (const string& path)
 	}
 	closedir(dir);
 }
-
-void Response::DeleteMethod() {
-	// cout << "Delete" << endl;
-	string path = request.getPath();
-	string root = getRoot();
-	string alias = getAlias();
-
-	if (!alias.empty()) {
-		string locationPath = location.getPath();
-		string newPath;
-		size_t pos = 0;
-		if ((pos = path.find(locationPath)) != string::npos)
-			newPath = path.substr(pos + locationPath.length(), path.length() - pos + locationPath.length());
-		cout << newPath << endl;
-		pathToServe = alias + newPath;
-	}
-	else
-		pathToServe = root + request.getPath();
-	cout << "path to delete: " << pathToServe << endl;
-	string index;
-	if (isDirectory(pathToServe) == 1) {
-		// is Directory
-		if (path != "/" && pathToServe[pathToServe.size() - 1] != '/')
-			throw 409;
-		deleteAll(pathToServe);
-		throw 204;
-	}
-	else if (isFile(pathToServe) == 1) {
-		// is File
-		if (!remove(pathToServe.c_str()))
-			throw 204;
-		else
-			throw 500;
-	}
-	else
-		throw 404;
-}
-
 void Response::redirection(int code, const string& path) {
 	setStatusCode(code);
 	setMessage(getStatusMessage(code));

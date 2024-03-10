@@ -79,9 +79,9 @@ string pathToServe;
 	void isMethodAllowed();
 	void whichMethod();
 
-	void GetMethod();
-	void PostMethod();
-	void DeleteMethod();
+	void GetMethod(const string& pathToServe);
+	void PostMethod(const string& pathToServe);
+	void DeleteMethod(const string& pathToServe);
 	void redirection(int code, const string& path);
 
 	void deleteAll (const string& path);
