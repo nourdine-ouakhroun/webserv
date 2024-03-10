@@ -136,3 +136,14 @@ void	GeneralPattern::setKeyValues(const String &key, const Data& data)
 	clearKey(key);
 	addData(data);
 }
+
+void	GeneralPattern::addMultipleData(const vector<Data>& _data)
+{
+	vector<Data>::const_iterator	iterBegin = _data.begin();
+	vector<Data>::const_iterator	iterEnd = _data.end();
+	while (iterBegin < iterEnd)
+	{
+		addData(*iterBegin);
+		iterBegin++;
+	}
+}
