@@ -38,7 +38,7 @@ OBJS		=	${SRCS:src/%.cpp=${BIN}/%.o}
 all			:	${NAME}
 
 ${NAME}		: ${OBJS}
-	@mkdir -p html
+	@mkdir -p html && echo "hello world" > html/index.html
 	${CPP} ${CPPFLAGS} $^ -o $@
 	@echo "finish !!"
 

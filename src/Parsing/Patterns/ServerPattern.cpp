@@ -10,8 +10,7 @@ void	ServerPattern::addRootsDirectivesToNestedLocation( void )
 	addDirectives("Options");
 	addDirectives("AddHandler");
 	addDirectives("autoindex");
-	addDirectives("cgi");
-	addDirectives("method");
+	addDirectives("cgi_time");
 	addDirectives("client_max_body_size");
 }
 
