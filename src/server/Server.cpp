@@ -12,7 +12,6 @@ void	Server::bindSocket(int fd, const String &ip, int port)
 		close(fd);
 		Logger::error(cerr, "bind : can't Bind this Port", "");
 		exit(1);
-		// throw runtime_error("bind : can't Bind this Port");
 	}
 	stringstream ss;
 	ss  << " URL ==> http://" << ip << ":" << port ;
@@ -21,9 +20,6 @@ void	Server::bindSocket(int fd, const String &ip, int port)
 
 void	Server::listenPort(int Socketfd)
 {
-	/**
-	 * @attention check BACKLOG fhmha
-	*/
 	if(listen(Socketfd, SOMAXCONN)  == -1)
 	{
 		close(Socketfd);
@@ -36,10 +32,6 @@ int		Server::setSocket()
 	if(fdSocket < -1)
 		throw runtime_error("socket : can't open the file conection");
 	int option = 1;
-
-	/**
-	 * @attention check setsockopt fhmha chno katakhd
-	*/
 	setsockopt(fdSocket, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(int));
 	return fdSocket;
 }
