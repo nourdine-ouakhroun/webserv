@@ -24,7 +24,6 @@ class	Servers
 	vector<int>		fdSockets;
 	ServerData		servers;
 	vector<Socket>	master;
-	// vector<Socket>	working;
 
 public:
 	vector<String>			allport;
@@ -33,7 +32,6 @@ public:
 	~Servers();
 
 	void			setRespond(const string &, size_t);
-	// void			setWorkingSockets(const vector<Socket> &);
 	void			setMasterSockets();
 	string			&getRespond(size_t);
 	vector<String>	getAllPorts(void) const;

@@ -1,30 +1,46 @@
 NAME	=	webserv
 
 
-SRCS		=	src/Parsing/Checker.cpp \
-				src/Parsing/Parser.cpp \
-				src/Parsing/Data.cpp \
-				src/Parsing/Patterns/LocationPattern.cpp \
-				src/Parsing/Patterns/GeneralPattern.cpp \
-				src/Parsing/Patterns/ServerPattern.cpp \
-				src/Utils/String.cpp \
-				src/Exception/ParsingException.cpp \
-				src/Utils/ServerData.cpp \
-				src/Exception/ServerException.cpp \
-				src/Utils/Poll.cpp \
-				src/Request/main.cpp \
-				src/Server/Server.cpp \
-				src/Exception/PollException.cpp \
-				src/Server/ReadRequest.cpp \
-				src/configurationTools.cpp \
-				src/tools.cpp \
-				src/Server/Servers.cpp \
-				src/Server/Socket.cpp \
-				src/Request/Request.cpp \
-				src/Request/Response.cpp
+SRCS	=	src/Parsing/Checker.cpp \
+			src/Parsing/Parser.cpp \
+			src/Parsing/Data.cpp \
+			src/Parsing/Patterns/LocationPattern.cpp \
+			src/Parsing/Patterns/GeneralPattern.cpp \
+			src/Parsing/Patterns/ServerPattern.cpp \
+			src/Exception/ParsingException.cpp \
+			src/Exception/PollException.cpp \
+			src/Exception/ServerException.cpp \
+			src/Utils/ServerData.cpp \
+			src/Utils/String.cpp \
+			src/Utils/Poll.cpp \
+			src/Server/Server.cpp \
+			src/Server/ReadRequest.cpp \
+			src/Server/Servers.cpp \
+			src/Request/main.cpp \
+			src/Server/Socket.cpp \
+			src/Request/Request.cpp \
+			src/Request/Response.cpp \
+			src/configurationTools.cpp \
+			src/tools.cpp
 
 
-HEADERS	=	src/Includes/*.hpp src/Request/*.hpp src/Parsing/*.hpp
+HEADERS	=	src/Includes/Cgi.hpp \
+			src/Includes/ServerException.hpp \
+			src/Includes/GeneralPattern.hpp \
+			src/Includes/Checker.hpp \
+			src/Includes/Data.hpp \
+			src/Includes/ParsingException.hpp \
+			src/Includes/LocationPattern.hpp \
+			src/Includes/Logger.hpp \
+			src/Includes/Parser.hpp \
+			src/Includes/Poll.hpp \
+			src/Includes/ServerPattern.hpp \
+			src/Includes/ReadRequest.hpp \
+			src/Includes/ServerData.hpp \
+			src/Includes/Servers.hpp \
+			src/Includes/Server.hpp \
+			src/Includes/Socket.hpp \
+			src/Includes/String.hpp
 
 
 CPP	=	c++

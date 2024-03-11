@@ -2,7 +2,7 @@
 #define GENERALPATTERN_HPP
 
 #include <exception>
-#include "../Data.hpp"
+#include "Data.hpp"
 
 class GeneralPattern
 {

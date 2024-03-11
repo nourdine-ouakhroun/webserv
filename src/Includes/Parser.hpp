@@ -7,7 +7,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include "ParsingException.hpp"
-#include "Patterns/ServerPattern.hpp"
+#include "ServerPattern.hpp"
 
 
 #ifndef KEYS
@@ -31,25 +31,23 @@ class Parser
 		const	vector<vector<String> >&	getServersContents( void ) const;
 		const	vector<ServerPattern>&		getServers( void ) const;
 		void								printServerPattern(const ServerPattern& server);
-		static vector<Data>					parseHeader(const String& header);
 	
 	private :
+		map<string, string>	getMimeTypes(String fileName);
+		LocationPattern		getLocations(vector<String>::iterator& begin, const vector<String>::iterator& end, String	path);
+		vector<String>		getServerConfig(vector<String>::iterator&, const vector<String>::iterator&);
+		String				readFile( void );
 		Data				extractDataFromString(String& line);
 		void				printLocations(const LocationPattern& locs);
-		LocationPattern		getLocations(vector<String>::iterator& begin, const vector<String>::iterator& end, String	path);
 		void	 			getFileContent( void );
-		vector<String>		getServerConfig(vector<String>::iterator&, const vector<String>::iterator&);
 		void				parsingFile(vector<String> content);
 		void				splitContentIntoServers( void );
 		void				getFinalResualt( void );
 		void				checkSyntax( void );
-		String				readFile( void );
 		void				checkServerKeys( void );
 		void				checkLocationKeys(const vector<LocationPattern>& loca, const vector<String>& keys);
 		void				checkingInfos( void );
 		void				includeMimeTypes( void );
-		map<string, string>	getMimeTypes(String fileName);
-		void				checkDuplicateListen( void );
 
 
 };
