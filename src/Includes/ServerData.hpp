@@ -1,19 +1,15 @@
 #ifndef	SERVERDATA_HPP
 #define	SERVERDATA_HPP
 
-#include "../Parsing/Parser.hpp"
+#include "Parser.hpp"
 #include "ServerException.hpp"
 #include <algorithm>
-
-
-#define	ERROR_404	"<h1 style=\"text-align: center;\">404 Page not found.</h1>"
-#define	ERROR_403	"<h1 style=\"text-align: center;\">403 Forbidden.</h1>"
 
 class ServerData
 {
 	private :
 		vector<ServerPattern> servers;
-		// unsigned short	getPort(String	value);
+
 	public :
 		ServerData( void );
 		ServerData(const vector<ServerPattern>&);
