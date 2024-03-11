@@ -5,82 +5,23 @@ Socket::Socket(/* args */)
 {
     content_lenght = 0;
 	is_chuncked = 0;
-    // lenght = -1;
-	method = -1;
-	// status = 0;
-	// rest = 0;
 	hex_valeu = 0;
 }
-// Socket::Socket(const Socket&	socket)
-// {
-// 	*this = socket;
-// }
-// Socket &Socket::operator=(const Socket&	socket)
-// {
-// 	if(this != &socket)
-// 	{
-// 		this->boundary = socket.boundary;
-// 		this->request = socket.request;
-// 		this->filename = socket.filename;
-// 		this->lenght = socket.lenght;
-// 		this->contenlenght = socket.contenlenght;
-// 		this->fd = socket.fd;
-// 		this->method = socket.method;
-// 		this->fdpoll = socket.fdpoll;
-// 		this->status = socket.status;
-// 		this->respond = socket.respond;
-// 		this->rest = socket.rest;
-// 	}
-// 	return *this;
-// }
 
 Socket::~Socket()
 {
 }
-// void Socket::eraseRequest(size_t _n, size_t linght)
-// {
-// 	this->Request.erase(_n, linght);
-// }
-
-// const string &Socket::getHeader() const 
-// {
-// 	return Request;
-// }
-// const int &Socket::getStatus() const
-// {
-// 	return status;
-// }
-const int &			Socket::getMethod() const
+const string &Socket::getRequest() const
 {
-	return this->method;
+	return this->request;
 }
-void 			Socket::setMethod(const int & method)
+string & Socket::changeRequest()
 {
-	this->method = method;
+	return this->request;
 }
-// void			Socket::setFileName(const string &filename)
-// {
-// 	this->filename = filename;
-// }
-// const string&	Socket::getFileName() const
-// {
-// 	return filename;
-// }
-const string &Socket::getBody() const
+void Socket::setRequest(const string& Request) 
 {
-	return this->body;
-}
-string & Socket::changeBody()
-{
-	return this->body;
-}
-// void Socket::setHeader(const string& request,const size_t& lenght) 
-// {
-// 	this->request.append(request, this->request.size(), lenght);
-// }
-void Socket::setBody(const string& body) 
-{
-	this->body.append(body);
+	this->request.append(Request);
 }
 void Socket::setFdPoll(const int &fd, const short & events)
 {
@@ -109,19 +50,6 @@ const size_t& Socket::getContenlenght() const
 {
 	return this->content_lenght;
 }
-// const ssize_t & Socket::getLenght() const
-// {
-// 	return this->lenght;
-// }
-// void	Socket::appendLenght(const size_t & lenght)
-// {
-// 	this->lenght += (ssize_t)lenght;
-
-// }
-// void Socket::setLenght(const size_t & lenght)
-// {
-// 	this->lenght = (ssize_t)lenght;
-// }
 void Socket::setContenlenght(const size_t & contenlenght)
 {
 	this->content_lenght = contenlenght;
@@ -130,13 +58,3 @@ void Socket::setBoundary(const string &	boundary)
 {
 	this->boundary = boundary;
 }
-
-// const int	&Socket::getFd() const
-// {
-// 	return this->fd;
-// }
-
-// void		Socket::setFd(const int &fd)
-// {
-// 	this->fd = fd;
-// }

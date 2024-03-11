@@ -8,6 +8,7 @@ SRCS		=	src/Parsing/Checker.cpp \
 				src/Parsing/Patterns/GeneralPattern.cpp \
 				src/Parsing/Patterns/ServerPattern.cpp \
 				src/Utils/String.cpp \
+				src/Exception/closeException.cpp \
 				src/Exception/ParsingException.cpp \
 				src/Utils/ServerData.cpp \
 				src/Exception/ServerException.cpp \

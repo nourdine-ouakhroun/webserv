@@ -17,11 +17,12 @@
 #include<cstdio>
 #include<algorithm>
 #include "webserver.h"
+#include"closeException.hpp"
 using namespace std;
 
 class   Socket
 {
-	string	body;
+	string	request;
 	string	boundary;
 	size_t content_lenght;
 	int 		method;
@@ -37,20 +38,19 @@ class   Socket
 		void	setFdPoll(const int &, const short &);
 		void	setFdPoll(const short &);
 		void	setMethod(const int &);
-		void	setBody(const 	string &);
+		void	setRequest(const 	string &);
 		void	setBoundary(const string &	boundary);
 		void	setContenlenght(const size_t & contenlenght);
 
-		string & changeBody();
+		string & changeRequest();
 		const string	&getBoundary() const;
 		const size_t	&getContenlenght() const;
-		const string 	&getBody() const;
+		const string 	&getRequest() const;
 		const pollfd	&getFdPoll() const;
 		const int		&getMethod() const;
 
 		size_t	is_chuncked;
 		string	respond;
-		string request;
 		size_t hex_valeu;
 };
 
