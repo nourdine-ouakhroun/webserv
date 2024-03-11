@@ -7,6 +7,7 @@ SRCS	=	src/Parsing/Checker.cpp \
 			src/Parsing/Patterns/LocationPattern.cpp \
 			src/Parsing/Patterns/GeneralPattern.cpp \
 			src/Parsing/Patterns/ServerPattern.cpp \
+			src/Exception/closeException.cpp \
 			src/Exception/ParsingException.cpp \
 			src/Exception/PollException.cpp \
 			src/Exception/ServerException.cpp \
@@ -39,6 +40,7 @@ HEADERS	=	src/Includes/Cgi.hpp \
 			src/Includes/ServerData.hpp \
 			src/Includes/Servers.hpp \
 			src/Includes/Server.hpp \
+			src/Includes/closeException.hpp \
 			src/Includes/Socket.hpp \
 			src/Includes/String.hpp
 
@@ -53,12 +55,12 @@ OBJS		=	${SRCS:src/%.cpp=${BIN}/%.o}
 
 all			:	${NAME}
 
-${NAME}		: ${OBJS}
+${NAME}		: ${OBJS}  Makefile
 	@mkdir -p html && echo "hello world" > html/index.html
 	${CPP} ${CPPFLAGS} $^ -o $@
 	@echo "finish !!"
 
-${BIN}/%.o	:	src/%.cpp ${HEADERS} Makefile
+${BIN}/%.o	:	src/%.cpp ${HEADERS}
 	@mkdir -p $(dir $@)
 	${CPP} ${CPPFLAGS} -c $< -o $@
 
