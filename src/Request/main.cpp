@@ -20,7 +20,7 @@ vector<string> split(const string& line, const string& sep) {
 
 string readF(const string &path)
 {
-	std::string content;
+	string content;
 	char buffer[READ_SIZE + 1];
 
 	int fd = open(path.c_str(), O_RDONLY);

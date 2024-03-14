@@ -2,7 +2,7 @@
 #include <cmath>
 #include <signal.h>
 
-int Response::isDirectory(const std::string& path)
+int Response::isDirectory(const string& path)
 {
 	struct stat statbuf;
 	if (stat(path.c_str(), &statbuf) == -1)
@@ -10,7 +10,7 @@ int Response::isDirectory(const std::string& path)
 	return (S_ISDIR(statbuf.st_mode));
 }
 
-int Response::isFile(const std::string& path)
+int Response::isFile(const string& path)
 {
 	struct stat statbuf;
 	if (stat(path.c_str(), &statbuf) == -1)
@@ -68,16 +68,19 @@ string Response::runScript(vector<String> args, string fileName)
 				close(output[0]);
 				dup2(output[1], STDOUT_FILENO);
 				dup2(output[1], STDERR_FILENO);
+				close(output[1]);
+
 				close(input[1]);
 				dup2(input[0], STDIN_FILENO);
+				close(input[0]);
 				if (execve(argv[0], argv, envp) < 0)
-					exit(1);
+					exit(254);
 			}
 			else {
 				time_t start_time = time(NULL);
 				if (start_time == (long)-1)
 					throw 500;
-				double timeout_seconds = 100000.0;
+				double timeout_seconds = 3.0;
 
 				const string &resBody = request.getBody();
 				close(input[0]);
@@ -98,20 +101,20 @@ string Response::runScript(vector<String> args, string fileName)
             	}
 				if (WIFEXITED(status)) {
 					if (WEXITSTATUS(status) != 0) {
-						cout << "status: " << WEXITSTATUS(status) << endl;
-						// throw 500;
+						if (WEXITSTATUS(status) == 254)
+							throw 500;
 					}
 				}
 				char res[200];
 				bzero(res, 200);
 				ssize_t bytes = 0;
+				close(output[1]);
 				while ((bytes = read(output[0], res, 199)) != 0) {
 					response.append(res);
 					bzero(res, 200);
 					if (bytes < 199)
 						break;
 				}
-				close(output[1]);
 				close(output[0]);
 			}
 		}
@@ -153,11 +156,11 @@ void Response::setStatusMessage()
 	statusMessage[501] = "Not Implamented";
 	statusMessage[504] = "Gateway Timeout";
 }
-std::string Response::getStatusMessage( int status ) {
+string Response::getStatusMessage( int status ) {
 	return (statusMessage[status]);
 }
 
-void Response::setFileToServe(const std::string &fileName)
+void Response::setFileToServe(const string &fileName)
 {
 	fileToServe = fileName;
 }
@@ -166,15 +169,15 @@ void Response::setStatusCode( int statusCode )
 {
     this->statusCode = statusCode;
 }
-void Response::setMessage( const std::string &message )
+void Response::setMessage( const string &message )
 {
     this->message = message;
 }
-void Response::setHeader(const std::string &key, const std::string &value)
+void Response::setHeader(const string &key, const string &value)
 {
     header[key] = value;
 }
-void Response::setBody(const std::string &body)
+void Response::setBody(const string &body)
 {
     this->body = body;
 }
@@ -185,11 +188,11 @@ void Response::setResponse(const string& response) {
 
 
 // geters
-const std::string &Response::getMessage( void ) const
+const string &Response::getMessage( void ) const
 {
     return (this->message);
 }
-const std::string &Response::getResponse( void ) const
+const string &Response::getResponse( void ) const
 {
     return (this->response);
 }
@@ -215,10 +218,10 @@ void Response::makeResponse( void ) {
 }
 
 
-std::string Response::getMimeType( const std::string &key) const
+string Response::getMimeType( const string &key) const
 {
 	try {
-		std::string ret = mimeType.at(key);
+		string ret = mimeType.at(key);
 		return (ret);
 	}
 	catch(...){
@@ -255,12 +258,12 @@ void Response::isFormed()
 		throw 400;
 	else if (request.getPath().length() > 2048)
 		throw 414;
-	else if (std::isinf(size) || (double)request.getBody().size() > size)
+	else if (isinf(size) || (double)request.getBody().size() > size)
 		throw 413;
 }
 void Response::isMatched() {
 
-	std::string path = request.getPath();
+	string path = request.getPath();
 
 
 	vector<String> pathss;
@@ -345,7 +348,7 @@ void Response::whichMethod() {
 	}
 }
 
-std::string Response::getErrorFile(int statusCode) const
+string Response::getErrorFile(int statusCode) const
 {
 	vector<Data>  errorPage = location.getData("error_page");
 
@@ -378,12 +381,12 @@ string Response::getAlias() const {
 }
 string Response::isFound( const string& path ) const
 {
-	std::vector<Data> vIndex = location.getData("index");
+	vector<Data> vIndex = location.getData("index");
 	if (!vIndex.empty())
 	{
 		for (size_t i = 0; i < vIndex.size(); i++)
 		{
-			std::vector<std::string> filename = split(vIndex[i].getValue(), " ");
+			vector<string> filename = split(vIndex[i].getValue(), " ");
 			for (size_t j = 0; j < filename.size(); j++)
 			{
 				if (access((path + filename[j]).c_str(), O_RDONLY) != -1)
@@ -494,7 +497,6 @@ void Response::GetMethod(const string& pathToServe) {
 }
 void Response::PostMethod(const string& pathToServe) {
 	string index;
-	cout << "pathToServe: " << pathToServe << endl;
 
 	if (isDirectory(pathToServe) == 1) {
 		// is Directory
