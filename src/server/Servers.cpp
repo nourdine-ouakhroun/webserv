@@ -63,6 +63,7 @@ string makeRespose(const Socket &socket, const ServerData &serversData)
 			Request parseCgiRes;
 			// parseCgiRes.parse;
 		}
+		// cout << "res: " << response << endl;
 	}
 	return res.getResponse();
 }

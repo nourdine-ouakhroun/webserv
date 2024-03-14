@@ -5,7 +5,7 @@ import cgitb
 import os
 cgitb.enable()
 print("HTTP/1.1 200 OK\r")
-print("Content-Length: 1000000000000\r")
+print("Content-Length: 100000\r")
 print("Content-Type: text/html\r")
 print("\r")
 

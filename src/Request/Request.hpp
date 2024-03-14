@@ -30,31 +30,31 @@ class Request
         ~Request( void );
 
         // ------------------------------ parsing request ----------------------------------
-        void                                parseRequest(const std::string &request);
+        void                                parseRequest(const string &request);
         void                                parseRequestLine( const string& reqLine );
         void                                parseHeader();
         void                                parseUrl( const string& url );
 
         // void                                unchunked();
         void                                parseBody();
-        void                                parseMultipartFormData(const std::string& payload, const std::string& boundary);
+        void                                parseMultipartFormData(const string& payload, const string& boundary);
         // ---------------------------------------------------------------------------------
 
         // --------------------------------------- geters -----------------------------------
-        const std::string                   &getMethod( void ) const;
-        const std::string                   &getPath( void ) const;
-        const std::string                   &getQuery( void ) const;
-        const std::string                   &getVersion( void ) const;
-        const std::string                   &getBoundary() const;
-        const std::string                   &getContentType() const;
+        const string                   &getMethod( void ) const;
+        const string                   &getPath( void ) const;
+        const string                   &getQuery( void ) const;
+        const string                   &getVersion( void ) const;
+        const string                   &getBoundary() const;
+        const string                   &getContentType() const;
         const map<string, string>           &getHeaders( void ) const;
         const string                        &getHeader( void ) const;
         const string                        &getBody( void ) const;
         const vector<pair<string, string> > getUploads() const;
-        std::string                         header(const std::string &key) const;
-        std::string                         extention(const string& path) const;
+        string                         header(const string &key) const;
+        string                         extention(const string& path) const;
         // -----------------------------------------------------------------------------------
 };
-std::vector<std::string> split(const std::string &line, const std::string &sep);
+vector<string> split(const string &line, const string &sep);
 
 #endif

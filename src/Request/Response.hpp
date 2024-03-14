@@ -13,8 +13,8 @@
 #include "Servers.hpp"
 
 
-typedef std::map<std::string, std::string> maps;
-string readF(const std::string& fileName);
+typedef map<string, string> maps;
+string readF(const string& fileName);
 
 
 #define VERSION "HTTP/1.1 "
@@ -30,7 +30,7 @@ private:
 
 
 	int         statusCode;
-	std::string message;
+	string message;
 	maps    	header;
 	string		body;
 	string		response;
@@ -50,28 +50,28 @@ string pathToServe;
 	Response( const Request& req, const ServerPattern& server );
 	~Response( void );
 	void	setStatusCode(int statusCode);
-	void	setMessage(const std::string &message);
+	void	setMessage(const string &message);
 	void	setMimeType(const map<string, string> &mimeTypes);
 	void	setRedirection(const string& redirection);
-	void	setHeader(const std::string &key, const std::string &value);
-	void	setBody(const std::string &body);
+	void	setHeader(const string &key, const string &value);
+	void	setBody(const string &body);
 	void	setResponse(const string& Response);
 	void    setStatusMessage();
-	void	setFileToServe(const std::string &path);
+	void	setFileToServe(const string &path);
 
 	const string&	getFileToServe() const;
 	const string&	getMessage() const;
 	const string&	getResponse() const;
 	const string&	getRedirection() const;
 	const string&	getBody() const;
-	string			getMimeType( const std::string &key ) const;
+	string			getMimeType( const string &key ) const;
 	string			getStatusMessage( int status );
 	const map<int, string>&	getStatusMessage() const;
 
 	void    makeResponse();
 
-	int isDirectory(const std::string& path);
-	int isFile(const std::string& path);
+	int isDirectory(const string& path);
+	int isFile(const string& path);
 
 	void isFormed();
 	void isMatched();
@@ -86,7 +86,7 @@ string pathToServe;
 
 	void deleteAll (const string& path);
 
-	std::string getErrorFile(int statusCode) const;
+	string getErrorFile(int statusCode) const;
 	string      getRoot() const;
 	string      getAlias() const;
 	string      isFound(const string &path) const;
