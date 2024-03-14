@@ -18,7 +18,6 @@ double      convertGigaToByte(double x);
 double      convertMigaToByte(double x);
 double      convertKiloToByte(double x);
 long long   convertor(String str);
-void        handleLogges(const GeneralPattern& data);
 
 
 #endif

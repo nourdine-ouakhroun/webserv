@@ -11,18 +11,18 @@ SRCS	=	src/Parsing/Checker.cpp \
 			src/Exception/ParsingException.cpp \
 			src/Exception/PollException.cpp \
 			src/Exception/ServerException.cpp \
+			src/Utils/configurationTools.cpp \
 			src/Utils/ServerData.cpp \
 			src/Utils/String.cpp \
+			src/Utils/tools.cpp \
 			src/Utils/Poll.cpp \
 			src/Server/Server.cpp \
 			src/Server/ReadRequest.cpp \
 			src/Server/Servers.cpp \
-			src/Request/main.cpp \
 			src/Server/Socket.cpp \
 			src/Request/Request.cpp \
 			src/Request/Response.cpp \
-			src/configurationTools.cpp \
-			src/tools.cpp
+			src/main.cpp
 
 
 HEADERS	=	src/Includes/Cgi.hpp \
@@ -80,5 +80,3 @@ cclean 	:
 run		:	all
 	./webserv configurations/default.conf
 
-run_tmp		:	all
-	./webserv configurations/tmp.conf
