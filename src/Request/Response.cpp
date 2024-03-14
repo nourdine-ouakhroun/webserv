@@ -80,8 +80,8 @@ string Response::runScript(vector<String> args, string fileName)
 				time_t start_time = time(NULL);
 				if (start_time == (long)-1)
 					throw 500;
-				double timeout_seconds = 3.0;
-
+				vector<Data> cgi_time = location.getData("cgi_time");
+				double timeout_seconds = (cgi_time.empty()) ? 3 : strtod(cgi_time.front().getValue().c_str(), NULL);
 				const string &resBody = request.getBody();
 				close(input[0]);
 				write(input[1], resBody.c_str(), resBody.size());
@@ -97,7 +97,7 @@ string Response::runScript(vector<String> args, string fileName)
                 		waitpid(pid, &status, 0);
 						throw 504;
 					}
-					usleep(100000); // 100 milliseconds
+					usleep(1000); // 100 milliseconds
             	}
 				if (WIFEXITED(status)) {
 					if (WEXITSTATUS(status) != 0) {
@@ -295,10 +295,6 @@ void Response::isRedirected() {
 		vector<Data> redirection = location.getData("return");
 		if (redirection.size()) {
 			vector<string> sp = split(redirection[0].getValue(), " ");
-			for (size_t i = 0; i < sp.size(); i++)
-			{
-				cout << sp[i] << endl;
-			}
 			if (sp.size() == 2) {
 				this->_redirection = sp[1];
 				int red = atoi(sp[0].c_str());
@@ -568,17 +564,14 @@ void Response::PostMethod(const string& pathToServe) {
 	throw 200;
 }
 void Response::DeleteMethod(const string& pathToServe) {
-	cout << "path to delete: " << pathToServe << endl;
 	string index;
 	if (isDirectory(pathToServe) == 1) {
-		// is Directory
 		if (request.getPath() != "/" && pathToServe[pathToServe.size() - 1] != '/')
 			throw 409;
 		deleteAll(pathToServe);
 		throw 204;
 	}
 	else if (isFile(pathToServe) == 1) {
-		// is File
 		if (!remove(pathToServe.c_str()))
 			throw 204;
 		else
@@ -596,17 +589,12 @@ void Response::deleteAll (const string& path)
 
 	while ((dirp = readdir(dir)) != NULL)
 	{
-		// cout << "Name: " << path+dirp->d_name << endl;
 		if (string(dirp->d_name) == "." || string(dirp->d_name) == "..")
 			continue ;
 		else if (isDirectory(path + dirp->d_name) == 1)
 			deleteAll(path + dirp->d_name + "/");
-		else
-		{
-			if (remove((path + dirp->d_name).c_str()))
+		else if (remove((path + dirp->d_name).c_str()))
 				throw 500;
-		}
-
 	}
 	closedir(dir);
 }

@@ -42,7 +42,9 @@ HEADERS	=	src/Includes/Cgi.hpp \
 			src/Includes/Server.hpp \
 			src/Includes/closeException.hpp \
 			src/Includes/Socket.hpp \
-			src/Includes/String.hpp
+			src/Includes/String.hpp \
+			src/Request/Request.hpp \
+			src/Request/Response.hpp 
 
 
 CPP	=	c++
@@ -55,7 +57,7 @@ OBJS		=	${SRCS:src/%.cpp=${BIN}/%.o}
 
 all			:	${NAME}
 
-${NAME}		: ${OBJS}  Makefile
+${NAME}		: ${OBJS}
 	@mkdir -p html && echo "hello world" > html/index.html
 	${CPP} ${CPPFLAGS} $^ -o $@
 	@echo "finish !!"
