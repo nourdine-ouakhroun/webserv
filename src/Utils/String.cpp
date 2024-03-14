@@ -155,16 +155,11 @@ String	String::convertVectorToString(const vector<String>& strings, unsigned int
 }
 
 size_t String::memStringSearchLast(string sstring, size_t lentgh)
-{
-	cout << (*this) << endl;
-	
+{	
 	for (size_t i = lentgh - 1; i > 0; i--)
 	{
-		cout << "fffff" << i << " : " << lentgh <<  endl;
-		cout << (int)(*this)[i] << endl;
 		if(sstring[sstring.size() - 1] == (*this)[i])
 		{
-			cout << "**" << (int)sstring[sstring.size() - 1] << "**" << endl;
 			size_t j = sstring.size() - 1;
 			for (; j > 0 && (*this)[i] == sstring[j]; j-- && i--);
 			if(j == 0)
