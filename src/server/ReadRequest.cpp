@@ -39,7 +39,7 @@ void ReadRequest::recvSomthing(char * buffer, size_t bytes)
 {
 	string request (buffer, bytes);
 	if (socket.getRequest().empty() == true)
-		setHeadre(request);
+		setHeader(request);
 	socket.setRequest(request);
 	if(socket.is_chuncked == true)
 		handelChunked();
@@ -68,33 +68,36 @@ void	ReadRequest::Read()
 		recvSomthing(buffer, (size_t)bytes);
 }
 
-size_t findSeparator(const string & buffer){
+size_t findSeparator(const string & buffer)
+{
 	size_t	pos = buffer.find("\r\n\r\n");
 	if(pos == NPOS)
 		throw runtime_error("");
 	return pos;
 }
 
-void methode(const string & buffer, Request &tmp_parser){
-	tmp_parser.parseRequestLine(buffer.substr(0, buffer.find("\r\n")));
+void checkHeader(const Request &tmp_parser, Socket &socket, const size_t position)
+{
 	if(tmp_parser.getMethod() != "POST")
 		throw ReadRequest::ReadException();
-}
-void	ReadRequest::setHeadre(string &buffer)
-{
-	size_t	position = findSeparator(buffer);
-	Request	tmp_parser;
-	position += 4;
-	socket.setRequest(buffer.substr(0, position));
-	methode(buffer, tmp_parser);
-	socket.hex_valeu = position + 2; // for chuncked
-	tmp_parser.parseRequest(socket.getRequest());
 	if(tmp_parser.header("Transfer-Encoding") == "chunked")
 		socket.is_chuncked = true;
 	else if(tmp_parser.header("Content-Length").empty() == false)
 		socket.setContenlenght((size_t)strtol(tmp_parser.header("Content-Length").c_str(), NULL, 10) + position);
 	else
 		throw ReadRequest::ReadException();
+}
+void	ReadRequest::setHeader(string &buffer)
+{
+	size_t	position = findSeparator(buffer);
+	Request	tmp_parser;
+
+	position += 4;
+	socket.setRequest(buffer.substr(0, position));
+	socket.hex_valeu = position + 2; // for chuncked
+	tmp_parser.parseRequest(socket.getRequest());
+	checkHeader(tmp_parser, socket, position);
+
 	buffer.erase(0, position);
 }
 

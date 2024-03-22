@@ -67,14 +67,13 @@ string Response::runScript(vector<String> args, string fileName)
 
 				close(output[0]);
 				dup2(output[1], STDOUT_FILENO);
-				dup2(output[1], STDERR_FILENO);
 				close(output[1]);
 
 				close(input[1]);
 				dup2(input[0], STDIN_FILENO);
 				close(input[0]);
 				if (execve(argv[0], argv, envp) < 0)
-					exit(254);
+					exit(1);
 			}
 			else {
 				time_t start_time = time(NULL);
@@ -101,7 +100,7 @@ string Response::runScript(vector<String> args, string fileName)
             	}
 				if (WIFEXITED(status)) {
 					if (WEXITSTATUS(status) != 0) {
-						if (WEXITSTATUS(status) == 254)
+						if (WEXITSTATUS(status) != 0)
 							throw 500;
 					}
 				}
@@ -329,7 +328,7 @@ void Response::whichMethod() {
 	}
 	else
 		pathToServe = root + request.getPath();
-		
+	cout << "method ======> [" << request.getMethod() << "]\n";
 	if (request.getMethod() == "GET") {
 		GetMethod(pathToServe);
 		// handle Get method

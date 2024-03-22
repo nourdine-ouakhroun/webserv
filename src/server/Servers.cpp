@@ -13,6 +13,7 @@ string makeRespose(const Socket &socket, const ServerData &serversData)
 	
 
 	Request	req;
+	// cout << socket.getRequest() << endl;
 	req.parseRequest(socket.getRequest());
 	server = ServerData::getServer(serversData, socket.ipAndPort, req.header("Host")).front();
 	Response	res(req, server);
@@ -152,16 +153,16 @@ void	Servers::runAllServers(void)
 void	Servers::readyToWrite(size_t &index, vector<pollfd> &poll_fd)
 {
 	ssize_t write_value = write(poll_fd[index].fd, master[index].respond.c_str(), master[index].respond.size());
-	if(write_value <= 0)
+	if(write_value < 0)
 	{
 		close(poll_fd[index].fd);
 		erase(index, master);
 		erase(index, poll_fd);
 		index--;
 	}
-	if(write_value > 0)
+	if(write_value >= 0)
 	{
-		master[index].respond.erase(0, (size_t)write_value);
+		master[index].respond.erase(0, (size_t)write_value - 1);
 		if(master[index].respond.empty() == true)
 		{
 			close(poll_fd[index].fd);
@@ -206,6 +207,7 @@ void Servers::readyToRead(size_t i, vector<pollfd> &poll_fd)
 	}
 	catch (ReadRequest::ReadException)
 	{
+		cout << master[i].getRequest() << endl;
 		master[i].respond = makeRespose(master[i], servers);
 		master[i].setFdPoll(POLLOUT);
 	}
@@ -220,6 +222,7 @@ void Servers::readyToRead(size_t i, vector<pollfd> &poll_fd)
 
 void Servers::isSocketsAreReady(vector<pollfd> &poll_fd)
 {
+	cout << master.size() << endl;
 	for (size_t i = 0; i < master.size(); i++)
 		poll_fd.push_back(master[i].getFdPoll());
 	int pint = poll(poll_fd.data(), static_cast<nfds_t>(poll_fd.size()), 8000);
