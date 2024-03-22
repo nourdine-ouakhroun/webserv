@@ -23,9 +23,8 @@ class   ReadRequest
         ReadRequest(Socket&);
         ~ReadRequest();
 
-        void	methodSerch(string &);
 		void 	recvSomthing(char *, size_t);
-        void	setHeadre(string &);
+        void	setHeader(string &);
         void	checkReqeust();
         void	handelChunked();
         void	Read();

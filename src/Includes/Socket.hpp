@@ -37,7 +37,6 @@ class   Socket
 		void	setFdPoll(const pollfd &);
 		void	setFdPoll(const int &, const short &);
 		void	setFdPoll(const short &);
-		void	setMethod(const int &);
 		void	setRequest(const 	string &);
 		void	setBoundary(const string &	boundary);
 		void	setContenlenght(const size_t & contenlenght);
@@ -51,7 +50,7 @@ class   Socket
 
 		size_t	is_chuncked;
 		string	respond;
-		size_t hex_valeu;
+		size_t	hex_valeu;
 };
 
 #endif
