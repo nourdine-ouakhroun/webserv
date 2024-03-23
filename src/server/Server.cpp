@@ -32,6 +32,7 @@ int		Server::setSocket()
 	if(fdSocket < -1)
 		throw runtime_error("socket : can't open the file conection");
 	int option = 1;
+	// fcntl(fdSocket, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
 	setsockopt(fdSocket, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(int));
 	return fdSocket;
 }
