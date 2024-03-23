@@ -9,6 +9,14 @@
         "iostream": "cpp",
         "string_view": "cpp",
         "functional": "cpp",
-        "stdexcept": "cpp"
+        "stdexcept": "cpp",
+        "__bit_reference": "cpp",
+        "__hash_table": "cpp",
+        "__string": "cpp",
+        "__tree": "cpp",
+        "algorithm": "cpp",
+        "map": "cpp",
+        "unordered_map": "cpp",
+        "filesystem": "cpp"
     }
 }

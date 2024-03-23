@@ -41,13 +41,8 @@ string Response::runScript(vector<String> args, string fileName)
 			if ((pid = fork()) == -1)
 				throw 500;
 			if (pid == 0) {
-				char	*argv[] = {
-					&args[0][0],
-					&fileName[0],
-					NULL
-				};
+				char	*argv[] = { &args[0][0], &fileName[0], NULL};
 				string str[11] = {
-					("REDIRECT_STATUS=200\0"),
 					("HTTP_CONNECTION=" + request.header("Connection") + "\0"),
 					("HTTP_HOST=" + request.header("Host")),
 					("CONTENT_LENGTH=" + request.header("Content-Length") + "\0"),
@@ -96,14 +91,10 @@ string Response::runScript(vector<String> args, string fileName)
                 		waitpid(pid, &status, 0);
 						throw 504;
 					}
-					usleep(1000); // 100 milliseconds
+					usleep(100000); // 100 milliseconds == 100000 microseconde
             	}
-				if (WIFEXITED(status)) {
-					if (WEXITSTATUS(status) != 0) {
-						if (WEXITSTATUS(status) != 0)
-							throw 500;
-					}
-				}
+				if (WIFEXITED(status) && WEXITSTATUS(status) && WEXITSTATUS(status))
+					throw 500;
 				char res[200];
 				bzero(res, 200);
 				ssize_t bytes = 0;
@@ -328,7 +319,7 @@ void Response::whichMethod() {
 	}
 	else
 		pathToServe = root + request.getPath();
-	cout << "method ======> [" << request.getMethod() << "]\n";
+	// cout << "method ======> [" << request.getMethod() << "]\n";
 	if (request.getMethod() == "GET") {
 		GetMethod(pathToServe);
 		// handle Get method

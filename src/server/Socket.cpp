@@ -3,6 +3,7 @@
 
 Socket::Socket(/* args */)
 {
+	first_read = 0;
     content_lenght = 0;
 	is_chuncked = 0;
 	hex_valeu = 0;

@@ -13,8 +13,8 @@ string makeRespose(const Socket &socket, const ServerData &serversData)
 	
 
 	Request	req;
-	// cout << socket.getRequest() << endl;
 	req.parseRequest(socket.getRequest());
+	cout << req.getMethod() << endl;
 	server = ServerData::getServer(serversData, socket.ipAndPort, req.header("Host")).front();
 	Response	res(req, server);
 	res.setMimeType(server.mimeTypes);
@@ -207,7 +207,7 @@ void Servers::readyToRead(size_t i, vector<pollfd> &poll_fd)
 	}
 	catch (ReadRequest::ReadException)
 	{
-		cout << master[i].getRequest() << endl;
+		cout << (int)master[i].getRequest().back() << endl;
 		master[i].respond = makeRespose(master[i], servers);
 		master[i].setFdPoll(POLLOUT);
 	}
@@ -222,10 +222,10 @@ void Servers::readyToRead(size_t i, vector<pollfd> &poll_fd)
 
 void Servers::isSocketsAreReady(vector<pollfd> &poll_fd)
 {
-	cout << master.size() << endl;
+	// cout << master.size() << endl;
 	for (size_t i = 0; i < master.size(); i++)
 		poll_fd.push_back(master[i].getFdPoll());
-	int pint = poll(poll_fd.data(), static_cast<nfds_t>(poll_fd.size()), 8000);
+	int pint = poll(poll_fd.data(), (nfds_t)(poll_fd.size()), 8000);
 	if(pint == 0)
 		throw Servers::PollException("Server reloaded");
 	if(pint < 0)

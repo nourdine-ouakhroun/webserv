@@ -145,7 +145,7 @@ void Request::parseMultipartFormData(const string& body, const string& boundary)
 				size_t lastBoundaryPos = lines[line].rfind(boundary);
 				if (lastBoundaryPos != string::npos)
 					lines[line].erase(lines[line].begin() + (int)lastBoundaryPos, lines[line].end());
-				content = lines[line];
+				content = lines[line].substr(0, lines[line].size() - 2);
 			}
 		}
 		_upload.push_back(make_pair(key, content));
