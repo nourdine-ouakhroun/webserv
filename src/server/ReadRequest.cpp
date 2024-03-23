@@ -15,8 +15,6 @@ void	ReadRequest::checkReqeust()
 {
 	
 }
-static size_t boundary_size;
-static string boundary;
 
 void ReadRequest::handelChunked()
 {
@@ -36,11 +34,7 @@ void ReadRequest::handelChunked()
 		socket.hex_valeu += decimal;
 		socket.first_read = true;
 		if(decimal == 0)
-		{
-			// cout << (int)socket.changeRequest().back() << endl;
-			// exit(1);
 			throw ReadRequest::ReadException();
-		}
 	}
 }
 
@@ -52,13 +46,8 @@ void ReadRequest::recvSomthing(char * buffer, size_t bytes)
 	socket.setRequest(request);
 	if(socket.is_chuncked == true)
 		handelChunked();
-	if ((size_t)socket.getContenlenght() == socket.getRequest().size()) {
-		// cout << boundary_size << endl;
-		// cout << boundary << endl;
-		// cout << socket.changeRequest().substr(socket.changeRequest().size() - (boundary_size + 50)) << endl;
-		// exit(1);
+	if ((size_t)socket.getContenlenght() == socket.getRequest().size())
 		throw ReadRequest::ReadException();
-	}
 }
 
 const string& ReadRequest::getRequest() const {
@@ -70,7 +59,6 @@ void	ReadRequest::Read()
 	ssize_t		bytes;
 	String		boundary;
 	char		buffer[READ_NUMBER];
-	// static int count = 0;
 
 	bytes = 0;
 	bzero(buffer, READ_NUMBER - 1);
@@ -91,8 +79,6 @@ size_t findSeparator(const string & buffer)
 
 void checkHeader(const Request &tmp_parser, Socket &socket, const size_t position)
 {
-	boundary_size = tmp_parser.getBoundary().size();
-	boundary = tmp_parser.getBoundary();
 	if(tmp_parser.getMethod() != "POST")
 		throw ReadRequest::ReadException();
 	if(tmp_parser.header("Transfer-Encoding") == "chunked")
@@ -104,6 +90,7 @@ void checkHeader(const Request &tmp_parser, Socket &socket, const size_t positio
 }
 void	ReadRequest::setHeader(string &buffer)
 {
+	// cout << buffer << endl;
 	size_t	position = findSeparator(buffer);
 	Request	tmp_parser;
 	position += 4;

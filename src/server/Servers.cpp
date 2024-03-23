@@ -14,7 +14,6 @@ string makeRespose(const Socket &socket, const ServerData &serversData)
 
 	Request	req;
 	req.parseRequest(socket.getRequest());
-	cout << req.getMethod() << endl;
 	server = ServerData::getServer(serversData, socket.ipAndPort, req.header("Host")).front();
 	Response	res(req, server);
 	res.setMimeType(server.mimeTypes);
@@ -152,7 +151,10 @@ void	Servers::runAllServers(void)
 
 void	Servers::readyToWrite(size_t &index, vector<pollfd> &poll_fd)
 {
+	// cout << master[index].respond << e/ndl;
+	master[index].respond = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nHello, world!";
 	ssize_t write_value = write(poll_fd[index].fd, master[index].respond.c_str(), master[index].respond.size());
+	cout << write_value << endl;
 	if(write_value < 0)
 	{
 		close(poll_fd[index].fd);
@@ -162,11 +164,11 @@ void	Servers::readyToWrite(size_t &index, vector<pollfd> &poll_fd)
 	}
 	if(write_value >= 0)
 	{
-		master[index].respond.erase(0, (size_t)write_value - 1);
+		master[index].respond.erase(0, (size_t)write_value);
 		if(master[index].respond.empty() == true)
 		{
-			close(poll_fd[index].fd);
 			erase(index, master);
+			close(poll_fd[index].fd);
 			erase(index, poll_fd);
 			index--;
 		}
@@ -207,8 +209,9 @@ void Servers::readyToRead(size_t i, vector<pollfd> &poll_fd)
 	}
 	catch (ReadRequest::ReadException)
 	{
-		cout << (int)master[i].getRequest().back() << endl;
-		master[i].respond = makeRespose(master[i], servers);
+		cout << "hello" << endl;
+		// master[i].respond = makeRespose(master[i], servers);
+		master[i].respond = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nHello, world!";
 		master[i].setFdPoll(POLLOUT);
 	}
 	catch (closeException)
@@ -222,7 +225,6 @@ void Servers::readyToRead(size_t i, vector<pollfd> &poll_fd)
 
 void Servers::isSocketsAreReady(vector<pollfd> &poll_fd)
 {
-	// cout << master.size() << endl;
 	for (size_t i = 0; i < master.size(); i++)
 		poll_fd.push_back(master[i].getFdPoll());
 	int pint = poll(poll_fd.data(), (nfds_t)(poll_fd.size()), 8000);
