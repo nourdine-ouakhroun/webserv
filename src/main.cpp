@@ -69,7 +69,7 @@ int main(int ac, char **av)
 		Checker check(parser.getServers());
 		check.fullCheck();
 		ServerData serv(parser.getServers());
-		serv.displayServers();
+		// serv.displayServers();
 		Servers servers(serv);
 		servers.runAllServers();
 		servers.setMasterSockets();
