@@ -151,10 +151,7 @@ void	Servers::runAllServers(void)
 
 void	Servers::readyToWrite(size_t &index, vector<pollfd> &poll_fd)
 {
-	// cout << master[index].respond << e/ndl;
-	master[index].respond = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nHello, world!";
 	ssize_t write_value = write(poll_fd[index].fd, master[index].respond.c_str(), master[index].respond.size());
-	cout << write_value << endl;
 	if(write_value < 0)
 	{
 		close(poll_fd[index].fd);
@@ -209,9 +206,7 @@ void Servers::readyToRead(size_t i, vector<pollfd> &poll_fd)
 	}
 	catch (ReadRequest::ReadException)
 	{
-		cout << "hello" << endl;
-		// master[i].respond = makeRespose(master[i], servers);
-		master[i].respond = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nHello, world!";
+		master[i].respond = makeRespose(master[i], servers);
 		master[i].setFdPoll(POLLOUT);
 	}
 	catch (closeException)
