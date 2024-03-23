@@ -48,7 +48,7 @@ HEADERS	=	src/Includes/Cgi.hpp \
 
 
 CPP	=	c++
-CPPFLAGS	=	-Wall -Wextra -Werror -std=c++98 -Wconversion -O3 -I./src/Includes -fsanitize=address -g
+CPPFLAGS	=	-Wall -Wextra -Werror -std=c++98 -Wconversion -O3 -I./src/Includes #-fsanitize=address -g
 
 BIN			=	bin
 

@@ -25,7 +25,6 @@ class   Socket
 	string	request;
 	string	boundary;
 	size_t content_lenght;
-	int 		method;
 	pollfd		fdpoll;
 
 	public:
@@ -48,6 +47,7 @@ class   Socket
 		const pollfd	&getFdPoll() const;
 		const int		&getMethod() const;
 
+		bool 	first_read;
 		size_t	is_chuncked;
 		string	respond;
 		size_t	hex_valeu;

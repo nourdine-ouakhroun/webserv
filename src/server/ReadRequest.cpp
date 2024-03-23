@@ -15,7 +15,8 @@ void	ReadRequest::checkReqeust()
 {
 	
 }
-
+static size_t boundary_size;
+static string boundary;
 
 void ReadRequest::handelChunked()
 {
@@ -27,11 +28,19 @@ void ReadRequest::handelChunked()
 		if(pos == NPOS)
 			break;
 		string hexa = socket.changeRequest().substr(socket.hex_valeu, pos - socket.hex_valeu);
+		pos += 2;
+		if(!socket.first_read)
+			socket.hex_valeu += 2;
 		socket.changeRequest().erase(socket.hex_valeu - 2, pos - (socket.hex_valeu - 2));
-		size_t decimal = static_cast<size_t>(strtol(hexa.c_str(), NULL, 16));
+		size_t decimal = (size_t)(strtol(hexa.c_str(), NULL, 16));
 		socket.hex_valeu += decimal;
+		socket.first_read = true;
 		if(decimal == 0)
+		{
+			// cout << (int)socket.changeRequest().back() << endl;
+			// exit(1);
 			throw ReadRequest::ReadException();
+		}
 	}
 }
 
@@ -44,10 +53,13 @@ void ReadRequest::recvSomthing(char * buffer, size_t bytes)
 	if(socket.is_chuncked == true)
 		handelChunked();
 	if ((size_t)socket.getContenlenght() == socket.getRequest().size()) {
+		// cout << boundary_size << endl;
+		// cout << boundary << endl;
+		// cout << socket.changeRequest().substr(socket.changeRequest().size() - (boundary_size + 50)) << endl;
+		// exit(1);
 		throw ReadRequest::ReadException();
 	}
 }
-
 
 const string& ReadRequest::getRequest() const {
 	return (request);
@@ -61,6 +73,7 @@ void	ReadRequest::Read()
 	// static int count = 0;
 
 	bytes = 0;
+	bzero(buffer, READ_NUMBER - 1);
 	bytes = read(socket.getFdPoll().fd, buffer, READ_NUMBER - 1);
 	if(bytes <= 0)
 		throw closeException();
@@ -78,6 +91,8 @@ size_t findSeparator(const string & buffer)
 
 void checkHeader(const Request &tmp_parser, Socket &socket, const size_t position)
 {
+	boundary_size = tmp_parser.getBoundary().size();
+	boundary = tmp_parser.getBoundary();
 	if(tmp_parser.getMethod() != "POST")
 		throw ReadRequest::ReadException();
 	if(tmp_parser.header("Transfer-Encoding") == "chunked")
@@ -91,12 +106,11 @@ void	ReadRequest::setHeader(string &buffer)
 {
 	size_t	position = findSeparator(buffer);
 	Request	tmp_parser;
-
 	position += 4;
 	socket.setRequest(buffer.substr(0, position));
-	socket.hex_valeu = position + 2; // for chuncked
 	tmp_parser.parseRequest(socket.getRequest());
 	checkHeader(tmp_parser, socket, position);
+	socket.hex_valeu = position; // for chunck
 
 	buffer.erase(0, position);
 }
