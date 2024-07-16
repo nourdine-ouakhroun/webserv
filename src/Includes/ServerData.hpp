@@ -2,7 +2,6 @@
 #define	SERVERDATA_HPP
 
 #include "Parser.hpp"
-#include "ServerException.hpp"
 #include <algorithm>
 
 class ServerData

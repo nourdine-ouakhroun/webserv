@@ -16,20 +16,14 @@
 #include"webserver.h"
 #include<sys/socket.h>
 #include <netinet/in.h>
-#ifndef BACKLOG
-# define BACKLOG 10
-#endif
+
 typedef struct sockaddr_in S_address;
 class	Server
 {
-	private : 
-	Server();
 	public:
-	~Server();
-
-	static void	bindSocket(int, const String &, int);
-	static int		setSocket();
-	static void	listenPort(int);
+		static void	bindSocket(int, const String &, int);
+		static int		setSocket();
+		static void	listenPort(int);
 };
 
 #endif

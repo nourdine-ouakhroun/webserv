@@ -1,7 +1,7 @@
 #ifndef	LOCATIONPATTERN_HPP
 # define LOCATIONPATTERN_HPP
 
-#include <iostream>
+
 #include "GeneralPattern.hpp"
 
 class	LocationPattern : public GeneralPattern

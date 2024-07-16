@@ -10,12 +10,10 @@ SRCS	=	src/Parsing/Checker.cpp \
 			src/Exception/closeException.cpp \
 			src/Exception/ParsingException.cpp \
 			src/Exception/PollException.cpp \
-			src/Exception/ServerException.cpp \
 			src/Utils/configurationTools.cpp \
 			src/Utils/ServerData.cpp \
 			src/Utils/String.cpp \
 			src/Utils/tools.cpp \
-			src/Utils/Poll.cpp \
 			src/Server/Server.cpp \
 			src/Server/ReadRequest.cpp \
 			src/Server/Servers.cpp \
@@ -26,7 +24,6 @@ SRCS	=	src/Parsing/Checker.cpp \
 
 
 HEADERS	=	src/Includes/Cgi.hpp \
-			src/Includes/ServerException.hpp \
 			src/Includes/GeneralPattern.hpp \
 			src/Includes/Checker.hpp \
 			src/Includes/Data.hpp \
@@ -34,7 +31,6 @@ HEADERS	=	src/Includes/Cgi.hpp \
 			src/Includes/LocationPattern.hpp \
 			src/Includes/Logger.hpp \
 			src/Includes/Parser.hpp \
-			src/Includes/Poll.hpp \
 			src/Includes/ServerPattern.hpp \
 			src/Includes/ReadRequest.hpp \
 			src/Includes/ServerData.hpp \

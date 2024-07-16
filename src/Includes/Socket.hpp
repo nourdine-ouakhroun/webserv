@@ -14,7 +14,6 @@
 #define FILEDEPANDENCY_HPP
 #include<iostream>
 #include<poll.h>
-#include<cstdio>
 #include<algorithm>
 #include "webserver.h"
 #include"closeException.hpp"
