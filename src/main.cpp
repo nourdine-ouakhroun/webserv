@@ -62,14 +62,13 @@ void socketHaveEvent(Servers &servers, vector<pollfd> &poll_fd)
 int main(int ac, char **av)
 {
 	string configFile((ac != 2) ? "configurations/default.conf" : av[1]);
-	signal(SIGPIPE, SIG_IGN);
 	try
 	{
+		signal(SIGPIPE, SIG_IGN);
 		Parser parser(configFile);
 		Checker check(parser.getServers());
 		check.fullCheck();
 		ServerData serv(parser.getServers());
-		// serv.displayServers();
 		Servers servers(serv);
 		servers.runAllServers();
 		servers.setMasterSockets();

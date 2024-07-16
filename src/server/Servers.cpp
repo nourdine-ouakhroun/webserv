@@ -7,12 +7,10 @@
 
 string makeRespose(const Socket &socket, const ServerData &serversData)
 {
-	(void)socket;
-	(void)serversData;
 	ServerPattern	server;
+	Request	req;
 	
 
-	Request	req;
 	req.parseRequest(socket.getRequest());
 	server = ServerData::getServer(serversData, socket.ipAndPort, req.header("Host")).front();
 	Response	res(req, server);
@@ -152,14 +150,14 @@ void	Servers::runAllServers(void)
 void	Servers::readyToWrite(size_t &index, vector<pollfd> &poll_fd)
 {
 	ssize_t write_value = write(poll_fd[index].fd, master[index].respond.c_str(), master[index].respond.size());
-	if(write_value < 0)
+	if(write_value <= 0)
 	{
 		close(poll_fd[index].fd);
 		erase(index, master);
 		erase(index, poll_fd);
 		index--;
 	}
-	if(write_value >= 0)
+	if(write_value > 0)
 	{
 		master[index].respond.erase(0, (size_t)write_value);
 		if(master[index].respond.empty() == true)
@@ -182,7 +180,12 @@ void Servers::acceptConection(size_t index)
 	int newfd = accept(fdSockets[index], NULL, NULL);
 	if(newfd < 0)
 		throw runtime_error("accept : filed!");
-	fcntl(newfd, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
+	
+	if(fcntl(newfd, F_SETFL, O_NONBLOCK, FD_CLOEXEC))
+	{
+		close(newfd);
+		throw runtime_error("fcntl : filed!");
+	}
 	Socket tmp;
 	tmp.setFdPoll(newfd, POLLIN);
 	tmp.ipAndPort = allport[index];
