@@ -1,44 +1,78 @@
-NAME	=	webServ
+NAME	=	webserv
 
 
-SRCS	=	src/main.cpp \
-		src/Parser/Parser.cpp \
-		src/Parser/Server.cpp \
-		src/Parser/Location.cpp \
-		src/Models/GlobalModel.cpp \
-		src/Models/ServerModel.cpp \
-		src/Models/Data.cpp \
-		src/Utils/String.cpp \
-		src/Exception/ParsingException.cpp \
-		src/Utils/ServerData.cpp
-#		src/parser/InnerLocation.cpp \
+SRCS	=	src/Parsing/Checker.cpp \
+			src/Parsing/Parser.cpp \
+			src/Parsing/Data.cpp \
+			src/Parsing/Patterns/LocationPattern.cpp \
+			src/Parsing/Patterns/GeneralPattern.cpp \
+			src/Parsing/Patterns/ServerPattern.cpp \
+			src/Exception/closeException.cpp \
+			src/Exception/ParsingException.cpp \
+			src/Exception/PollException.cpp \
+			src/Utils/configurationTools.cpp \
+			src/Utils/ServerData.cpp \
+			src/Utils/String.cpp \
+			src/Utils/tools.cpp \
+			src/Server/Server.cpp \
+			src/Server/ReadRequest.cpp \
+			src/Server/Servers.cpp \
+			src/Server/Socket.cpp \
+			src/Request/Request.cpp \
+			src/Request/Response.cpp \
+			src/main.cpp
 
-HEADERS	=	src/Parser/Parser.hpp \
-		src/Parser/Server.hpp \
-		src/Parser/Location.hpp \
-		src/Models/Data.hpp \
-		src/Utils/String.hpp \
-		src/Exception/ParsingException.hpp \
-		src/Models/GlobalModel.hpp \
-		src/Utils/ServerData.hpp
+
+HEADERS	=	src/Includes/Cgi.hpp \
+			src/Includes/GeneralPattern.hpp \
+			src/Includes/Checker.hpp \
+			src/Includes/Data.hpp \
+			src/Includes/ParsingException.hpp \
+			src/Includes/LocationPattern.hpp \
+			src/Includes/Logger.hpp \
+			src/Includes/Parser.hpp \
+			src/Includes/ServerPattern.hpp \
+			src/Includes/ReadRequest.hpp \
+			src/Includes/ServerData.hpp \
+			src/Includes/Servers.hpp \
+			src/Includes/Server.hpp \
+			src/Includes/closeException.hpp \
+			src/Includes/Socket.hpp \
+			src/Includes/String.hpp \
+			src/Request/Request.hpp \
+			src/Request/Response.hpp 
+
 
 CPP	=	c++
-CPPFLAGS	=	-Wall -Wextra -Werror -std=c++98 -Wconversion# -fsanitize=address
+CPPFLAGS	=	-Wall -Wextra -Werror -std=c++98 -Wconversion -O3 -I./src/Includes #-fsanitize=address -g
 
-OBJS	=	${SRCS:.cpp=.o}
+BIN			=	bin
 
-all	:	${NAME}
+OBJS		=	${SRCS:src/%.cpp=${BIN}/%.o}
 
-${NAME}	:	${OBJS}
+
+all			:	${NAME}
+
+${NAME}		: ${OBJS}
+	@mkdir -p html && echo "hello world" > html/index.html
 	${CPP} ${CPPFLAGS} $^ -o $@
+	@echo "finish !!"
 
-%.o	:	%.cpp ${HEADERS}
+${BIN}/%.o	:	src/%.cpp ${HEADERS}
+	@mkdir -p $(dir $@)
 	${CPP} ${CPPFLAGS} -c $< -o $@
 
-clean	:
-	rm -rf ${OBJS}
+clean		:
+	rm -rf ${BIN}
 
-fclean	:	clean
+fclean		:	clean
 	rm -rf ${NAME}
 
-re	: fclean all
+re		: fclean all
+
+cclean 	:
+	clean
+
+run		:	all
+	./webserv configurations/default.conf
+
