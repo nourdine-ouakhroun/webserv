@@ -1,57 +1,94 @@
-#include <fstream>
-#include "Parser/Location.hpp"
-#include "Parser/Parser.hpp"
-#include "Models/ServerModel.hpp"
-#include <cctype>
+#include "Servers.hpp"
+#include "webserver.h"
 
 
-void	printAllData(Parser& parser)
+#define READ_SIZE 1000
+
+vector<string> split(const string& line, const string& sep) {
+    vector<string> tokens;
+    size_t start = 0;
+	size_t end = 0;
+	
+    while ((end = line.find(sep, start)) != string::npos) {
+		if (end != start)
+        	tokens.push_back(line.substr(start, end - start));
+        start = end + sep.length();
+    }
+    tokens.push_back(line.substr(start));
+    return tokens;
+}
+
+string readF(const string &path)
 {
-	std::vector<ServerModel> servers = parser.getServers();
-	std::vector<ServerModel>::iterator b = servers.begin();
-	std::vector<ServerModel>::iterator e = servers.end();
-	int i = 0;
-	while (b < e)
+	string content;
+	char buffer[READ_SIZE + 1];
+
+	int fd = open(path.c_str(), O_RDONLY);
+	if (fd < 0)
+		return (content);
+
+	while (1)
 	{
-		std::cout << "===================================== Server " << i++ << "====================================" << std::endl;
-		std::vector<Data>::const_iterator begin = b->getAllData().begin();
-		std::vector<Data>::const_iterator end = b->getAllData().end();
-		while (begin < end)
+		ssize_t readBytes = read(fd, buffer, READ_SIZE);
+		if (readBytes <= 0)
+			break;
+		buffer[readBytes] = 0;
+		content.append(buffer, (size_t)readBytes);
+	}
+	close(fd);
+	return (content);
+}
+
+void socketHaveEvent(Servers &servers, vector<pollfd> &poll_fd)
+{
+	for (size_t i = 0; i < poll_fd.size(); i++)
+	{
+		if (poll_fd[i].revents & POLLIN)
 		{
-			std::cout << "Key = " << begin->getKey() << "\tValue = " << begin->getValue() << std::endl;
-			begin++;
+			try
+			{
+				servers.readyToRead(i, poll_fd);
+			}
+			catch (runtime_error &e)
+			{
+				Logger::error(cerr, e.what(), "");
+			}
 		}
-		parser.printServerModel(*b);
-		b++;
+		else if (poll_fd[i].revents & POLLOUT)
+			servers.readyToWrite(i, poll_fd);
 	}
 }
 
-void	testLeaks(char *fileName)
+int main(int ac, char **av)
 {
+	string configFile((ac != 2) ? "configurations/default.conf" : av[1]);
 	try
 	{
-		Parser* parser = new Parser(fileName);
-		std::cout << "\033[32mwebserv: the configuration file " << fileName << " syntax is ok" << std::endl;
-		std::cout << "webserv: configuration file " << fileName << " test is successful\033[0m" << std::endl;
-		printAllData(*parser);
-		delete parser;
+		signal(SIGPIPE, SIG_IGN);
+		Parser parser(configFile);
+		Checker check(parser.getServers());
+		check.fullCheck();
+		ServerData serv(parser.getServers());
+		Servers servers(serv);
+		servers.runAllServers();
+		servers.setMasterSockets();
+		while (true)
+		{
+			try
+			{
+				vector<pollfd> poll_fd;
+				servers.isSocketsAreReady(poll_fd);
+				socketHaveEvent(servers, poll_fd);
+			}
+			catch (const Servers::PollException &e)
+			{
+				Logger::warn(cout, e.what(), "");
+				continue;
+			}
+		}
 	}
-	catch (ParsingException& e)
+	catch(exception& e)
 	{
-		std::cerr << "\033[31m" << e.what() << "\033[0m" << std::endl;
+		Logger::error(cerr, e.what(), "");
 	}
-}
-
-int	main(int ac, char **av)
-{
-	if (ac < 2)
-	{
-		std::cerr << "Error :\fInvalid argument" << std::endl;
-		return (1);
-	}
-	testLeaks(av[1]);
-//	system("leaks -q webServ");	
-	//checkSyntax(data);
-
-	return (0);
 }
