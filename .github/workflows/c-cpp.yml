@@ -15,5 +15,5 @@ jobs:
     - uses: actions/checkout@v4
     - name: make
       run: make
-    - name: configure
-      run: ./configure
+    - name: run
+      run: ./webserv configurations/default.conf
