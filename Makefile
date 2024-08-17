@@ -74,5 +74,10 @@ cclean 	:
 	clean
 
 run		:	all
-	./webserv configurations/default.conf
+	./webserv configurations/default.conf&
 
+test	:
+	curl 127.0.0.1:8090
+
+kill	:
+	killall webserv
